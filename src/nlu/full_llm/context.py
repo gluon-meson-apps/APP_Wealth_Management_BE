@@ -7,3 +7,6 @@ class FullLlmConversationContext:
 
     def get_current_user_input(self):
         return self.conversation_context.current_user_input
+
+    def get_current_intent(self):
+        return self.conversation_context.current_intent

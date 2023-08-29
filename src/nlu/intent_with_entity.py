@@ -1,6 +1,14 @@
-from typing import List
+from typing import List, Optional
+from enum import Enum
 
 from pydantic import BaseModel
+
+
+class SlotType(str, Enum):
+    TEXT = "text"
+    CATEGORICAL = "categorical"
+    numeric = "numeric"
+    boolean = "boolean"
 
 
 class Intent(BaseModel):
@@ -8,17 +16,20 @@ class Intent(BaseModel):
     confidence: float
 
 
-class SlotFilling(BaseModel):
+class Slot(BaseModel):
     name: str
-    confidence: float
+    description: str
+    value: Optional[str] = None
+    slot_type: Optional[SlotType] = None
+    confidence: Optional[float] = None
 
 
 class Entity(BaseModel):
     type: str
-    role: str
     value: str
-    confidence: float
-    possible_slot: SlotFilling
+    role: Optional[str] = None
+    confidence: Optional[float] = None
+    possible_slot: Optional[Slot] = None
 
 
 class IntentWithEntity(BaseModel):
