@@ -12,7 +12,7 @@ import json
 
 system_template = """
 ## 背景：
-你是一个聊天机器人，你需要解析用户的消息，根据用户提供的实体选项，提取出相应的实体，如果没有找到对应的实体，不要自己编造
+你是一个聊天机器人，你需要解析用户的消息，根据用户提供的实体选项，提取出相应的实体，如果没有找到对应的实体，不要自己编造，尤其是数值型的实体，不要自己编造一个数值，除非用户明确了数值的具体大小。
 
 ## 返回格式
 返回格式必须符合json格式，下面是一个返回的例子：
@@ -100,7 +100,7 @@ class EntityExtractor:
         form = self.form_store.get_form_from_intent(intent)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         prompt, history = self.construct_messages(user_input, intent, form)
-        response = self.model.chat_single(prompt, history=history, model_type="qwen", max_length=2048).response
+        response = self.model.chat_single(prompt, history=history, model_type="cd-chatglm2-6b", max_length=2048).response
         entities = json.loads(self.extract_json_code(response))
 
         def get_slot(name, value):

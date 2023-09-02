@@ -33,16 +33,13 @@ system_template_without_example = """
 {intent_list}
 """
 
-template = """
-"""
-
 topic = "test_topic_for_intent"
 
 class IntentClassifier:
-    def __init__(self):
-        self.model = ChatModel()
-        self.embedding = EmbeddingModel()
-        self.milvus_for_langchain = MilvusForLangchain(self.embedding, MilvusConnection())
+    def __init__(self, chat_model: ChatModel, embedding_model: EmbeddingModel, milvus_for_langchain: MilvusForLangchain):
+        self.model = chat_model
+        self.embedding = embedding_model
+        self.milvus_for_langchain = milvus_for_langchain
         self.retrieval_counts = 10
         self.embedding_type = "E5"
 
@@ -106,7 +103,7 @@ class IntentClassifier:
 """
         return "\n".join([template.format(question=example["example"], intent=example["intent"]) for example in examples])
 
-    def construct_message_normal(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
+    def construct_message_with_few_shot_in_system_prompt(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         examples_str = self.format_examples(examples)
         system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
@@ -145,6 +142,7 @@ class IntentClassifier:
         return [Intent(name=intent.response, confidence=1.0)]
 
 if __name__ == '__main__':
-    classifier = IntentClassifier()
+    embedding_model = EmbeddingModel()
+    classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()))
     # classifier.train()
     print(classifier.classify_intent(FullLlmConversationContext(ConversationContext("帮忙添加一个用户"))))
