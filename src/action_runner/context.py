@@ -1,21 +1,28 @@
-
 class ActionContext:
 
+    """Holds context information for executing actions."""
+    
     def __init__(self):
-        self.user_input = None 
+        """Initialize empty context."""
+        self.user_input = None
         self.slots = {}
         
     def set_user_input(self, user_input):
+        """Set the user input for this context."""
         self.user_input = user_input
-        
+
     def get_user_input(self):
+        """Get the user input."""
         return self.user_input
-    
-    def set_slot(self, name, value):
-        self.slots[name] = va·lue
-        
+
+    def set_slot(self, name, value=None):
+        """Set a slot value by name."""
+        self.slots[name] = value
+
     def get_slot(self, name):
+        """Get a slot value by name."""
         return self.slots.get(name)
-    
+
     def get_slots(self):
+        """Get all slots."""
         return self.slots
