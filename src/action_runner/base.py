@@ -46,4 +46,5 @@ class BaseActionRunner(ActionRunner):
             raise Exception(f"Action {action_name} not found")
             
         action = self.actions[action_name]
-        action.run(context)
+        result = action.run(context)
+        return result

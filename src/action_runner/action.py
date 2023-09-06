@@ -4,7 +4,7 @@ import requests
 from gluon_meson_sdk.models.chat_model import ChatModel
 
 from action_runner.context import ActionContext
-from prompt_manager.base import PromptManager
+from prompt_manager.base import BasePromptManager
 
 GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000"
 
@@ -29,7 +29,8 @@ class ChatAction(Action):
             style: Prompt style to use.
             model_name: Name of model to use for chat.
         """
-        self.prompt_template = PromptManager.load(domain='response', style=style)
+        prompt_manager = BasePromptManager()
+        self.prompt_template = prompt_manager.load(domain='response', style=style)
         self.model = model_name
         self.llm = ChatModel(master_endpoint=GLUON_MESON_MASTER_ENDPOINT)
 
@@ -44,15 +45,15 @@ class ChatAction(Action):
             The chat response.
         """
         user_input = context.get_user_input()
-        prompt = self.prompt_template.format(user_input)
+        prompt = self.prompt_template.format({"input": user_input})
         response = self.llm.chat_single(prompt, model_type=self.model)
-        return response
+        return response.response
         
 class SlotFillingAction(Action):
 
     """Slot filling action using large language models."""
 
-    def __init__(self, style, model_name):
+    def __init__(self, model_name):
         """
         Initialize the slot filling action.
         
@@ -60,9 +61,10 @@ class SlotFillingAction(Action):
             style: Prompt style to use. 
             model_name: Name of model to use for slot filling.
         """        
-        self.prompt_template = PromptManager.load(domain='slot_filling', style=style)
+        prompt_manager = BasePromptManager()
+        self.prompt_template = prompt_manager.load(domain='slot_filling')
         self.model = model_name
-        self.llm = ChatModel(master_endpoint="http://localhost:8000/api/v1/chat")
+        self.llm = ChatModel(master_endpoint=GLUON_MESON_MASTER_ENDPOINT)
 
     def run(self, context):
         """
@@ -80,7 +82,7 @@ class SlotFillingAction(Action):
             "fill_slot": not_filled_slot[0]
         })
         response = self.llm.chat_single(prompt, model_type=self.model)
-        return response
+        return response.response
         
 class FixedAnswerAction(Action):
 
@@ -101,7 +103,7 @@ class FixedAnswerAction(Action):
         """        
         self.response = self.PresetResponses.get(response_policy)
 
-    def run(self):
+    def run(self, context):
         """
         Run the fixed response action.
         
