@@ -36,6 +36,7 @@ class BaseDialogManager:
         enriched_input = self.input_enricher.enrich(conversation.current_user_input)
         conversation.current_enriched_user_input = enriched_input
         intent = self.nlu.extract_intents_and_entities(conversation)
+        # todo: 需要补充一轮槽位，根据识别的意图，获取表单，然后从表单中获取槽位，有一些槽位是可以自动填充的，比如查天气，默认是今天，开灯的话，根据所对话的智能音箱所处的房间，自动填充房间。
         action = self.policy_manager.get_action(intent, conversation)
         action_response = self.action_runner.run(action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
