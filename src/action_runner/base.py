@@ -1,26 +1,31 @@
-from action_runner.action import Action  
+from action_runner.action import Action
 from action_runner.context import ActionContext
 
-class ActionRunner:
 
+class ActionRunner:
     """Interface for action runner."""
-    
+
     def run(self, action: Action, context: ActionContext):
         """Run the given action with the provided context."""
         raise NotImplementedError
 
-    def register_actions(self, action: Action):  
+    def register_actions(self, action: Action):
         """Register an action."""
         raise NotImplementedError
 
-class BaseActionRunner(ActionRunner):
 
+class SimpleActionRunner(ActionRunner):
+    def run(self, action: Action, context: ActionContext):
+        return action.run(context)
+
+
+class BaseActionRunner(ActionRunner):
     """Basic implementation of an action runner."""
-    
+
     def __init__(self):
         """Initialize the action runner, storing registered actions."""
         self.actions = {}
-        
+
     def register_actions(self, name, action):
         """
         Register an action by name.
@@ -44,7 +49,7 @@ class BaseActionRunner(ActionRunner):
         """
         if action_name not in self.actions:
             raise Exception(f"Action {action_name} not found")
-            
+
         action = self.actions[action_name]
         result = action.run(context)
         return result

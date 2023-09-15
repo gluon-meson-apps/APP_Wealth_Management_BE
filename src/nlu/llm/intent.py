@@ -8,8 +8,12 @@ from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
 from conversation_tracker.context import ConversationContext
-from nlu.full_llm.context import FullLlmConversationContext
+from nlu.llm.context import FullLlmConversationContext
 from nlu.intent_with_entity import Intent
+
+from gm_logger import get_logger
+
+logger = get_logger()
 
 # should extract to a config file
 system_template = """
@@ -40,7 +44,7 @@ class IntentClassifier:
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
-        self.retrieval_counts = 10
+        self.retrieval_counts = 4
         self.embedding_type = "E5"
 
     def train(self):
@@ -66,20 +70,25 @@ class IntentClassifier:
 
     def get_intent_list(self):
         # should be extract to config file
-        return ["页面字体缩放", "增减表头的字段", "调整菜单的排序", "回单打印", "银企对账", "自助申请-开通功能",
-                "系统设置-增加用户", "申请征信报告"]
+        # return ["页面字体缩放", "增减表头的字段", "调整菜单的排序", "回单打印", "银企对账", "自助申请-开通功能",
+        #         "系统设置-增加用户", "申请征信报告"]
+        return ["控制智能家居", "问天气", "设置闹钟", "闲聊"]
 
     def get_intent_examples_to_be_train(self):
         # should be extract to config file
         return [
             {
-                "intent": "页面字体缩放",
-                "examples": ['我想调大网页的字体到现在的150%', '帮我把字体调小50%']
+                "intent": "控制智能家居",
+                "examples": ['帮忙打开卧室的空调', '关灯', '打开电视', '关闭窗帘']
             },
             {
-                "intent": "增减表头的字段",
-                "examples": ['我只想看姓名和年龄']
+                "intent": "设置闹钟",
+                "examples": ['明天早上六点叫我起床', '提醒我下午三点开会', '明天早上八点半叫我起床']
             },
+            {
+                "intent": "问天气",
+                "examples": ['明天北京的天气怎么样', '今天上海的天气怎么样', '明天的天气怎么样']
+            }
         ]
 
     def get_intent_examples(self, user_input: str) -> list[dict[str, Any]]:
@@ -107,7 +116,7 @@ class IntentClassifier:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         examples_str = self.format_examples(examples)
         system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
-        print(system_message)
+        logger.debug(system_message)
         intent = self.model.chat_single(system_message, model_type="cd-chatglm2-6b", max_length=1024)
         return intent
 
@@ -122,12 +131,12 @@ class IntentClassifier:
             history.append(('assistant', example['intent']))
 
         intent = self.model.chat_single(user_template.format(question=question), history=history, model_type="qwen", max_length=1024)
-        print(question)
-        print(history)
-        return intent
+        logger.debug(question)
+        logger.debug(history)
+        return intent.response
 
 
-    def classify_intent(self, conversation_context: FullLlmConversationContext) -> List[Intent]:
+    def classify_intent(self, conversation_context: FullLlmConversationContext) -> Intent:
         user_input = conversation_context.get_current_user_input()
         intent_list = self.get_intent_list()
         question = user_input
@@ -136,13 +145,13 @@ class IntentClassifier:
         # intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         # examples_str = self.format_examples(intent_examples)
         # system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
-        # print(system_message)
+        # logger.debug(system_message)
 
         intent = self.construct_message_with_few_shot_history(intent_list, intent_examples, question)
-        return [Intent(name=intent.response, confidence=1.0)]
+        return Intent(name=intent, confidence=1.0)
 
 if __name__ == '__main__':
     embedding_model = EmbeddingModel()
     classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()))
     # classifier.train()
-    print(classifier.classify_intent(FullLlmConversationContext(ConversationContext("帮忙添加一个用户"))))
+    logger.debug(classifier.classify_intent(FullLlmConversationContext(ConversationContext("帮忙打开卧室的空调"))))

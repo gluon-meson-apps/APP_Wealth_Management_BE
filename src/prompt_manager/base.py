@@ -30,7 +30,11 @@ class BasePromptManager(PromptManager):
         prompt = self.prompt_service.get_prompt(name)
         if prompt is None:
             if domain == "slot_filling":
-                prompt = "请引导用户对{{fill_slot}}填充"
+                prompt = """你是一个友好的智能机器人，在==聊天历史开始==和==聊天历史结束==之间的你和用户之间的对话，用户的目的是{{intent}}，但是他没有提供{{fill_slot}}的信息，请对用户进行引导，让他提供所缺失的信息
+==聊天历史开始==
+{{history}}
+==聊天历史结束==
+"""
             if domain == "response":
                 prompt = "你是一个友好智能机器人，请对用户的问题\"{{input}}\"进行回复"
         return PromptWrapper(prompt)

@@ -1,30 +1,36 @@
 from typing import List, Optional
 from enum import Enum
 
-from pydantic import BaseModel
+from util import HashableBaseModel
 
 
 class SlotType(str, Enum):
     TEXT = "text"
     CATEGORICAL = "categorical"
-    numeric = "numeric"
-    boolean = "boolean"
+    NUMERIC = "numeric"
+    BOOLEAN = "boolean"
+    NUMERIC_OR_TEXT = "numeric or text"
 
 
-class Intent(BaseModel):
+class Intent(HashableBaseModel):
     name: str
-    confidence: float
+    confidence: Optional[float] = None
 
 
-class Slot(BaseModel):
+class Slot(HashableBaseModel):
     name: str
     description: str
     value: Optional[str] = None
     slot_type: Optional[SlotType] = None
     confidence: Optional[float] = None
 
+    def __hash__(self):
+        return hash((self.name,))
+    def __eq__(self, other):
+        return self.name == other.name
 
-class Entity(BaseModel):
+
+class Entity(HashableBaseModel):
     type: str
     value: str
     role: Optional[str] = None
@@ -32,6 +38,6 @@ class Entity(BaseModel):
     possible_slot: Optional[Slot] = None
 
 
-class IntentWithEntity(BaseModel):
-    intent: List[Intent]
+class IntentWithEntity(HashableBaseModel):
+    intent: Intent
     entities: List[Entity]

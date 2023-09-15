@@ -2,10 +2,11 @@ class ActionContext:
 
     """Holds context information for executing actions."""
     
-    def __init__(self):
+    def __init__(self, conversation):
         """Initialize empty context."""
         self.user_input = None
         self.slots = {}
+        self.conversation = conversation
         
     def set_user_input(self, user_input):
         """Set the user input for this context."""
