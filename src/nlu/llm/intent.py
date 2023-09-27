@@ -12,7 +12,6 @@ from nlu.llm.context import FullLlmConversationContext
 from nlu.intent_with_entity import Intent
 
 from gm_logger import get_logger
-
 logger = get_logger()
 
 # should extract to a config file
@@ -39,13 +38,57 @@ system_template_without_example = """
 
 topic = "test_topic_for_intent"
 
+import yaml
+
+class IntentConfig:
+    def __init__(self, name, examples, slots):
+        self.name = name
+        self.examples = examples
+        self.slots = slots
+
+class IntentListConfig:
+    def __init__(self, intents):
+        self.intents = intents
+
+    def get_intent_list(self):
+        # read resources/intent.yaml file and get intent list
+        return [intent.name for intent in self.intents]
+
+    def get_intent_and_examples(self):
+        return [ {'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
+
+    @classmethod
+    def from_yaml_file(cls, file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = yaml.safe_load(file)
+
+        intents = []
+        for intent_data in data['intents']:
+            intent_name, intent_details = list(intent_data.items())[0]
+            for intent_detail in intent_details:
+                if 'examples' in intent_detail:
+                    examples = intent_detail['examples']
+                elif 'slots' in intent_detail:
+                    slots = intent_detail['slots']
+            intent = IntentConfig(intent_name, examples, slots)
+            intents.append(intent)
+
+        return cls(intents)
+
 class IntentClassifier:
-    def __init__(self, chat_model: ChatModel, embedding_model: EmbeddingModel, milvus_for_langchain: MilvusForLangchain):
+    def __init__(self, 
+                    chat_model: ChatModel,
+                    embedding_model: EmbeddingModel, 
+                    milvus_for_langchain: MilvusForLangchain, 
+                    intent_config_path: str,
+                    model_type: str = 'qwen',):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
         self.retrieval_counts = 4
         self.embedding_type = "E5"
+        self.model_type = model_type
+        self.intent_list_config = IntentListConfig.from_yaml_file(intent_config_path)
 
     def train(self):
         # recreate topic
@@ -55,7 +98,7 @@ class IntentClassifier:
             extra_meta_fields=[FieldSchema("intent", DataType.VARCHAR, max_length=256)],
             max_length=1024,
         )
-        intent_examples = self.get_intent_examples_to_be_train()
+        intent_examples = self.intent_list_config.get_intent_and_examples()
         docs = []
         for intent_example in intent_examples:
             intent = intent_example["intent"]
@@ -68,28 +111,7 @@ class IntentClassifier:
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
-    def get_intent_list(self):
-        # should be extract to config file
-        # return ["页面字体缩放", "增减表头的字段", "调整菜单的排序", "回单打印", "银企对账", "自助申请-开通功能",
-        #         "系统设置-增加用户", "申请征信报告"]
-        return ["控制智能家居", "问天气", "设置闹钟", "闲聊"]
 
-    def get_intent_examples_to_be_train(self):
-        # should be extract to config file
-        return [
-            {
-                "intent": "控制智能家居",
-                "examples": ['帮忙打开卧室的空调', '关灯', '打开电视', '关闭窗帘']
-            },
-            {
-                "intent": "设置闹钟",
-                "examples": ['明天早上六点叫我起床', '提醒我下午三点开会', '明天早上八点半叫我起床']
-            },
-            {
-                "intent": "问天气",
-                "examples": ['明天北京的天气怎么样', '今天上海的天气怎么样', '明天的天气怎么样']
-            }
-        ]
 
     def get_intent_examples(self, user_input: str) -> list[dict[str, Any]]:
         search_with_score = self.milvus_for_langchain.query_docs(topic, user_input, embedding_type=self.embedding_type,
@@ -112,15 +134,15 @@ class IntentClassifier:
 """
         return "\n".join([template.format(question=example["example"], intent=example["intent"]) for example in examples])
 
-    def construct_message_with_few_shot_in_system_prompt(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
+    def classify_intent_using_llm(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         examples_str = self.format_examples(examples)
         system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
         logger.debug(system_message)
-        intent = self.model.chat_single(system_message, model_type="cd-chatglm2-6b", max_length=1024)
+        intent = self.model.chat_single(system_message, model_type=self.model_type, max_length=1024)
         return intent
 
-    def construct_message_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
+    def classify_intent_using_llm_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         system_message = system_template_without_example.format(intent_list=intent_list_str)
         history = [('system', system_message)]
@@ -130,7 +152,7 @@ class IntentClassifier:
             history.append(('user', user_template.format(question=example['example'])))
             history.append(('assistant', example['intent']))
 
-        intent = self.model.chat_single(user_template.format(question=question), history=history, model_type="qwen", max_length=1024)
+        intent = self.model.chat_single(user_template.format(question=question), history=history, model_type=self.model_type, max_length=1024)
         logger.debug(question)
         logger.debug(history)
         return intent.response
@@ -142,12 +164,7 @@ class IntentClassifier:
         question = user_input
         intent_examples = self.get_intent_examples(user_input)
 
-        # intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
-        # examples_str = self.format_examples(intent_examples)
-        # system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
-        # logger.debug(system_message)
-
-        intent = self.construct_message_with_few_shot_history(intent_list, intent_examples, question)
+        intent = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
         return Intent(name=intent, confidence=1.0)
 
 if __name__ == '__main__':
