@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import requests
-from gluon_meson_sdk.models.chat_model import ChatModel
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 from pydantic import BaseModel
 
 from action_runner.context import ActionContext

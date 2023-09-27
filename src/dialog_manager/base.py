@@ -54,3 +54,8 @@ if __name__ == '__main__':
     result = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), LLMNlu(classifier, EntityExtractor(form_store, ChatModel())), BasePolicyManager([SlotCheckPolicy(form_store), SmartHomeOperatingPolicy()]),
                       SimpleActionRunner(), BaseOutputAdapter()).handle_message("打开灯", "123")
     print(result)
+
+    # How embedding model works?
+    # How to configure OpenAI API Key
+    # How to connect to gluon-meson api endpoint
+    # 
