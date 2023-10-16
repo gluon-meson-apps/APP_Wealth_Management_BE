@@ -28,5 +28,9 @@ pip install -r {project_root_directory}/sdk/requirements.txt
 export GLUON_MESON_MASTER_ENDPOINT=http://sz.private.gluon-meson.tech:11000/master
 ```
 
+
 ## Run chatbot
 Entrypoint is `dialog_manager.base`
+```
+python src/dialog_manager/base.py
+```

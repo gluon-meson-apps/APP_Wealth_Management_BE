@@ -17,7 +17,7 @@ class Form(HashableBaseModel):
 class FormStore:
     def __init__(self):
         pass
-
+    
     def get_form_from_intent(self, intent: Intent) -> Optional[Form]:
         if intent.name == "控制智能家居":
             return Form(name="控制智能家居", slots=[

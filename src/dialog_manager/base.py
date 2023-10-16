@@ -45,14 +45,22 @@ class BaseDialogManager:
 
 
 if __name__ == '__main__':
+    import os
     # construct BaseDialogManager
     # call handle_message
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    intent_config_file_path = os.path.join(pwd, '..', 'resources', 'intent.yaml')
 
     embedding_model = EmbeddingModel()
-    classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()))
+    classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()), intent_config_file_path)
     form_store = FormStore()
-    result = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), LLMNlu(classifier, EntityExtractor(form_store, ChatModel())), BasePolicyManager([SlotCheckPolicy(form_store), SmartHomeOperatingPolicy()]),
-                      SimpleActionRunner(), BaseOutputAdapter()).handle_message("打开灯", "123")
+
+    entity_extractor = EntityExtractor(form_store, ChatModel())
+
+    policy_manager = BasePolicyManager([SlotCheckPolicy(form_store), SmartHomeOperatingPolicy()])
+
+    result = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), LLMNlu(classifier, entity_extractor), policy_manager,
+                      SimpleActionRunner(), BaseOutputAdapter()).handle_message("明天天气怎么样", "123")
     print(result)
 
     # How embedding model works?

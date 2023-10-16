@@ -81,7 +81,7 @@ class IntentClassifier:
                     embedding_model: EmbeddingModel, 
                     milvus_for_langchain: MilvusForLangchain, 
                     intent_config_path: str,
-                    model_type: str = 'qwen',):
+                    model_type: str = 'cd-chatglm2-6b',):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
@@ -160,7 +160,7 @@ class IntentClassifier:
 
     def classify_intent(self, conversation_context: FullLlmConversationContext) -> Intent:
         user_input = conversation_context.get_current_user_input()
-        intent_list = self.get_intent_list()
+        intent_list = self.intent_list_config.get_intent_list()
         question = user_input
         intent_examples = self.get_intent_examples(user_input)
 
