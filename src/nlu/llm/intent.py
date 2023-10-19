@@ -81,7 +81,7 @@ class IntentClassifier:
                     embedding_model: EmbeddingModel, 
                     milvus_for_langchain: MilvusForLangchain, 
                     intent_config_path: str,
-                    model_type: str = 'cd-chatglm2-6b',):
+                    model_type: str,):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain

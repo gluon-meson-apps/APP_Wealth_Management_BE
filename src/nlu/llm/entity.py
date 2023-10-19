@@ -1,16 +1,13 @@
+import json
+import re
 from typing import List
 
-from gluon_meson_sdk.models.chat_model import ChatModel
-
 from conversation_tracker.context import ConversationContext
-from nlu.forms import FormStore, Form
-from nlu.llm.context import FullLlmConversationContext
-from nlu.intent_with_entity import Entity, Slot, Intent
-
+from gluon_meson_sdk.models.chat_model import ChatModel
 from gm_logger import get_logger
-
-import re
-import json
+from nlu.forms import FormStore, Form
+from nlu.intent_with_entity import Entity, Intent
+from nlu.llm.context import FullLlmConversationContext
 
 logger = get_logger()
 
@@ -84,9 +81,10 @@ examples = [
 
 
 class EntityExtractor:
-    def __init__(self, form_store: FormStore, chat_model: ChatModel):
+    def __init__(self, form_store: FormStore, chat_model: ChatModel, model_type: str):
         self.form_store = form_store
         self.model = chat_model
+        self.model_type = model_type
 
     def construct_messages(self, user_input, intent, form: Form, history="") -> List[str]:
         final_user_message = user_message_template.format(conversation_history=history, user_intent=intent.name,
@@ -111,7 +109,7 @@ class EntityExtractor:
             return []
         prompt, history = self.construct_messages(user_input, intent, form)
         logger.debug(prompt)
-        response = self.model.chat_single(prompt, history=history, model_type="gpt-4",
+        response = self.model.chat_single(prompt, history=history, model_type=self.model_type,
                                           max_length=2048).response
         entities = json.loads(self.extract_json_code(response))
 

@@ -1,33 +1,25 @@
 from typing import Any
 
-from action_runner.base import ActionRunner, BaseActionRunner, SimpleActionRunner
+from action_runner.base import ActionRunner
 from action_runner.context import ActionContext
-from conversation_tracker.base import ConversationTracker, BaseConversationTracker
-from input_enricher.base import InputEnricher, BaseInputEnricher
-from nlu.base import Nlu, BaseNlu
-from nlu.forms import FormStore
-from nlu.llm.entity import EntityExtractor
-from nlu.llm.intent import IntentClassifier
-from nlu.llm.llm_nlu import LLMNlu
-from output_adapter.base import OutputAdapter, BaseOutputAdapter
-from policy_manager.base import PolicyManager, BasePolicyManager
-from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy
-from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
-from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
-from sdk.src.gluon_meson_sdk.models.embedding_model import EmbeddingModel
+from conversation_tracker.base import ConversationTracker
+from input_enricher.base import InputEnricher
+from nlu.base import Nlu
+from output_adapter.base import OutputAdapter
+from policy_manager.base import PolicyManager
 
 
 class BaseDialogManager:
     def __init__(self, conversation_tracker: ConversationTracker, input_enricher: InputEnricher, nlu: Nlu,
                  policy_manager: PolicyManager,
-                 action_runner: ActionRunner, output_adapter: OutputAdapter):
+                 action_runner: ActionRunner, output_adapter: OutputAdapter, model_type: str):
         self.conversation_tracker = conversation_tracker
         self.input_enricher = input_enricher
         self.nlu = nlu
         self.policy_manager = policy_manager
         self.action_runner = action_runner
         self.output_adapter = output_adapter
+        self.model_type = model_type
 
     def handle_message(self, message: Any, user_id: str) -> Any:
         conversation = self.conversation_tracker.load_conversation(user_id)
@@ -37,33 +29,8 @@ class BaseDialogManager:
         conversation.current_enriched_user_input = enriched_input
         intent = self.nlu.extract_intents_and_entities(conversation)
         # todo: 需要补充一轮槽位，根据识别的意图，获取表单，然后从表单中获取槽位，有一些槽位是可以自动填充的，比如查天气，默认是今天，开灯的话，根据所对话的智能音箱所处的房间，自动填充房间。
-        action = self.policy_manager.get_action(intent, conversation)
+        action = self.policy_manager.get_action(intent, conversation, self.model_type)
         action_response = self.action_runner.run(action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         self.conversation_tracker.save_conversation(user_id, conversation)
         return response
-
-
-if __name__ == '__main__':
-    import os
-    # construct BaseDialogManager
-    # call handle_message
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    intent_config_file_path = os.path.join(pwd, '..', 'resources', 'intent.yaml')
-
-    embedding_model = EmbeddingModel()
-    classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()), intent_config_file_path)
-    form_store = FormStore()
-
-    entity_extractor = EntityExtractor(form_store, ChatModel())
-
-    policy_manager = BasePolicyManager([SlotCheckPolicy(form_store), SmartHomeOperatingPolicy()])
-
-    result = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), LLMNlu(classifier, entity_extractor), policy_manager,
-                      SimpleActionRunner(), BaseOutputAdapter()).handle_message("明天天气怎么样", "123")
-    print(result)
-
-    # How embedding model works?
-    # How to configure OpenAI API Key
-    # How to connect to gluon-meson api endpoint
-    # 

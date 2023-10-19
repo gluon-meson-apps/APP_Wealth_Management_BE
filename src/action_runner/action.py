@@ -39,14 +39,14 @@ class SmartHomeOperatingAction(Action):
 
 
 class ChitChatAction(Action):
-    def __init__(self, model_name, chat_model: ChatModel, user_input):
-        self.model_name = model_name
+    def __init__(self, model_type: str, chat_model: ChatModel, user_input):
+        self.model_type = model_type
         self.chat_model = chat_model
         self.user_input = user_input
 
     def run(self, context) -> ActionResponse:
         # todo: add history from context
-        response = self.chat_model.chat_single(self.user_input, model_type=self.model_name, max_length=1000)
+        response = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
         return ActionResponse(text=response.response)
 
 
