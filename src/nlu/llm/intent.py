@@ -63,13 +63,15 @@ class IntentListConfig:
             data = yaml.safe_load(file)
 
         intents = []
-        for intent_data in data['intents']:
-            intent_name, intent_details = list(intent_data.items())[0]
-            for intent_detail in intent_details:
-                if 'examples' in intent_detail:
-                    examples = intent_detail['examples']
-                elif 'slots' in intent_detail:
-                    slots = intent_detail['slots']
+        for intent_details in data['intents']:
+            intent_name, examples, slots = None, None, None
+            for key in intent_details:
+                if 'examples' == key:
+                    examples = intent_details['examples']
+                elif 'intent' == key:
+                    intent_name = intent_details['intent']
+                elif 'slots' == key:
+                    slots = intent_details['slots']
             intent = IntentConfig(intent_name, examples, slots)
             intents.append(intent)
 

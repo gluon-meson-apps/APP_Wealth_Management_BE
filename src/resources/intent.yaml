@@ -1,46 +1,46 @@
 intents:
-  - 控制智能家居:
-    - examples:
+  - intent: 控制智能家居
+    examples:
       - 帮忙打开卧室的空调
       - 关灯
       - 打开电视
       - 关闭窗帘
-    - slots:
+    slots:
       - 位置
       - 操作
       - 对象
       - 操作值
-  - 设置闹钟:
-    - examples:
-      - 明天早上六点叫我起床  
+  - intent: 设置闹钟
+    examples:
+      - 明天早上六点叫我起床
       - 提醒我下午三点开会
       - 明天早上八点半叫我起床
-    - slots:
+    slots:
       - 日期
       - 时间
       - 事件
-  - 查询天气:
-    - examples:
+  - intent: 查询天气
+    examples:
       - 明天北京的天气怎么样
       - 今天上海的天气怎么样
       - 明天的天气怎么样
-    - slots:
+    slots:
       - 日期
       - 地点
-  - 查看日程:
-    - examples:
+  - intent: 查看日程
+    examples:
       - 明天有什么安排
       - 今天有什么安排
       - 明天的日程
-    - slots:
+    slots:
       - 日期
       - 时间
-  - 生成查询SQL:
-    - examples:
+  - intent: 生成查询SQL
+    examples:
       - 今天的销售数据
       - 本月的利润数据
       - 过去一周的日均销售数据
-    - slots:
+    slots:
       - 日期
       - 时间
       - 维度

@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     result = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(),
                                LLMNlu(classifier, entity_extractor), policy_manager, SimpleActionRunner(),
-                               BaseOutputAdapter(), model_type=model_type).handle_message("帮忙打开卧室的空调", "123")
+                               BaseOutputAdapter(), model_type=model_type).handle_message("打开卧室的空调", "123")
     print(result)
 
     # How embedding model works?
