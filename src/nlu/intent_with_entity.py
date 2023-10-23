@@ -26,8 +26,15 @@ class Slot(HashableBaseModel):
 
     def __hash__(self):
         return hash((self.name,))
+
     def __eq__(self, other):
         return self.name == other.name
+
+    @staticmethod
+    def from_dict(slot_dict: dict):
+        return Slot(name=slot_dict['name'], description=slot_dict['description'],
+                    value=slot_dict.get('default', None),
+                    slot_type=SlotType(slot_dict['slotType']))
 
 
 class Entity(HashableBaseModel):

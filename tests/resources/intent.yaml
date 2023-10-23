@@ -6,39 +6,69 @@ intents:
       - 打开电视
       - 关闭窗帘
     slots:
-      - 位置
-      - 操作
-      - 对象
-      - 操作值
+      - name: 位置
+        description: 智能家居所处的房间
+        slotType: text
+        optional: true
+        default: ${current_room}
+      - name: 操作
+        description: 对智能家居进行的操作
+        slotType: text
+        optional: false
+      - name: 对象
+        description: 哪一种智能家居
+        slotType: text
+        optional: false
+      - name: 操作值
+        description: 操作的时候，需要考虑的参数，比如灯是开启还是关闭，灯的亮度需要调到多少
+        slotType: numeric or text
+        optional: true
   - intent: 设置闹钟
     examples:
       - 明天早上六点叫我起床
       - 提醒我下午三点开会
       - 明天早上八点半叫我起床
     slots:
-      - 时间
-      - 事件
+      - name: 日期
+        description: 日期
+        slotType: text
+        optional: true
+        default: ${today}
+      - name: 时间
+        description: 时间
+        slotType: numeric
+        optional: false
+      - name: 事件
+        description: 事件
+        slotType: text
+        optional: true
   - intent: 查询天气
     examples:
       - 明天北京的天气怎么样
       - 今天上海的天气怎么样
       - 明天的天气怎么样
     slots:
-      - 时间
-      - 地点
+      - name: 日期
+        description: 日期
+        slotType: text
+        optional: true
+        default: ${today}
+      - name: 地点
+        description: 地点
+        slotType: text
+        optional: false
   - intent: 查看日程
     examples:
       - 明天有什么安排
       - 今天有什么安排
       - 明天的日程
     slots:
-      - 时间
-  - intent: 生成查询SQL
-    examples:
-      - 今天的销售数据
-      - 本月的利润数据
-      - 过去一周的日均销售数据
-    slots:
-      - 时间
-      - 维度
-      - 指标
+      - name: 日期
+        description: 日期
+        slotType: text
+        optional: false
+        default: ${today}
+      - name: 时间
+        description: 时间
+        slotType: numeric
+        optional: false

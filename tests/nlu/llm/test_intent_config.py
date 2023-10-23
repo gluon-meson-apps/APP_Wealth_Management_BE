@@ -14,19 +14,19 @@ class TestIntentListConfig(unittest.TestCase):
         self.assertIsInstance(intent_list_config, IntentListConfig)
 
         # Check that intent_config has the correct number of intents
-        self.assertEqual(len(intent_list_config.intents), 5)
+        self.assertEqual(len(intent_list_config.intents), 4)
 
         # Check the details of the first intent
         first_intent = intent_list_config.intents[0]
         self.assertEqual(first_intent.name, '控制智能家居')
         self.assertEqual(first_intent.examples, ['帮忙打开卧室的空调', '关灯', '打开电视', '关闭窗帘'])
-        self.assertEqual(first_intent.slots, ['位置', '操作', '对象', '操作值'])
+        self.assertEqual(list(map(lambda s: s['name'], first_intent.slots)), ['位置', '操作', '对象', '操作值'])
 
         # Check the details of the second intent
         second_intent = intent_list_config.intents[1]
         self.assertEqual(second_intent.name, '设置闹钟')
         self.assertEqual(second_intent.examples, ['明天早上六点叫我起床', '提醒我下午三点开会', '明天早上八点半叫我起床'])
-        self.assertEqual(second_intent.slots, ['时间', '事件'])
+        self.assertEqual(list(map(lambda s: s['name'], second_intent.slots)), ['日期', '时间', '事件'])
 
     def test_get_intent_list(self):
         pwd = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +38,7 @@ class TestIntentListConfig(unittest.TestCase):
 
         intent_and_examples = intent_list_config.get_intent_and_examples()
 
-        self.assertEqual(intent_list, ['控制智能家居', '设置闹钟', '查询天气', '查看日程', '生成查询SQL'])
+        self.assertEqual(intent_list, ['控制智能家居', '设置闹钟', '查询天气', '查看日程'])
         self.assertEqual(intent_and_examples[0], {'intent': '控制智能家居', 'examples': ['帮忙打开卧室的空调', '关灯', '打开电视', '关闭窗帘']})
 
 if __name__ == '__main__':

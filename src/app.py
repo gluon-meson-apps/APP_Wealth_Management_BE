@@ -8,7 +8,7 @@ from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from input_enricher.base import BaseInputEnricher
 from nlu.forms import FormStore
 from nlu.llm.entity import EntityExtractor
-from nlu.llm.intent import IntentClassifier
+from nlu.llm.intent import IntentClassifier, IntentListConfig
 from output_adapter.base import BaseOutputAdapter
 from policy_manager.base import BasePolicyManager
 from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy
@@ -18,11 +18,12 @@ from reasoner.llm_reasoner import LlmReasoner
 def create_reasoner():
     global policy_manager, reasoner
     embedding_model = EmbeddingModel()
+    intent_list_config = IntentListConfig.from_yaml_file(intent_config_file_path)
     classifier = IntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
                                   milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
-                                  intent_config_path=intent_config_file_path,
+                                  intent_list_config=intent_list_config,
                                   model_type=model_type)
-    form_store = FormStore()
+    form_store = FormStore(intent_list_config)
     entity_extractor = EntityExtractor(form_store, ChatModel(), model_type=model_type)
     policy_manager = BasePolicyManager([SlotCheckPolicy(form_store), SmartHomeOperatingPolicy()])
     return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)

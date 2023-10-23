@@ -54,6 +54,10 @@ class IntentListConfig:
         # read resources/intent.yaml file and get intent list
         return [intent.name for intent in self.intents]
 
+    def get_intent(self, intent_name):
+        intents = [intent for intent in self.intents if intent.name == intent_name]
+        return intents[0] if len(intents) > 0 else None
+
     def get_intent_and_examples(self):
         return [ {'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
 
@@ -82,7 +86,7 @@ class IntentClassifier:
                     chat_model: ChatModel,
                     embedding_model: EmbeddingModel,
                     milvus_for_langchain: MilvusForLangchain,
-                    intent_config_path: str,
+                    intent_list_config,
                     model_type: str,):
         self.model = chat_model
         self.embedding = embedding_model
@@ -90,7 +94,7 @@ class IntentClassifier:
         self.retrieval_counts = 4
         self.embedding_type = "E5"
         self.model_type = model_type
-        self.intent_list_config = IntentListConfig.from_yaml_file(intent_config_path)
+        self.intent_list_config = intent_list_config
 
     def train(self):
         # recreate topic
