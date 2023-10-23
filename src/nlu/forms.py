@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from nlu.intent_with_entity import Slot, SlotType, Intent
+from nlu.intent_with_entity import Slot, Intent
 from util import HashableBaseModel
 
 
