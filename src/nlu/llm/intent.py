@@ -1,17 +1,17 @@
-from typing import List, Dict, Union, Any, Tuple
+from typing import List, Dict, Any
 
-from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
 from conversation_tracker.context import ConversationContext
-from nlu.llm.context import FullLlmConversationContext
-from nlu.intent_with_entity import Intent
-
+from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
+from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from gm_logger import get_logger
+from nlu.intent_with_entity import Intent
+from nlu.llm.context import FullLlmConversationContext
+
 logger = get_logger()
 
 # should extract to a config file
@@ -78,10 +78,10 @@ class IntentListConfig:
         return cls(intents)
 
 class IntentClassifier:
-    def __init__(self, 
+    def __init__(self,
                     chat_model: ChatModel,
-                    embedding_model: EmbeddingModel, 
-                    milvus_for_langchain: MilvusForLangchain, 
+                    embedding_model: EmbeddingModel,
+                    milvus_for_langchain: MilvusForLangchain,
                     intent_config_path: str,
                     model_type: str,):
         self.model = chat_model
@@ -167,6 +167,7 @@ class IntentClassifier:
         intent_examples = self.get_intent_examples(user_input)
 
         intent = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
+        # TODO: Check whether the intent matches the intent list
         return Intent(name=intent, confidence=1.0)
 
 if __name__ == '__main__':

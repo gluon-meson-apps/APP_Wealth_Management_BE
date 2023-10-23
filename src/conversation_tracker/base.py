@@ -10,8 +10,14 @@ class ConversationTracker:
 
 
 class BaseConversationTracker(ConversationTracker):
+
+    def __init__(self):
+        self.conversation_caches = {}
+
     def save_conversation(self, id: str, conversation_context: ConversationContext):
-        pass
+        self.conversation_caches[id] = conversation_context
 
     def load_conversation(self, id: str) -> ConversationContext:
+        if id in self.conversation_caches:
+            return self.conversation_caches[id]
         return ConversationContext("")

@@ -1,5 +1,3 @@
-from typing import List
-
 from conversation_tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity
 

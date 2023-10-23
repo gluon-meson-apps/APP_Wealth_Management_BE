@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-
-from util import HashableBaseModel
 from nlu.intent_with_entity import Slot, SlotType, Intent
+from util import HashableBaseModel
 
 
 # Form is the collection of slots

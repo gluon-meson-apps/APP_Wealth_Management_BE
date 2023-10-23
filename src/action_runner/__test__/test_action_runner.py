@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import patch
 
-from action_runner.action import ChatAction, SlotFillingAction, FixedAnswerAction, ApiAction  
-from action_runner.context import ActionContext
+from action_runner.action import ChatAction, SlotFillingAction, FixedAnswerAction
 from action_runner.base import BaseActionRunner
+from action_runner.context import ActionContext
 
 GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000" 
 

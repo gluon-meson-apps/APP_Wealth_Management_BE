@@ -2,6 +2,7 @@ from typing import List, Any
 
 from nlu.intent_with_entity import Intent
 
+
 class History:
     def __init__(self, histories: List[dict[str, Any]]):
         self.histories = histories

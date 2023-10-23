@@ -86,8 +86,9 @@ class EntityExtractor:
         self.model = chat_model
         self.model_type = model_type
 
-    def construct_messages(self, user_input, intent, form: Form, history="") -> List[str]:
-        final_user_message = user_message_template.format(conversation_history=history, user_intent=intent.name,
+    def construct_messages(self, user_input, intent, form: Form, conversation_context: ConversationContext) -> List[str]:
+        chat_history = conversation_context.get_history().format_to_string()
+        final_user_message = user_message_template.format(conversation_history=chat_history, user_intent=intent.name,
                                                           user_message=user_input,
                                                           entity_names=form.get_available_slots_str())
         history = [('system', system_template)]
@@ -107,7 +108,7 @@ class EntityExtractor:
         if not form:
             logger.debug(f"该意图[{intent.name}]不需要提取实体")
             return []
-        prompt, history = self.construct_messages(user_input, intent, form)
+        prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
         response = self.model.chat_single(prompt, history=history, model_type=self.model_type,
                                           max_length=2048).response

@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import requests
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 from pydantic import BaseModel
 
 from action_runner.context import ActionContext
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import BasePromptManager
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 
 GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000"
 
