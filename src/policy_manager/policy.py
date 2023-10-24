@@ -18,7 +18,7 @@ class SlotCheckPolicy(Policy):
         self.form_store = form_store
 
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
-        possible_slots = {entity.possible_slot for entity in intent.entities}
+        possible_slots = {entity.possible_slot for entity in intent.entities if self.is_not_empty(entity)}
         logger.debug(f"最终识别的\n意图：{intent.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(intent.intent):
             missed_slots = set(form.slots) - possible_slots
@@ -29,6 +29,11 @@ class SlotCheckPolicy(Policy):
             else:
                 return False, None
         return False, None
+
+    @staticmethod
+    def is_not_empty(entity):
+        return entity.value is not None and entity.value != ''
+
 
 class SmartHomeOperatingPolicy(Policy):
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
