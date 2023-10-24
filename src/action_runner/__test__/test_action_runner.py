@@ -4,7 +4,7 @@ from action_runner.action import ChatAction, SlotFillingAction, FixedAnswerActio
 from action_runner.base import BaseActionRunner
 from action_runner.context import ActionContext
 
-GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000" 
+GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
 
 class TestActionRunner(unittest.TestCase):
 

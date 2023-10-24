@@ -1,6 +1,6 @@
 from gluon_meson_sdk.prompt.prompt_service import PromptService
 
-GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000" 
+GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
 
 class PromptWrapper:
     def __init__(self, template):
@@ -20,7 +20,7 @@ class BasePromptManager(PromptManager):
     
     def __init__(self) -> None:
         super().__init__()
-        self.prompt_service = PromptService(master_endpoint=GLUON_MESON_MASTER_ENDPOINT)
+        self.prompt_service = PromptService(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
     
     def load(self, domain, style=None) -> str:
         if style is not None:

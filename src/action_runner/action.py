@@ -9,7 +9,7 @@ from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import BasePromptManager
 from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 
-GLUON_MESON_MASTER_ENDPOINT = "http://10.207.227.101:18000"
+GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
 
 from gm_logger import get_logger
 
@@ -65,7 +65,7 @@ class ChatAction(Action):
         prompt_manager = BasePromptManager()
         self.prompt_template = prompt_manager.load(domain='response', style=style)
         self.model = model_name
-        self.llm = ChatModel(master_endpoint=GLUON_MESON_MASTER_ENDPOINT)
+        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
 
     def run(self, context):
         """
@@ -97,7 +97,7 @@ class SlotFillingAction(Action):
         prompt_manager = BasePromptManager()
         self.prompt_template = prompt_manager.load(domain='slot_filling')
         self.model = model_name
-        self.llm = ChatModel(master_endpoint=GLUON_MESON_MASTER_ENDPOINT)
+        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
         self.slots = slots
         self.intent = intent
 
