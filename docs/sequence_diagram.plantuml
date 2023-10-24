@@ -1,0 +1,47 @@
+@startuml
+
+title 系统时序图
+
+actor 用户
+
+participant 对话窗口
+box "Reasoner"
+participant 意图识别器
+participant 关键信息提取器
+participant 策略管理器
+end box
+box "Action"
+participant 策略执行器
+participant 知识库或服务
+participant 结果分析器
+end box
+participant Model
+
+autonumber
+用户 -> 对话窗口 : 输入问题
+对话窗口 -> 意图识别器 : 发送问题文本
+意图识别器 -> 知识库或服务 : 检索相似问题
+知识库或服务 --> 意图识别器 : 返回检索结果
+意图识别器 -> 意图识别器 : 生成询问意图 prompt
+意图识别器 -> Model : 询问意图
+Model --> 意图识别器 : 返回用户意图
+关键信息提取器 -> Model: 询问关键信息
+Model --> 关键信息提取器 : 返回关键信息
+autonumber 7.0
+autonumber inc b
+意图识别器 -> 策略管理器 : 发送意图
+关键信息提取器 -> 策略管理器 : 发送关键信息
+autonumber 8
+策略管理器 -> 策略执行器 : 根据意图和关键信息选择动作，生成计划
+策略执行器 -> 策略执行器 : 丰富上下文信息
+alt Optional
+  策略执行器 -> 知识库或服务 : 查询、检索信息
+  知识库或服务 --> 策略执行器 : 返回检索结果
+end
+策略执行器 -> 策略执行器 : 生成问答 prompt
+策略执行器 -> Model : 发送问答 prompt
+Model --> 结果分析器 : 返回答案
+结果分析器 --> 对话窗口 : 返回分析结果
+对话窗口 -> 用户 : 显示结果
+
+@enduml
