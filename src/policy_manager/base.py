@@ -13,13 +13,15 @@ class PolicyManager:
 
 
 class BasePolicyManager(PolicyManager):
-    def __init__(self, policies: List[Policy]):
+    def __init__(self, policies: List[Policy], action_model_type: str = None):
         self.policies = policies
+        self.action_model_type = action_model_type
 
     # 如果有多个action，用一个大的action包装起来，还是视为一个action，用到组合模式
     def get_action(self, intent: IntentWithEntity, conversation: ConversationContext, model_type: str) -> Action:
+        model = self.action_model_type if self.action_model_type is not None else model_type
         for policy in self.policies:
-            handled, action = policy.handle(intent, conversation, model_type)
+            handled, action = policy.handle(intent, conversation, model)
             if handled:
                 return action
         return ChitChatAction(model_type, ChatModel(), conversation.current_enriched_user_input)

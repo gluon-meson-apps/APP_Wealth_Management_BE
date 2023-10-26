@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from action_runner.action import Action, SlotFillingAction, SmartHomeOperatingAction
+from action_runner.rag_action import RAGAction
 from conversation_tracker.context import ConversationContext
 from gm_logger import get_logger
 from nlu.forms import FormStore
@@ -12,13 +13,21 @@ class Policy:
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
         pass
 
+    @staticmethod
+    def get_possible_slots(intent: IntentWithEntity):
+        return {entity.possible_slot for entity in intent.entities if Policy.is_not_empty(entity)}
+
+    @staticmethod
+    def is_not_empty(entity):
+        return entity.value is not None and entity.value != ''
+
 
 class SlotCheckPolicy(Policy):
     def __init__(self, form_store: FormStore):
         self.form_store = form_store
 
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
-        possible_slots = {entity.possible_slot for entity in intent.entities if self.is_not_empty(entity)}
+        possible_slots = self.get_possible_slots(intent=intent)
         logger.debug(f"最终识别的\n意图：{intent.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(intent.intent):
             missed_slots = set(form.slots) - possible_slots
@@ -29,10 +38,6 @@ class SlotCheckPolicy(Policy):
             else:
                 return False, None
         return False, None
-
-    @staticmethod
-    def is_not_empty(entity):
-        return entity.value is not None and entity.value != ''
 
 
 class SmartHomeOperatingPolicy(Policy):
@@ -49,3 +54,12 @@ class SmartHomeOperatingPolicy(Policy):
         else:
             return False, None
 
+class RAGPolicy(Policy):
+
+    def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
+        if intent.intent.name == "保险知识问答":
+            possible_slots = self.get_possible_slots(intent)
+            if len(possible_slots) > 0:
+                return True, RAGAction(model_type, possible_slots)
+
+        return False, None

@@ -113,7 +113,7 @@ class EntityExtractor:
         response = self.model.chat_single(prompt, history=history, model_type=self.model_type,
                                           max_length=2048).response
         entities = json.loads(self.extract_json_code(response))
-
+        entity_list = list(filter(lambda tup: len(tup[1]) > 0, list(entities.items())))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
 
         def get_slot(name, value):
@@ -123,7 +123,7 @@ class EntityExtractor:
             return None
 
         return [Entity(type=name, value=value['value'], possible_slot=get_slot(name, value)) for name, value in
-                entities.items()]
+                entity_list]
 
 
 if __name__ == '__main__':
