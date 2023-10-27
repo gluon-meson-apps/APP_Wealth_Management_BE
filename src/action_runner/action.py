@@ -43,12 +43,15 @@ class ChitChatAction(Action):
         self.model_type = model_type
         self.chat_model = chat_model
         self.user_input = user_input
+        self.default_template = "我不知道该怎么回答好了"
 
     def run(self, context) -> ActionResponse:
         # todo: add history from context
-        response = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
-        return ActionResponse(text=response.response)
-
+        result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
+        if result.response is None:
+            return ActionResponse(text=self.default_template)
+        else:
+            return ActionResponse(text=result.response)
 
 
 class ChatAction(Action):

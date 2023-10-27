@@ -3,8 +3,6 @@ from typing import List, Dict, Any
 from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
-from conversation_tracker.context import ConversationContext
-from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
@@ -173,9 +171,3 @@ class IntentClassifier:
         intent = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
         # TODO: Check whether the intent matches the intent list
         return Intent(name=intent, confidence=1.0)
-
-if __name__ == '__main__':
-    embedding_model = EmbeddingModel()
-    classifier = IntentClassifier(ChatModel(), embedding_model, MilvusForLangchain(embedding_model, MilvusConnection()))
-    # classifier.train()
-    logger.debug(classifier.classify_intent(FullLlmConversationContext(ConversationContext("帮忙打开卧室的空调"))))

@@ -17,7 +17,9 @@ from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAG
 from reasoner.llm_reasoner import LlmReasoner
 
 
-def create_reasoner(model_type, action_model_type):
+def create_reasoner(model_type, action_model_type, intent_yaml):
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    intent_config_file_path = os.path.join(pwd, '.', 'resources', intent_yaml)
     embedding_model = EmbeddingModel()
     intent_list_config = IntentListConfig.from_yaml_file(intent_config_file_path)
     classifier = IntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
@@ -33,12 +35,10 @@ def create_reasoner(model_type, action_model_type):
 
 if __name__ == '__main__':
 
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'intent.yaml')
     model_type = "azure_gpt35"
-    action_model_type = 'gpt-4'
+    action_model_type = "azure_gpt35" # 'gpt-4'
 
-    reasoner = create_reasoner(model_type, action_model_type)
+    reasoner = create_reasoner(model_type, action_model_type, 'intent.yaml')
     base_dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(),
                                             reasoner, SimpleActionRunner(), BaseOutputAdapter())
 

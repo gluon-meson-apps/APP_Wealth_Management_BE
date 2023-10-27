@@ -24,4 +24,5 @@ class BasePolicyManager(PolicyManager):
             handled, action = policy.handle(intent, conversation, model)
             if handled:
                 return action
-        return ChitChatAction(model_type, ChatModel(), conversation.current_enriched_user_input)
+        return ChitChatAction(model_type=model, chat_model=ChatModel(),
+                              user_input=conversation.current_enriched_user_input)
