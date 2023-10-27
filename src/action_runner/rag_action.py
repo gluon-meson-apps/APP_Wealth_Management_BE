@@ -1,6 +1,9 @@
+import gm_logger
 from action_runner.action import Action, ActionResponse, GLUON_MESON_CONTROL_CENTER_ENDPOINT
 from gluon_meson_sdk.models.chat_model import ChatModel
 
+
+logger = gm_logger.get_logger()
 
 class RAGAction(Action):
 
@@ -115,7 +118,9 @@ A:
         self.slots = slots
 
     def run(self, context) -> ActionResponse:
+        context.set_status('action:rag_qa')
         question = self.get_slot('问题').value
+        logger.info("question: %s", question)
         prompt = self.template.format(question=question)
         response = self.chat_model.chat_single(prompt, model_type=self.model_type, max_length=4096, temperature=0.01)
         return ActionResponse(text=response.response)

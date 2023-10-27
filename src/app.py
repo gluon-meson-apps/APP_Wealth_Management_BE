@@ -36,7 +36,7 @@ def create_reasoner(model_type, action_model_type, intent_yaml):
 if __name__ == '__main__':
 
     model_type = "azure_gpt35"
-    action_model_type = "azure_gpt35" # 'gpt-4'
+    action_model_type = "gpt-4"
 
     reasoner = create_reasoner(model_type, action_model_type, 'intent.yaml')
     base_dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(),

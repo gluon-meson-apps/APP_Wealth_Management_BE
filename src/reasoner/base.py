@@ -22,7 +22,3 @@ class Reasoner:
     def think(self, conversation_tracker: ConversationContext) -> Plan:
         raise NotImplementedError()
 
-
-class BaseReasoner(Reasoner):
-    def think(self, conversation_tracker: ConversationContext) -> Plan:
-        pass

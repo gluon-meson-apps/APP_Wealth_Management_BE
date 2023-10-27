@@ -19,5 +19,6 @@ class BaseConversationTracker(ConversationTracker):
 
     def load_conversation(self, id: str) -> ConversationContext:
         if id in self.conversation_caches:
-            return self.conversation_caches[id]
-        return ConversationContext("")
+            conversation = self.conversation_caches[id]
+            return conversation
+        return ConversationContext(current_user_input="", user_id=id)

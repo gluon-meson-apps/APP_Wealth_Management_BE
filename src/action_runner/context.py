@@ -27,3 +27,7 @@ class ActionContext:
     def get_slots(self):
         """Get all slots."""
         return self.slots
+
+    def set_status(self, status):
+        """Set the status of the conversation."""
+        self.conversation.set_status(status)

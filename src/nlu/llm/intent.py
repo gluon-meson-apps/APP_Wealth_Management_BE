@@ -38,11 +38,13 @@ topic = "test_topic_for_intent"
 
 import yaml
 
+
 class IntentConfig:
     def __init__(self, name, examples, slots):
         self.name = name
         self.examples = examples
         self.slots = slots
+
 
 class IntentListConfig:
     def __init__(self, intents):
@@ -57,7 +59,7 @@ class IntentListConfig:
         return intents[0] if len(intents) > 0 else None
 
     def get_intent_and_examples(self):
-        return [ {'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
+        return [{'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
 
     @classmethod
     def from_yaml_file(cls, file_path):
@@ -79,13 +81,14 @@ class IntentListConfig:
 
         return cls(intents)
 
+
 class IntentClassifier:
     def __init__(self,
-                    chat_model: ChatModel,
-                    embedding_model: EmbeddingModel,
-                    milvus_for_langchain: MilvusForLangchain,
-                    intent_list_config,
-                    model_type: str,):
+                 chat_model: ChatModel,
+                 embedding_model: EmbeddingModel,
+                 milvus_for_langchain: MilvusForLangchain,
+                 intent_list_config,
+                 model_type: str, ):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
@@ -115,8 +118,6 @@ class IntentClassifier:
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
-
-
     def get_intent_examples(self, user_input: str) -> list[dict[str, Any]]:
         search_with_score = self.milvus_for_langchain.query_docs(topic, user_input, embedding_type=self.embedding_type,
                                                                  k=self.retrieval_counts)
@@ -136,7 +137,8 @@ class IntentClassifier:
         template = """消息：{question}
 意图：{intent}
 """
-        return "\n".join([template.format(question=example["example"], intent=example["intent"]) for example in examples])
+        return "\n".join(
+            [template.format(question=example["example"], intent=example["intent"]) for example in examples])
 
     def classify_intent_using_llm(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
@@ -146,7 +148,8 @@ class IntentClassifier:
         intent = self.model.chat_single(system_message, model_type=self.model_type, max_length=1024)
         return intent
 
-    def classify_intent_using_llm_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
+    def classify_intent_using_llm_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]],
+                                                        question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
         system_message = system_template_without_example.format(intent_list=intent_list_str)
         history = [('system', system_message)]
@@ -156,11 +159,11 @@ class IntentClassifier:
             history.append(('user', user_template.format(question=example['example'])))
             history.append(('assistant', example['intent']))
 
-        intent = self.model.chat_single(user_template.format(question=question), history=history, model_type=self.model_type, max_length=1024)
+        intent = self.model.chat_single(user_template.format(question=question), history=history,
+                                        model_type=self.model_type, max_length=1024)
         logger.debug(question)
         logger.debug(history)
         return intent.response
-
 
     def classify_intent(self, conversation_context: FullLlmConversationContext) -> Intent:
         user_input = conversation_context.get_current_user_input()
@@ -168,6 +171,10 @@ class IntentClassifier:
         question = user_input
         intent_examples = self.get_intent_examples(user_input)
 
-        intent = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
-        # TODO: Check whether the intent matches the intent list
-        return Intent(name=intent, confidence=1.0)
+        intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
+        if intent_name in intent_list:
+            logger.info('intent: %s', intent_name)
+            return Intent(name=intent_name, confidence=1.0)
+
+        logger.info('intent: %s is not predefined', intent_name)
+        return None

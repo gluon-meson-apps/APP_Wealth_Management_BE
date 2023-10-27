@@ -34,6 +34,7 @@ class SmartHomeOperatingAction(Action):
         self.response = response
 
     def run(self, context) -> ActionResponse:
+        context.set_status('action:smart_home_operating')
         logger.debug("成功控制了智能家居")
         return ActionResponse(text=self.response)
 
@@ -46,6 +47,7 @@ class ChitChatAction(Action):
         self.default_template = "我不知道该怎么回答好了"
 
     def run(self, context) -> ActionResponse:
+        context.set_status('action:chitchat')
         # todo: add history from context
         result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
         if result.response is None:
@@ -80,6 +82,7 @@ class ChatAction(Action):
         Returns:
             The chat response.
         """
+        context.set_status('action:chat')
         user_input = context.get_user_input()
         prompt = self.prompt_template.format({"input": user_input})
         response = self.llm.chat_single(prompt, model_type=self.model)
@@ -114,6 +117,7 @@ class SlotFillingAction(Action):
         Returns:
             The slot filling response.
         """
+        context.set_status('action:slot_filling')
         slots = self.slots
         # not_filled_slot = [k for k, v in slots.items() if v is None]
         prompt = self.prompt_template.format({
@@ -150,6 +154,7 @@ class FixedAnswerAction(Action):
         Returns:
             Pre-defined response string.
         """
+        context.set_status('action:fixed_response')
         return self.response
 
 
@@ -187,6 +192,7 @@ class ApiAction(Action):
         Returns:
             The API response.
         """
+        context.set_status('action:api_call')
         params_dict = {}
         for key in self.slot_used:
             params_dict[key] = context.get_slot(key)
