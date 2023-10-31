@@ -99,7 +99,7 @@ class SlotFillingAction(Action):
             style: Prompt style to use. 
             model_name: Name of model to use for slot filling.
         """
-        self.prompt_template = prompt_manager.load(name='slot_filling')
+        self.prompt_template = prompt_manager.load(name='action_slot_filling')
         self.model = model_name
         self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
         self.slots = slots
