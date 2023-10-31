@@ -17,6 +17,15 @@ class BaseDialogManager:
         self.output_adapter = output_adapter
         self.reasoner = reasoner
 
+    def greet(self, user_id: str) -> Any:
+        conversation = self.conversation_tracker.load_conversation(user_id)
+
+        action = self.reasoner.greet(conversation)
+        action_response = self.action_runner.run(action, ActionContext(conversation))
+        response = self.output_adapter.process_output(action_response)
+        self.conversation_tracker.save_conversation(user_id, conversation)
+        return response
+
     def handle_message(self, message: Any, user_id: str) -> Any:
         conversation = self.conversation_tracker.load_conversation(user_id)
         conversation.current_user_input = message
@@ -28,5 +37,6 @@ class BaseDialogManager:
 
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
+        conversation.append_history('assistant', response.text)
         self.conversation_tracker.save_conversation(user_id, conversation)
-        return response
+        return response.text

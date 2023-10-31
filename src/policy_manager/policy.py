@@ -6,10 +6,15 @@ from conversation_tracker.context import ConversationContext
 from gm_logger import get_logger
 from nlu.forms import FormStore
 from nlu.intent_with_entity import IntentWithEntity
+from prompt_manager.base import PromptManager
 
 logger = get_logger()
 
 class Policy:
+
+    def __init__(self, prompt_manager: PromptManager):
+        self.prompt_manager = prompt_manager
+
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
         pass
 
@@ -23,7 +28,8 @@ class Policy:
 
 
 class SlotCheckPolicy(Policy):
-    def __init__(self, form_store: FormStore):
+    def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
+        Policy.__init__(self, prompt_manager)
         self.form_store = form_store
 
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
@@ -34,13 +40,17 @@ class SlotCheckPolicy(Policy):
             missed_slots = list(filter(lambda slot: slot.optional is not True, missed_slots))
             logger.debug(f"需要填充的槽位： {[slot.name for slot in missed_slots if slot]}")
             if missed_slots:
-                return True, SlotFillingAction(model_type, missed_slots, intent.intent)
+                return True, SlotFillingAction(model_type, missed_slots, intent.intent, prompt_manager=self.prompt_manager)
             else:
                 return False, None
         return False, None
 
 
 class SmartHomeOperatingPolicy(Policy):
+
+    def __init__(self, prompt_manager: PromptManager):
+        Policy.__init__(self, prompt_manager)
+
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
         if intent.intent.name == "控制智能家居":
             possible_slots = {entity.possible_slot.name: entity.possible_slot for entity in intent.entities if entity.possible_slot}
@@ -54,7 +64,11 @@ class SmartHomeOperatingPolicy(Policy):
         else:
             return False, None
 
+
 class RAGPolicy(Policy):
+
+    def __init__(self, prompt_manager: PromptManager):
+        Policy.__init__(self, prompt_manager)
 
     def handle(self, intent: IntentWithEntity, context: ConversationContext, model_type: str) -> Tuple[bool, Action]:
         if intent.intent.name == "保险知识问答":

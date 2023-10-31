@@ -1,4 +1,5 @@
 import gm_logger
+from action_runner.action import Action
 from conversation_tracker.context import ConversationContext
 from nlu.llm.entity import EntityExtractor
 from nlu.llm.intent import IntentClassifier
@@ -17,6 +18,9 @@ class LlmReasoner(Reasoner):
         self.policy_manager = policy_manager
         self.nlu = LLMNlu(intent_classifier, entity_extractor)
         self.model_type = model_type
+
+    def greet(self, conversation_tracker: ConversationContext) -> Action:
+        return self.policy_manager.get_greet_action(conversation_tracker, self.model_type)
 
     def think(self, conversation: ConversationContext) -> Plan:
         conversation.set_status('reasoning')

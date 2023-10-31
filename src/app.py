@@ -14,23 +14,36 @@ from nlu.llm.intent import IntentClassifier, IntentListConfig
 from output_adapter.base import BaseOutputAdapter
 from policy_manager.base import BasePolicyManager
 from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAGPolicy
+from prompt_manager.base import BasePromptManager, PromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
 
-def create_reasoner(model_type, action_model_type, intent_yaml):
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    intent_config_file_path = os.path.join(pwd, '.', 'resources', intent_yaml)
+def create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder):
     embedding_model = EmbeddingModel()
     intent_list_config = IntentListConfig.from_yaml_file(intent_config_file_path)
+    prompt_manager = BasePromptManager(prompt_template_folder)
+
     classifier = IntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
                                   milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
                                   intent_list_config=intent_list_config,
-                                  model_type=model_type)
+                                  model_type=model_type, prompt_manager=prompt_manager)
     form_store = FormStore(intent_list_config)
-    entity_extractor = EntityExtractor(form_store, ChatModel(), model_type=model_type)
-    policy_manager = BasePolicyManager(policies=[SlotCheckPolicy(form_store), SmartHomeOperatingPolicy(), RAGPolicy()],
+    entity_extractor = EntityExtractor(form_store, ChatModel(), model_type=model_type, prompt_manager=prompt_manager)
+
+    slot_check_policy = SlotCheckPolicy(prompt_manager, form_store)
+    smart_home_operating_policy = SmartHomeOperatingPolicy(prompt_manager)
+    rag_policy = RAGPolicy(prompt_manager)
+    policy_manager = BasePolicyManager(policies=[slot_check_policy, smart_home_operating_policy, rag_policy],
+                                       prompt_manager=prompt_manager,
                                        action_model_type=action_model_type)
     return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
+
+
+def greet(should_greeting: bool):
+    if should_greeting:
+        greeting = dialog_manager.greet(user_id)
+        if greeting is not None:
+            print(greeting)
 
 
 if __name__ == '__main__':
@@ -38,14 +51,21 @@ if __name__ == '__main__':
     model_type = "azure_gpt35"
     action_model_type = "gpt-4"
 
-    reasoner = create_reasoner(model_type, action_model_type, 'intent.yaml')
-    base_dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(),
-                                            reasoner, SimpleActionRunner(), BaseOutputAdapter())
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    prompt_template_folder = os.path.join(pwd, '.', 'resources', 'prompt_templates')
+    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'intent.yaml')
+
+    reasoner = create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
+    dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), reasoner,
+                                       SimpleActionRunner(), BaseOutputAdapter())
+
+    user_id = "123"
+    greet(True)
 
     user_input = input("You: ")
     while user_input != "stop":
         # 打开卧室的空调
         # 温度26度制冷
-        result = base_dialog_manager.handle_message(user_input, "123")
+        result = dialog_manager.handle_message(user_input, user_id)
         print(result)
         user_input = input("You: ")

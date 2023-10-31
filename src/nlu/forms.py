@@ -10,7 +10,7 @@ class Form(HashableBaseModel):
     slots: List[Slot]
 
     def get_available_slots_str(self):
-        return "、".join([f"{slot.name}[{slot.description}, 类型：{slot.slot_type}]" for slot in self.slots])
+        return "\n".join([f" * {slot.name}: {slot.description}, 类型：{slot.slot_type}, 是否可选：{slot.optional}" for slot in self.slots])
 
 
 class FormStore:

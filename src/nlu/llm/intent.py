@@ -9,6 +9,7 @@ from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from gm_logger import get_logger
 from nlu.intent_with_entity import Intent
 from nlu.llm.context import FullLlmConversationContext
+from prompt_manager.base import PromptManager
 
 logger = get_logger()
 
@@ -28,7 +29,7 @@ system_template = """
 """
 
 system_template_without_example = """
-你是一个聊天机器人，你需要对用户的意图进行识别，必须选择一个你认为最合适的意图，然后将其返回给我，不要返回多余的信息。
+你是一个聊天机器人，你需要结合上下文对用户的意图进行识别，必须选择一个你认为最合适的意图，然后将其返回给我，不要返回多余的信息。
 
 ## 意图的可选项如下：
 {intent_list}
@@ -88,7 +89,8 @@ class IntentClassifier:
                  embedding_model: EmbeddingModel,
                  milvus_for_langchain: MilvusForLangchain,
                  intent_list_config,
-                 model_type: str, ):
+                 model_type: str,
+                 prompt_manager: PromptManager):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
@@ -96,6 +98,8 @@ class IntentClassifier:
         self.embedding_type = "E5"
         self.model_type = model_type
         self.intent_list_config = intent_list_config
+        self.prompt_manager = prompt_manager
+        self.system_template_without_example = prompt_manager.load(name='intent_classification')
 
     def train(self):
         # recreate topic
@@ -133,25 +137,13 @@ class IntentClassifier:
             })
         return intents
 
-    def format_examples(self, examples: List[Dict[str, Any]]) -> str:
-        template = """消息：{question}
-意图：{intent}
-"""
-        return "\n".join(
-            [template.format(question=example["example"], intent=example["intent"]) for example in examples])
-
-    def classify_intent_using_llm(self, intent_list: List[str], examples: List[Dict[str, Any]], question: str) -> str:
-        intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
-        examples_str = self.format_examples(examples)
-        system_message = system_template.format(intent_list=intent_list_str, examples=examples_str, question=question)
-        logger.debug(system_message)
-        intent = self.model.chat_single(system_message, model_type=self.model_type, max_length=1024)
-        return intent
-
     def classify_intent_using_llm_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]],
-                                                        question: str) -> str:
+                                                        chat_history: str, question: str) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
-        system_message = system_template_without_example.format(intent_list=intent_list_str)
+        system_message = self.system_template_without_example.format({
+            "intent_list": intent_list_str,
+            "chat_history": chat_history,
+        })
         history = [('system', system_message)]
         user_template = """消息：{question}
 意图："""
@@ -165,13 +157,13 @@ class IntentClassifier:
         logger.debug(history)
         return intent.response
 
-    def classify_intent(self, conversation_context: FullLlmConversationContext) -> Intent:
-        user_input = conversation_context.get_current_user_input()
+    def classify_intent(self, conversation: FullLlmConversationContext) -> Intent:
+        user_input = conversation.get_current_user_input()
         intent_list = self.intent_list_config.get_intent_list()
-        question = user_input
+        chat_history = conversation.get_history().format_to_string()
         intent_examples = self.get_intent_examples(user_input)
 
-        intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, question)
+        intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, chat_history, user_input)
         if intent_name in intent_list:
             logger.info('intent: %s', intent_name)
             return Intent(name=intent_name, confidence=1.0)

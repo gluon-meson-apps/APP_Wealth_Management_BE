@@ -25,7 +25,7 @@ intents:
         slotType: categorical
         optional: True
       - name: 问题
-        description: 经过分析思考提炼之后的用户问题
+        description: 经过分析思考提炼出的用户问题
         slotType: text
         optional: False
   - intent: 文件检索
@@ -46,4 +46,4 @@ intents:
       - name: 文件关键词
         description: 从用户问题中提取的搜索关键词
         slotType: text
-        optional: False
+        optional: True

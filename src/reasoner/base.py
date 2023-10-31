@@ -22,3 +22,5 @@ class Reasoner:
     def think(self, conversation_tracker: ConversationContext) -> Plan:
         raise NotImplementedError()
 
+    def greet(self, conversation_tracker: ConversationContext) -> Action:
+        raise NotImplementedError()

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from action_runner.context import ActionContext
 from nlu.intent_with_entity import Intent, Slot
-from prompt_manager.base import BasePromptManager
+from prompt_manager.base import PromptManager
 from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 
 GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
@@ -56,32 +56,31 @@ class ChitChatAction(Action):
             return ActionResponse(text=result.response)
 
 
-class ChatAction(Action):
+class GreetAction(Action):
     """Chat action using large language models."""
 
-    def __init__(self, style, model_name):
-        """
-        Initialize the chat action.
-        
-        Args:
-            style: Prompt style to use.
-            model_name: Name of model to use for chat.
-        """
-        prompt_manager = BasePromptManager()
-        self.prompt_template = prompt_manager.load(domain='response', style=style)
-        self.model = model_name
+    def __init__(self, prompt_name: str, model_type: str, prompt_manager: PromptManager, prompt_domain: str = None):
+        self.greet_prompt_template = prompt_manager.load(domain=prompt_domain, name=prompt_name)
+        self.model = model_type
         self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
 
     def run(self, context):
-        """
-        Run the chat action.
-        
-        Args:
-            context: The action context.
-            
-        Returns:
-            The chat response.
-        """
+        context.set_status('action:greet')
+        if self.greet_prompt_template is None:
+            return None
+        prompt = self.greet_prompt_template.format({})
+        response = self.llm.chat_single(prompt, model_type=self.model)
+        return response.response
+
+class ChatAction(Action):
+    """Chat action using large language models."""
+
+    def __init__(self, prompt_domain: str, prompt_name: str, model_type: str, prompt_manager: PromptManager):
+        self.prompt_template = prompt_manager.load(domain=prompt_domain, name=prompt_name)
+        self.model = model_type
+        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
+
+    def run(self, context):
         context.set_status('action:chat')
         user_input = context.get_user_input()
         prompt = self.prompt_template.format({"input": user_input})
@@ -92,7 +91,7 @@ class ChatAction(Action):
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
 
-    def __init__(self, model_name, slots: List[Slot], intent: Intent):
+    def __init__(self, model_name, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
         """
         Initialize the slot filling action.
         
@@ -100,8 +99,7 @@ class SlotFillingAction(Action):
             style: Prompt style to use. 
             model_name: Name of model to use for slot filling.
         """
-        prompt_manager = BasePromptManager()
-        self.prompt_template = prompt_manager.load(domain='slot_filling')
+        self.prompt_template = prompt_manager.load(name='slot_filling')
         self.model = model_name
         self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
         self.slots = slots
@@ -125,6 +123,7 @@ class SlotFillingAction(Action):
             "intent": self.intent.name,
             "history": context.conversation.get_history().format_to_string(),
         })
+        logger.debug(prompt)
         response = self.llm.chat_single(prompt, model_type=self.model, max_length=4000)
         return ActionResponse(text=response.response)
 
