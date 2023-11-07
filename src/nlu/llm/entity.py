@@ -1,6 +1,7 @@
-import json
 import re
 from typing import List
+
+import yaml
 
 from conversation_tracker.context import ConversationContext
 from gluon_meson_sdk.models.chat_model import ChatModel
@@ -12,23 +13,16 @@ from prompt_manager.base import PromptManager
 logger = get_logger()
 
 system_template = """
-## 角色与任务
-你是一个聊天机器人，你需要根据识别出的用户意图和聊天历史，结合提供的实体选项，提取出相应的实体。
+## Role & Task
+你是一个聊天机器人，你需要根据"User Intent"和"Chat History"，结合提供的"Entities Types & Description"，提取出相应的实体。
 如果没有找到对应的实体，输出空字符串，数值型的实体，需要输出的是用户明确表示的具体数值。
 
-## 返回格式
-返回格式必须符合json格式，下面是一个返回的例子：
-{
-    "实体1": {
-        "实体值": "$实体值"
-    },
-    ...
-    "实体n": {
-        "实体值": "$实体值"
-    }
-}
-
-重点关注必选的实体
+## Output Format
+重点关注必选的实体，返回格式必须符合yaml格式，下面是一个返回的例子：
+```yaml
+Entity_1: $Value_1
+Entity_n: $Value_n
+```
 """
 
 
@@ -57,48 +51,28 @@ class EntityExtractor:
         examples = [
             (self.user_message_template.format({"chat_history": "user: 帮忙打开客厅的灯", "user_intent": "控制智能家居",
                                                 "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]"}),
-             """```
-        {
-            "位置": {
-                "value": "客厅"
-            },
-            "操作": {
-                "value": "打开"
-            },
-            "对象": {
-                "value": "灯"
-            },
-            "操作值": {
-                "value": "开启"
-            }
-        }
-        ```"""),
+             """```yaml
+位置: 客厅
+操作: 打开
+对象: 灯
+操作值: 开启
+```"""),
             (self.user_message_template.format({"chat_history": """user: 帮忙调亮客厅的灯
         assistant: 请问需要将客厅的灯调到多亮呢？
         user: 调到50%的亮度""", "user_intent": "控制智能家居/补充信息",
                                                 "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]"}),
-             """```
-        {
-            "位置": {
-                "value": "客厅"
-            },
-            "操作": {
-                "value": "打开"
-            },
-            "对象": {
-                "value": "灯"
-            },
-            "操作值": {
-                "value": "0.5"
-            }
-        }
-        ```"""),
+             """```yaml
+ 位置: 客厅
+ 操作: 打开
+ 对象: 灯
+ 操作值: 0.5
+ ```"""),
         ]
         return examples
 
-    def extract_json_code(self, response) -> str:
+    def extract_yaml_code(self, response) -> str:
         logger.debug(response)
-        return re.match('```((.|\n)*)```', response).group(1)
+        return re.match('```yaml((.|\n)*)```', response).group(1)
 
     def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input
@@ -111,17 +85,19 @@ class EntityExtractor:
         logger.debug(prompt)
         response = self.model.chat_single(prompt, history=history, model_type=self.model_type,
                                           max_length=2048).response
-        entities = json.loads(self.extract_json_code(response))
-        entity_list = list(filter(lambda tup: len(tup[1]) > 0, list(entities.items())))
+        entities = yaml.safe_load(self.extract_yaml_code(response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
+
+        entity_list = list(filter(lambda tup: tup[0] in slot_name_to_slot and tup[1] is not None and len(tup[1]) > 0,
+                                  list(entities.items())))
 
         def get_slot(name, value):
             if slot_name_to_slot:
                 if name in slot_name_to_slot:
-                    return slot_name_to_slot[name].copy(update={'value': value['value']})
+                    return slot_name_to_slot[name].copy(update={'value': value})
             return None
 
-        return [Entity(type=name, value=value['value'], possible_slot=get_slot(name, value)) for name, value in
+        return [Entity(type=name, value=value, possible_slot=get_slot(name, value)) for name, value in
                 entity_list]
 
 

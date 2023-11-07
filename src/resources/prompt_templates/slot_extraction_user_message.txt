@@ -1,8 +1,10 @@
-## 聊天历史
-{{chat_history}}
-## 用户意图
-{{user_intent}}
-## 实体选项
+## Entities Types & Description
 {{entity_types_and_values}}
 
-Output:
+## User Intent
+{{user_intent}}
+
+## Chat History
+{{chat_history}}
+
+## Output

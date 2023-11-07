@@ -14,7 +14,7 @@ from nlu.llm.intent import IntentClassifier, IntentListConfig
 from output_adapter.base import BaseOutputAdapter
 from policy_manager.base import BasePolicyManager
 from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAGPolicy
-from prompt_manager.base import BasePromptManager, PromptManager
+from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
 
@@ -64,8 +64,6 @@ if __name__ == '__main__':
 
     user_input = input("You: ")
     while user_input != "stop":
-        # 打开卧室的空调
-        # 温度26度制冷
         result = dialog_manager.handle_message(user_input, user_id)
         print(result)
         user_input = input("You: ")

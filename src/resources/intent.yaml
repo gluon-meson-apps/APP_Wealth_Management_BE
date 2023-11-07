@@ -18,7 +18,7 @@ intents:
       - name: 产品
         description: 包含的产品有：汇佑康宁, 长佑康宁, 鸿禧稳盈, 鸿利稳稳赢, 鸿利月月盈, 鸿利年年盈, 粤享康宁
         slotType: categorical
-        optional: True
+        optional: False
       - name: 问题
         description: 经过分析思考提炼出的用户问题
         slotType: text
