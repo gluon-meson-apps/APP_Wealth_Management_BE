@@ -12,6 +12,7 @@ class RAGAction(Action):
 ### 任务：负责回答客户的问题，答案需要像聊天一样，但回答中不要向客户提及产品名称
  * 回答要依据产品的责任，避免使用“通常”、“一般情况下”、“一般”等用语
  * 请重点理解《重大疾病保险条款》中的核心逻辑
+ * 内容以Markdown格式输出
 ### 保险条款
 ```plantuml
 @startuml
@@ -120,7 +121,7 @@ A:
     def run(self, context) -> ActionResponse:
         context.set_status('action:rag_qa')
         question = self.get_slot('问题').value
-        logger.info("question: %s", question)
+        logger.info("user %s, question: %s", context.get_user_id(), question)
         prompt = self.template.format(question=question)
         response = self.chat_model.chat_single(prompt, model_type=self.model_type, max_length=4096, temperature=0.01)
         return ActionResponse(text=response.response)

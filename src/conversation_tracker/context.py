@@ -33,4 +33,4 @@ class ConversationContext:
 
     def set_status(self, status: str):
         self.status = status
-        logger.info("user %s: , conversation status: %s", self.user_id, status)
+        logger.info("user %s, conversation status: %s", self.user_id, status)

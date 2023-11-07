@@ -3,12 +3,12 @@ from typing import List, Dict, Any
 from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
+from conversation_tracker.context import ConversationContext
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from gm_logger import get_logger
 from nlu.intent_with_entity import Intent
-from nlu.llm.context import FullLlmConversationContext
 from prompt_manager.base import PromptManager
 
 logger = get_logger()
@@ -157,15 +157,15 @@ class IntentClassifier:
         logger.debug(history)
         return intent.response
 
-    def classify_intent(self, conversation: FullLlmConversationContext) -> Intent:
-        user_input = conversation.get_current_user_input()
+    def classify_intent(self, conversation: ConversationContext) -> Intent:
+        user_input = conversation.current_user_input
         intent_list = self.intent_list_config.get_intent_list()
         chat_history = conversation.get_history().format_to_string()
         intent_examples = self.get_intent_examples(user_input)
 
         intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, chat_history, user_input)
         if intent_name in intent_list:
-            logger.info('intent: %s', intent_name)
+            logger.info('user %s, intent: %s', conversation.user_id, intent_name)
             return Intent(name=intent_name, confidence=1.0)
 
         logger.info('intent: %s is not predefined', intent_name)

@@ -6,11 +6,6 @@ intents:
       - 如何申请理赔？
       - 理赔过两次轻症疾病还能理赔吗？
     slots:
-      - name: 问题分类
-        description: 问题的分类包括：General, 产品说明, 产品条款, 数据服务, 公司治理
-        slotType: categorical
-        optional: True
-        default: General
       - name: 问题主题
         description: 保险问答的主题包括：产品咨询, 保险理赔, Other
         slotType: categorical
@@ -21,7 +16,7 @@ intents:
         slotType: categorical
         optional: True
       - name: 产品
-        description: 包含的产品有：长佑康宁, 鸿禧稳盈, 鸿利稳稳赢, 鸿利月月盈, 鸿利年年盈, 粤享康宁
+        description: 包含的产品有：汇佑康宁, 长佑康宁, 鸿禧稳盈, 鸿利稳稳赢, 鸿利月月盈, 鸿利年年盈, 粤享康宁
         slotType: categorical
         optional: True
       - name: 问题

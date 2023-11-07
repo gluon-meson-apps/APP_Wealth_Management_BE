@@ -7,7 +7,6 @@ from gluon_meson_sdk.models.chat_model import ChatModel
 from gm_logger import get_logger
 from nlu.forms import FormStore, Form
 from nlu.intent_with_entity import Entity
-from nlu.llm.context import FullLlmConversationContext
 from prompt_manager.base import PromptManager
 
 logger = get_logger()
@@ -101,9 +100,9 @@ class EntityExtractor:
         logger.debug(response)
         return re.match('```((.|\n)*)```', response).group(1)
 
-    def extract_entity(self, conversation_context: FullLlmConversationContext) -> List[Entity]:
-        user_input = conversation_context.get_current_user_input()
-        intent = conversation_context.get_current_intent()
+    def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
+        user_input = conversation_context.current_user_input
+        intent = conversation_context.current_intent
         form = self.form_store.get_form_from_intent(intent)
         if not form:
             logger.debug(f"该意图[{intent.name}]不需要提取实体")

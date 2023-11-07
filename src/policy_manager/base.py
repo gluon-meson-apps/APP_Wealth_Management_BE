@@ -1,11 +1,12 @@
 from typing import List
 
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
+
 from action_runner.action import Action, ChitChatAction, GreetAction
 from conversation_tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity
 from policy_manager.policy import Policy
-from prompt_manager.base import BasePromptManager, PromptManager
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
+from prompt_manager.base import PromptManager
 
 
 class PolicyManager:

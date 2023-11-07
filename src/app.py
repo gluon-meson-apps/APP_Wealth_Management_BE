@@ -60,7 +60,7 @@ if __name__ == '__main__':
                                        SimpleActionRunner(), BaseOutputAdapter())
 
     user_id = "123"
-    greet(True)
+    greet(False)
 
     user_input = input("You: ")
     while user_input != "stop":

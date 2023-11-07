@@ -28,6 +28,10 @@ class ActionContext:
         """Get all slots."""
         return self.slots
 
+    def get_user_id(self) -> str:
+        """Get the user id."""
+        return self.conversation.user_id
+
     def set_status(self, status):
         """Set the status of the conversation."""
         self.conversation.set_status(status)
