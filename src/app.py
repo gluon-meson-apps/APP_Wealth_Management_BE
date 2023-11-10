@@ -48,7 +48,7 @@ def greet(should_greeting: bool):
 
 if __name__ == '__main__':
 
-    model_type = "azure_gpt35"
+    model_type = "azure-gpt-3.5"
     action_model_type = "gpt-4"
 
     pwd = os.path.dirname(os.path.abspath(__file__))

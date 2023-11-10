@@ -1,5 +1,5 @@
 import gm_logger
-from action_runner.action import Action, ActionResponse, GLUON_MESON_CONTROL_CENTER_ENDPOINT
+from action_runner.action import Action, ActionResponse
 from gluon_meson_sdk.models.chat_model import ChatModel
 
 
@@ -115,7 +115,7 @@ A:
 
     def __init__(self, model_type: str, slots):
         self.model_type = model_type
-        self.chat_model = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
+        self.chat_model = ChatModel()
         self.slots = slots
 
     def run(self, context) -> ActionResponse:

@@ -95,7 +95,7 @@ class IntentClassifier:
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
         self.retrieval_counts = 4
-        self.embedding_type = "E5"
+        self.embedding_type = "BASE_CH_P"
         self.model_type = model_type
         self.intent_list_config = intent_list_config
         self.prompt_manager = prompt_manager

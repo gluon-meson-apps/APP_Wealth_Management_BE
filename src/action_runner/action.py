@@ -9,8 +9,6 @@ from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
 from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 
-GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
-
 from gm_logger import get_logger
 
 logger = get_logger()
@@ -62,7 +60,7 @@ class GreetAction(Action):
     def __init__(self, prompt_name: str, model_type: str, prompt_manager: PromptManager, prompt_domain: str = None):
         self.greet_prompt_template = prompt_manager.load(domain=prompt_domain, name=prompt_name)
         self.model = model_type
-        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
+        self.llm = ChatModel()
 
     def run(self, context):
         context.set_status('action:greet')
@@ -78,7 +76,7 @@ class ChatAction(Action):
     def __init__(self, prompt_domain: str, prompt_name: str, model_type: str, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(domain=prompt_domain, name=prompt_name)
         self.model = model_type
-        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
+        self.llm = ChatModel()
 
     def run(self, context):
         context.set_status('action:chat')
@@ -101,7 +99,7 @@ class SlotFillingAction(Action):
         """
         self.prompt_template = prompt_manager.load(name='action_slot_filling')
         self.model = model_name
-        self.llm = ChatModel(control_center_endpoint=GLUON_MESON_CONTROL_CENTER_ENDPOINT)
+        self.llm = ChatModel()
         self.slots = slots
         self.intent = intent
 
