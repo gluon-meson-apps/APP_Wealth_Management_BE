@@ -35,6 +35,16 @@ class SmartHomeOperatingAction(Action):
         context.set_status('action:smart_home_operating')
         logger.debug("成功控制了智能家居")
         return ActionResponse(text=self.response)
+    
+
+class PrintStatementAction(Action):
+    def __init__(self, response):
+        self.response = response
+
+    def run(self, context) -> ActionResponse:
+        context.set_status('action:print_statement')
+        logger.debug("成功查询打印了回单")
+        return ActionResponse(text=self.response)
 
 
 class ChitChatAction(Action):
