@@ -9,7 +9,7 @@ GLUON_MESON_CONTROL_CENTER_ENDPOINT = "http://10.207.227.101:18000"
 class TestActionRunner(unittest.TestCase):
 
     def setUp(self):
-        default_model = "gpt-3.5-turbo"
+        default_model = "azure-gpt-3.5"
         self.context = ActionContext()
         self.context.set_user_input("Hello")
         self.context.set_slot("name", None)
