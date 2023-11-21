@@ -87,9 +87,11 @@ class EntityExtractor:
                                           max_length=2048).response
         entities = yaml.safe_load(self.extract_yaml_code(response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
-
-        entity_list = list(filter(lambda tup: tup[0] in slot_name_to_slot and tup[1] is not None and len(tup[1]) > 0,
-                                  list(entities.items())))
+        if entities:
+            entity_list = list(filter(lambda tup: tup[0] in slot_name_to_slot and tup[1] is not None and (type(tup[1])==int or len(tup[1]) > 0),
+                                    list(entities.items())))
+        else:
+            entity_list = []
 
         def get_slot(name, value):
             if slot_name_to_slot:
