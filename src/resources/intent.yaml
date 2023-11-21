@@ -9,11 +9,12 @@ intents:
       - name: 账号
         description: 用户登录自带的公司账号（一个或者多个）
         slotType: numeric or text
-        optional: True
+        optional: False
       - name: 时间范围
         description: 时间段限制（起始时间要小于一年&时间范围要小于100天，最细颗粒度为天，默认闭区间）
         slotType: text
-        optional: False
+        optional: True
+        default: 当月
       - name: 金额范围
         description: 可以选择只查询打印指定金额范围的回单
         slotType: text
@@ -22,3 +23,57 @@ intents:
         description: 打印过的回单会有一个字段记录，用户可选择只打印未打印的回单
         slotType: numeric or text
         optional: True
+
+  - intent: 页面字体缩放
+    examples:
+      - 看不清楚
+      - 看不全页面
+      - 放大字体
+      - 缩小页面
+      - 字体太小
+    slots:
+      - name: 调整方向
+        description: 放大 或 缩小
+        slotType: categorical
+        optional: False
+
+  - intent: 增减表头
+    examples:
+      - 太多内容了
+      - 减少一些表头
+      - 显示xxx字段
+      - 取消xxx要素
+    slots:
+      - name: 调整方向
+        description: 增加 或 减少
+        slotType: categorical
+        optional: False
+      - name: 字段要素
+        description: 表头字段名称
+        slotType: categorical
+        optional: True
+
+  - intent: 开通功能
+    examples:
+      - 开通功能
+      - 开通某功能
+      - 请开通某功能
+      - 帮我开通某功能
+    slots:
+      - name: 功能名称
+        description: 该用户有权限开通的产品名称
+        slotType: categorical
+        optional: False
+      
+
+  - intent: 金融产品知识问答
+    examples:
+      - 什么是发票云？
+      - 企业征信报告是什么？
+      - 如何开通进口代收业务？
+    slots:
+      - name: 主题
+        description: 问答主题
+        slotType: categorical
+        optional: True
+    
