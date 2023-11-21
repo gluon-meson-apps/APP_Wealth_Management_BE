@@ -13,7 +13,7 @@ from nlu.llm.entity import EntityExtractor
 from nlu.llm.intent import IntentClassifier, IntentListConfig
 from output_adapter.base import BaseOutputAdapter
 from policy_manager.base import BasePolicyManager
-from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAGPolicy, PrintStatementPolicy
+from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAGPolicy, PrintStatementPolicy, FontPageAdjustmentPolicy, AdjustTableColumnPolicy, ActivateFunctionPolicy, QAPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
@@ -33,8 +33,19 @@ def create_reasoner(model_type, action_model_type, intent_config_file_path, prom
     slot_check_policy = SlotCheckPolicy(prompt_manager, form_store)
     smart_home_operating_policy = SmartHomeOperatingPolicy(prompt_manager)
     print_statement_policy = PrintStatementPolicy(prompt_manager)
+    font_page_adjustment_policy = FontPageAdjustmentPolicy(prompt_manager)
+    adjust_table_column_policy = AdjustTableColumnPolicy(prompt_manager)
+    activate_function_policy = ActivateFunctionPolicy(prompt_manager)
+    qa_policy = QAPolicy(prompt_manager)
     rag_policy = RAGPolicy(prompt_manager)
-    policy_manager = BasePolicyManager(policies=[slot_check_policy, smart_home_operating_policy, rag_policy, print_statement_policy],
+    policy_manager = BasePolicyManager(policies=[slot_check_policy, 
+                                                 rag_policy, 
+                                                 smart_home_operating_policy, 
+                                                 font_page_adjustment_policy, 
+                                                 adjust_table_column_policy, 
+                                                 print_statement_policy, 
+                                                 activate_function_policy, 
+                                                 qa_policy],
                                        prompt_manager=prompt_manager,
                                        action_model_type=action_model_type)
     return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
