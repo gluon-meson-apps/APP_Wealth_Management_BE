@@ -1,7 +1,8 @@
 from typing import Tuple
 
-from action_runner.action import Action, SlotFillingAction, PrintStatementAction
-from action_runner.rag_action import RAGAction
+from action_runner.action import Action
+from action_runner.actions.general import SlotFillingAction
+from action_runner.actions.bank import PrintStatementAction
 from conversation_tracker.context import ConversationContext
 from gm_logger import get_logger
 from nlu.forms import FormStore

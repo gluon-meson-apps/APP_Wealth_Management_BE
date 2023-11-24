@@ -2,7 +2,9 @@ from typing import List
 
 from llm.self_host import ChatModel
 
-from action_runner.action import Action, ChitChatAction, GreetAction
+from action_runner.actions.general import ChitChatAction, GreetAction
+from action_runner.action import Action
+
 from conversation_tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity
 from policy_manager.policy import Policy

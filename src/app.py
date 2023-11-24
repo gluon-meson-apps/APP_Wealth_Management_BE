@@ -3,7 +3,6 @@ import os
 from action_runner.base import SimpleActionRunner
 from conversation_tracker.base import BaseConversationTracker
 from dialog_manager.base import BaseDialogManager
-from input_enricher.base import BaseInputEnricher
 from nlu.forms import FormStore
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier, IntentListConfig
@@ -48,8 +47,7 @@ if __name__ == '__main__':
     intent_config_file_path = os.path.join(pwd, '.', 'resources', 'scenes')
 
     reasoner = create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
-    dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), reasoner,
-                                       SimpleActionRunner(), BaseOutputAdapter())
+    dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
 
     user_id = "123"
     greet(False)
