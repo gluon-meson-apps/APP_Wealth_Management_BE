@@ -63,7 +63,7 @@ class IntentListConfig:
         return [{'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
 
     @classmethod
-    def from_yaml_file(cls, file_path):
+    def from_scenes(cls, file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             data = yaml.safe_load(file)
 

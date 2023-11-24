@@ -22,12 +22,6 @@ export PYTHONPATH={project_root_directory}:{project_root_directory}/sdk/src/:PYT
 pip install -r {project_root_directory}/sdk/requirements.txt
 ```
 
-4. Configure endpoint URL
-
-```
-export GLUON_MESON_MASTER_ENDPOINT=http://sz.private.gluon-meson.tech:11000/master
-```
-
 
 ## Run chatbot
 Entrypoint is `dialog_manager.base`

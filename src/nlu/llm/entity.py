@@ -83,8 +83,7 @@ class EntityExtractor:
             return []
         prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
-        response = self.model.chat_single(prompt, history=history, model_type=self.model_type,
-                                          max_length=2048).response
+        response = self.model.chat(prompt, history=history, max_length=2048)
         entities = yaml.safe_load(self.extract_yaml_code(response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:

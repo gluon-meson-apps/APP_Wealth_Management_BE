@@ -1,9 +1,9 @@
 import gm_logger
 from action_runner.action import Action
 from conversation_tracker.context import ConversationContext
-from nlu.llm.entity import EntityExtractor
-from nlu.llm.intent import IntentClassifier
-from nlu.llm.llm_nlu import LLMNlu
+from nlu.mlm.entity import EntityExtractor
+from nlu.mlm.intent import IntentClassifier
+from nlu.mlm.mixed import MixedNLU
 from policy_manager.base import PolicyManager
 from reasoner.base import Plan, Reasoner
 
@@ -16,7 +16,7 @@ class LlmReasoner(Reasoner):
         self.intent_classifier = intent_classifier
         self.entity_extractor = entity_extractor
         self.policy_manager = policy_manager
-        self.nlu = LLMNlu(intent_classifier, entity_extractor)
+        self.nlu = MixedNLU(intent_classifier, entity_extractor)
         self.model_type = model_type
 
     def greet(self, conversation_tracker: ConversationContext) -> Action:

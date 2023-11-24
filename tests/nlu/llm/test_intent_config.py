@@ -9,7 +9,7 @@ class TestIntentListConfig(unittest.TestCase):
     def test_intent_list_config_from_yaml_file(self):
         pwd = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(pwd, '..', '..', 'resources', 'intent.yaml')
-        intent_list_config = IntentListConfig.from_yaml_file(file_path)
+        intent_list_config = IntentListConfig.from_scenes(file_path)
         
         self.assertIsInstance(intent_list_config, IntentListConfig)
 
@@ -32,7 +32,7 @@ class TestIntentListConfig(unittest.TestCase):
         pwd = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(pwd, '..', '..', 'resources', 'intent.yaml')
         print(file_path)
-        intent_list_config = IntentListConfig.from_yaml_file(file_path)
+        intent_list_config = IntentListConfig.from_scenes(file_path)
 
         intent_list = intent_list_config.get_intent_list()
 

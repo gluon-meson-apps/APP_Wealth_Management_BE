@@ -1,6 +1,6 @@
 import gm_logger
 from action_runner.action import Action, ActionResponse
-from gluon_meson_sdk.models.chat_model import ChatModel
+from llm.self_host import ChatModel
 
 
 logger = gm_logger.get_logger()
@@ -123,7 +123,7 @@ A:
         question = self.get_slot('问题').value
         logger.info("user %s, question: %s", context.get_user_id(), question)
         prompt = self.template.format(question=question)
-        response = self.chat_model.chat_single(prompt, model_type=self.model_type, max_length=4096, temperature=0.01)
+        response = self.chat_model.chat(prompt, max_length=4096, temperature=0.01)
         return ActionResponse(text=response.response)
 
     def get_slot(self, slot_name):

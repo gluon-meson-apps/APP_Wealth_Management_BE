@@ -12,7 +12,7 @@ def add_intent_examples(intent_yaml):
     import os
     pwd = os.path.dirname(os.path.abspath(__file__))
     intent_config_file_path = os.path.join(pwd, 'resources', intent_yaml)
-    intent_list_config = IntentListConfig.from_yaml_file(intent_config_file_path)
+    intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
     embedding_model = EmbeddingModel()
 
     pwd = os.path.dirname(os.path.abspath(__file__))

@@ -3,49 +3,29 @@ import os
 from action_runner.base import SimpleActionRunner
 from conversation_tracker.base import BaseConversationTracker
 from dialog_manager.base import BaseDialogManager
-from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from input_enricher.base import BaseInputEnricher
 from nlu.forms import FormStore
-from nlu.llm.entity import EntityExtractor
-from nlu.llm.intent import IntentClassifier, IntentListConfig
+from nlu.mlm.entity import EntityExtractor
+from nlu.mlm.intent import IntentClassifier, IntentListConfig
 from output_adapter.base import BaseOutputAdapter
 from policy_manager.base import BasePolicyManager
-from policy_manager.policy import SlotCheckPolicy, SmartHomeOperatingPolicy, RAGPolicy, PrintStatementPolicy, FontPageAdjustmentPolicy, AdjustTableColumnPolicy, ActivateFunctionPolicy, QAPolicy
+from policy_manager.policy import SlotFillingPolicy, RulePolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
 
 def create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder):
-    embedding_model = EmbeddingModel()
-    intent_list_config = IntentListConfig.from_yaml_file(intent_config_file_path)
+    intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
     prompt_manager = BasePromptManager(prompt_template_folder)
 
-    classifier = IntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
-                                  milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
-                                  intent_list_config=intent_list_config,
-                                  model_type=model_type, prompt_manager=prompt_manager)
+    classifier = IntentClassifier()
     form_store = FormStore(intent_list_config)
-    entity_extractor = EntityExtractor(form_store, ChatModel(), model_type=model_type, prompt_manager=prompt_manager)
+    entity_extractor = EntityExtractor(form_store)
 
-    slot_check_policy = SlotCheckPolicy(prompt_manager, form_store)
-    smart_home_operating_policy = SmartHomeOperatingPolicy(prompt_manager)
-    print_statement_policy = PrintStatementPolicy(prompt_manager)
-    font_page_adjustment_policy = FontPageAdjustmentPolicy(prompt_manager)
-    adjust_table_column_policy = AdjustTableColumnPolicy(prompt_manager)
-    activate_function_policy = ActivateFunctionPolicy(prompt_manager)
-    qa_policy = QAPolicy(prompt_manager)
-    rag_policy = RAGPolicy(prompt_manager)
-    policy_manager = BasePolicyManager(policies=[slot_check_policy, 
-                                                 rag_policy, 
-                                                 smart_home_operating_policy, 
-                                                 font_page_adjustment_policy, 
-                                                 adjust_table_column_policy, 
-                                                 print_statement_policy, 
-                                                 activate_function_policy, 
-                                                 qa_policy],
+    slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
+    rule_policy = RulePolicy(prompt_manager, form_store)
+
+    policy_manager = BasePolicyManager(policies=[slot_filling_policy, rule_policy],
                                        prompt_manager=prompt_manager,
                                        action_model_type=action_model_type)
     return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
@@ -65,7 +45,7 @@ if __name__ == '__main__':
 
     pwd = os.path.dirname(os.path.abspath(__file__))
     prompt_template_folder = os.path.join(pwd, '.', 'resources', 'prompt_templates')
-    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'intent.yaml')
+    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'scenes')
 
     reasoner = create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
     dialog_manager = BaseDialogManager(BaseConversationTracker(), BaseInputEnricher(), reasoner,

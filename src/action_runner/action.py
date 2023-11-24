@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from action_runner.context import ActionContext
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
+from llm.self_host import ChatModel
 
 from gm_logger import get_logger
 
@@ -93,11 +93,11 @@ class ChitChatAction(Action):
     def run(self, context) -> ActionResponse:
         context.set_status('action:chitchat')
         # todo: add history from context
-        result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
-        if result.response is None:
+        result = self.chat_model.chat(self.user_input, max_length=1000)
+        if result is None:
             return ActionResponse(text=self.default_template)
         else:
-            return ActionResponse(text=result.response)
+            return ActionResponse(text=result)
 
 
 class GreetAction(Action):
@@ -113,8 +113,8 @@ class GreetAction(Action):
         if self.greet_prompt_template is None:
             return None
         prompt = self.greet_prompt_template.format({})
-        response = self.llm.chat_single(prompt, model_type=self.model)
-        return response.response
+        response = self.llm.chat(prompt)
+        return response
 
 class ChatAction(Action):
     """Chat action using large language models."""
@@ -128,14 +128,14 @@ class ChatAction(Action):
         context.set_status('action:chat')
         user_input = context.get_user_input()
         prompt = self.prompt_template.format({"input": user_input})
-        response = self.llm.chat_single(prompt, model_type=self.model)
-        return response.response
+        response = self.llm.chat(prompt)
+        return response
 
 
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
 
-    def __init__(self, model_name, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
+    def __init__(self, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
         """
         Initialize the slot filling action.
         
@@ -144,7 +144,6 @@ class SlotFillingAction(Action):
             model_name: Name of model to use for slot filling.
         """
         self.prompt_template = prompt_manager.load(name='action_slot_filling')
-        self.model = model_name
         self.llm = ChatModel()
         self.slots = slots
         self.intent = intent
@@ -168,8 +167,8 @@ class SlotFillingAction(Action):
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat_single(prompt, model_type=self.model, max_length=4000)
-        return ActionResponse(text=response.response)
+        response = self.llm.chat(prompt, max_length=4000)
+        return ActionResponse(text=response)
 
 
 class FixedAnswerAction(Action):

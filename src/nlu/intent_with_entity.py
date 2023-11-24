@@ -49,3 +49,4 @@ class Entity(HashableBaseModel):
 class IntentWithEntity(HashableBaseModel):
     intent: Intent
     entities: List[Entity]
+    action: str

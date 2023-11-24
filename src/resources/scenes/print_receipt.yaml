@@ -1,0 +1,16 @@
+name: 查询打印回单
+slots:
+  - name: 账号
+    description: 用户登录自带的公司账号（一个或者多个）
+    slotType: numeric or text
+    optional: False
+  - name: 时间范围
+    description: 时间段限制（起始时间要小于一年&时间范围要小于100天，最细颗粒度为天，默认闭区间）
+    slotType: text
+    optional: True
+    default: 当月
+  - name: 金额范围
+    description: 可以选择只查询打印指定金额范围的回单
+    slotType: text
+    optional: True
+action: print_receipt

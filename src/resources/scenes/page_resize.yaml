@@ -1,0 +1,7 @@
+name: 页面字体缩放
+slots:
+  - name: 调整方向
+    description: 放大 或 缩小
+    slotType: categorical
+    optional: False
+action: page_resize
