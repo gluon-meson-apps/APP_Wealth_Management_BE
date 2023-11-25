@@ -44,7 +44,7 @@ class SlotFillingAction(Action):
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=4000)
+        response = self.llm.chat(prompt, max_length=1024)
         return ActionResponse(text=response)
 
 

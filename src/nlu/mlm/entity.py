@@ -1,3 +1,4 @@
+import random
 from typing import List
 
 from conversation_tracker.context import ConversationContext
@@ -12,7 +13,7 @@ class EntityExtractor:
         self.form_store = form_store
     
     def extract_slots(self, utterance):
-        return {'账号': "1234"}
+        return random.choice([{'账号': "1234"}, {'时间范围': "今年"}, {'时间范围': "去年"}, {'账号': "3344"}])
 
     def get_entity_and_action(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input

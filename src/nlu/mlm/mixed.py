@@ -11,19 +11,37 @@ class MixedNLU(Nlu):
     def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):
         self.intent_classifier = intent_classifier
         self.entity_extractor = entity_extractor
+        
+    def merge_entities(self, existed_entities, current_entities):
+        merged_entities = {entity.possible_slot.name if entity.possible_slot else None: entity for entity in existed_entities}
+
+        for entity in current_entities:
+            if entity.possible_slot and entity.possible_slot.name:
+                merged_entities[entity.possible_slot.name] = entity
+
+        return list(merged_entities.values())
 
     def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
 
         conversation.set_status("analyzing user's intent")
         current_intent = self.intent_classifier.get_intent(conversation)
+        
+        # intent changed
         if current_intent is not None:
             conversation.current_intent = current_intent
-            conversation.set_status("extracting utterance's slots")
-            current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
-            entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
-            logger.info("user %s, entities: %s", conversation.user_id, entities_string)
-            
-            print(action)
-            return IntentWithEntity(intent=current_intent, entities=current_entities, action=action)
-        else:
-            return None
+
+        conversation.set_status("extracting utterance's slots")
+        current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
+        entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
+        logger.info("user %s, entities: %s", conversation.user_id, entities_string)
+        
+        # keep entities
+        existed_entities = conversation.get_entities()
+        merged_entities = self.merge_entities(existed_entities, current_entities)
+
+        entities_string = str(list(map(lambda entity: (entity.type, entity.value), merged_entities)))
+        conversation.add_entity(current_entities)
+        
+        logger.info("user %s, entities: %s", conversation.user_id, entities_string)
+        
+        return IntentWithEntity(intent=current_intent, entities=merged_entities, action=action)
