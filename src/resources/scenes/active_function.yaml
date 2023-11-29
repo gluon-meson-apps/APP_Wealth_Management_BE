@@ -1,0 +1,7 @@
+name: activate_function
+slots:
+  - name: function_identifier
+    description: 功能的识别信息
+    slotType: numeric or text
+    optional: False
+action: activate_function

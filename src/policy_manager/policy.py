@@ -56,5 +56,5 @@ class RulePolicy(Policy):
         logger.debug(f"最终识别的\n意图：{intent.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(intent.intent):
             print(f'exec action {form.action}')
-            return True, PrintStatementAction('打印成功')
+            return True, PrintStatementAction(form.action)
         return False, None

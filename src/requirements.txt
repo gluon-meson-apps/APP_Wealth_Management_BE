@@ -1,0 +1,6 @@
+fastapi
+requests
+PyYAML
+colorama
+openai
+loguru

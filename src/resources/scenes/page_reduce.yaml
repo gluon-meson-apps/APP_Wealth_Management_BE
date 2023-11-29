@@ -1,0 +1,7 @@
+name: reduce_page
+slots:
+  - name: font_size
+    description: 字号
+    slotType: categorical
+    optional: True
+action: page_resize

@@ -1,7 +1,13 @@
 import os
+
+import requests
 import yaml
+from fastapi import HTTPException
+from loguru import logger
+
 from conversation_tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
+
 
 class IntentConfig:
     def __init__(self, name, action, slots):
@@ -56,4 +62,17 @@ class IntentClassifier:
         pass
 
     def get_intent(self, conversation: ConversationContext) -> Intent:
-        return Intent(name='查询打印回单', confidence=1.0)
+        url = "http://10.204.202.149:8000/predict/"
+        payload = {"input_text": conversation.current_user_input}
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            name = data.get("intent_label")
+            confidence = data.get("intent_confidence")
+            logger.info(f"name is {name}")
+            logger.info(f"confidence is {confidence}")
+            return Intent(name=name, confidence=confidence)
+        else:
+            raise HTTPException(
+                status_code=response.status_code, detail={response.text}
+            )

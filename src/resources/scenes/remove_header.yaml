@@ -1,0 +1,7 @@
+name: remove_header
+slots:
+  - name: header_element
+    description: 表头的相关信息
+    slotType: numeric or text
+    optional: False
+action: remove_header

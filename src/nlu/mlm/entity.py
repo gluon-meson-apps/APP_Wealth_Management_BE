@@ -1,19 +1,31 @@
-import random
 from typing import List
 
-from conversation_tracker.context import ConversationContext
-from gm_logger import get_logger
-from nlu.intent_with_entity import Entity
-from nlu.forms import FormStore
+import requests
+from fastapi import HTTPException
+from loguru import logger
 
-logger = get_logger()
+from conversation_tracker.context import ConversationContext
+
+from nlu.forms import FormStore
+from nlu.intent_with_entity import Entity
 
 class EntityExtractor:
     def __init__(self, form_store: FormStore):
         self.form_store = form_store
     
     def extract_slots(self, utterance):
-        return random.choice([{'账号': "1234"}, {'时间范围': "今年"}, {'时间范围': "去年"}, {'账号': "3344"}])
+        url = "http://10.204.202.149:8000/predict/"
+        payload = {'input_text': utterance}
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            slots: dict[str, str] = data.get("slot_labels")
+            logger.info(f"slots is {slots}")
+            return slots
+        else:
+            raise HTTPException(
+                status_code=response.status_code, detail={response.text}
+            )
 
     def get_entity_and_action(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input

@@ -50,3 +50,9 @@ class IntentWithEntity(HashableBaseModel):
     intent: Intent
     entities: List[Entity]
     action: str
+
+
+class IntentWithSlot(HashableBaseModel):
+    intent_label: str
+    intent_confidence: float
+    slot_label: str
