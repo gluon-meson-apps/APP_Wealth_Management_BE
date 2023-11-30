@@ -33,7 +33,7 @@ class MixedNLU(Nlu):
         conversation.set_status("extracting utterance's slots")
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
         entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
-        logger.info("user %s, entities: %s", conversation.user_id, entities_string)
+        logger.info("user %s, entities: %s", conversation.session_id, entities_string)
         
         # keep entities
         existed_entities = conversation.get_entities()
@@ -42,6 +42,6 @@ class MixedNLU(Nlu):
         entities_string = str(list(map(lambda entity: (entity.type, entity.value), merged_entities)))
         conversation.add_entity(current_entities)
         
-        logger.info("user %s, entities: %s", conversation.user_id, entities_string)
+        logger.info("user %s, entities: %s", conversation.session_id, entities_string)
         
         return IntentWithEntity(intent=current_intent, entities=merged_entities, action=action)

@@ -5,6 +5,7 @@ import yaml
 from fastapi import HTTPException
 from loguru import logger
 
+from common.constant import MODEL_URL
 from conversation_tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
@@ -62,9 +63,9 @@ class IntentClassifier:
         pass
 
     def get_intent(self, conversation: ConversationContext) -> Intent:
-        url = "http://10.204.202.149:8000/predict/"
+        logger.info(f"user input is: {conversation.current_user_input}")
         payload = {"input_text": conversation.current_user_input}
-        response = requests.post(url, json=payload)
+        response = requests.post(MODEL_URL, json=payload)
         if response.status_code == 200:
             data = response.json()
             name = data.get("intent_label")

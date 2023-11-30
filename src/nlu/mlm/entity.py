@@ -1,25 +1,26 @@
-from typing import List
+from typing import List, Any
 
 import requests
 from fastapi import HTTPException
 from loguru import logger
 
+from common.constant import MODEL_URL
 from conversation_tracker.context import ConversationContext
 
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Entity
+
 
 class EntityExtractor:
     def __init__(self, form_store: FormStore):
         self.form_store = form_store
     
     def extract_slots(self, utterance):
-        url = "http://10.204.202.149:8000/predict/"
         payload = {'input_text': utterance}
-        response = requests.post(url, json=payload)
+        response = requests.post(MODEL_URL, json=payload)
         if response.status_code == 200:
             data = response.json()
-            slots: dict[str, str] = data.get("slot_labels")
+            slots: dict[str, Any] = data.get("slot_labels")
             logger.info(f"slots is {slots}")
             return slots
         else:
@@ -41,16 +42,17 @@ class EntityExtractor:
 
         if entities:
             valid_entities = [(name, value) for name, value in entities.items() if name in slot_dict
-                            and value is not None and (isinstance(value, int) or len(value) > 0)]
+                              and value is not None and (isinstance(value, int) or (isinstance(value, dict) and len(value) > 0))]
+
         else:
             valid_entities = []
 
         def get_slot(name, value):
             if slot_dict and name in slot_dict:
-                return slot_dict[name].copy(update={'value': value})
+                return slot_dict[name].copy(update={'value': value["value"]})
             return None
 
         return [
-            Entity(type=name, value=value, possible_slot=get_slot(name, value))
+            Entity(type=name, value=value["value"], possible_slot=get_slot(name, value))
             for name, value in valid_entities
         ], form.action

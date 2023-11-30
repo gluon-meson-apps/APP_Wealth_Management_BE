@@ -165,7 +165,7 @@ class IntentClassifier:
 
         intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, chat_history, user_input)
         if intent_name in intent_list:
-            logger.info('user %s, intent: %s', conversation.user_id, intent_name)
+            logger.info('user %s, intent: %s', conversation.session_id, intent_name)
             return Intent(name=intent_name, confidence=1.0)
 
         logger.info('intent: %s is not predefined', intent_name)

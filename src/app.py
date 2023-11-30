@@ -32,7 +32,7 @@ def create_reasoner(model_type, action_model_type, intent_config_file_path, prom
 
 def greet(should_greeting: bool):
     if should_greeting:
-        greeting = dialog_manager.greet(user_id)
+        greeting = dialog_manager.greet(session_id)
         if greeting is not None:
             print(greeting)
 
@@ -49,11 +49,12 @@ if __name__ == '__main__':
     reasoner = create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
     dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
 
-    user_id = "123"
+    session_id = input("Your Id: ")
     greet(False)
 
     user_input = input("You: ")
     while user_input != "stop":
-        result = dialog_manager.handle_message(user_input, user_id)
+        result = dialog_manager.handle_message(user_input, session_id)
         print(result)
+        session_id = input("Your Id: ")
         user_input = input("You: ")

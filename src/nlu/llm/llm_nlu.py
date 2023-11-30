@@ -21,7 +21,7 @@ class LLMNlu(Nlu):
             conversation.set_status('slot_filling')
             current_entities = self.entity_extractor.extract_entity(conversation)
             entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
-            logger.info("user %s, entities: %s", conversation.user_id, entities_string)
+            logger.info("user %s, entities: %s", conversation.session_id, entities_string)
             return IntentWithEntity(intent=current_intent, entities=current_entities)
         else:
             return None

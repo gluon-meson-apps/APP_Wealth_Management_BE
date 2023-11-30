@@ -1,7 +1,11 @@
 name: reduce_page
 slots:
   - name: font_size
-    description: 字号
+    description: 目标字号
     slotType: categorical
     optional: True
-action: page_resize
+  - name: font_decrease
+    description: 增量字号
+    slotType: categorical
+    optional: True
+action: page_reduce

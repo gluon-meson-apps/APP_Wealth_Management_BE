@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Any
 
 from gm_logger import get_logger
@@ -17,14 +18,16 @@ class History:
 
 
 class ConversationContext:
-    def __init__(self, current_user_input: str, user_id: str, current_user_intent: Intent = None):
+    def __init__(self, current_user_input: str, session_id: str, current_user_intent: Intent = None):
         self.current_user_input = current_user_input
-        self.user_id = user_id
+        self.session_id = session_id
         self.current_intent = current_user_intent
         self.current_enriched_user_input = None
         self.history = History([])
         self.status = 'start'
         self.entities: List[Entity] = []
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
 
     def get_history(self) -> History:
         return self.history
@@ -39,7 +42,7 @@ class ConversationContext:
         for index, entity in enumerate(self.entities):
             if entity.name == updated_entity.name:
                 self.entities[index] = updated_entity
-                logger.info("Updated slot %s for user %s", updated_entity.name, self.user_id)
+                logger.info("Updated slot %s for user %s", updated_entity.name, self.session_id)
                 return True  # Slot updated successfully
         return False  # Slot with given name not found
 
@@ -51,4 +54,4 @@ class ConversationContext:
 
     def set_status(self, status: str):
         self.status = status
-        logger.info("user %s, conversation status: %s", self.user_id, status)
+        logger.info("user %s, conversation status: %s", self.session_id, status)

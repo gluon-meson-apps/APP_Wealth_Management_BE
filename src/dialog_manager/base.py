@@ -24,8 +24,8 @@ class BaseDialogManager:
         self.conversation_tracker.save_conversation(user_id, conversation)
         return response
 
-    def handle_message(self, message: Any, user_id: str) -> Any:
-        conversation = self.conversation_tracker.load_conversation(user_id)
+    def handle_message(self, message: Any, session_id: str) -> Any:
+        conversation = self.conversation_tracker.load_conversation(session_id)
         conversation.current_user_input = message
         conversation.append_history('user', message)
         conversation.current_enriched_user_input = conversation.current_user_input
@@ -35,5 +35,5 @@ class BaseDialogManager:
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         conversation.append_history('assistant', response.text)
-        self.conversation_tracker.save_conversation(user_id, conversation)
+        self.conversation_tracker.save_conversation(session_id, conversation)
         return response.text
