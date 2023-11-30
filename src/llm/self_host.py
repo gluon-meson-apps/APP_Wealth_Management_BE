@@ -26,7 +26,7 @@ client = OpenAI(
 model = "gpt-3.5-turbo"
 
 class ChatModel():
-    def chat(self, query, stream=False, history=[], functions=None, max_retry=5, max_length=256, temperature=0.5):
+    def chat(self, query, stream=False, history=[], functions=None, max_retry=5, max_length=256, temperature=0.2):
         params = dict(model=model, messages=[{"role": "user", "content": query}] + history, stream=stream)
         params["max_tokens"] = max_length
         params["temperature"] = temperature

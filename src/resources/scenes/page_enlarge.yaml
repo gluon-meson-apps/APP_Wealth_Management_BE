@@ -1,4 +1,5 @@
 name: enlarge_page
+description: 放大页面字体
 slots:
   - name: font_size
     description: 目标字号

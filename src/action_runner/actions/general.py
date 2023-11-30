@@ -1,9 +1,11 @@
+import os
 from typing import List
 import gm_logger
 from action_runner.action import Action, ActionResponse
 from llm.self_host import ChatModel
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
+from nlu.mlm.intent import IntentListConfig
 
 
 logger = gm_logger.get_logger()
@@ -13,34 +15,42 @@ class SlotFillingAction(Action):
     """Slot filling action using large language models."""
 
     def __init__(self, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
-        """
-        Initialize the slot filling action.
-        
-        Args:
-            style: Prompt style to use. 
-            model_name: Name of model to use for slot filling.
-        """
         self.prompt_template = prompt_manager.load(name='action_slot_filling')
         self.llm = ChatModel()
         self.slots = slots
         self.intent = intent
 
     def run(self, context):
-        """
-        Run the slot filling action.
-        
-        Args:
-            context: The action context.
-            
-        Returns:
-            The slot filling response.
-        """
         context.set_status('action:slot_filling')
-        slots = self.slots
         # not_filled_slot = [k for k, v in slots.items() if v is None]
         prompt = self.prompt_template.format({
-            "fill_slot": self.slots.pop().name,
+            "fill_slot": self.slots.pop().description,
             "intent": self.intent.name,
+            "history": context.conversation.get_history().format_to_string(),
+        })
+        logger.debug(prompt)
+        response = self.llm.chat(prompt, max_length=1024)
+        return ActionResponse(text=response)
+    
+
+
+class IntentConfirmAction(Action):
+    """Slot filling action using large language models."""
+
+    def __init__(self, intent: Intent, prompt_manager: PromptManager):
+        self.prompt_template = prompt_manager.load(name='intent_confirm')
+        self.llm = ChatModel()
+        self.intent = intent
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        intent_config_file_path = os.path.join(pwd, '../../', 'resources', 'scenes')
+        self.intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
+
+    def run(self, context):
+        context.set_status('action:intent_confirm')
+        # not_filled_slot = [k for k, v in slots.items() if v is None]
+        prompt = self.prompt_template.format({
+            "intent": self.intent.description,
+            "intent_candidates": self.intent_list_config.get_intent_list(),
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
@@ -58,21 +68,9 @@ class FixedAnswerAction(Action):
     }
 
     def __init__(self, response_policy):
-        """
-        Initialize the fixed response action.
-        
-        Args:
-            response_policy: Key of pre-defined response to use.
-        """
         self.response = self.PresetResponses.get(response_policy)
 
     def run(self, context):
-        """
-        Run the fixed response action.
-        
-        Returns:
-            Pre-defined response string.
-        """
         context.set_status('action:fixed_response')
         return self.response
 

@@ -34,7 +34,7 @@ class EntityExtractor:
         form = self.form_store.get_form_from_intent(intent)
 
         if not form:
-            logger.debug(f"The intent [{intent.name}] does not require entity extraction")
+            logger.debug(f"The intent [{intent.name}] does not require entities")
             return []
 
         entities = self.extract_slots(user_input)

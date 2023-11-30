@@ -1,4 +1,5 @@
 name: remove_header
+description: 删减表头
 slots:
   - name: header_element
     description: 表头的名称信息

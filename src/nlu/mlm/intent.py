@@ -11,8 +11,9 @@ from nlu.intent_with_entity import Intent
 
 
 class IntentConfig:
-    def __init__(self, name, action, slots):
+    def __init__(self, name, description, action, slots):
         self.name = name
+        self.description = description
         self.action = action
         self.slots = slots
 
@@ -23,14 +24,14 @@ class IntentListConfig:
 
     def get_intent_list(self):
         # read resources/intent.yaml file and get intent list
-        return [intent.name for intent in self.intents]
+        return [intent.description for intent in self.intents]
 
     def get_intent(self, intent_name):
         intents = [intent for intent in self.intents if intent.name == intent_name]
         return intents[0] if len(intents) > 0 else None
 
-    def get_intent_and_examples(self):
-        return [{'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
+    def get_intent_and_attrs(self):
+        return [{'intent': intent_config.name, 'examples': intent_config.examples, 'description': intent_config.description} for intent_config in self.intents]
 
     @classmethod
     def from_scenes(cls, folder_path):
@@ -47,20 +48,22 @@ class IntentListConfig:
             for key in data:
                 if key == 'name':
                     name = data['name']
+                elif key == 'description':
+                    description = data['description']
                 elif key == 'slots':
                     slots = data['slots']
                 elif key == 'action':
                     action = data['action']
 
-            intent = IntentConfig(name, action, slots)
+            intent = IntentConfig(name, description, action, slots)
             intents.append(intent)
 
         return cls(intents)
 
 
 class IntentClassifier:
-    def __init__(self):
-        pass
+    def __init__(self, intent_list_config: IntentListConfig):
+        self.intent_list_config = intent_list_config
 
     def get_intent(self, conversation: ConversationContext) -> Intent:
         logger.info(f"user input is: {conversation.current_user_input}")
@@ -70,9 +73,8 @@ class IntentClassifier:
             data = response.json()
             name = data.get("intent_label")
             confidence = data.get("intent_confidence")
-            logger.info(f"name is {name}")
-            logger.info(f"confidence is {confidence}")
-            return Intent(name=name, confidence=confidence)
+            logger.info(f"find intent {name} with confidence {confidence}")
+            return Intent(name=name, confidence=confidence, description=self.intent_list_config.get_intent(name).description)
         else:
             raise HTTPException(
                 status_code=response.status_code, detail={response.text}
