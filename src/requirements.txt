@@ -4,3 +4,4 @@ PyYAML
 colorama
 openai
 loguru
+uvicorn

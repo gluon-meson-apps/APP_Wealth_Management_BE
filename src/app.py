@@ -11,9 +11,45 @@ from policy_manager.base import BasePolicyManager
 from policy_manager.policy import SlotFillingPolicy, RulePolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
+from fastapi import FastAPI
+from uvicorn import run
+from pydantic import BaseModel
 
+app = FastAPI()
+
+class MessageInput(BaseModel):
+    session_id: str
+    user_input: str
 
 def create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder):
+    intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
+    prompt_manager = BasePromptManager(prompt_template_folder)
+
+    classifier = IntentClassifier()
+    form_store = FormStore(intent_list_config)
+    entity_extractor = EntityExtractor(form_store)
+
+    slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
+    rule_policy = RulePolicy(prompt_manager, form_store)
+
+    # todo: add priority level to policy
+    policy_manager = BasePolicyManager(policies=[slot_filling_policy, rule_policy],
+                                       prompt_manager=prompt_manager,
+                                       action_model_type=action_model_type)
+    return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
+
+
+@app.post("/chat/")
+def chat(data: MessageInput):
+    session_id = data.session_id
+    user_input = data.user_input
+    model_type = "azure-gpt-3.5"
+    action_model_type = "azure-gpt-3.5"
+
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    prompt_template_folder = os.path.join(pwd, '.', 'resources', 'prompt_templates')
+    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'scenes')
+
     intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
     prompt_manager = BasePromptManager(prompt_template_folder)
 
@@ -27,34 +63,15 @@ def create_reasoner(model_type, action_model_type, intent_config_file_path, prom
     policy_manager = BasePolicyManager(policies=[slot_filling_policy, rule_policy],
                                        prompt_manager=prompt_manager,
                                        action_model_type=action_model_type)
-    return LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
-
-
-def greet(should_greeting: bool):
-    if should_greeting:
-        greeting = dialog_manager.greet(session_id)
-        if greeting is not None:
-            print(greeting)
-
-
-if __name__ == '__main__':
-
-    model_type = "azure-gpt-3.5"
-    action_model_type = "azure-gpt-3.5"
-
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    prompt_template_folder = os.path.join(pwd, '.', 'resources', 'prompt_templates')
-    intent_config_file_path = os.path.join(pwd, '.', 'resources', 'scenes')
-
-    reasoner = create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
+    reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
     dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
 
-    session_id = input("Your Id: ")
-    greet(False)
+    result = dialog_manager.handle_message(user_input, session_id)
+    return {"response": result}
 
-    user_input = input("You: ")
-    while user_input != "stop":
-        result = dialog_manager.handle_message(user_input, session_id)
-        print(result)
-        session_id = input("Your Id: ")
-        user_input = input("You: ")
+
+def main():
+    run(app, host="0.0.0.0", port=7788)
+
+if __name__ == "__main__":
+    main()
