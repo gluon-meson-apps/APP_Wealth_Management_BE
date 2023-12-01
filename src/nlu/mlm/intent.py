@@ -31,7 +31,9 @@ class IntentListConfig:
         return intents[0] if len(intents) > 0 else None
 
     def get_intent_and_attrs(self):
-        return [{'intent': intent_config.name, 'examples': intent_config.examples, 'description': intent_config.description} for intent_config in self.intents]
+        return [
+            {'intent': intent_config.name, 'examples': intent_config.examples, 'description': intent_config.description}
+            for intent_config in self.intents]
 
     @classmethod
     def from_scenes(cls, folder_path):
@@ -73,8 +75,9 @@ class IntentClassifier:
             data = response.json()
             name = data.get("intent_label")
             confidence = data.get("intent_confidence")
+            intent = self.intent_list_config.get_intent(name)
             logger.info(f"find intent {name} with confidence {confidence}")
-            return Intent(name=name, confidence=confidence, description=self.intent_list_config.get_intent(name).description)
+            return Intent(name=name, confidence=confidence, description=intent.description if intent else "")
         else:
             raise HTTPException(
                 status_code=response.status_code, detail={response.text}

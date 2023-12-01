@@ -14,7 +14,7 @@ from nlu.intent_with_entity import Entity
 class EntityExtractor:
     def __init__(self, form_store: FormStore):
         self.form_store = form_store
-    
+
     def extract_slots(self, utterance):
         payload = {'input_text': utterance}
         response = requests.post(MODEL_URL, json=payload)
@@ -28,21 +28,25 @@ class EntityExtractor:
                 status_code=response.status_code, detail={response.text}
             )
 
-    def get_entity_and_action(self, conversation_context: ConversationContext) -> List[Entity]:
+    def get_entity_and_action(self, conversation_context: ConversationContext) -> (List[Entity], str):
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
-        form = self.form_store.get_form_from_intent(intent)
+        form = self.form_store.get_form_from_intent(intent) if intent else None
 
         if not form:
-            logger.debug(f"The intent [{intent.name}] does not require entities")
-            return []
+            if not intent:
+                logger.debug(f"Cannot find intent for user_input: {user_input}")
+            else:
+                logger.debug(f"The intent [{intent.name}] does not require entities")
+            return [], ""
 
         entities = self.extract_slots(user_input)
         slot_dict = {slot.name: slot for slot in form.slots}
 
         if entities:
             valid_entities = [(name, value) for name, value in entities.items() if name in slot_dict
-                              and value is not None and (isinstance(value, int) or (isinstance(value, dict) and len(value) > 0))]
+                              and value is not None and (
+                                          isinstance(value, int) or (isinstance(value, dict) and len(value) > 0))]
 
         else:
             valid_entities = []
