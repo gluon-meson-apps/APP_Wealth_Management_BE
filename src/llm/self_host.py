@@ -1,5 +1,6 @@
 import json
 import configparser
+import os
 
 from colorama import init, Fore
 from loguru import logger
@@ -8,7 +9,7 @@ from openai import OpenAI
 from util import dispatch_tool
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(os.path.join(os.path.dirname(__file__), '../', 'config.ini'))
 
 base_url = config['LLM']['base_url']
 
