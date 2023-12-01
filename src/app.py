@@ -15,14 +15,13 @@ from policy_manager.base import BasePolicyManager
 from policy_manager.policy import SlotFillingPolicy, AssistantPolicy, IntentConfirmPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from uvicorn import run
 from pydantic import BaseModel
 
 load_dotenv()
 
 app = FastAPI()
-dialog_manager = None
 
 
 @app.middleware("http")
@@ -35,21 +34,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
         return JSONResponse(status_code=500, content=err_msg)
 
 
-class MessageInput(BaseModel):
-    session_id: str
-    user_input: str
-
-
-@app.post("/chat/")
-def chat(data: MessageInput):
-    session_id = data.session_id
-    user_input = data.user_input
-    result, conversation = dialog_manager.handle_message(user_input, session_id)
-    return {"response": result, "conversation": conversation}
-
-
-def main():
-    global dialog_manager
+def get_dialog_manager():
     model_type = "azure-gpt-3.5"
     action_model_type = "azure-gpt-3.5"
 
@@ -72,9 +57,24 @@ def main():
                                        prompt_manager=prompt_manager,
                                        action_model_type=action_model_type)
     reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
-    dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
+    return BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
 
-    if os.getenv("LOCAL_MODE"):
+
+class MessageInput(BaseModel):
+    session_id: str
+    user_input: str
+
+
+@app.post("/chat/")
+def chat(data: MessageInput, dialog_manager: BaseDialogManager = Depends(get_dialog_manager)):
+    session_id = data.session_id
+    user_input = data.user_input
+    result, conversation = dialog_manager.handle_message(user_input, session_id)
+    return {"response": result, "conversation": conversation}
+
+
+def main():
+    if os.getenv("LOCAL_MODE") == '1':
         run("app:app", host="0.0.0.0", port=7788, reload=True,
             reload_dirs=os.path.dirname(os.path.abspath(__file__)))
     else:
