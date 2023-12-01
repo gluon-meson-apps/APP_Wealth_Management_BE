@@ -1,4 +1,8 @@
 import os
+from urllib.request import Request
+
+from dotenv import load_dotenv
+from starlette.responses import JSONResponse
 
 from action_runner.base import SimpleActionRunner
 from conversation_tracker.base import BaseConversationTracker
@@ -15,8 +19,21 @@ from fastapi import FastAPI
 from uvicorn import run
 from pydantic import BaseModel
 
+load_dotenv()
+
 app = FastAPI()
 dialog_manager = None
+
+
+@app.middleware("http")
+async def catch_exceptions_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as err:
+        err_msg = f"Error occurred: {err}"
+        print(err_msg)
+        return JSONResponse(status_code=500, content=err_msg)
+
 
 class MessageInput(BaseModel):
     session_id: str
@@ -56,7 +73,13 @@ def main():
                                        action_model_type=action_model_type)
     reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
     dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
-    run(app, host="0.0.0.0", port=7788)
+
+    if os.getenv("LOCAL_MODE"):
+        run("app:app", host="0.0.0.0", port=7788, reload=True,
+            reload_dirs=os.path.dirname(os.path.abspath(__file__)))
+    else:
+        run("app:app", host="0.0.0.0", port=7788)
+
 
 if __name__ == "__main__":
     main()
