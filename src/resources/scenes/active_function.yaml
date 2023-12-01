@@ -1,7 +1,7 @@
 name: activate_function
 description: 激活功能
 slots:
-  - name: function_identifier
+  - name: functions
     description: 功能的识别信息
     slotType: numeric or text
     optional: False
