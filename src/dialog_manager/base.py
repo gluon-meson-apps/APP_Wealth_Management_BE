@@ -25,6 +25,7 @@ class BaseDialogManager:
         return response
 
     def handle_message(self, message: Any, session_id: str) -> Any:
+        self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
         conversation.current_user_input = message
         conversation.append_history('user', message)
@@ -34,6 +35,6 @@ class BaseDialogManager:
 
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
-        conversation.append_history('assistant', response.text)
+        conversation.append_history('assistant', response)
         self.conversation_tracker.save_conversation(session_id, conversation)
-        return response.text
+        return response

@@ -1,34 +1,54 @@
+import threading
+import time
 from datetime import datetime, timedelta
+
+import schedule
 
 from conversation_tracker.context import ConversationContext
 
 
 class ConversationTracker:
-    def save_conversation(self, id: str, conversation_context: ConversationContext):
+    def save_conversation(self, session_id: str, conversation_context: ConversationContext):
         raise NotImplementedError
 
-    def load_conversation(self, id: str) -> ConversationContext:
+    def load_conversation(self, session_id: str) -> ConversationContext:
         raise NotImplementedError
+
+    def clear_inactive_conversations(self):
+        raise NotImplementedError
+
+
+def start_schedule():
+    # 无限循环，直到程序手动停止
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 class BaseConversationTracker(ConversationTracker):
 
     def __init__(self):
         self.conversation_caches = {}
+        # 每天固定时间执行clear_inactive_conversations函数
+        schedule.every().day.at("00:00").do(self.clear_inactive_conversations)
 
-    def save_conversation(self, id: str, conversation_context: ConversationContext):
-        self.conversation_caches[id] = conversation_context
+        # 启动定时任务
+        schedule_thread = threading.Thread(target=start_schedule)
+        schedule_thread.start()
 
-    def load_conversation(self, id: str) -> ConversationContext:
-        if id in self.conversation_caches:
-            conversation = self.conversation_caches[id]
+    def save_conversation(self, session_id: str, conversation_context: ConversationContext):
+        self.conversation_caches[session_id] = conversation_context
+
+    def load_conversation(self, session_id: str) -> ConversationContext:
+        if session_id in self.conversation_caches:
+            conversation = self.conversation_caches[session_id]
             conversation.updated_at = datetime.now()
             return conversation
-        return ConversationContext(current_user_input="", session_id=id)
+        return ConversationContext(current_user_input="", session_id=session_id)
 
     def clear_inactive_conversations(self):
         current_time = datetime.now()
-        inactive_conversations = [id for id, conversation in self.conversation_caches.items()
+        inactive_conversations = [session_id for session_id, conversation in self.conversation_caches.items()
                                   if (current_time - conversation.updated_at) > timedelta(hours=24)]
-        for id in inactive_conversations:
-            del self.conversation_caches[id]
+        for session_id in inactive_conversations:
+            del self.conversation_caches[session_id]
