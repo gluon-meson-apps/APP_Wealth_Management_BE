@@ -27,8 +27,8 @@ class MessageInput(BaseModel):
 def chat(data: MessageInput):
     session_id = data.session_id
     user_input = data.user_input
-    result = dialog_manager.handle_message(user_input, session_id)
-    return {"response": result}
+    result, conversation = dialog_manager.handle_message(user_input, session_id)
+    return {"response": result, "conversation": conversation}
 
 
 def main():

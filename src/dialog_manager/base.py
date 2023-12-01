@@ -41,4 +41,4 @@ class BaseDialogManager:
         conversation.current_intent = plan.intent.intent
         conversation.add_entity(plan.intent.entities)
         self.conversation_tracker.save_conversation(session_id, conversation)
-        return response
+        return response, conversation
