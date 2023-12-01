@@ -81,13 +81,7 @@ class IntentClassifier:
             )
 
     def handle_intent(self, conversation: ConversationContext, current_intent: Intent) -> ConversationContext:
-        if current_intent.name != "slot filling" and current_intent.confidence > 0.9:
+        if current_intent.name != "slot_filling":
             conversation.current_intent = current_intent
-        else:
-            self.todo_for_low_confidence_intent(conversation, current_intent)
 
         return conversation
-
-    def todo_for_low_confidence_intent(self, conversation: ConversationContext, current_intent: Intent):
-        # 写一个待办的方法，等待后续处理
-        pass

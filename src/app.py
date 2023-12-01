@@ -16,6 +16,7 @@ from uvicorn import run
 from pydantic import BaseModel
 
 app = FastAPI()
+dialog_manager = None
 
 class MessageInput(BaseModel):
     session_id: str
@@ -26,6 +27,12 @@ class MessageInput(BaseModel):
 def chat(data: MessageInput):
     session_id = data.session_id
     user_input = data.user_input
+    result = dialog_manager.handle_message(user_input, session_id)
+    return {"response": result}
+
+
+def main():
+    global dialog_manager
     model_type = "azure-gpt-3.5"
     action_model_type = "azure-gpt-3.5"
 
@@ -49,12 +56,6 @@ def chat(data: MessageInput):
                                        action_model_type=action_model_type)
     reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
     dialog_manager = BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
-
-    result = dialog_manager.handle_message(user_input, session_id)
-    return {"response": result}
-
-
-def main():
     run(app, host="0.0.0.0", port=7788)
 
 if __name__ == "__main__":

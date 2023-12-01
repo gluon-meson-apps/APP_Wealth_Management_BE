@@ -1,6 +1,7 @@
 import threading
 import time
 from datetime import datetime, timedelta
+from loguru import logger
 
 import schedule
 
@@ -41,6 +42,7 @@ class BaseConversationTracker(ConversationTracker):
 
     def load_conversation(self, session_id: str) -> ConversationContext:
         if session_id in self.conversation_caches:
+            logger.info(f"session_id is {session_id}")
             conversation = self.conversation_caches[session_id]
             conversation.updated_at = datetime.now()
             return conversation
@@ -51,4 +53,5 @@ class BaseConversationTracker(ConversationTracker):
         inactive_conversations = [session_id for session_id, conversation in self.conversation_caches.items()
                                   if (current_time - conversation.updated_at) > timedelta(hours=24)]
         for session_id in inactive_conversations:
+            logger.info(f"clear history for {session_id}")
             del self.conversation_caches[session_id]

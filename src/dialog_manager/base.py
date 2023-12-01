@@ -5,6 +5,7 @@ from action_runner.context import ActionContext
 from conversation_tracker.base import ConversationTracker
 from output_adapter.base import OutputAdapter
 from reasoner.base import Reasoner
+from loguru import logger
 
 
 class BaseDialogManager:
@@ -27,6 +28,7 @@ class BaseDialogManager:
     def handle_message(self, message: Any, session_id: str) -> Any:
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
+        logger.info(f"exist intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_history('user', message)
         conversation.current_enriched_user_input = conversation.current_user_input
@@ -36,5 +38,7 @@ class BaseDialogManager:
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         conversation.append_history('assistant', response)
+        conversation.current_intent = plan.intent.intent
+        conversation.add_entity(plan.intent.entities)
         self.conversation_tracker.save_conversation(session_id, conversation)
         return response
