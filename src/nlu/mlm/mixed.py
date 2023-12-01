@@ -28,7 +28,7 @@ class MixedNLU(Nlu):
         
         # intent changed
         if current_intent is not None:
-            conversation.current_intent = current_intent
+            self.intent_classifier.handle_intent(conversation,current_intent)
 
         conversation.set_status("extracting utterance's slots")
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
