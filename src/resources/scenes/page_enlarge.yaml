@@ -3,10 +3,10 @@ description: 放大页面字体
 slots:
   - name: font_size
     description: 目标大小
-    slotType: numberic or text
+    slotType: numeric or text
     optional: True
   - name: font_increase
     description: 增量大小
-    slotType: numberic or text
+    slotType: numeric or text
     optional: True
 action: page_enlarge
