@@ -3,6 +3,6 @@ description: 增加表头
 slots:
   - name: header_element
     description: 表头的相关信息
-    slotType: numeric or text
+    slotType: text
     optional: False
 action: add_header

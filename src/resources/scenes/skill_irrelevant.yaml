@@ -1,4 +1,4 @@
 name: skill_irrelevant
-description: 无关业务需求
+description: 无关技能调度的需求
 slots: []
 action: skill_irrelevant

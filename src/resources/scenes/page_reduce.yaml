@@ -2,11 +2,11 @@ name: reduce_page
 description: 缩小页面字体
 slots:
   - name: font_size
-    description: 目标字号
-    slotType: categorical
+    description: 目标大小
+    slotType: text
     optional: True
   - name: font_decrease
-    description: 增量字号
-    slotType: categorical
+    description: 增量大小
+    slotType: text
     optional: True
 action: page_reduce
