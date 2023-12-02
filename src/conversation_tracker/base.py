@@ -23,7 +23,7 @@ def start_schedule():
     # 无限循环，直到程序手动停止
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(10)
 
 
 class BaseConversationTracker(ConversationTracker):
