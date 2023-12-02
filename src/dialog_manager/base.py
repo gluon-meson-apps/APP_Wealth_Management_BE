@@ -1,11 +1,20 @@
+import os
 from typing import Any
 
-from action_runner.base import ActionRunner
+from action_runner.base import ActionRunner, SimpleActionRunner
 from action_runner.context import ActionContext
-from conversation_tracker.base import ConversationTracker
-from output_adapter.base import OutputAdapter
+from conversation_tracker.base import BaseConversationTracker, ConversationTracker
+from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
 from loguru import logger
+from nlu.forms import FormStore
+
+from nlu.mlm.entity import EntityExtractor
+from nlu.mlm.intent import IntentClassifier, IntentListConfig
+from policy_manager.base import BasePolicyManager
+from policy_manager.policy import AssistantPolicy, IntentConfirmPolicy, SlotFillingPolicy
+from prompt_manager.base import BasePromptManager
+from reasoner.llm_reasoner import LlmReasoner
 
 
 class BaseDialogManager:
@@ -28,7 +37,7 @@ class BaseDialogManager:
     def handle_message(self, message: Any, session_id: str) -> Any:
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
-        logger.info(f"exist intent is {conversation.current_intent}")
+        logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_history('user', message)
         conversation.current_enriched_user_input = conversation.current_user_input
@@ -42,3 +51,33 @@ class BaseDialogManager:
         conversation.add_entity(plan.intent.entities)
         self.conversation_tracker.save_conversation(session_id, conversation)
         return response, conversation
+
+
+class DialogManagerFactory:
+    @staticmethod
+    def create_dialog_manager():
+        model_type = "chatglm"
+        action_model_type = "chatglm"
+
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        prompt_template_folder = os.path.join(pwd, '../', 'resources', 'prompt_templates')
+        intent_config_file_path = os.path.join(pwd, '../', 'resources', 'scenes')
+
+        intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
+        prompt_manager = BasePromptManager(prompt_template_folder)
+
+        classifier = IntentClassifier(intent_list_config)
+        form_store = FormStore(intent_list_config)
+        entity_extractor = EntityExtractor(form_store)
+
+        slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
+        assitant_policy = AssistantPolicy(prompt_manager, form_store)
+        intent_confirm_policy = IntentConfirmPolicy(prompt_manager, form_store)
+
+        policy_manager = BasePolicyManager(
+            policies=[intent_confirm_policy, slot_filling_policy, assitant_policy],
+            prompt_manager=prompt_manager,
+            action_model_type=action_model_type
+        )
+        reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
+        return BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())

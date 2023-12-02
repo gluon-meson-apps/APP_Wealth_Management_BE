@@ -84,7 +84,14 @@ class IntentClassifier:
             )
 
     def handle_intent(self, conversation: ConversationContext, current_intent: Intent) -> ConversationContext:
+        
+        # if slot_filling intent found, we will not change current intent
         if current_intent.name != "slot_filling":
             conversation.current_intent = current_intent
+
+        # if no obviously intent found before, set current intent as [skill_irrelevant]
+        if conversation.current_intent is None and current_intent.name == "slot_filling":
+            conversation.current_intent = current_intent
+            conversation.current_intent.name = 'skill_irrelevant'
 
         return conversation

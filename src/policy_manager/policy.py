@@ -2,7 +2,7 @@ from typing import Tuple
 
 from action_runner.action import Action
 from action_runner.actions.general import SlotFillingAction, IntentConfirmAction
-from action_runner.actions.bnb import BankRelatedAction
+from action_runner.actions.bnb import BankRelatedAction, JumpOut
 from conversation_tracker.context import ConversationContext
 from gm_logger import get_logger
 from nlu.forms import FormStore
@@ -69,6 +69,10 @@ class AssistantPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(IE.intent):
-            print(f'exec action {form.action}')
-            return True, BankRelatedAction(form.action)
+            if IE.intent.name not in ["skill_irrelevant"]:
+                print(f'exec action {form.action}')
+                return True, BankRelatedAction(form.action)
+            else:
+                print(f'exec action {form.action}')
+                return True, JumpOut()
         return False, None

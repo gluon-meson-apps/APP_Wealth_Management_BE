@@ -29,14 +29,13 @@ class MixedNLU(Nlu):
         current_intent = self.intent_classifier.get_intent(conversation)
 
         # intent changed
-        if current_intent is not None:
-            conversation = self.intent_classifier.handle_intent(conversation, current_intent)
+        conversation = self.intent_classifier.handle_intent(conversation, current_intent)
 
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.set_status("extracting utterance's slots")
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
         entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
-        logger.info("user %s, entities: %s", conversation.session_id, entities_string)
+        logger.info("session %s, entities: %s", conversation.session_id, entities_string)
 
         # keep entities
         existed_entities = conversation.get_entities()
@@ -45,6 +44,6 @@ class MixedNLU(Nlu):
         entities_string = str(list(map(lambda entity: (entity.type, entity.value), merged_entities)))
         conversation.add_entity(current_entities)
 
-        logger.info("user %s, entities: %s", conversation.session_id, entities_string)
+        logger.info("session %s, entities: %s", conversation.session_id, entities_string)
 
         return IntentWithEntity(intent=conversation.current_intent, entities=merged_entities, action=action)

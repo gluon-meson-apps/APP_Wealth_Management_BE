@@ -42,7 +42,7 @@ class ConversationContext:
         for index, entity in enumerate(self.entities):
             if entity.name == updated_entity.name:
                 self.entities[index] = updated_entity
-                logger.info("Updated slot %s for user %s", updated_entity.name, self.session_id)
+                logger.info("Updated slot %s for session %s", updated_entity.name, self.session_id)
                 return True  # Slot updated successfully
         return False  # Slot with given name not found
 
@@ -54,4 +54,4 @@ class ConversationContext:
 
     def set_status(self, status: str):
         self.status = status
-        logger.info("user %s, conversation status: %s", self.session_id, status)
+        logger.info("session %s, conversation status: %s", self.session_id, status)

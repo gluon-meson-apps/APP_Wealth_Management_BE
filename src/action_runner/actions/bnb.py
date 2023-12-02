@@ -25,4 +25,4 @@ class JumpOut(Action):
     def run(self, context) -> ActionResponse:
         context.set_status('action:jump out')
         logger.debug("非范围内意图")
-        return ActionResponse(text=self.response)
+        return None
