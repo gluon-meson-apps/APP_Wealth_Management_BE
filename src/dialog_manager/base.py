@@ -1,7 +1,7 @@
 import os
 from typing import Any
 
-from action.base import ActionRunner, SimpleActionRunner
+from action.runner import ActionRunner, SimpleActionRunner
 from action.context import ActionContext
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter

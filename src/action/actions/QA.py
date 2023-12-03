@@ -1,5 +1,5 @@
 import gm_logger
-from action.action import Action, ActionResponse
+from src.action.base import Action, ActionResponse
 from llm.self_host import ChatModel
 
 

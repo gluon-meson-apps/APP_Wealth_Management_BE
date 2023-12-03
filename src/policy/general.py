@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from action.action import Action
+from action.base import Action
 from action.actions.general import SlotFillingAction, IntentConfirmAction
 from action.actions.bnb import BankRelatedAction, JumpOut
 from tracker.context import ConversationContext

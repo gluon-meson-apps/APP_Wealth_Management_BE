@@ -1,6 +1,6 @@
 from typing import List
 
-from action.action import Action
+from action.base import Action
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity
 
