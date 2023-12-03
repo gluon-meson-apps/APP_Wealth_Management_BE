@@ -2,9 +2,6 @@ import os
 import uuid
 import requests
 
-# 初始化会话ID
-session_id = str(uuid.uuid4())
-
 # 指定文件夹路径
 script_path = './scripts'  # 修改为你的文件夹路径
 log_path = './logs'  # 修改为你的文件夹路径
@@ -15,6 +12,7 @@ files = os.listdir(script_path)
 # 遍历文件夹中的每个文件
 for file_name in files:
     if file_name.endswith('.txt'):  # 确保只处理文本文件
+        session_id = str(uuid.uuid4())
         file_path = os.path.join(script_path, file_name)
 
         # 打开文件进行读取

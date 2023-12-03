@@ -16,7 +16,7 @@ class BankRelatedAction(Action):
     def run(self, context) -> ActionResponse:
         context.set_status(f'action: {self.action_name}')
         # logger.debug(f"intent:{context.intent}, slots: {}")
-        return ActionResponse(text=f"已为您完成", extra_info={'action': "bank related action {self.action_name} triggered"})
+        return ActionResponse(text=f"已为您完成{self.action_name}")
     
 class JumpOut(Action):
     def __init__(self):
