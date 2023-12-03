@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
-from action_runner.context import ActionContext
+from action.context import ActionContext
 from gm_logger import get_logger
 
 logger = get_logger()

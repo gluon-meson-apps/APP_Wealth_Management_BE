@@ -1,10 +1,10 @@
 import gm_logger
-from action_runner.action import Action
-from conversation_tracker.context import ConversationContext
+from action.action import Action
+from tracker.context import ConversationContext
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier
 from nlu.mlm.mixed import MixedNLU
-from policy_manager.base import PolicyManager
+from policy.base import PolicyManager
 from reasoner.base import Plan, Reasoner
 
 logger = gm_logger.get_logger()

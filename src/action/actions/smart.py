@@ -1,5 +1,5 @@
 import gm_logger
-from action_runner.action import Action, ActionResponse
+from action.action import Action, ActionResponse
 
 logger = gm_logger.get_logger()
 

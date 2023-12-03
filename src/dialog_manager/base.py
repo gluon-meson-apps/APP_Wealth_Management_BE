@@ -1,9 +1,9 @@
 import os
 from typing import Any
 
-from action_runner.base import ActionRunner, SimpleActionRunner
-from action_runner.context import ActionContext
-from conversation_tracker.base import BaseConversationTracker, ConversationTracker
+from action.base import ActionRunner, SimpleActionRunner
+from action.context import ActionContext
+from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
 from loguru import logger
@@ -11,8 +11,8 @@ from nlu.forms import FormStore
 
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier, IntentListConfig
-from policy_manager.base import BasePolicyManager
-from policy_manager.policy import AssistantPolicy, IntentConfirmPolicy, SlotFillingPolicy
+from policy.base import BasePolicyManager
+from policy.general import AssistantPolicy, IntentConfirmPolicy, SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 

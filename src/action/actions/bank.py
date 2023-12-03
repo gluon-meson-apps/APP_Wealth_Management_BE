@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from gm_logger import get_logger
-from action_runner.action import Action
+from action.action import Action
 
 logger = get_logger()
 

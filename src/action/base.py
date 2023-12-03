@@ -1,5 +1,5 @@
-from action_runner.action import Action
-from action_runner.context import ActionContext
+from action.action import Action
+from action.context import ActionContext
 
 
 class ActionRunner:

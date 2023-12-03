@@ -1,8 +1,8 @@
 import unittest
 
-from action_runner.action import ChatAction, SlotFillingAction, FixedAnswerAction
-from action_runner.base import BaseActionRunner
-from action_runner.context import ActionContext
+from action.action import ChatAction, SlotFillingAction, FixedAnswerAction
+from action.base import BaseActionRunner
+from action.context import ActionContext
 
 class TestActionRunner(unittest.TestCase):
 

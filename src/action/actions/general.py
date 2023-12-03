@@ -1,7 +1,7 @@
 import os
 from typing import List
 import gm_logger
-from action_runner.action import Action, ActionResponse
+from action.action import Action, ActionResponse
 from llm.self_host import ChatModel
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager

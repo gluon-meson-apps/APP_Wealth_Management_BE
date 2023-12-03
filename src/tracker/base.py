@@ -5,7 +5,7 @@ from loguru import logger
 
 import schedule
 
-from conversation_tracker.context import ConversationContext
+from tracker.context import ConversationContext
 
 
 class ConversationTracker:

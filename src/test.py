@@ -4,7 +4,7 @@ from urllib.request import Request
 from dotenv import load_dotenv
 from starlette.responses import JSONResponse
 
-from action_runner.base import SimpleActionRunner
+from action.base import SimpleActionRunner
 from conversation_tracker.base import BaseConversationTracker
 from dialog_manager.base import BaseDialogManager
 from nlu.forms import FormStore

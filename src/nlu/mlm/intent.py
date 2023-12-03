@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from loguru import logger
 
 from common.constant import MODEL_URL
-from conversation_tracker.context import ConversationContext
+from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
 

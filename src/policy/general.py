@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from action_runner.action import Action
-from action_runner.actions.general import SlotFillingAction, IntentConfirmAction
-from action_runner.actions.bnb import BankRelatedAction, JumpOut
-from conversation_tracker.context import ConversationContext
+from action.action import Action
+from action.actions.general import SlotFillingAction, IntentConfirmAction
+from action.actions.bnb import BankRelatedAction, JumpOut
+from tracker.context import ConversationContext
 from gm_logger import get_logger
 from nlu.forms import FormStore
 from nlu.intent_with_entity import IntentWithEntity

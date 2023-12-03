@@ -1,5 +1,5 @@
 import gm_logger
-from conversation_tracker.context import ConversationContext
+from tracker.context import ConversationContext
 from nlu.base import Nlu
 from nlu.intent_with_entity import IntentWithEntity
 from nlu.mlm.entity import EntityExtractor
