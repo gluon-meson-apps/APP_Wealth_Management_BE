@@ -35,7 +35,7 @@ class SlotFillingAction(Action):
 
 
 class IntentConfirmAction(Action):
-    """Slot filling action using large language models."""
+    """Intent confirm action using large language models."""
 
     def __init__(self, intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='intent_confirm')
@@ -47,16 +47,36 @@ class IntentConfirmAction(Action):
 
     def run(self, context):
         context.set_status('action:intent_confirm')
-        # not_filled_slot = [k for k, v in slots.items() if v is None]
         prompt = self.prompt_template.format({
             "intent": self.intent.description,
             "intent_candidates": self.intent_list_config.get_intent_list(),
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=1024)
+        response = self.llm.chat(prompt, max_length=256)
         return ActionResponse(text=response)
+    
 
+class IntentFillingAction(Action):
+    """Intent filling action using large language models."""
+
+    def __init__(self, intent: Intent, prompt_manager: PromptManager):
+        self.prompt_template = prompt_manager.load(name='intent_filling')
+        self.llm = ChatModel()
+        self.intent = intent
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        intent_config_file_path = os.path.join(pwd, '../../', 'resources', 'scenes')
+        self.intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
+
+    def run(self, context):
+        context.set_status('action:intent_filling')
+
+        prompt = self.prompt_template.format({
+            "history": context.conversation.get_history().format_to_string(),
+        })
+        logger.debug(prompt)
+        response = self.llm.chat(prompt, max_length=256)
+        return ActionResponse(text=response)
 
 class FixedAnswerAction(Action):
     """Fixed response action giving pre-defined answers."""

@@ -94,11 +94,10 @@ class IntentClassifier:
             context.current_intent = next_intent
             context.current_intent.name = 'skill_irrelevant'
         
-        # if conversation
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
             context.current_intent.confidence = 1.0
             
-        if next_intent.name in ["negative"] and context.state in ["intent_confirm"]:
-            context.current_intent.confidence = 0.0
+        if next_intent.name in ["negative"]:
+            context.current_intent.name = 'unknown'
 
         return context

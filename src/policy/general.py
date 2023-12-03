@@ -37,11 +37,14 @@ class IntentConfirmPolicy(Policy):
         significant_value = 0.9
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"当前状态\n待明确的意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
-        if IE.intent.confidence < significant_value:
+        if IE.intent.confidence < significant_value and IE.intent.name not in ["unknown"]:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
-        else:
-            return False, None
+        elif IE.intent.name in ["unknown"]:
+            context.set_state("intent_filling")
+            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
+        
+        return False, None
     
 class SlotFillingPolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
