@@ -7,10 +7,13 @@ from nlu.intent_with_entity import Entity, Intent
 logger = get_logger()
 
 class History:
-    def __init__(self, histories: List[dict[str, Any]]):
-        self.histories = histories
+    def __init__(self, histories: List[dict[str, Any]], max_history: int = 4):
+        self.max_history = max_history
+        self.histories = histories[-self.max_history:]
 
     def add_history(self, role: str, message: str):
+        if len(self.histories) >= self.max_history:
+            self.histories.pop(0)
         self.histories.append({'role': role, 'content': message})
 
     def format_to_string(self):
@@ -25,6 +28,7 @@ class ConversationContext:
         self.current_enriched_user_input = None
         self.history = History([])
         self.status = 'start'
+        self.state = None
         self.entities: List[Entity] = []
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
@@ -55,3 +59,6 @@ class ConversationContext:
     def set_status(self, status: str):
         self.status = status
         logger.info("session %s, conversation status: %s", self.session_id, status)
+        
+    def set_state(self, state: str):
+        self.state = state

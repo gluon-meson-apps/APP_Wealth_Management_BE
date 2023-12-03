@@ -1,0 +1,4 @@
+name: negative
+description: 否认
+slots: []
+action: negative

@@ -46,7 +46,7 @@ class BaseDialogManager:
 
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
-        conversation.append_history('assistant', response)
+        conversation.append_history('assistant', response.text)
         conversation.current_intent = plan.intent.intent
         conversation.add_entity(plan.intent.entities)
         self.conversation_tracker.save_conversation(session_id, conversation)

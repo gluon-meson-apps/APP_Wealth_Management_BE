@@ -83,15 +83,22 @@ class IntentClassifier:
                 status_code=response.status_code, detail={response.text}
             )
 
-    def handle_intent(self, conversation: ConversationContext, current_intent: Intent) -> ConversationContext:
+    def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
         
         # if slot_filling intent found, we will not change current intent
-        if current_intent.name != "slot_filling":
-            conversation.current_intent = current_intent
+        if next_intent.name not in ["slot_filling", "negative", "positive"]:
+            context.current_intent = next_intent
 
         # if no obviously intent found before, set current intent as [skill_irrelevant]
-        if conversation.current_intent is None and current_intent.name == "slot_filling":
-            conversation.current_intent = current_intent
-            conversation.current_intent.name = 'skill_irrelevant'
+        if context.current_intent is None and next_intent.name in ["slot_filling"]:
+            context.current_intent = next_intent
+            context.current_intent.name = 'skill_irrelevant'
+        
+        # if conversation
+        if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
+            context.current_intent.confidence = 1.0
+            
+        if next_intent.name in ["negative"] and context.state in ["intent_confirm"]:
+            context.current_intent.confidence = 0.0
 
-        return conversation
+        return context
