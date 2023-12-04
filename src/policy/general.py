@@ -75,7 +75,7 @@ class AssistantPolicy(Policy):
         if form := self.form_store.get_form_from_intent(IE.intent):
             if IE.intent.name not in ["skill_irrelevant"]:
                 print(f'exec action {form.action}')
-                return True, BankRelatedAction(form.action)
+                return True, BankRelatedAction(form.action, possible_slots)
             else:
                 print(f'exec action {form.action}')
                 return True, JumpOut()

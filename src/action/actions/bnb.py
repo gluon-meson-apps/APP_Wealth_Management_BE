@@ -10,14 +10,16 @@ class ActionResponse(BaseModel):
 
 
 class BankRelatedAction(Action):
-    def __init__(self, action_name):
+    def __init__(self, action_name, possible_slots):
         self.action_name = action_name
+        self.possible_slots = possible_slots
 
     def run(self, context) -> ActionResponse:
         context.set_status(f'action: {self.action_name}')
-        # logger.debug(f"intent:{context.intent}, slots: {}")
-        return ActionResponse(text=f"已为您完成{self.action_name}")
-    
+        slots = [(slot.name, slot.value) for slot in self.possible_slots]
+        return ActionResponse(text=f"已为您完成{self.action_name}, slots: {slots}")
+
+
 class JumpOut(Action):
     def __init__(self):
         pass
