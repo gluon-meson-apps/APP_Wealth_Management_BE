@@ -5,4 +5,8 @@ slots:
     description: 页面是放大还是缩小
     slotType: categorical
     optional: False
+  - name: font_size
+    description: 需要调整到的目标值
+    slotType: text
+    optional: True
 action: page_resize
