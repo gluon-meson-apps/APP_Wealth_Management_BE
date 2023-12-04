@@ -1,3 +1,4 @@
+import configparser
 import os
 
 import requests
@@ -5,10 +6,13 @@ import yaml
 from fastapi import HTTPException
 from loguru import logger
 
-from common.constant import MODEL_URL
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), '../', 'config.ini'))
+
+MODEL_URL = config['JointBert']['base_url']
 
 class IntentConfig:
     def __init__(self, name, description, action, slots):
