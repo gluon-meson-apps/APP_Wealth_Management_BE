@@ -1,14 +1,21 @@
+import configparser
+import os
 from typing import List, Any
 
 import requests
 from fastapi import HTTPException
 from loguru import logger
 
-from common.constant import MODEL_URL
+# from common.constant import MODEL_URL
 from tracker.context import ConversationContext
 
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Entity
+
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
+
+MODEL_URL = config['JointBert']['base_url']
 
 
 class EntityExtractor:
@@ -46,7 +53,7 @@ class EntityExtractor:
         if entities:
             valid_entities = [(name, value) for name, value in entities.items() if name in slot_dict
                               and value is not None and (
-                                          isinstance(value, int) or (isinstance(value, dict) and len(value) > 0))]
+                                      isinstance(value, int) or (isinstance(value, dict) and len(value) > 0))]
 
         else:
             valid_entities = []

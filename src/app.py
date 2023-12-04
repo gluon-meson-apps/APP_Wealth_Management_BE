@@ -31,6 +31,7 @@ class MessageInput(BaseModel):
 
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
+
 @app.post("/chat/")
 def chat(data: MessageInput):
     session_id = data.session_id

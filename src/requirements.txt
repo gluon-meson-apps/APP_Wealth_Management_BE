@@ -6,3 +6,4 @@ openai
 loguru
 uvicorn
 schedule
+python-dotenv

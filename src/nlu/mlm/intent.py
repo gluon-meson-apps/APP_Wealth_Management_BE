@@ -10,9 +10,10 @@ from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), '../', 'config.ini'))
+config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
 
 MODEL_URL = config['JointBert']['base_url']
+
 
 class IntentConfig:
     def __init__(self, name, description, action, slots):
@@ -88,7 +89,7 @@ class IntentClassifier:
             )
 
     def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
-        
+
         # if slot_filling intent found, we will not change current intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:
             context.current_intent = next_intent
@@ -97,10 +98,10 @@ class IntentClassifier:
         if context.current_intent is None and next_intent.name in ["slot_filling"]:
             context.current_intent = next_intent
             context.current_intent.name = 'skill_irrelevant'
-        
+
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
             context.current_intent.confidence = 1.0
-            
+
         if next_intent.name in ["negative"]:
             context.current_intent.name = 'unknown'
 
