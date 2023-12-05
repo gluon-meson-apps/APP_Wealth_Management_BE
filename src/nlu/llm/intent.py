@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
-from conversation_tracker.context import ConversationContext
+from tracker.context import ConversationContext
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
