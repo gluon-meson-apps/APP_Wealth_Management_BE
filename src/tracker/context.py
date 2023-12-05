@@ -25,6 +25,7 @@ class ConversationContext:
         self.current_user_input = current_user_input
         self.session_id = session_id
         self.current_intent = current_user_intent
+        self.intent_queue: List[Intent] = [] 
         self.current_enriched_user_input = None
         self.history = History([])
         self.status = 'start'
@@ -62,3 +63,6 @@ class ConversationContext:
         
     def set_state(self, state: str):
         self.state = state
+        
+    def push_intent(self, intent: Intent):
+        self.intent_queue.append(intent)

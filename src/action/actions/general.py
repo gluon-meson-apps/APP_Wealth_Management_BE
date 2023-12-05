@@ -60,13 +60,9 @@ class IntentConfirmAction(Action):
 class IntentFillingAction(Action):
     """Intent filling action using large language models."""
 
-    def __init__(self, intent: Intent, prompt_manager: PromptManager):
+    def __init__(self, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='intent_filling')
         self.llm = ChatModel()
-        self.intent = intent
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        intent_config_file_path = os.path.join(pwd, '../../', 'resources', 'scenes')
-        self.intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
 
     def run(self, context):
         context.set_status('action:intent_filling')

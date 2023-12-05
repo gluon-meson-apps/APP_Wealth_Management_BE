@@ -26,6 +26,16 @@ class IntentConfig:
 class IntentListConfig:
     def __init__(self, intents):
         self.intents = intents
+        self._initialize_fixed_intents()
+
+    def _initialize_fixed_intents(self):
+        # Initialize fixed intents like chitchat, slot_filling
+        chitchat = IntentConfig("chitchat", "闲聊", "chitchat", [])
+        slot_filling = IntentConfig("slot_filling", "追问槽位", "slot_filling", [])
+        positive = IntentConfig("positive", "肯定", "positive", [])
+        negative = IntentConfig("negative", "否认", "negative", [])
+
+        self.intents.extend([chitchat, slot_filling, positive, negative])
 
     def get_intent_list(self):
         # read resources/intent.yaml file and get intent list
@@ -96,13 +106,14 @@ class IntentClassifier:
 
         # if no obviously intent found before, set current intent as [skill_irrelevant]
         if context.current_intent is None and next_intent.name in ["slot_filling"]:
-            context.current_intent = next_intent
-            context.current_intent.name = 'skill_irrelevant'
+            context.current_intent = self.intent_list_config.get_intent('skill_irrelevant')
 
+        # if last round set conversation state "intent_confirm" and confirm in this round
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
             context.current_intent.confidence = 1.0
 
+        # if user deny in this round
         if next_intent.name in ["negative"]:
-            context.current_intent.name = 'unknown'
+            context.current_intent = None
 
         return context

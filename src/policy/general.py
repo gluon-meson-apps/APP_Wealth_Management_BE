@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from action.base import Action
-from action.actions.general import SlotFillingAction, IntentConfirmAction
+from action.actions.general import SlotFillingAction, IntentConfirmAction, IntentFillingAction
 from action.actions.bnb import BankRelatedAction, JumpOut
 from tracker.context import ConversationContext
 from gm_logger import get_logger
@@ -37,13 +37,12 @@ class IntentConfirmPolicy(Policy):
         significant_value = 0.9
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"当前状态\n待明确的意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
-        if IE.intent.confidence < significant_value and IE.intent.name not in ["unknown"]:
-            context.set_state("intent_confirm")
-            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
-        elif IE.intent.name in ["unknown"]:
+        if IE.intent is None:
             context.set_state("intent_filling")
-            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
-        
+            return True, IntentFillingAction(prompt_manager=self.prompt_manager)
+        elif IE.intent.confidence < significant_value and IE.intent.name not in ["unknown"]:
+            context.set_state("intent_confirm")
+            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)        
         return False, None
     
 class SlotFillingPolicy(Policy):
@@ -73,10 +72,12 @@ class AssistantPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(IE.intent):
-            if IE.intent.name not in ["skill_irrelevant"]:
+            if IE.intent.name not in ["skill_irrelevant", "other_skill", "chitchat"]:
                 print(f'exec action {form.action}')
                 return True, BankRelatedAction(form.action, possible_slots)
-            else:
+            elif IE.intent.name in ["skill_irrelevant", "other_skill"]:
                 print(f'exec action {form.action}')
                 return True, JumpOut()
+            else:
+                return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         return False, None
