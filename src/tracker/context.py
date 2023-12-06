@@ -28,11 +28,16 @@ class ConversationContext:
         self.intent_queue: List[Intent] = [] 
         self.current_enriched_user_input = None
         self.history = History([])
+        # used for logging
         self.status = 'start'
+        
+        # used for condition jughment
         self.state = None
         self.entities: List[Entity] = []
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        # counter for inquiry times
+        self.inquiry_times = 0
 
     def get_history(self) -> History:
         return self.history
@@ -64,5 +69,6 @@ class ConversationContext:
     def set_state(self, state: str):
         self.state = state
         
-    def push_intent(self, intent: Intent):
+    def update_intent(self, intent: Intent):
+        self.current_intent = intent
         self.intent_queue.append(intent)
