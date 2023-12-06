@@ -36,11 +36,11 @@ class IntentConfirmPolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         significant_value = 0.9
         possible_slots = self.get_possible_slots(intent=IE)
-        logger.debug(f"当前状态\n待明确的意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
+        logger.debug(f"当前状态\n待明确的意图：{IE.intent}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if IE.intent is None:
             context.set_state("intent_filling")
             return True, IntentFillingAction(prompt_manager=self.prompt_manager)
-        elif IE.intent.confidence < significant_value and IE.intent.name not in ["unknown"]:
+        elif IE.intent.confidence < significant_value:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)        
         return False, None

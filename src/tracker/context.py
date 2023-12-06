@@ -72,4 +72,6 @@ class ConversationContext:
         
     def update_intent(self, intent: Intent):
         self.current_intent = intent
-        self.intent_queue.append(intent)
+        if intent is not None:
+            self.intent_queue.append(intent)
+        self.inquiry_times = 0

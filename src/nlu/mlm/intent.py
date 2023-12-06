@@ -102,11 +102,11 @@ class IntentClassifier:
 
         # if slot_filling intent found, we will not change current intent to next intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:
-            context.current_intent = next_intent
+            context.update_intent(next_intent)
 
         # if no obviously intent found before, throw out to fusion engine
         if context.current_intent is None and next_intent.name in ["slot_filling", "positive", "negative"]:
-            context.current_intent = self.intent_list_config.get_intent('skill_irrelevant')
+            context.update_intent(None)
 
         # if last round set conversation state "intent_confirm" and user confirmed in current round
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
@@ -114,6 +114,6 @@ class IntentClassifier:
 
         # if user deny in current round
         if next_intent.name in ["negative"]:
-            context.current_intent = None
+            context.update_intent(None)
 
         return context

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from util import HashableBaseModel
 
@@ -48,7 +48,7 @@ class Entity(HashableBaseModel):
 
 
 class IntentWithEntity(HashableBaseModel):
-    intent: Intent
+    intent: Union[Intent, None]
     entities: List[Entity]
     action: str
 
