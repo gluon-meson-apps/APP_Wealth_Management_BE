@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Any
+from typing import Dict, List, Any
 
 from gm_logger import get_logger
 from nlu.intent_with_entity import Entity, Intent
@@ -34,7 +34,7 @@ class ConversationContext:
         
         # used for condition jughment
         self.state = None
-        self.entities: List[Entity] = []
+        self.entities = []
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
         # counter for inquiry times
@@ -47,7 +47,23 @@ class ConversationContext:
         self.history.add_history(role, message)
         
     def add_entity(self, entities: List[Entity]):
-        self.entities += entities
+        entity_map: Dict[str, Entity] = {entity.type: entity for entity in self.entities}
+        
+        for new_entity in entities:
+            if new_entity.type in entity_map:
+                existing_entity = entity_map[new_entity.type]
+                existing_entity.value = new_entity.value
+                existing_entity.role = new_entity.role
+                existing_entity.confidence = new_entity.confidence
+                existing_entity.possible_slot = new_entity.possible_slot
+                logger.info("Updated entity %s for session %s", new_entity.type, self.session_id)
+            else:
+                self.entities.append(new_entity)
+                logger.info("Added entity %s for session %s", new_entity.type, self.session_id)
+        
+        #self.entities = list(entity_map.values())  # Update entities with the modified/new entities
+        print(f"entities: {self.entities}")
+
     
     def update_entity(self, updated_entity: Entity) -> bool:
         for index, entity in enumerate(self.entities):
@@ -57,7 +73,7 @@ class ConversationContext:
                 return True  # Slot updated successfully
         return False  # Slot with given name not found
 
-    def get_entities(self) -> List[Entity]:
+    def get_entities(self):
         return self.entities
     
     def flush_entities(self):

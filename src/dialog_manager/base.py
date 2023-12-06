@@ -12,7 +12,7 @@ from nlu.forms import FormStore
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier, IntentListConfig
 from policy.base import BasePolicyManager
-from policy.general import AssistantPolicy, IntentConfirmPolicy, SlotFillingPolicy
+from policy.general import AssistantPolicy, IntentFillingPolicy, SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
@@ -72,10 +72,10 @@ class DialogManagerFactory:
 
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
-        intent_confirm_policy = IntentConfirmPolicy(prompt_manager, form_store)
+        intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
 
         policy_manager = BasePolicyManager(
-            policies=[intent_confirm_policy, slot_filling_policy, assitant_policy],
+            policies=[intent_filling_policy, slot_filling_policy, assitant_policy],
             prompt_manager=prompt_manager,
             action_model_type=action_model_type
         )

@@ -28,7 +28,7 @@ class Policy:
         return entity.value is not None and entity.value != ''
 
 
-class IntentConfirmPolicy(Policy):
+class IntentFillingPolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         Policy.__init__(self, prompt_manager)
         self.form_store = form_store
@@ -38,7 +38,6 @@ class IntentConfirmPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"当前状态\n待明确的意图：{IE.intent}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if IE.intent is None:
-            context.set_state("intent_filling")
             return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         elif IE.intent.confidence < significant_value:
             context.set_state("intent_confirm")
