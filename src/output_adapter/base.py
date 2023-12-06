@@ -13,10 +13,14 @@ def chinese_to_arabic(chinese):
     for char in chinese:
         if char in chinese_dict:
             temp = chinese_dict[char]
-            print(f"--temp: {temp}")
             has_chinese_num = True
         else:
             if char == '十':
+                has_chinese_num = True
+                temp *= 10
+                arabic_number += temp
+                temp = 0
+            elif char == '百':
                 has_chinese_num = True
                 temp *= 10
                 arabic_number += temp
