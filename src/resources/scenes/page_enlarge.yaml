@@ -5,8 +5,4 @@ slots:
     description: 目标大小
     slotType: numeric or text
     optional: True
-  - name: font_increase
-    description: 增量大小
-    slotType: numeric or text
-    optional: True
 action: page_enlarge
