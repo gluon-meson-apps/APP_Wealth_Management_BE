@@ -49,7 +49,7 @@ class BaseDialogManager:
         conversation.append_history('assistant', response.text)
         conversation.current_intent = plan.intent.intent
         conversation.add_entity(plan.intent.entities)
-        self.conversation_tracker.save_conversation(session_id, conversation)
+        self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         return response, conversation
 
 

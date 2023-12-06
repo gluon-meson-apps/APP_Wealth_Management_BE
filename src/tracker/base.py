@@ -41,7 +41,7 @@ class BaseConversationTracker(ConversationTracker):
         self.conversation_caches[session_id] = conversation_context
 
     def load_conversation(self, session_id: str) -> ConversationContext:
-        if session_id in self.conversation_caches:
+        if session_id and session_id in self.conversation_caches:
             logger.info(f"session_id is {session_id}")
             conversation = self.conversation_caches[session_id]
             conversation.updated_at = datetime.now()

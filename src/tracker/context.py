@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import List, Any
 
@@ -23,7 +24,7 @@ class History:
 class ConversationContext:
     def __init__(self, current_user_input: str, session_id: str, current_user_intent: Intent = None):
         self.current_user_input = current_user_input
-        self.session_id = session_id
+        self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
         self.intent_queue: List[Intent] = [] 
         self.current_enriched_user_input = None
