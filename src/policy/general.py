@@ -5,12 +5,11 @@ from action.actions.general import EndDialogueAction, SlotFillingAction, IntentC
 from action.actions.bnb import BankRelatedAction, JumpOut
 from policy.base import Policy
 from tracker.context import ConversationContext
-from gm_logger import get_logger
+from loguru import logger
 from nlu.forms import FormStore
 from nlu.intent_with_entity import IntentWithEntity
 from prompt_manager.base import PromptManager
 
-logger = get_logger()
 
 INTENT_SIG_TRH = 0.9
 SLOT_SIG_TRH = 0.9

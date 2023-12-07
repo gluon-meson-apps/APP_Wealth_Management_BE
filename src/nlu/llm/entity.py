@@ -5,12 +5,10 @@ import yaml
 
 from tracker.context import ConversationContext
 from gluon_meson_sdk.models.chat_model import ChatModel
-from gm_logger import get_logger
+from loguru import logger
 from nlu.forms import FormStore, Form
 from nlu.intent_with_entity import Entity
 from prompt_manager.base import PromptManager
-
-logger = get_logger()
 
 system_template = """
 ## Role & Task

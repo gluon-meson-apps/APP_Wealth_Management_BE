@@ -2,11 +2,10 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Any
 
-from gm_logger import get_logger
 from nlu.intent_with_entity import Entity, Intent
 from collections import deque
 
-logger = get_logger()
+from loguru import logger
 
 class History:
     def __init__(self, histories: List[dict[str, Any]], max_history: int = 6):

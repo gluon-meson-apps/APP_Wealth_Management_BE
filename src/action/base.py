@@ -2,9 +2,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
 from action.context import ActionContext
-from gm_logger import get_logger
-
-logger = get_logger()
+from loguru import logger
 
 class ActionResponse(BaseModel):
     text: str

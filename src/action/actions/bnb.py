@@ -1,8 +1,6 @@
 from pydantic import BaseModel
-from gm_logger import get_logger
+from loguru import logger
 from action.base import Action
-
-logger = get_logger()
 
 class ActionResponse(BaseModel):
     text: str

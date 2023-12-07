@@ -1,7 +1,5 @@
-import gm_logger
+from loguru import logger
 from src.action.base import Action, ActionResponse
-
-logger = gm_logger.get_logger()
 
 
 class SmartHomeOperatingAction(Action):

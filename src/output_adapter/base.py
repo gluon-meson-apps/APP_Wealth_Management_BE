@@ -1,7 +1,5 @@
 import re
-from gm_logger import get_logger
-
-logger = get_logger()
+from loguru import logger
 
 def chinese_to_arabic(chinese):
     # 编写转换函数，将汉字数字转换为阿拉伯数字

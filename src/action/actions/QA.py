@@ -1,9 +1,6 @@
-import gm_logger
+from loguru import logger
 from src.action.base import Action, ActionResponse
 from llm.self_host import ChatModel
-
-
-logger = gm_logger.get_logger()
 
 class RAGAction(Action):
 

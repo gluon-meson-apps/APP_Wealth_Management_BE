@@ -1,12 +1,11 @@
 import configparser
 import os
-from typing import List, Any
+from typing import List
 
 import requests
 from fastapi import HTTPException
 from loguru import logger
 
-# from common.constant import MODEL_URL
 from tracker.context import ConversationContext
 
 from nlu.forms import FormStore

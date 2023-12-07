@@ -1,4 +1,4 @@
-import gm_logger
+from loguru import logger
 from action.base import Action
 from tracker.context import ConversationContext
 from nlu.mlm.entity import EntityExtractor
@@ -6,8 +6,6 @@ from nlu.mlm.intent import IntentClassifier
 from nlu.mlm.integrated import IntegratedNLU
 from policy.base import PolicyManager
 from reasoner.base import Plan, Reasoner
-
-logger = gm_logger.get_logger()
 
 class LlmReasoner(Reasoner):
 

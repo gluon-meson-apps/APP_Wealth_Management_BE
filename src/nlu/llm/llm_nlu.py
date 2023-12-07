@@ -1,11 +1,9 @@
-import gm_logger
+from loguru import logger
 from tracker.context import ConversationContext
 from nlu.base import Nlu
 from nlu.intent_with_entity import IntentWithEntity
 from nlu.llm.entity import EntityExtractor
 from nlu.llm.intent import IntentClassifier
-
-logger = gm_logger.get_logger()
 
 class LLMNlu(Nlu):
     def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):

@@ -1,6 +1,5 @@
-import os
 from typing import List
-import gm_logger
+from loguru import logger
 from action.base import Action, ActionResponse
 from llm.self_host import ChatModel
 from nlu.intent_with_entity import Intent, Slot
@@ -8,7 +7,6 @@ from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
 
 
-logger = gm_logger.get_logger()
 DEFAULT_END_UTTERANCE = "感谢您的使用，祝您生活愉快"
 
 class EndDialogueAction(Action):

@@ -7,11 +7,10 @@ from tracker.context import ConversationContext
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
-from gm_logger import get_logger
+from loguru import logger
 from nlu.intent_with_entity import Intent
 from prompt_manager.base import PromptManager
 
-logger = get_logger()
 
 # should extract to a config file
 system_template = """

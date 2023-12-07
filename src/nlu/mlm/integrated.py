@@ -1,13 +1,11 @@
 import configparser
-
-import gm_logger
+from loguru import logger
 from tracker.context import ConversationContext
 from nlu.base import Nlu
 from nlu.intent_with_entity import IntentWithEntity
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier
 
-logger = gm_logger.get_logger()
 config = configparser.ConfigParser()
 config.read('config.ini')
 
