@@ -27,7 +27,7 @@ class SlotFillingAction(Action):
         self.intent = intent
 
     def run(self, context):
-        context.set_status('action:slot_filling')
+        logger.info(f'exec action slot filling')
         prompt = self.prompt_template.format({
             "fill_slot": self.slots.pop().description,
             "intent": self.intent.name,
@@ -50,7 +50,7 @@ class IntentConfirmAction(Action):
         self.intent = intent
 
     def run(self, context: ConversationContext):        
-        context.set_status('action:intent_confirm')
+        logger.info(f'exec action intent confirm')
         prompt = self.prompt_template.format({
             "intent": self.intent.description,
             "history": context.conversation.get_history().format_to_string(),
@@ -71,7 +71,7 @@ class IntentFillingAction(Action):
         self.llm = ChatModel()
 
     def run(self, context):
-        context.set_status('action:intent_filling')
+        logger.info(f'exec action intent_filling')
         prompt = self.prompt_template.format({
             "history": context.conversation.get_history().format_to_string(),
         })
@@ -87,7 +87,7 @@ class ChitChatAction(Action):
         self.default_template = "我不知道该怎么回答好了"
 
     def run(self, context) -> ActionResponse:
-        context.set_status('action:chitchat')
+        logger.info(f'exec action slot chitchat')
         # todo: add history from context
         result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
         if result.response is None:

@@ -71,16 +71,13 @@ class AssistantPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(IE.intent):
-            if IE.intent.name in BUSINESS_INTENS:
-                print(f'exec action {form.action}')
+            if IE.intent.name in BUSINESS_INTENS and context.has_update:
+                context.has_update = False
                 return True, BankRelatedAction(form.action, possible_slots, IE.intent)
             elif IE.intent.name in ["skill_irrelevant", "other_skill"]:
-                print(f'exec action {form.action}')
                 return True, JumpOut()
             elif IE.intent.name in ["chitchat"]:
-                print(f"{context.intent_queue}----------------------")
                 if len(context.intent_queue) < 2 or context.intent_queue[-2].name in ["chitchat"]:
-                    print(f'exec action {form.action}')
                     return True, JumpOut()
                 else:
                     context.set_state("intent_filling")

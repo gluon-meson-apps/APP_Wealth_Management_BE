@@ -28,11 +28,9 @@ class ConversationContext:
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
         self.intent_queue = deque(maxlen=3)
-        self.current_enriched_user_input = None
         self.history = History([])
         # used for logging
-        self.status = 'start'
-        
+        self.status = 'start'  
         # used for condition jughment
         self.state = None
         self.entities = []
@@ -40,6 +38,7 @@ class ConversationContext:
         self.updated_at = datetime.now()
         # counter for inquiry times
         self.inquiry_times = 0
+        self.has_update = False
 
     def get_history(self) -> History:
         return self.history
@@ -48,6 +47,7 @@ class ConversationContext:
         self.history.add_history(role, message)
         
     def add_entity(self, entities: List[Entity]):
+        self.has_update = True
         entity_map: Dict[str, Entity] = {entity.type: entity for entity in self.entities}
         
         for new_entity in entities:
@@ -61,15 +61,6 @@ class ConversationContext:
             else:
                 self.entities.append(new_entity)
                 logger.info("Added entity %s for session %s", new_entity.type, self.session_id)
-
-    
-    def update_entity(self, updated_entity: Entity) -> bool:
-        for index, entity in enumerate(self.entities):
-            if entity.name == updated_entity.name:
-                self.entities[index] = updated_entity
-                logger.info("Updated slot %s for session %s", updated_entity.name, self.session_id)
-                return True  # Slot updated successfully
-        return False  # Slot with given name not found
 
     def get_entities(self):
         return self.entities

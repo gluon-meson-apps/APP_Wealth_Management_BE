@@ -51,4 +51,4 @@ class BasePolicyManager(PolicyManager):
                 if handled:
                     return action
                 
-        return ChitChatAction(model_type=model, chat_model=ChatModel(), user_input=conversation.current_enriched_user_input)
+        return ChitChatAction(model_type=model, chat_model=ChatModel(), user_input=conversation.current_user_input)

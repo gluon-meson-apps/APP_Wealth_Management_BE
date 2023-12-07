@@ -16,7 +16,7 @@ class BankRelatedAction(Action):
         self.intent = intent
 
     def run(self, context) -> ActionResponse:
-        context.set_status(f'action: {self.action_name}')
+        logger.info(f'exec action {self.action_name}')
         slots = [(slot.name, slot.value, slot.confidence) for slot in self.possible_slots]
         detail = {
             "slot": slots,
@@ -29,6 +29,6 @@ class JumpOut(Action):
         pass
 
     def run(self, context) -> ActionResponse:
-        context.set_status('action:jump out')
+        logger.info(f'exec action jump out')
         logger.debug("非范围内意图")
         return ActionResponse(text=f"Jump out")

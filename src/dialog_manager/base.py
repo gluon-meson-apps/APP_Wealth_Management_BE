@@ -40,7 +40,6 @@ class BaseDialogManager:
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_history('user', message)
-        conversation.current_enriched_user_input = conversation.current_user_input
 
         plan = self.reasoner.think(conversation)
 
