@@ -1,3 +1,6 @@
+import configparser
+import os
+
 import gm_logger
 from tracker.context import ConversationContext
 from nlu.base import Nlu
@@ -6,7 +9,8 @@ from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier
 
 logger = gm_logger.get_logger()
-
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class MixedNLU(Nlu):
     def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):
@@ -26,10 +30,13 @@ class MixedNLU(Nlu):
     def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
 
         conversation.set_status("analyzing user's intent")
-        try:
-            current_intent = self.intent_classifier.get_intent_from_es(conversation)
-        except Exception:
-            current_intent = None
+        current_intent = None
+        if "True" == config.get('elasticsearch', 'enable'):
+            try:
+                current_intent = self.intent_classifier.get_intent_from_es(conversation)
+            except Exception:
+                pass
+
         if not current_intent:
             current_intent = self.intent_classifier.get_intent_from_model(conversation)
 
