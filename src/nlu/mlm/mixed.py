@@ -26,14 +26,19 @@ class MixedNLU(Nlu):
     def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
 
         conversation.set_status("analyzing user's intent")
-        current_intent = self.intent_classifier.get_intent(conversation)
+        try:
+            current_intent = self.intent_classifier.get_intent_from_es(conversation)
+        except Exception as e:
+            logger.error(f"An error occurred while getting intent from ES: {str(e)}")
+            current_intent = None
+        if not current_intent:
+            current_intent = self.intent_classifier.get_intent_from_model(conversation)
 
         conversation = self.intent_classifier.handle_intent(conversation, current_intent)
 
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.set_status("extracting utterance's slots")
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
-        entities_string = str(list(map(lambda entity: (entity.type, entity.value), current_entities)))
 
         # retain entities
         existed_entities = conversation.get_entities()

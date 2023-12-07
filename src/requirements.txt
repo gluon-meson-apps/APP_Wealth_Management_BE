@@ -7,3 +7,4 @@ loguru
 uvicorn
 schedule
 python-dotenv
+elasticsearch

@@ -6,6 +6,7 @@ import yaml
 from fastapi import HTTPException
 from loguru import logger
 
+from elastic_search_manager.base import ElasticsearchManager
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
@@ -82,7 +83,7 @@ class IntentClassifier:
     def __init__(self, intent_list_config: IntentListConfig):
         self.intent_list_config = intent_list_config
 
-    def get_intent(self, conversation: ConversationContext) -> Intent:
+    def get_intent_from_model(self, conversation: ConversationContext) -> Intent:
         logger.info(f"user input is: {conversation.current_user_input}")
         payload = {"input_text": conversation.current_user_input}
         response = requests.post(MODEL_URL, json=payload)
@@ -97,6 +98,12 @@ class IntentClassifier:
             raise HTTPException(
                 status_code=response.status_code, detail={response.text}
             )
+
+    @staticmethod
+    def get_intent_from_es(conversation):
+        elasticsearch_manager = ElasticsearchManager()
+        search_result = elasticsearch_manager.search_by_question(question=conversation.current_user_input)
+        return Intent(name=search_result[1], confidence=1.0)
 
     def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
 
@@ -117,3 +124,5 @@ class IntentClassifier:
             context.update_intent(None)
 
         return context
+
+
