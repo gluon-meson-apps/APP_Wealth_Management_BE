@@ -1,14 +1,30 @@
-from typing import List
+from typing import List, Tuple
 
 from llm.self_host import ChatModel
 
-from action.actions.general import ChitChatAction, GreetAction
+from action.actions.general import ChitChatAction
 from action.base import Action
 
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity
-from policy.general import Policy
 from prompt_manager.base import PromptManager
+
+
+class Policy:
+
+    def __init__(self, prompt_manager: PromptManager):
+        self.prompt_manager = prompt_manager
+
+    def handle(self, intent: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
+        pass
+
+    @staticmethod
+    def get_possible_slots(intent: IntentWithEntity):
+        return {entity.possible_slot for entity in intent.entities if Policy.is_not_empty(entity)}
+
+    @staticmethod
+    def is_not_empty(entity):
+        return entity.value is not None and entity.value != ''
 
 
 class PolicyManager:
@@ -24,9 +40,6 @@ class BasePolicyManager(PolicyManager):
         self.policies = policies
         self.prompt_manager = prompt_manager
         self.action_model_type = action_model_type
-
-    def get_greet_action(self, conversation: ConversationContext, model_type: str) -> Action:
-        return GreetAction(prompt_name="greeting", model_type=model_type, prompt_manager=self.prompt_manager)
 
     # 如果有多个action，用一个大的action包装起来，还是视为一个action，用到组合模式
     def get_action(self, intent: IntentWithEntity, conversation: ConversationContext, model_type: str) -> Action:

@@ -4,11 +4,12 @@ from typing import Dict, List, Any
 
 from gm_logger import get_logger
 from nlu.intent_with_entity import Entity, Intent
+from collections import deque
 
 logger = get_logger()
 
 class History:
-    def __init__(self, histories: List[dict[str, Any]], max_history: int = 4):
+    def __init__(self, histories: List[dict[str, Any]], max_history: int = 6):
         self.max_history = max_history
         self.histories = histories[-self.max_history:]
 
@@ -26,7 +27,7 @@ class ConversationContext:
         self.current_user_input = current_user_input
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
-        self.intent_queue: List[Intent] = [] 
+        self.intent_queue = deque(maxlen=3)
         self.current_enriched_user_input = None
         self.history = History([])
         # used for logging
@@ -60,9 +61,6 @@ class ConversationContext:
             else:
                 self.entities.append(new_entity)
                 logger.info("Added entity %s for session %s", new_entity.type, self.session_id)
-        
-        #self.entities = list(entity_map.values())  # Update entities with the modified/new entities
-        print(f"entities: {self.entities}")
 
     
     def update_entity(self, updated_entity: Entity) -> bool:
@@ -85,9 +83,12 @@ class ConversationContext:
         
     def set_state(self, state: str):
         self.state = state
+        if "filling" in state or "confirm" in state:
+            self.inquiry_times += 1
         
     def update_intent(self, intent: Intent):
         self.current_intent = intent
         if intent is not None:
             self.intent_queue.append(intent)
-        self.inquiry_times = 0
+            if intent.name != self.current_intent.name:
+                self.inquiry_times = 0

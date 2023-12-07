@@ -66,5 +66,5 @@ class BaseOutputAdapter(OutputAdapter):
                     return f"{match.group(1)}%"
 
         # 如果没有匹配成功，打印警告并返回空字符串
-        print("警告：未能识别百分比文本格式！")
+        logger.warn(f"Normalize [{text} failed")
         return ""
