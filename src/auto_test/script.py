@@ -36,7 +36,9 @@ for file_name in files:
                 # 解析并记录机器人的响应
                 if response.status_code == 200:
                     bot_response = response.json()["response"]["text"]
+                    extra_info = response.json()["response"]["extra_info"]
                     log_file.write(f"User: {user_input}\nBot: {bot_response}\n")
+                    log_file.write(f"Extra info: {extra_info}\n")
                     log_file.write("-" * 120)
                     log_file.write("\n")
                 else:

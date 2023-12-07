@@ -1,3 +1,4 @@
 User: 页面放大到110%
-Bot: 已为您完成page_enlarge, slots: [('font_size', '110%')]
+Bot: 已为您完成放大页面字体
+Extra info: {'slot': [['font_size', '110%', None]], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------

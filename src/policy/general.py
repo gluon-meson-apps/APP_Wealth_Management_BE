@@ -73,7 +73,7 @@ class AssistantPolicy(Policy):
         if form := self.form_store.get_form_from_intent(IE.intent):
             if IE.intent.name in BUSINESS_INTENS:
                 print(f'exec action {form.action}')
-                return True, BankRelatedAction(form.action, possible_slots)
+                return True, BankRelatedAction(form.action, possible_slots, IE.intent)
             elif IE.intent.name in ["skill_irrelevant", "other_skill"]:
                 print(f'exec action {form.action}')
                 return True, JumpOut()

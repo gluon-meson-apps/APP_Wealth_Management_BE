@@ -35,7 +35,11 @@ class SlotFillingAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=1024)
-        return ActionResponse(text=response)
+        detail = {
+            "slot": [(slot.name, slot.value, slot.confidence) for slot in self.slots],
+            "intent": self.intent
+        }
+        return ActionResponse(text=response, extra_info=detail)
 
 class IntentConfirmAction(Action):
     """Intent confirm action using large language models."""
@@ -53,7 +57,10 @@ class IntentConfirmAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=256)
-        return ActionResponse(text=response)
+        detail = {
+            "intent": self.intent
+        }
+        return ActionResponse(text=response, extra_info=detail)
     
 
 class IntentFillingAction(Action):
