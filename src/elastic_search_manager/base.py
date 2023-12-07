@@ -13,7 +13,6 @@ class ElasticsearchManager:
         # 从配置文件中获取Elasticsearch连接参数
         es_config = {
             "host": config.get('elasticsearch', 'host').split(","),
-            "port": config.getint('elasticsearch', 'port'),
             "http_auth": (config.get('elasticsearch', 'username'),
                           config.get('elasticsearch', 'password')),
             "timeout": timeout,
@@ -21,7 +20,12 @@ class ElasticsearchManager:
         }
 
         # 初始化Elasticsearch连接
-        self.es = Elasticsearch([es_config])
+        self.es = Elasticsearch(
+            hosts=es_config["host"],
+            http_auth=es_config["http_auth"],
+            timeout=es_config["timeout"],
+            max_retries=es_config["max_retries"]
+        )
         logger.info(f"ES info: {self.es.info}")
         self.status = config.get('elasticsearch', 'es_status')
         self.channel = config.get('elasticsearch', 'es_channel')
@@ -54,6 +58,7 @@ class ElasticsearchManager:
                 timeout_cnt += 1
                 if timeout_cnt >= 3:
                     logger.error("ES failed 3 times")
+                    raise e
                 else:
                     logger.error(f"ES failed {timeout_cnt} times")
                     logger.error(f"{str(e)}")

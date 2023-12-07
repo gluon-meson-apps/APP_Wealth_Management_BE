@@ -102,8 +102,12 @@ class IntentClassifier:
     @staticmethod
     def get_intent_from_es(conversation):
         elasticsearch_manager = ElasticsearchManager()
-        search_result = elasticsearch_manager.search_by_question(question=conversation.current_user_input)
-        return Intent(name=search_result[1], confidence=1.0)
+        try:
+            search_result = elasticsearch_manager.search_by_question(question=conversation.current_user_input)
+            return Intent(name=','.join(search_result[1]), confidence=1.0, description="")
+        except Exception as e:
+            logger.error(f"An error occurred while getting intent from ES: {str(e)}")
+            raise e
 
     def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
 

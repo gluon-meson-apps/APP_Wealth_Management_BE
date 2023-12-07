@@ -7,4 +7,4 @@ loguru
 uvicorn
 schedule
 python-dotenv
-elasticsearch
+elasticsearch==7.6.0

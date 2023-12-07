@@ -28,8 +28,7 @@ class MixedNLU(Nlu):
         conversation.set_status("analyzing user's intent")
         try:
             current_intent = self.intent_classifier.get_intent_from_es(conversation)
-        except Exception as e:
-            logger.error(f"An error occurred while getting intent from ES: {str(e)}")
+        except Exception:
             current_intent = None
         if not current_intent:
             current_intent = self.intent_classifier.get_intent_from_model(conversation)
