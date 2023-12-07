@@ -2,6 +2,7 @@ import os
 from urllib.request import Request
 
 from dotenv import load_dotenv
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
@@ -13,6 +14,20 @@ load_dotenv()
 
 app = FastAPI()
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
+
+if os.getenv("LOCAL_MODE") == '1':
+    origins = [
+        "http://127.0.0.1",
+        "http://127.0.0.1:8089",
+    ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 @app.middleware("http")
@@ -35,7 +50,7 @@ def chat(data: MessageInput):
     session_id = data.session_id
     user_input = data.user_input
     result, conversation = dialog_manager.handle_message(user_input, session_id)
-    return {"response": result, "conversation": conversation}
+    return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
 
 
 def main():
