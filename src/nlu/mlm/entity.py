@@ -17,6 +17,7 @@ config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
 
 MODEL_URL = config['JointBert']['base_url']
 
+BASE_SIG_VALUE = 0.8
 
 class EntityExtractor:
     def __init__(self, form_store: FormStore):
@@ -82,7 +83,7 @@ class EntityExtractor:
         # 创建实体列表和动作
         entity_list = [
             Entity(type=name, value=value["value"], confidence=value["confidence"], possible_slot=get_slot(name, value))
-            for name, value in valid_entities
+            for name, value in valid_entities if value["confidence"] > BASE_SIG_VALUE
         ]
         action = form.action
 
