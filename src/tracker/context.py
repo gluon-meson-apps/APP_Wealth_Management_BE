@@ -83,7 +83,8 @@ class ConversationContext:
         
     def set_state(self, state: str):
         self.state = state
-        if "filling" in state or "confirm" in state:
+        keywords = ["filling", "confirm"]
+        if any(keyword in state for keyword in keywords):
             self.inquiry_times += 1
         
     def update_intent(self, intent: Intent):

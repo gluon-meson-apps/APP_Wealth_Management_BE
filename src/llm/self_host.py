@@ -28,7 +28,7 @@ model = "chatglm3"
 model = "chatglm3"
 
 class ChatModel():
-    def chat(self, query, stream=False, history=[], functions=None, max_retry=5, max_length=256, temperature=0.0):
+    def chat(self, query, stream=False, history=[], functions=None, max_retry=5, max_length=128, temperature=0.0):
         params = dict(model=model, messages=[{"role": "user", "content": query}] + history, stream=stream)
         params["max_tokens"] = max_length
         params["temperature"] = temperature

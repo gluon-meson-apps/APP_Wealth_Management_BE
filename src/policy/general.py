@@ -77,6 +77,14 @@ class AssistantPolicy(Policy):
             elif IE.intent.name in ["skill_irrelevant", "other_skill"]:
                 print(f'exec action {form.action}')
                 return True, JumpOut()
+            elif IE.intent.name in ["chitchat"]:
+                print(f"{context.intent_queue}----------------------")
+                if len(context.intent_queue) < 2 or context.intent_queue[-2].name in ["chitchat"]:
+                    print(f'exec action {form.action}')
+                    return True, JumpOut()
+                else:
+                    context.set_state("intent_filling")
+                    return True, IntentFillingAction(prompt_manager=self.prompt_manager)
             else:
                 return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         return False, None
