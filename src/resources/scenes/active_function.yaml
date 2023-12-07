@@ -1,5 +1,5 @@
 name: activate_function
-description: 激活功能
+description: 开通功能
 slots:
   - name: functions
     description: 待激活的功能名称
