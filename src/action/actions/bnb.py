@@ -35,6 +35,5 @@ class JumpOut(Action):
         pass
 
     def run(self, context) -> ActionResponse:
-        logger.info(f'exec action jump out')
         logger.debug("非范围内意图")
         return ActionResponse(text=f"Jump out")

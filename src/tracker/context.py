@@ -56,10 +56,10 @@ class ConversationContext:
                 existing_entity.role = new_entity.role
                 existing_entity.confidence = new_entity.confidence
                 existing_entity.possible_slot = new_entity.possible_slot
-                logger.info("Updated entity %s for session %s", new_entity.type, self.session_id)
+                logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")
             else:
                 self.entities.append(new_entity)
-                logger.info("Added entity %s for session %s", new_entity.type, self.session_id)
+                logger.info(f"Added entity {new_entity.type} for session {self.session_id}")
 
     def get_entities(self):
         return self.entities
@@ -69,7 +69,7 @@ class ConversationContext:
 
     def set_status(self, status: str):
         self.status = status
-        logger.info("session %s, conversation status: %s", self.session_id, status)
+        logger.info(f"session {self.session_id}, conversation status: {status}")
         
     def set_state(self, state: str):
         self.state = state

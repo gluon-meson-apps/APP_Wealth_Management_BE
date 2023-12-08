@@ -36,17 +36,15 @@ class EntityExtractor:
                 status_code=response.status_code, detail={response.text}
             )
 
-    def is_valid_entity(self, name, value, slot_dict):
+    def is_valid_entity(self, name, value, confidence, slot_dict):
         """
         检查实体是否有效
         """
         return (
             name in slot_dict
             and value is not None
-            and (
-                isinstance(value, int)
-                or (isinstance(value, dict) and len(value) > 0)
-            )
+            and confidence > BASE_SIG_VALUE
+            and (isinstance(value, int) or len(value) > 0)
         )
 
     def get_entity_and_action(self, conversation_context: ConversationContext) -> (List[Entity], str):
@@ -63,26 +61,27 @@ class EntityExtractor:
             return [], ""
 
         entities = self.extract_slots(user_input)
+        print(f'got entities: {entities.items()}')
         slot_dict = {slot.name: slot for slot in form.slots}
 
         if entities:
             valid_entities = [
-                (name, value)
-                for name, value in entities.items()
-                if self.is_valid_entity(name, value, slot_dict)
+                (name, detail['value'], round(detail['confidence'], 2))
+                for name, detail in entities.items()
+                if self.is_valid_entity(name, detail['value'], detail['confidence'], slot_dict)
             ]
         else:
             valid_entities = []
 
-        def get_slot(name, value):
+        def get_slot(name, value, confidence):
             if slot_dict and name in slot_dict:
-                return slot_dict[name].copy(update={'value': value["value"]})
+                return slot_dict[name].copy(update={'value': value, 'confidence': confidence})
             return None
 
         # 创建实体列表和动作
         entity_list = [
-            Entity(type=name, value=value["value"], confidence=value["confidence"], possible_slot=get_slot(name, value))
-            for name, value in valid_entities if value["confidence"] > BASE_SIG_VALUE
+            Entity(type=name, value=value, confidence=confidence, possible_slot=get_slot(name, value, confidence))
+            for name, value, confidence in valid_entities
         ]
         action = form.action
 
