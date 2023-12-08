@@ -20,7 +20,15 @@ class BankRelatedAction(Action):
             "slot": slots,
             "intent": self.intent
         }
-        return ActionResponse(text=f"已为您完成{self.intent.description}", extra_info=detail)
+        function_name = None
+        for slot in self.possible_slots:
+            if slot.name == "functions":
+                function_name = slot.value
+                break
+
+        if self.action_name == "activate_function":
+            return ActionResponse(text=f"已为您开通功能 {function_name}", extra_info=detail)
+        return ActionResponse(text=f"已为您完成 {self.intent.description}", extra_info=detail)
 
 class JumpOut(Action):
     def __init__(self):
