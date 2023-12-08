@@ -12,6 +12,7 @@ from pydantic import BaseModel
 load_dotenv()
 
 app = FastAPI()
+dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
 
 @app.middleware("http")
@@ -27,9 +28,6 @@ async def catch_exceptions_middleware(request: Request, call_next):
 class MessageInput(BaseModel):
     session_id: str
     user_input: str
-
-
-dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
 
 @app.post("/chat/")

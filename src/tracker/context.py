@@ -73,13 +73,13 @@ class ConversationContext:
         
     def set_state(self, state: str):
         self.state = state
-        keywords = ["filling", "confirm"]
+        keywords = ["intent_filling", "intent_confirm"]
         if any(keyword in state for keyword in keywords):
             self.inquiry_times += 1
         
     def update_intent(self, intent: Intent):
-        self.current_intent = intent
         if intent is not None:
             self.intent_queue.append(intent)
-            if intent.name != self.current_intent.name:
+            if intent != self.current_intent:
                 self.inquiry_times = 0
+        self.current_intent = intent
