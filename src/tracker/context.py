@@ -31,7 +31,7 @@ class ConversationContext:
         # used for logging
         self.status = 'start'  
         # used for condition jughment
-        self.state = None
+        self.state = ""
         self.entities = []
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
