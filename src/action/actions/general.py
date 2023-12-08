@@ -19,7 +19,7 @@ class SlotFillingAction(Action):
     """Slot filling action using large language models."""
 
     def __init__(self, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
-        self.prompt_template = prompt_manager.load(name='action_slot_filling')
+        self.prompt_template = prompt_manager.load(name='slot_filling')
         self.llm = ChatModel()
         self.slots = slots
         self.intent = intent
@@ -76,6 +76,29 @@ class IntentFillingAction(Action):
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=256)
         return ActionResponse(text=response)
+
+class SlotConfirmAction(Action):
+    """Slot confirm action using large language models."""
+
+    def __init__(self, intent: Intent, slot: Slot, prompt_manager: PromptManager):
+        self.prompt_template = prompt_manager.load(name='slot_confirm')
+        self.llm = ChatModel()
+        self.intent = intent
+        self.slot = slot
+
+    def run(self, context: ConversationContext):        
+        logger.info(f'exec action slot confirm')
+        prompt = self.prompt_template.format({
+            "intent": self.intent.description,
+            "slot": self.slot.description,
+            "history": context.conversation.get_history().format_to_string(),
+        })
+        logger.debug(prompt)
+        response = self.llm.chat(prompt, max_length=256)
+        detail = {
+            "intent": self.intent
+        }
+        return ActionResponse(text=response, extra_info=detail)
 
 class ChitChatAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel, user_input):

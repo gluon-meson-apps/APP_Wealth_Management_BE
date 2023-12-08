@@ -16,7 +16,7 @@ config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
 
 MODEL_URL = config['JointBert']['base_url']
 
-BASE_SIG_VALUE = 0.8
+BASE_SIG_VALUE = 0.5
 
 class EntityExtractor:
     def __init__(self, form_store: FormStore):

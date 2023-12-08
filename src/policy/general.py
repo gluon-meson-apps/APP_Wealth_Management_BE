@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from action.base import Action
-from action.actions.general import EndDialogueAction, SlotFillingAction, IntentConfirmAction, IntentFillingAction
+from action.actions.general import EndDialogueAction, SlotFillingAction, IntentConfirmAction, IntentFillingAction, SlotConfirmAction
 from action.actions.bnb import BankRelatedAction, JumpOut
 from policy.base import Policy
 from tracker.context import ConversationContext
@@ -12,7 +12,7 @@ from prompt_manager.base import PromptManager
 
 
 INTENT_SIG_TRH = 0.9
-SLOT_SIG_TRH = 0.9
+SLOT_SIG_TRH = 0.8
 
 MAX_FOLLOW_UP_TIMES = 2
 
@@ -51,6 +51,7 @@ class SlotFillingPolicy(Policy):
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
+        print(possible_slots)
         logger.debug(f"当前状态\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(IE.intent):
             missed_slots = set(form.slots) - possible_slots
@@ -59,6 +60,14 @@ class SlotFillingPolicy(Policy):
             if missed_slots:
                 context.set_state("slot_filling")
                 return True, SlotFillingAction(missed_slots, IE.intent, prompt_manager=self.prompt_manager)
+
+            #print(f"possible slots: {possible_slots}")
+            for slot in possible_slots:
+                # print(slot)
+                if slot in form.slots and slot.confidence < SLOT_SIG_TRH:
+                    context.set_state(f"slot_confirm: {slot.name}")
+                    return True, SlotConfirmAction(IE.intent, slot, prompt_manager=self.prompt_manager)
+
         return False, None
 
 class AssistantPolicy(Policy):
@@ -68,19 +77,29 @@ class AssistantPolicy(Policy):
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
-        logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}'for slot in possible_slots if slot]}")
-        if form := self.form_store.get_form_from_intent(IE.intent):
-            if IE.intent.name in BUSINESS_INTENS and context.has_update:
-                context.has_update = False
-                return True, BankRelatedAction(form.action, possible_slots, IE.intent)
-            elif IE.intent.name in ["skill_irrelevant", "other_skill"]:
+        logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
+        form = self.form_store.get_form_from_intent(IE.intent)
+
+        if not form:
+            return False, None
+        
+        # 处理业务相关的意图
+        if IE.intent.name in BUSINESS_INTENS and context.has_update:
+            context.has_update = False
+            return True, BankRelatedAction(form.action, possible_slots, IE.intent)
+
+        # 跳出对话
+        elif IE.intent.name in ("skill_irrelevant", "other_skill"):
+            return True, JumpOut()
+
+        # 处理闲聊意图
+        elif IE.intent.name == "chitchat":
+            if len(context.intent_queue) < 2 or context.intent_queue[-2].name == "chitchat":
                 return True, JumpOut()
-            elif IE.intent.name in ["chitchat"]:
-                if len(context.intent_queue) < 2 or context.intent_queue[-2].name in ["chitchat"]:
-                    return True, JumpOut()
-                else:
-                    context.set_state("intent_filling")
-                    return True, IntentFillingAction(prompt_manager=self.prompt_manager)
             else:
+                context.set_state("intent_filling")
                 return True, IntentFillingAction(prompt_manager=self.prompt_manager)
-        return False, None
+
+        # 其他意图
+        else:
+            return True, IntentFillingAction(prompt_manager=self.prompt_manager)
