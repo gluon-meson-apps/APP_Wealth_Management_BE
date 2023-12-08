@@ -15,11 +15,10 @@ class IntegratedNLU(Nlu):
         self.entity_extractor = entity_extractor
 
     def merge_entities(self, existing_entities, current_entities):
-        merged_entities = {entity.possible_slot.name if entity.possible_slot else None: entity for entity in existing_entities}
+        merged_entities = {entity.type if entity else None: entity for entity in existing_entities}
 
         for entity in current_entities:
-            if entity.possible_slot and entity.possible_slot.name:
-                merged_entities[entity.possible_slot.name] = entity
+            merged_entities[entity.type] = entity
 
         return list(merged_entities.values())
 
@@ -45,7 +44,9 @@ class IntegratedNLU(Nlu):
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
         # Retain entities
         existing_entities = conversation.get_entities()
+        print(f"current_entities: {current_entities}")
         merged_entities = self.merge_entities(existing_entities, current_entities)
+        print(f"merged_entities: {merged_entities}")
 
         entities_string = str([(entity.type, entity.value, entity.confidence) for entity in merged_entities])
         conversation.add_entity(current_entities)
