@@ -25,7 +25,6 @@ model = "chatglm3"
 # )
 
 # model = "gpt-3.5-turbo"
-model = "chatglm3"
 
 class ChatModel():
     def chat(self, query, stream=False, history=[], functions=None, max_retry=5, max_length=128, temperature=0.0):

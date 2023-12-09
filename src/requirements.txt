@@ -1,10 +1,10 @@
-fastapi
-requests
-PyYAML
+fastapi==0.104.1
+requests==2.31.0
+pyyaml==6.0.1
 colorama
-openai
+openai==1.3.7
 loguru
-uvicorn
+uvicorn==0.24.0
 schedule
 python-dotenv
 elasticsearch==7.6.0

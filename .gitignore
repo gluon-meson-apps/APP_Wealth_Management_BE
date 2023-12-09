@@ -4,3 +4,4 @@ venv/
 *.log
 .env
 .vscode
+.DS_Store
