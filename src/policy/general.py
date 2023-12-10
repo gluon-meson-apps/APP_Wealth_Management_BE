@@ -89,7 +89,7 @@ class AssistantPolicy(Policy):
             return True, BankRelatedAction(form.action, possible_slots, IE.intent)
 
         # 跳出对话
-        elif IE.intent.name in ("skill_irrelevant", "other_skill"):
+        elif IE.intent.name in ("skill_irrelevant", "other_skills"):
             return True, JumpOut()
 
         # 处理闲聊意图
