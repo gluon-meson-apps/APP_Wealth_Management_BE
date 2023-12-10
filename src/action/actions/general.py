@@ -91,6 +91,7 @@ class SlotConfirmAction(Action):
         prompt = self.prompt_template.format({
             "intent": self.intent.description,
             "slot": self.slot.description,
+            "slot_value": self.slot.value,
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
