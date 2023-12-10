@@ -12,7 +12,7 @@ from nlu.forms import FormStore
 from nlu.mlm.entity import EntityExtractor
 from nlu.mlm.intent import IntentClassifier, IntentListConfig
 from policy.base import BasePolicyManager
-from policy.general import AssistantPolicy, IntentFillingPolicy, SlotFillingPolicy, EndDialoguePolicy
+from policy.general import AssistantPolicy, IntentFillingPolicy, SlotFillingPolicy, EndDialoguePolicy, JumpOutPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
 
@@ -46,7 +46,6 @@ class BaseDialogManager:
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         conversation.append_history('assistant', response.text)
-        conversation.current_intent = plan.intent.intent
         conversation.add_entity(plan.intent.entities)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         return response, conversation
@@ -73,9 +72,10 @@ class DialogManagerFactory:
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
+        jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
 
         policy_manager = BasePolicyManager(
-            policies=[end_dialogue_policy, intent_filling_policy, slot_filling_policy, assitant_policy],
+            policies=[end_dialogue_policy, jump_out_policy, intent_filling_policy, slot_filling_policy, assitant_policy],
             prompt_manager=prompt_manager,
             action_model_type=action_model_type
         )

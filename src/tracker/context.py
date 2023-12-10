@@ -83,3 +83,6 @@ class ConversationContext:
             if intent != self.current_intent:
                 self.inquiry_times = 0
         self.current_intent = intent
+        
+    def intent_restore(self):
+        self.current_intent = self.intent_queue[0]

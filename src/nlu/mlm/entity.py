@@ -61,7 +61,6 @@ class EntityExtractor:
             return [], ""
 
         entities = self.extract_slots(user_input)
-        print(f'got entities: {entities.items()}')
         slot_dict = {slot.name: slot for slot in form.slots}
 
         if entities:

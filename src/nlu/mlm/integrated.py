@@ -44,9 +44,7 @@ class IntegratedNLU(Nlu):
         current_entities, action = self.entity_extractor.get_entity_and_action(conversation)
         # Retain entities
         existing_entities = conversation.get_entities()
-        print(f"current_entities: {current_entities}")
         merged_entities = self.merge_entities(existing_entities, current_entities)
-        print(f"merged_entities: {merged_entities}")
 
         entities_string = str([(entity.type, entity.value, entity.confidence) for entity in merged_entities])
         conversation.add_entity(current_entities)
