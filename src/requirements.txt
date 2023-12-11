@@ -7,6 +7,5 @@ loguru
 uvicorn==0.24.0
 schedule
 python-dotenv
-elasticsearch==7.6.0
 parameterized==0.8.1
 Locust

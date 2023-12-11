@@ -2,7 +2,6 @@ import base64
 import configparser
 
 import requests
-from elasticsearch import Elasticsearch
 from loguru import logger
 
 
@@ -11,38 +10,21 @@ class ElasticsearchManager:
         # 从config.ini文件中读取Elasticsearch连接参数
         config = configparser.ConfigParser()
         config.read('config.ini')
+        credentials = f"{config.get('elasticsearch', 'username')}:{config.get('elasticsearch', 'password')}"
+        token = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
-        # 从配置文件中获取Elasticsearch连接参数
-        es_config = {
-            "host": config.get('elasticsearch', 'host'),
-            "http_auth": (config.get('elasticsearch', 'username'),
-                          config.get('elasticsearch', 'password')),
-            "timeout": timeout,
-            "max_retries": 1
-        }
-
-        # 初始化Elasticsearch连接
-        self.es = Elasticsearch(
-            hosts=es_config["host"],
-            http_auth=es_config["http_auth"],
-            timeout=es_config["timeout"],
-            max_retries=es_config["max_retries"]
-        )
-        logger.info(f"ES info: {self.es.info}")
         self.status = config.get('elasticsearch', 'es_status')
         self.channel = config.get('elasticsearch', 'es_channel')
+        self.version = config.get('elasticsearch', 'es_version_id')
         self.index = config.get('elasticsearch', 'es_listed_index')
-        self.alias = config.get('elasticsearch', 'es_listed_index')
-        credentials = f"{config.get('elasticsearch', 'username')}:{config.get('elasticsearch', 'password')}"
-        self.token = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        self.host = config.get('elasticsearch', 'host')
         self.headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Basic {self.token}"
+            "Authorization": f"Basic {token}"
         }
-        self.host = config.get('elasticsearch', 'host')
-        self.version = config.get('elasticsearch', 'es_version_id')
 
     def search_by_question(self, question, topk=20):
+        logger.info("ES search start")
         body = {
             "size": topk,
             "query": {
@@ -62,7 +44,8 @@ class ElasticsearchManager:
         source_list = []
         for _ in range(3):
             try:
-                response = requests.post(self.host, headers=self.headers, json=body)
+                url = self.host + "/" + self.index + "/_search"
+                response = requests.post(url, headers=self.headers, json=body)
                 source_list = response.json().get("hits").get("hits")
                 break
             except Exception as e:

@@ -104,6 +104,7 @@ class IntentClassifier:
         elasticsearch_manager = ElasticsearchManager()
         try:
             search_result = elasticsearch_manager.search_by_question(question=conversation.current_user_input)
+            logger.info(f"find intent from ES: {search_result[1]}")
             return Intent(name=','.join(search_result[1]), confidence=1.0, description="")
         except Exception as e:
             logger.error(f"An error occurred while getting intent from ES: {str(e)}")
