@@ -1,5 +1,7 @@
+import base64
 import configparser
 
+import requests
 from elasticsearch import Elasticsearch
 from loguru import logger
 
@@ -12,7 +14,7 @@ class ElasticsearchManager:
 
         # 从配置文件中获取Elasticsearch连接参数
         es_config = {
-            "host": config.get('elasticsearch', 'host').split(","),
+            "host": config.get('elasticsearch', 'host'),
             "http_auth": (config.get('elasticsearch', 'username'),
                           config.get('elasticsearch', 'password')),
             "timeout": timeout,
@@ -31,14 +33,22 @@ class ElasticsearchManager:
         self.channel = config.get('elasticsearch', 'es_channel')
         self.index = config.get('elasticsearch', 'es_listed_index')
         self.alias = config.get('elasticsearch', 'es_listed_index')
+        credentials = f"{config.get('elasticsearch', 'username')}:{config.get('elasticsearch', 'password')}"
+        self.token = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        self.headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {self.token}"
+        }
+        self.host = config.get('elasticsearch', 'host')
+        self.version = config.get('elasticsearch', 'es_version_id')
 
-    def search_by_question(self, question, version_id=None, topk=20):
+    def search_by_question(self, question, topk=20):
         body = {
             "size": topk,
             "query": {
                 "bool": {
                     "filter": [
-                        {"term": {"version_id": {"value": version_id}}},
+                        {"term": {"version_id": {"value": self.version}}},
                         {"term": {"status": {"value": self.status}}}
                     ],
                     "must": [
@@ -52,7 +62,8 @@ class ElasticsearchManager:
         source_list = []
         for _ in range(3):
             try:
-                source_list = self.es.search(index=self.index, body=body, request_timeout=0.1)["hits"]["hits"]
+                response = requests.post(self.host, headers=self.headers, json=body)
+                source_list = response.json().get("hits").get("hits")
                 break
             except Exception as e:
                 timeout_cnt += 1
