@@ -6,8 +6,8 @@ from tqdm import tqdm
 
 def process_files(directory):
     # 指定文件夹路径
-    script_path = './scripts'  # 修改为你的文件夹路径
-    log_base_path = './logs'  # 修改为你的文件夹路径
+    script_path = './scripts/adjust_header'  # 修改为你的文件夹路径
+    log_base_path = './logs/adjust_header'  # 修改为你的文件夹路径
 
     # 获取文件列表
     file_list = []
