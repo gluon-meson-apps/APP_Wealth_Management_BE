@@ -138,5 +138,3 @@ class IntentClassifier:
             context.update_intent(None)
 
         return context
-
-
