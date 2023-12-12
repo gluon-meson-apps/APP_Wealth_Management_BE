@@ -28,7 +28,7 @@ class SlotFillingAction(Action):
         logger.info(f'exec action slot filling')
         prompt = self.prompt_template.format({
             "fill_slot": self.slots.pop().description,
-            "intent": self.intent.name,
+            "intent": self.intent.description,
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)

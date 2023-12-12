@@ -31,12 +31,11 @@ class IntentListConfig:
 
     def _initialize_fixed_intents(self):
         # Initialize fixed intents like chitchat, slot_filling
-        chitchat = IntentConfig("chitchat", "闲聊", "chitchat", [])
         slot_filling = IntentConfig("slot_filling", "追问槽位", "slot_filling", [])
         positive = IntentConfig("positive", "肯定", "positive", [])
         negative = IntentConfig("negative", "否认", "negative", [])
 
-        self.intents.extend([chitchat, slot_filling, positive, negative])
+        self.intents.extend([slot_filling, positive, negative])
 
     def get_intent_list(self):
         # read resources/intent.yaml file and get intent list
