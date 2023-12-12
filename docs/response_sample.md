@@ -57,8 +57,9 @@
                 "value": "110" //目标百分比，可选参数，如果没有该字段，触发UI兜底「如缩放按钮的高亮」
             },
             "businessInfo": {}
-        },
-        "jump_out_flag": false
+        },},
+  
+    "jump_out_flag": false
     }
 }
 ```

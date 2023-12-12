@@ -1,4 +1,3 @@
-import random
 from typing import Tuple
 
 from action.base import Action
@@ -10,6 +9,7 @@ from loguru import logger
 from nlu.forms import FormStore
 from nlu.intent_with_entity import IntentWithEntity
 from prompt_manager.base import PromptManager
+from output_adapter.base import BaseOutputAdapter
 
 
 INTENT_SIG_TRH = 0.8
@@ -125,7 +125,7 @@ class AssistantPolicy(Policy):
         # 处理业务相关的意图
         if IE.intent.name in BUSINESS_INTENS and context.has_update:
             context.has_update = False
-            return True, BankRelatedAction(form.action, possible_slots, IE.intent)
+            return True, BankRelatedAction(form.action, possible_slots, IE.intent, BaseOutputAdapter())
 
         # 兜底
         return True, IntentFillingAction(prompt_manager=self.prompt_manager)

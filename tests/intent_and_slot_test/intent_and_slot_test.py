@@ -1,27 +1,26 @@
 import unittest
 import uuid
 
-import parameterized
+from parameterized import parameterized
 import requests
 
 questions_and_expected_responses = [
   [
     '页面看不清楚，请放大50%',
     'enlarge_page',
-    [['font_size', '50%', None]]
+    [['font_size', '50%', 1.0]]
   ],
   [
     '页面看不清楚，请放大5%',
     'enlarge_page',
-    [['font_size', '5%', None]]
+    [['font_size', '5%', 1.0]]
   ],
-
 ]
 
 
 class TestIntentAndSlots(unittest.TestCase):
 
-  @parameterized.parameterized.expand(questions_and_expected_responses)
+  @parameterized.expand(questions_and_expected_responses)
   def test_single_chat_intent_and_slots(self, question, intent, slots):
     random_uuid = uuid.uuid4()
     response = requests.post('http://localhost:7788/chat/', json={

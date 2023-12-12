@@ -1,34 +1,101 @@
-from pydantic import BaseModel
+from enum import unique, Enum
+
 from loguru import logger
+from pydantic import BaseModel
+
 from action.base import Action
+from output_adapter.base import OutputAdapter
+
 
 class ActionResponse(BaseModel):
-    text: str
-    extra_info: dict = {}
+    code: int
+    message: str
+    answer: dict = {}
+    jump_out_flag: bool
+
+
+@unique
+class ActionType(str, Enum):
+    activate_function = "activate_function"
+    page_reduce = "page_reduce"
+    page_enlarge = "page_enlarge"
+    page_resize = "page_resize"
+    add_header = "add_header"
+    remove_header = "remove_header"
+
+
+operateTypeDict = {
+    "activate_function": "ACTIVATE_FUNCTION",
+    "page_reduce": "PAGE_RESIZE_INCREMENT",
+    "page_enlarge": "PAGE_RESIZE_INCREMENT",
+    "page_resize": "PAGE_RESIZE_TARGET",
+    "add_header": "ADJUST_HEADER",
+    "remove_header": "ADJUST_HEADER",
+}
+
+actionSlotsTypeDict = {
+    "activate_function": ["functions"],
+    "page_reduce": ["font_decrease", "font_size"],
+    "page_enlarge": ["font_increase", "font_size"],
+    "page_resize": ["font_size"],
+    "add_header": ["header_element"],
+    "remove_header": ["header_element", "header_position"],
+}
+
+operateSlotCategoryTypeDict = {
+    "page_reduce": "DECREASE",
+    "page_enlarge": "INCREASE",
+    "add_header": "ADD",
+    "remove_header": "REMOVE",
+}
+
+operateSlotValueTypeDict = {
+    "header_element": "NAME",
+    "header_position": "INDEX",
+}
 
 
 class BankRelatedAction(Action):
-    def __init__(self, action_name, possible_slots, intent):
+    def __init__(self, action_name, possible_slots, intent, output_adapter: OutputAdapter):
         self.action_name = action_name
         self.possible_slots = possible_slots
         self.intent = intent
+        self.output_adapter = output_adapter
 
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action {self.action_name}')
-        slots = [(slot.name, slot.value, slot.confidence) for slot in self.possible_slots]
-        detail = {
-            "slot": slots,
-            "intent": self.intent
-        }
-        function_name = None
-        for slot in self.possible_slots:
-            if slot.name == "functions":
-                function_name = slot.value
-                break
+        target_slot = [x for x in self.possible_slots if x.name in actionSlotsTypeDict[self.action_name]][0]
+        target_slot_value = self.output_adapter.normalize_slot_value(target_slot.value)
+        slot = dict()
+        if self.action_name == ActionType.activate_function or self.action_name == ActionType.page_resize:
+            slot = {
+                "value":target_slot_value
+            }
+        elif self.action_name == ActionType.page_reduce or self.action_name == ActionType.page_enlarge:
+            slot = {
+                "category": operateSlotCategoryTypeDict[self.action_name],
+                "value": target_slot_value
+            }
 
-        if self.action_name == "activate_function":
-            return ActionResponse(text=f"已为您开通功能 {function_name}", extra_info=detail)
-        return ActionResponse(text=f"已为您完成 {self.intent.description}", extra_info=detail)
+        elif self.action_name == ActionType.add_header or self.action_name == ActionType.remove_header:
+            slot = {
+                "category": operateSlotCategoryTypeDict[self.action_name],
+                "valueType": operateSlotValueTypeDict[target_slot.name],
+                "value": target_slot_value
+            }
+
+        detail = {
+            "messageType": "FORMAT_INTELLIGENT_EXEC",
+            "content": {
+                "businessId": "N35010Operate",
+                "operateType": operateTypeDict[self.action_name],
+                "operateSlots": slot,
+                "businessInfo": {}
+            },
+        }
+
+        return ActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+
 
 class JumpOut(Action):
     def __init__(self):
@@ -36,4 +103,4 @@ class JumpOut(Action):
 
     def run(self, context) -> ActionResponse:
         logger.debug("非范围内意图")
-        return ActionResponse(text=f"Jump out")
+        return ActionResponse(code=200, message="success", answer=dict(), jump_out_flag=True)
