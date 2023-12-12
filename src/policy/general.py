@@ -1,3 +1,4 @@
+import random
 from typing import Tuple
 
 from action.base import Action
@@ -58,7 +59,6 @@ class JumpOutPolicy(Policy):
 class IntentFillingPolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         Policy.__init__(self, prompt_manager)
-        self.form_store = form_store
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
@@ -98,6 +98,16 @@ class SlotFillingPolicy(Policy):
                 if slot in form.slots and slot.confidence < SLOT_SIG_TRH:
                     context.set_state(f"slot_confirm: {slot.name}")
                     return True, SlotConfirmAction(IE.intent, slot, prompt_manager=self.prompt_manager)
+            
+            # 如果所有的可选槽位都没有被填充且form.slot_required为True，则随机填充一个可选槽位
+            if form.slot_required:
+                optional_slots = [slot for slot in form.slots if slot.optional]
+                if optional_slots and len(possible_slots) == 0:
+                    slot_to_fill = random.choice(optional_slots)
+                    context.set_state("slot_filling")
+                    return True, SlotFillingAction([slot_to_fill], IE.intent, prompt_manager=self.prompt_manager)
+
+        return False, None
 
         return False, None
 

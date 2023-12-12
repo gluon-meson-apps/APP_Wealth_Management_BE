@@ -8,5 +8,5 @@ slots:
   - name: header_element
     description: 表头的相关信息
     slotType: text
-    optional: False
+    optional: True
 action: skill_irrelevant

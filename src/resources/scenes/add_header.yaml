@@ -2,7 +2,7 @@ name: add_header
 description: 增加表头
 slots:
   - name: header_element
-    description: 表头的相关信息
+    description: 表头名称
     slotType: text
     optional: False
 action: add_header

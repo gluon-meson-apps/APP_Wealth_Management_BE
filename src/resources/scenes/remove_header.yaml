@@ -1,12 +1,13 @@
 name: remove_header
 description: 删减表头
 slots:
+  - required: true
   - name: header_element
-    description: 表头的名称信息
+    description: 表头名称
     slotType: text
     optional: True
   - name: header_position
-    description: 表头的位置信息
+    description: 表头位置
     slotType: text
     optional: True
 action: remove_header
