@@ -53,8 +53,8 @@
             "operateType": "HEADER_ADJUSTMENT",
             "operateSlots": {
                 "category": "ADD" | "REMOVE", //增加或者减少
-                "valueType": "NUMERIC" | "STRING", //数值还是字符串
-                "value": "用户ID", 1, -1 //表头的名字或者表头的索引，负数意为倒数
+                "valueType": "INDEX" | "NAME", //数值还是字符串
+                "value": "用户ID" | 1 | -1 //表头的名字或者表头的索引，负数意为倒数
             },
             "businessInfo": {}
         },
@@ -98,7 +98,7 @@
 ```
 
 
-### TW Agent遇到无法处理的意图或决定交给开放域处理
+### TW Agent遇到无法处理的意图或其他决定交给开放域处理的情况
 ```json
 {
     "code": 200,
@@ -109,7 +109,7 @@
 ```
 
 
-### 发生错误
+### Agent 中发生错误
 ```json
 {
     "code": 500,
