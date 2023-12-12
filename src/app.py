@@ -62,4 +62,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # session_id = "123"
+    # user_input = "列太少了不清楚"
+    # result, conversation = dialog_manager.handle_message(user_input, session_id)
     main()

@@ -91,7 +91,7 @@ class SlotFillingPolicy(Policy):
             # 追问槽位
             if missed_slots:
                 context.set_state("slot_filling")
-                return True, SlotFillingAction(missed_slots, IE.intent, prompt_manager=self.prompt_manager)
+                return True, SlotFillingAction(missed_slots.pop(), IE.intent, prompt_manager=self.prompt_manager)
 
             # 确认槽位
             for slot in possible_slots:
@@ -103,9 +103,8 @@ class SlotFillingPolicy(Policy):
             if form.slot_required:
                 optional_slots = [slot for slot in form.slots if slot.optional]
                 if optional_slots and len(possible_slots) == 0:
-                    slot_to_fill = random.choice(optional_slots)
                     context.set_state("slot_filling")
-                    return True, SlotFillingAction([slot_to_fill], IE.intent, prompt_manager=self.prompt_manager)
+                    return True, SlotFillingAction(optional_slots, IE.intent, prompt_manager=self.prompt_manager)
 
         return False, None
 

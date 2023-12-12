@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from loguru import logger
 from action.base import Action, ActionResponse
 from llm.self_host import ChatModel
@@ -18,26 +18,32 @@ class EndDialogueAction(Action):
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
 
-    def __init__(self, slots: List[Slot], intent: Intent, prompt_manager: PromptManager):
+    def __init__(self, slots: Union[List[Slot], Slot], intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='slot_filling')
         self.llm = ChatModel()
-        self.slots = slots
         self.intent = intent
+        self.slots = slots
 
     def run(self, context):
         logger.info(f'exec action slot filling')
+        if isinstance(self.slots, list):
+            slot_description = '或'.join(slot.description for slot in self.slots)
+        else:
+            slot_description = self.slots.description
+        
         prompt = self.prompt_template.format({
-            "fill_slot": self.slots.pop().description,
+            "fill_slot": slot_description,
             "intent": self.intent.description,
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=1024)
+        response = self.llm.chat(prompt, max_length=128)
         detail = {
-            "slot": [(slot.name, slot.value, slot.confidence) for slot in self.slots],
+            "slot": self.slots,
             "intent": self.intent
         }
         return ActionResponse(text=response, extra_info=detail)
+
 
 class IntentConfirmAction(Action):
     """Intent confirm action using large language models."""
@@ -54,7 +60,7 @@ class IntentConfirmAction(Action):
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=256)
+        response = self.llm.chat(prompt, max_length=128)
         detail = {
             "intent": self.intent
         }
@@ -74,7 +80,7 @@ class IntentFillingAction(Action):
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=256)
+        response = self.llm.chat(prompt, max_length=128)
         return ActionResponse(text=response)
 
 class SlotConfirmAction(Action):
@@ -95,7 +101,7 @@ class SlotConfirmAction(Action):
             "history": context.conversation.get_history().format_to_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=256)
+        response = self.llm.chat(prompt, max_length=128)
         detail = {
             "intent": self.intent
         }
