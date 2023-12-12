@@ -73,7 +73,7 @@
         "messageType": "FORMAT_INTELLIGENT_EXEC",
         "content": {
             "businessId": "N35010Operate",
-            "operateType": "HEADER_ADJUSTMENT",
+            "operateType": "ADJUST_HEADER",
             "operateSlots": {
                 "category": "ADD" | "REMOVE", //增加或者减少
                 "valueType": "INDEX" | "NAME", //数值还是字符串，可选参数，如果没有该字段，触发UI兜底
