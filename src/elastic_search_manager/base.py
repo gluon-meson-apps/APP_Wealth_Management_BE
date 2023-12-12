@@ -66,6 +66,8 @@ class ElasticsearchManager:
             labelid_cands = []
             grammar_cands = []
             grammarid_cand = []
+            if not source_list:
+                return question_cands, label_cands, scores, labelid_cands, grammar_cands, grammarid_cand
             for source in source_list:
                 result = source["_source"]
                 scores.append(source["_score"])
