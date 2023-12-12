@@ -1,5 +1,6 @@
 name: enlarge_page
 description: 放大页面字体
+business: true
 slots:
   - name: font_size
     description: 目标大小

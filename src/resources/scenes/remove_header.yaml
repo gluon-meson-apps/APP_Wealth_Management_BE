@@ -1,5 +1,6 @@
 name: remove_header
 description: 删减表头
+business: true
 slots:
   - required: true
   - name: header_element

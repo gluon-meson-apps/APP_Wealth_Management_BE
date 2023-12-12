@@ -17,12 +17,12 @@ MODEL_URL = config['JointBert']['base_url']
 
 
 class IntentConfig:
-    def __init__(self, name, description, action, slots):
+    def __init__(self, name, description, business, action, slots):
         self.name = name
         self.description = description
         self.action = action
         self.slots = slots
-
+        self.business = business
 
 class IntentListConfig:
     def __init__(self, intents):
@@ -30,25 +30,28 @@ class IntentListConfig:
         self._initialize_fixed_intents()
 
     def _initialize_fixed_intents(self):
-        # Initialize fixed intents like chitchat, slot_filling
-        slot_filling = IntentConfig("slot_filling", "追问槽位", "slot_filling", [])
-        positive = IntentConfig("positive", "肯定", "positive", [])
-        negative = IntentConfig("negative", "否认", "negative", [])
+        fixed_intents = [
+            ("slot_filling", "追问槽位", False, "slot_filling", []),
+            ("positive", "肯定", False, "positive", []),
+            ("negative", "否认", False, "negative", [])
+        ]
 
-        self.intents.extend([slot_filling, positive, negative])
+        for intent_data in fixed_intents:
+            name, description, business, action, slots = intent_data
+            intent = IntentConfig(name, description, business, action, slots)
+            self.intents.append(intent)
 
     def get_intent_list(self):
-        # read resources/intent.yaml file and get intent list
-        return [intent.description for intent in self.intents]
+        return self.intents
 
     def get_intent(self, intent_name):
-        intents = [intent for intent in self.intents if intent.name == intent_name]
-        return intents[0] if len(intents) > 0 else None
+        return next((intent for intent in self.intents if intent.name == intent_name), None)
 
     def get_intent_and_attrs(self):
         return [
-            {'intent': intent_config.name, 'examples': intent_config.examples, 'description': intent_config.description}
-            for intent_config in self.intents]
+            {'intent': intent.name, 'examples': intent.examples, 'description': intent.description}
+            for intent in self.intents
+        ]
 
     @classmethod
     def from_scenes(cls, folder_path):
@@ -61,22 +64,16 @@ class IntentListConfig:
             with open(file_path, 'r', encoding='utf-8') as file:
                 data = yaml.safe_load(file)
 
-            name, action, slots = None, None, None
-            for key in data:
-                if key == 'name':
-                    name = data['name']
-                elif key == 'description':
-                    description = data['description']
-                elif key == 'slots':
-                    slots = data['slots']
-                elif key == 'action':
-                    action = data['action']
-
-            intent = IntentConfig(name, description, action, slots)
+            intent = IntentConfig(
+                name=data.get('name'),
+                description=data.get('description'),
+                business=data.get('business'),
+                action=data.get('action'),
+                slots=data.get('slots')
+            )
             intents.append(intent)
 
         return cls(intents)
-
 
 class IntentClassifier:
     def __init__(self, intent_list_config: IntentListConfig):

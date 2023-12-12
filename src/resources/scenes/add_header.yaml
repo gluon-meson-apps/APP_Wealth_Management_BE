@@ -1,5 +1,6 @@
 name: add_header
 description: 增加表头
+business: true
 slots:
   - name: header_element
     description: 表头名称

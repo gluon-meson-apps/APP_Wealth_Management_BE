@@ -1,9 +1,11 @@
+import os
 from typing import List, Union
 from loguru import logger
 from action.base import Action, ActionResponse
 from llm.self_host import ChatModel
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
+from nlu.mlm.intent import IntentListConfig
 from tracker.context import ConversationContext
 
 
@@ -73,11 +75,17 @@ class IntentFillingAction(Action):
     def __init__(self, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='intent_filling')
         self.llm = ChatModel()
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(pwd, '../../', 'resources', 'scenes')
+        intent_list_config = IntentListConfig.from_scenes(file_path)
+        self.intents = intent_list_config.get_intent_list()
 
     def run(self, context):
         logger.info(f'exec action intent_filling')
+        filtered_intents = [intent.description for intent in self.intents if intent.business]
         prompt = self.prompt_template.format({
             "history": context.conversation.get_history().format_to_string(),
+            "intent_list": "和".join(filtered_intents)
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)

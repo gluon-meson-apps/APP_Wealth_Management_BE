@@ -1,5 +1,6 @@
 name: reduce_page
 description: 缩小页面字体
+business: true
 slots:
   - name: font_size
     description: 目标大小
