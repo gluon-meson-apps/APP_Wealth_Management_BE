@@ -99,14 +99,12 @@ class SlotFillingPolicy(Policy):
                     context.set_state(f"slot_confirm: {slot.name}")
                     return True, SlotConfirmAction(IE.intent, slot, prompt_manager=self.prompt_manager)
             
-            # 如果所有的可选槽位都没有被填充且form.slot_required为True，则随机填充一个可选槽位
+            # 如果所有的可选槽位都没有被填充且form.slot_required为True，则通过话术引导用户填充任意一个槽位
             if form.slot_required:
                 optional_slots = [slot for slot in form.slots if slot.optional]
                 if optional_slots and len(possible_slots) == 0:
                     context.set_state("slot_filling")
                     return True, SlotFillingAction(optional_slots, IE.intent, prompt_manager=self.prompt_manager)
-
-        return False, None
 
         return False, None
 
@@ -117,6 +115,7 @@ class AssistantPolicy(Policy):
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
+        print(possible_slots)
         logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
         form = self.form_store.get_form_from_intent(IE.intent)
 

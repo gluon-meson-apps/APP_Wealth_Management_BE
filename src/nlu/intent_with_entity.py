@@ -25,6 +25,7 @@ class Slot(HashableBaseModel):
     slot_type: Optional[SlotType] = None
     confidence: Optional[float] = None
     optional: bool = True
+    priority: int = 0
 
     def __hash__(self):
         return hash((self.name,))
@@ -42,7 +43,7 @@ class Slot(HashableBaseModel):
 class Entity(HashableBaseModel):
     type: str
     value: str
-    role: Optional[str] = None
+    round: int
     confidence: Optional[float] = None
     possible_slot: Optional[Slot] = None
 

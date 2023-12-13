@@ -16,7 +16,7 @@ class Policy:
         self.prompt_manager = prompt_manager
 
     def handle(self, intent: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
-        pass
+        return NotImplementedError
 
     @staticmethod
     def get_possible_slots(intent: IntentWithEntity):

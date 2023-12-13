@@ -51,6 +51,8 @@ class EntityExtractor:
         # 获取实体和动作
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
+        current_round = conversation_context.current_round
+        
         form = self.form_store.get_form_from_intent(intent) if intent else None
 
         if not form:
@@ -72,14 +74,15 @@ class EntityExtractor:
         else:
             valid_entities = []
 
-        def get_slot(name, value, confidence):
+        def get_slot(name, value, confidence, priority):
             if slot_dict and name in slot_dict:
-                return slot_dict[name].copy(update={'value': value, 'confidence': confidence})
+                return slot_dict[name].copy(update={'value': value, 'confidence': confidence, 'priority': priority})
             return None
 
         # 创建实体列表和动作
         entity_list = [
-            Entity(type=name, value=value, confidence=confidence, possible_slot=get_slot(name, value, confidence))
+            Entity(type=name, value=value, round=current_round, 
+                   confidence=confidence, possible_slot=get_slot(name, value, confidence, current_round))
             for name, value, confidence in valid_entities
         ]
         action = form.action

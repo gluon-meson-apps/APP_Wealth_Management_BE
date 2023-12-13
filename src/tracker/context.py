@@ -38,6 +38,7 @@ class ConversationContext:
         # counter for inquiry times
         self.inquiry_times = 0
         self.has_update = False
+        self.current_round = 0
 
     def get_history(self) -> History:
         return self.history
@@ -47,15 +48,12 @@ class ConversationContext:
         
     def add_entity(self, entities: List[Entity]):
         self.has_update = True
-        entity_map: Dict[str, Entity] = {entity.type: entity for entity in self.entities}
-        
+        entity_map = {entity.type: entity for entity in self.entities}
+
         for new_entity in entities:
             if new_entity.type in entity_map:
                 existing_entity = entity_map[new_entity.type]
-                existing_entity.value = new_entity.value
-                existing_entity.role = new_entity.role
-                existing_entity.confidence = new_entity.confidence
-                existing_entity.possible_slot = new_entity.possible_slot
+                existing_entity.__dict__.update(new_entity.__dict__)
                 logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")
             else:
                 self.entities.append(new_entity)
