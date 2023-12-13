@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 DEFAULT_END_UTTERANCE = "感谢您的使用，祝您生活愉快"
 
-class SlotFillingActionResponse(BaseModel):
+class MiddleActionResponse(BaseModel):
     code: int
     message: str
     answer: dict = {}
@@ -52,7 +52,7 @@ class SlotFillingAction(Action):
             "messageType": "FORMAT_TEXT",
             "content": response
         }
-        return SlotFillingActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 
 class IntentConfirmAction(Action):
@@ -72,10 +72,10 @@ class IntentConfirmAction(Action):
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
         detail = {
-            "intent": self.intent
+            "messageType": "FORMAT_TEXT",
+            "content": response
         }
-        return ActionResponse(text=response, extra_info=detail)
-    
+        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class IntentFillingAction(Action):
     """Intent filling action using large language models."""
@@ -97,7 +97,11 @@ class IntentFillingAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
-        return ActionResponse(text=response)
+        detail = {
+            "messageType": "FORMAT_TEXT",
+            "content": response
+        }
+        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class SlotConfirmAction(Action):
     """Slot confirm action using large language models."""
@@ -119,9 +123,10 @@ class SlotConfirmAction(Action):
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
         detail = {
-            "intent": self.intent
+            "messageType": "FORMAT_TEXT",
+            "content": response
         }
-        return ActionResponse(text=response, extra_info=detail)
+        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class ChitChatAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel, user_input):
