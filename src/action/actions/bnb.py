@@ -19,39 +19,52 @@ class BankRelatedAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action {self.action_name}')
         target_slots = [x for x in self.possible_slots if x.name in ActionToValidSlotTypesDict[self.action_name]]
+
         if len(target_slots) > 1:
             target_slots.sort(key=lambda x: x.priority, reverse=True)
-        target_slot_value = self.output_adapter.normalize_slot_value(
-            target_slots[0].value if len(target_slots) > 0 else config.get('defaultActionSlotValue',
-                                                                           self.action_name))
-        target_slot_name = self.output_adapter.normalize_slot_value(
-            target_slots[0].name if len(target_slots) > 0 else ActionToValidSlotTypesDict[self.action_name][0])
-        slot = dict()
-        if self.action_name == ActionName.activate_function or self.action_name == ActionName.page_resize:
-            slot = {
-                "value": target_slot_value
-            }
-        elif self.action_name == ActionName.page_reduce or self.action_name == ActionName.page_enlarge:
-            slot = {
-                "category": ActionToSlotCategoryDict[self.action_name],
-                "value": target_slot_value
-            }
 
-        elif self.action_name == ActionName.add_header or self.action_name == ActionName.remove_header:
+        slot = self._prepare_slot(target_slots)
+
+        answer = self._prepare_answer(slot)
+        return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+
+    def _prepare_slot(self, target_slots):
+        target_slot_value, target_slot_name = self._get_target_slot_values(target_slots)
+
+        if self.action_name in [ActionName.activate_function, ActionName.page_resize]:
+            slot = {"value": target_slot_value}
+        elif self.action_name in [ActionName.page_reduce, ActionName.page_enlarge]:
+            slot = {"category": ActionToSlotCategoryDict[self.action_name], "value": target_slot_value}
+        elif self.action_name in [ActionName.add_header, ActionName.remove_header]:
             slot = {
                 "category": ActionToSlotCategoryDict[self.action_name],
                 "valueType": SlotTypeToSlotValueTypeDict[target_slot_name],
                 "value": target_slot_value
             }
+        else:
+            slot = {}
+        return slot
 
-        answer = ActionResponseAnswer(messageType="FORMAT_INTELLIGENT_EXEC",
-                                      content=ActionResponseAnswerContent(businessId="N35010Operate",
-                                                                          operateType=ActionToOperateTypeDict[
-                                                                              self.action_name],
-                                                                          operateSlots=slot,
-                                                                          businessInfo={}))
+    def _get_target_slot_values(self, target_slots):
+        default_slot_value = config.get('defaultActionSlotValue', self.action_name)
+        target_slot_value = self.output_adapter.normalize_slot_value(
+            target_slots[0].value if target_slots else default_slot_value
+        )
+        target_slot_name = self.output_adapter.normalize_slot_value(
+            target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
+        )
+        return target_slot_value, target_slot_name
 
-        return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+    def _prepare_answer(self, slot):
+        return ActionResponseAnswer(
+            messageType="FORMAT_INTELLIGENT_EXEC",
+            content=ActionResponseAnswerContent(
+                businessId="N35010Operate",
+                operateType=ActionToOperateTypeDict[self.action_name],
+                operateSlots=slot,
+                businessInfo={}
+            )
+        )
 
 
 class JumpOut(Action):
