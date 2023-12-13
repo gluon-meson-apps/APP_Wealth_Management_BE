@@ -1,8 +1,0 @@
-User: 列太少了不清楚
-Bot: 您好，为了帮助您进行表头增加操作，我需要了解您希望新增的表头名称。请您告诉我具体的表头名称，我将竭诚为您提供支持。
-Extra info: {'slot': {'name': 'header_element', 'description': '表头名称', 'value': None, 'slot_type': 'text', 'confidence': None, 'optional': False}, 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 0.9}}
-------------------------------------------------------------------------------------------------------------------------
-User: 月消费列删除
-Bot: 已为您完成 删减表头
-Extra info: {'slot': [['header_element', '月消费', 1.0]], 'intent': {'name': 'remove_header', 'description': '删减表头', 'confidence': 1.0}}
-------------------------------------------------------------------------------------------------------------------------
