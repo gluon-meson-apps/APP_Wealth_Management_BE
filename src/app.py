@@ -2,18 +2,26 @@ import os
 from urllib.request import Request
 
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
+from uvicorn import run
 
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
-from fastapi import FastAPI
-from uvicorn import run
-from pydantic import BaseModel
 
 load_dotenv()
 
 app = FastAPI()
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
+
+
+class ErrorResponse(BaseModel):
+    code: int
+    message: str
+    answer: dict = {}
+    jump_out_flag: bool
+
 
 if os.getenv("LOCAL_MODE") == '1':
     origins = [
@@ -37,7 +45,9 @@ async def catch_exceptions_middleware(request: Request, call_next):
     except Exception as err:
         err_msg = f"Error occurred: {err}"
         print(err_msg)
-        return JSONResponse(status_code=500, content=err_msg)
+        return JSONResponse(status_code=500,
+                            content=ErrorResponse(
+                                code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__)
 
 
 class MessageInput(BaseModel):
