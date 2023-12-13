@@ -9,3 +9,4 @@ schedule
 python-dotenv
 parameterized==0.8.1
 urllib3==1.26.6
+chinese2digits

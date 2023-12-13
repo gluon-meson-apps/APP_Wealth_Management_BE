@@ -47,10 +47,10 @@ class ConversationContext:
         self.history.add_history(role, message)
         
     def add_entity(self, entities: List[Entity]):
-        self.has_update = True
         entity_map = {entity.type: entity for entity in self.entities}
 
         for new_entity in entities:
+            self.has_update = True
             if new_entity.type in entity_map:
                 existing_entity = entity_map[new_entity.type]
                 existing_entity.__dict__.update(new_entity.__dict__)
