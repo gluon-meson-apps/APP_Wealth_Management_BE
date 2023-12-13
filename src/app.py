@@ -53,6 +53,11 @@ def chat(data: MessageInput):
     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
 
 
+@app.get("/healthy/")
+async def healthcheck():
+    return {"status": "alive"}
+
+
 def main():
     if os.getenv("LOCAL_MODE") == '1':
         run("app:app", host="0.0.0.0", port=7788, reload=True,
