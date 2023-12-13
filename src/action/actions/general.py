@@ -1,26 +1,19 @@
 import os
 from typing import List, Union
 from loguru import logger
-from action.base import Action, ActionResponse
+from action.base import Action, ActionResponse, GeneralResponse, ChatResponseAnswer, JumpOutResponse
 from llm.self_host import ChatModel
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
 from nlu.mlm.intent import IntentListConfig
 from tracker.context import ConversationContext
-from pydantic import BaseModel
-
-class MiddleActionResponse(BaseModel):
-    code: int
-    message: str
-    answer: dict = {}
-    jump_out_flag: bool
 
 
 class EndDialogueAction(Action):
     """action to end the conversation with user"""
 
     def run(self, context):
-        return MiddleActionResponse(code=200, message="success", answer={}, jump_out_flag=True)
+        return JumpOutResponse(code=200, message="success", answer={}, jump_out_flag=True)
 
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
@@ -45,11 +38,8 @@ class SlotFillingAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
-        detail = {
-            "messageType": "FORMAT_TEXT",
-            "content": response
-        }
-        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+        detail = ChatResponseAnswer(messageType="FORMAT_TEXT", content=response)
+        return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 
 class IntentConfirmAction(Action):
@@ -68,11 +58,8 @@ class IntentConfirmAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
-        detail = {
-            "messageType": "FORMAT_TEXT",
-            "content": response
-        }
-        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+        detail = ChatResponseAnswer(messageType="FORMAT_TEXT", content=response)
+        return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class IntentFillingAction(Action):
     """Intent filling action using large language models."""
@@ -94,11 +81,8 @@ class IntentFillingAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
-        detail = {
-            "messageType": "FORMAT_TEXT",
-            "content": response
-        }
-        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+        detail = ChatResponseAnswer(messageType="FORMAT_TEXT", content=response)
+        return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class SlotConfirmAction(Action):
     """Slot confirm action using large language models."""
@@ -119,11 +103,8 @@ class SlotConfirmAction(Action):
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
-        detail = {
-            "messageType": "FORMAT_TEXT",
-            "content": response
-        }
-        return MiddleActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+        detail = ChatResponseAnswer(messageType="FORMAT_TEXT", content=response)
+        return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 class ChitChatAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel, user_input):

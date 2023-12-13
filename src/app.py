@@ -8,20 +8,13 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
+from action.base import ErrorResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 
 load_dotenv()
 
 app = FastAPI()
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
-
-
-class ErrorResponse(BaseModel):
-    code: int
-    message: str
-    answer: dict = {}
-    jump_out_flag: bool
-
 
 if os.getenv("LOCAL_MODE") == '1':
     origins = [
@@ -48,7 +41,6 @@ async def catch_exceptions_middleware(request: Request, call_next):
         return JSONResponse(status_code=500,
                             content=ErrorResponse(
                                 code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__)
-
 
 class MessageInput(BaseModel):
     session_id: str
