@@ -12,7 +12,7 @@ from nlu.intent_with_entity import IntentWithEntity
 from prompt_manager.base import PromptManager
 
 
-INTENT_SIG_TRH = 0.9
+INTENT_SIG_TRH = 0.8
 SLOT_SIG_TRH = 0.8
 
 MAX_FOLLOW_UP_TIMES = 2

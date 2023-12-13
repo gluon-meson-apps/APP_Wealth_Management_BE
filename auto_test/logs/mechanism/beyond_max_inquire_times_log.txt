@@ -1,12 +1,12 @@
 User: 页面看着不太清楚啊
-Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
-Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 1.0}}
+Bot: 已为您完成 放大页面字体
+Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.86}}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面看着不太清楚啊
-Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
-Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 1.0}}
+Bot: 已为您完成 放大页面字体
+Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.86}}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面看着不太清楚啊
-Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
-Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 1.0}}
+Bot: 已为您完成 放大页面字体
+Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.86}}
 ------------------------------------------------------------------------------------------------------------------------
