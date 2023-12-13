@@ -63,8 +63,28 @@
 }
 ```
 
+用户没有输入明确的幅值
+```json
+{
+    "code": 200,
+    "message": "success",
+    "answer": {
+        "messageType": "FORMAT_INTELLIGENT_EXEC",
+        "content": {
+            "businessId": "N35010Operate",
+            "operateType": "PAGE_RESIZE_TARGET", //触发的动作名称
+            "operateSlots": {
+                "value": "", //默认值为10，通过YAML文件配置
+            },
+            "businessInfo": {}
+        },
+    },
+    "jump_out_flag": false //是否交给其他BOT处理
+}
+```
 
-### 执行动作: 增加减少表头
+
+### 执行动作: 增加删除表头（category、valueType和value中有任意一个字段为空字符串的时候，触发UI兜底「如弹出表头列表供用户勾选」）
 ```json
 {
     "code": 200,
@@ -75,9 +95,9 @@
             "businessId": "N35010Operate",
             "operateType": "ADJUST_HEADER",
             "operateSlots": {
-                "category": "ADD" | "REMOVE", //增加或者减少
-                "valueType": "INDEX" | "NAME", //数值还是字符串，可选参数，如果没有该字段，触发UI兜底
-                "value": "用户ID" | 1 | -1 //表头的名字或者表头的索引，负数意为倒数第n，可选参数
+                "category": "ADD" | "REMOVE", //增加或者删除
+                "valueType": "INDEX" | "NAME", //数值还是字符串 INDEX只会出现在删除列的时候
+                "value": "用户ID" | 1 | -1 //表头的名字或者表头的索引，负数意为倒数第n
             },
             "businessInfo": {}
         },
@@ -98,7 +118,7 @@
             "businessId": "N35010Operate",
             "operateType": "ACTIVATE_FUNCTION",
             "operateSlots": {
-                "value": "发票云" //功能名，可选参数
+                "value": "发票云" //「功能名」或者「功能代码」。用户在多轮引导下没有提及功能名称或者代码，“value”传空字符串，网银前端跳转到开通功能的总页面。此外，推荐：网银前端没有成功匹配到功能名称/代码，也采用跳转到开通功能总页面的兜底。如果功能代码不在可在线开通的列表中，网银前端可在页面上进行提示线下办理）
             },
             "businessInfo": {}
         },
