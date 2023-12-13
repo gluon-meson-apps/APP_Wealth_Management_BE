@@ -2,7 +2,7 @@ User: 减少表头
 Bot: 您好，为了帮您进行删减表头操作，我需要知道您希望删除的表头名称或位置。请您提供相关信息，我将尽快为您处理。
 Extra info: {'slot': [{'name': 'header_element', 'description': '表头名称', 'value': None, 'slot_type': 'text', 'confidence': None, 'optional': True}, {'name': 'header_position', 'description': '表头位置', 'value': None, 'slot_type': 'text', 'confidence': None, 'optional': True}], 'intent': {'name': 'remove_header', 'description': '删减表头', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------
-User: 月消费
-Bot: Jump out
-Extra info: {}
+User: 第一个
+Bot: 已为您完成 删减表头
+Extra info: {'slot': [['header_position', '第一个', 1.0]], 'intent': {'name': 'remove_header', 'description': '删减表头', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------
