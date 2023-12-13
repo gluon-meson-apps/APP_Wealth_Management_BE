@@ -9,9 +9,6 @@ from nlu.mlm.intent import IntentListConfig
 from tracker.context import ConversationContext
 from pydantic import BaseModel
 
-
-DEFAULT_END_UTTERANCE = "感谢您的使用，祝您生活愉快"
-
 class MiddleActionResponse(BaseModel):
     code: int
     message: str
@@ -23,7 +20,7 @@ class EndDialogueAction(Action):
     """action to end the conversation with user"""
 
     def run(self, context):
-        return ActionResponse(text=DEFAULT_END_UTTERANCE)
+        return MiddleActionResponse(code=200, message="success", answer={}, jump_out_flag=True)
 
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
