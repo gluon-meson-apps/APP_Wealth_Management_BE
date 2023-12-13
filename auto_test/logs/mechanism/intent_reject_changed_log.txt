@@ -1,8 +1,12 @@
 User: 页面看着不太清楚啊
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.86}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 这字太大了！
-Bot: 好的，已为您调小页面字体。
-Extra info: {'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.66}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您是否需要将页面字体放大？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

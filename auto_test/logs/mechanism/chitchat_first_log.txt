@@ -1,20 +1,26 @@
 User: 你好
-Bot: Jump out
-Extra info: {}
+Bot: 
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面放大50%
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [['font_size', '50%', 1.0]], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.5'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气咋样
-Bot: 您想了解天气信息吗？我可以帮您查询。
-Extra info: {}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您想了解天气信息吗？我可以帮您查询。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 空气咋样
-Bot: 很抱歉，我无法获取实时空气质量数据，但我可以为您提供天气预报。
-Extra info: {}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您需要了解当前页面的天气和空气质量信息，对吗？我可以帮您调用相应的API获取这些数据。请问您需要哪个地区的天气信息呢？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 生活咋样
-Bot: Jump out
-Extra info: {}
+Bot: 
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

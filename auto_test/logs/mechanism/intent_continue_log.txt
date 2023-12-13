@@ -1,12 +1,16 @@
 User: 页面字也太小了
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.88}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 再大点吧
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.88}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 好了，你已经没有利用价值了
-Bot: Jump out
-Extra info: {}
+Bot: 
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

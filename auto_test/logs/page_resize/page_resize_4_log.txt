@@ -1,4 +1,6 @@
 User: 页面缩小20%
-Bot: 已为您完成 缩小页面字体
-Extra info: {'slot': [['font_size', '20%', 1.0]], 'intent': {'name': 'reduce_page', 'description': '缩小页面字体', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

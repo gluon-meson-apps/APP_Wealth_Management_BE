@@ -1,12 +1,18 @@
 User: 开通功能
-Bot: 您好，为了为您开通相关功能，请您告诉我您想开通的具体功能名称。
-Extra info: {'slot': {'name': 'functions', 'description': '待开通的功能名称', 'value': None, 'slot_type': 'text', 'confidence': None, 'optional': False}, 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好，为了为您开通相关功能，请您告诉我您想开通的具体功能名称。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 我想想
-Bot: 好的，如果您有任何其他问题或需求，请随时告诉我，我会尽力为您提供帮助。
-Extra info: {}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好，请问您需要进行哪些操作？如增加表头、删减表头、放大页面字体、开通功能、调整页面字体大小或缩小页面字体等。请您具体描述一下您的需求，我将竭诚为您提供帮助。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 国内保理
-Bot: 已为您开通功能 国内保理
-Extra info: {'slot': [['functions', '国内保理', 0.99]], 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '国内保理'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

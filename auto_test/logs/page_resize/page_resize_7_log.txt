@@ -1,8 +1,12 @@
 User: 页面大一点
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 还能更大吗
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

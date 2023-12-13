@@ -4,6 +4,7 @@ import requests
 import argparse
 from tqdm import tqdm
 
+
 def process_files(directory):
     # 指定文件夹路径
     script_path = './scripts'  # 修改为你的文件夹路径
@@ -48,10 +49,17 @@ def process_files(directory):
 
                 # 解析并记录机器人的响应
                 if response.status_code == 200:
-                    bot_response = response.json()["response"]["text"]
-                    extra_info = response.json()["response"]["extra_info"]
-                    log_file.write(f"User: {user_input}\nBot: {bot_response}\n")
-                    log_file.write(f"Extra info: {extra_info}\n")
+                    log_file.write(f"User: {user_input}\n")
+
+                    log_file.write(f"Bot: \n")
+                    bot_response_jump_out = response.json()["response"]["jump_out_flag"]
+                    if bot_response_jump_out == False:
+                        bot_response_messageType = response.json()["response"]["answer"]["messageType"]
+                        bot_response_content = response.json()["response"]["answer"]["content"]
+                        log_file.write(f"MessageType: {bot_response_messageType}\n")
+                        log_file.write(f"Content: {bot_response_content}\n")
+                    log_file.write(f"JumpOutFlag: {bot_response_jump_out}\n")
+
                     log_file.write("-" * 120)
                     log_file.write("\n")
                 else:

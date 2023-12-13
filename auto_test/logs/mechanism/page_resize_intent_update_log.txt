@@ -1,20 +1,24 @@
 User: 帮我调整下页面
-Bot: 您好！请问您需要将页面字体放大吗？
-Extra info: {'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.67}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好！请问您需要将页面字体放大吗？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 对的
-Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 调到110%可以吗
-Bot: 当然可以，已为您将页面字体调整为110%。如有其他需求，请随时告诉我。
-Extra info: {'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.54}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 当然可以，已为您将页面字体调整至110%。如有其他需求，请随时告诉我。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 不对
-Bot: 抱歉，我无法理解您的意图。请问您需要进行哪种操作？如增加表头、删减表头等。
-Extra info: {}
-------------------------------------------------------------------------------------------------------------------------
-User: 还是到140%
-Bot: 感谢您的使用，祝您生活愉快
-Extra info: {}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您需要调整页面字体大小。请问您希望将字体大小调整为多少百分比呢？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

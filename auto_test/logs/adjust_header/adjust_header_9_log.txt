@@ -1,4 +1,6 @@
 User: 减少第一个表头
-Bot: 已为您完成 删减表头
-Extra info: {'slot': [['header_position', '第一个', 1.0]], 'intent': {'name': 'remove_header', 'description': '删减表头', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'INDEX', 'value': '1'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,8 +1,12 @@
 User: 页面太大了
-Bot: 您好！请问您需要我帮您调整页面字体大小吗？
-Extra info: {'intent': {'name': 'reduce_page', 'description': '缩小页面字体', 'confidence': 0.86}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好！请问您需要我帮您调整页面字体大小吗？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 现在又有点太小了
-Bot: 好的，我可以为您调整页面字体大小。请问您希望将字体调大还是调小呢？
-Extra info: {'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.49}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您是否需要调整页面字体大小？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

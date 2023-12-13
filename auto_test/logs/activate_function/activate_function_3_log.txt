@@ -1,12 +1,16 @@
 User: 页面不对
-Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
-Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 0.94}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好！请问您遇到了什么问题？需要我帮您查看您的设备字体大小吗？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: emm
-Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
-Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 0.94}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 抱歉,我不确定您的意图。您能否提供更多信息,例如您所使用的设备或浏览器,或者您遇到的具体问题。如果您的意图是调整页面字体大小,您可以告诉我您想要使用的字体大小,我会尽力帮助您完成操作。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 打回单
-Bot: Jump out
-Extra info: {}
+Bot: 
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,12 +1,16 @@
 User: 开通功能：薪资通
-Bot: 已为您开通功能 薪资通
-Extra info: {'slot': [['functions', '薪资通', 1.0]], 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: AAA
-Bot: 已为您开通功能 薪资通
-Extra info: {'slot': [['functions', '薪资通', 1.0]], 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {}}
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 打回单
-Bot: Jump out
-Extra info: {}
+Bot: 
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

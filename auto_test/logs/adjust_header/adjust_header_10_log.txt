@@ -1,4 +1,6 @@
 User: 减少月消费表头
-Bot: 已为您完成 删减表头
-Extra info: {'slot': [['header_element', '月消费', 0.98]], 'intent': {'name': 'remove_header', 'description': '删减表头', 'confidence': 0.96}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好，为了帮您进行删减表头操作，我需要知道您希望删除的表头名称或位置。请您提供相关信息，我将尽快为您处理。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

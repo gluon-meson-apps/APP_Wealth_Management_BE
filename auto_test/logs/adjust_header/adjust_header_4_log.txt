@@ -1,4 +1,6 @@
 User: 增加一个月消费的表头
-Bot: 已为您完成 增加表头
-Extra info: {'slot': [['header_element', '消费', 0.86]], 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 1.0}}
+Bot: 
+MessageType: FORMAT_TEXT
+Content: 您好！为了更好地为您添加一个月消费的表头，请您确认一下表头名称是否为“月度消费”。
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
