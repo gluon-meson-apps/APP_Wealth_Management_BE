@@ -1,10 +1,10 @@
 User: 页面不对
-Bot: 您好，请问您遇到了什么问题？请详细描述一下您所看到的问题，以便我能更好地为您提供帮助。
-Extra info: {}
+Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
+Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 0.94}}
 ------------------------------------------------------------------------------------------------------------------------
 User: emm
-Bot: 抱歉，我没有理解您的意思。请问您需要什么帮助？
-Extra info: {}
+Bot: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
+Extra info: {'slot': {'name': 'font_opt', 'description': '页面是放大还是缩小', 'value': None, 'slot_type': 'categorical', 'confidence': None, 'optional': False}, 'intent': {'name': 'page_resize', 'description': '调整页面字体大小', 'confidence': 0.94}}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面放大
 Bot: 已为您完成 放大页面字体

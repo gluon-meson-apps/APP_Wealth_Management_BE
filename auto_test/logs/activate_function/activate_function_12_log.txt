@@ -4,5 +4,5 @@ Extra info: {'slot': [['functions', '薪资通', 1.0]], 'intent': {'name': 'acti
 ------------------------------------------------------------------------------------------------------------------------
 User: 国内保理
 Bot: 已为您开通功能 国内保理
-Extra info: {'slot': [['functions', '国内保理', 1.0]], 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
+Extra info: {'slot': [['functions', '国内保理', 0.99]], 'intent': {'name': 'activate_function', 'description': '开通功能', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------

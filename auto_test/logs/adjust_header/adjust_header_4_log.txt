@@ -1,4 +1,4 @@
 User: 增加一个月消费的表头
 Bot: 已为您完成 增加表头
-Extra info: {'slot': [['header_element', '月消费', 0.99]], 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 1.0}}
+Extra info: {'slot': [['header_element', '消费', 0.86]], 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------

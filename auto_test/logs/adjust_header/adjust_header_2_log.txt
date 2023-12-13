@@ -1,12 +1,12 @@
 User: 增加一个月消费的表头
 Bot: 已为您完成 增加表头
-Extra info: {'slot': [['header_element', '月消费', 0.99]], 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 1.0}}
+Extra info: {'slot': [['header_element', '消费', 0.86]], 'intent': {'name': 'add_header', 'description': '增加表头', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气真好
-Bot: 很高兴听到您对天气感到满意！请问有什么其他问题我可以帮您解答吗？
+Bot: 很抱歉,我不太明白您的意思.请问您需要我帮忙做什么?
 Extra info: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 放大页面
 Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [['header_element', '月消费', 0.99]], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
+Extra info: {'slot': [['header_element', '消费', 0.86]], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------

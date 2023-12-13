@@ -1,4 +1,4 @@
 User: 页面大一点
 Bot: 已为您完成 放大页面字体
-Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 0.99}}
+Extra info: {'slot': [], 'intent': {'name': 'enlarge_page', 'description': '放大页面字体', 'confidence': 1.0}}
 ------------------------------------------------------------------------------------------------------------------------
