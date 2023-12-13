@@ -1,3 +1,4 @@
+import configparser
 from enum import unique, Enum
 
 from loguru import logger
@@ -5,6 +6,9 @@ from pydantic import BaseModel
 
 from action.base import Action
 from output_adapter.base import OutputAdapter
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 class ActionResponse(BaseModel):
@@ -64,12 +68,18 @@ class BankRelatedAction(Action):
 
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action {self.action_name}')
-        target_slot = [x for x in self.possible_slots if x.name in actionSlotsTypeDict[self.action_name]][0]
-        target_slot_value = self.output_adapter.normalize_slot_value(target_slot.value)
+        target_slots = [x for x in self.possible_slots if x.name in actionSlotsTypeDict[self.action_name]]
+        if len(target_slots) > 1:
+            target_slots.sort(key=lambda x: x.priority, reverse=True)
+        target_slot_value = self.output_adapter.normalize_slot_value(
+            target_slots[0].value if len(target_slots) > 0 else config.get('defaultActionSlotValue',
+                                                                           self.action_name))
+        target_slot_name = self.output_adapter.normalize_slot_value(
+            target_slots[0].name if len(target_slots) > 0 else actionSlotsTypeDict[self.action_name][0])
         slot = dict()
         if self.action_name == ActionType.activate_function or self.action_name == ActionType.page_resize:
             slot = {
-                "value":target_slot_value
+                "value": target_slot_value
             }
         elif self.action_name == ActionType.page_reduce or self.action_name == ActionType.page_enlarge:
             slot = {
@@ -80,7 +90,7 @@ class BankRelatedAction(Action):
         elif self.action_name == ActionType.add_header or self.action_name == ActionType.remove_header:
             slot = {
                 "category": operateSlotCategoryTypeDict[self.action_name],
-                "valueType": operateSlotValueTypeDict[target_slot.name],
+                "valueType": operateSlotValueTypeDict[target_slot_name],
                 "value": target_slot_value
             }
 
