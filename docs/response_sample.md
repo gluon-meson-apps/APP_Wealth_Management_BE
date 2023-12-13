@@ -8,11 +8,11 @@
     "answer": {
         "messageType": "FORMAT_INTELLIGENT_EXEC",
         "content": {
-            "businessId": "N35010Operate", //待网银输入
+            "businessId": "N35010Operate", //待网银输入，业务类型
             "operateType": "PAGE_RESIZE_INCREMENT", //触发的动作名称
             "operateSlots": {
                 "category": "INCREASE" | "DECREASE", //放大还是缩小
-                "value": "20" //增量变化的幅值，可选参数，如果没有该字段，触发UI兜底
+                "value": "20" //增量变化的幅值，10的倍数，默认值为10，通过YAML文件配置
             },
             "businessInfo": {}
         },
@@ -33,7 +33,7 @@
             "operateType": "PAGE_RESIZE_INCREMENT", //触发的动作名称
             "operateSlots": {
                 "category": "INCREASE", //放大还是缩小
-                "value": "10", //默认10%，可以通过YAML配置
+                "value": "10", //默认值为10，通过YAML文件配置
             },
             "businessInfo": {}
         },
@@ -54,7 +54,7 @@
             "businessId": "N35010Operate",
             "operateType": "PAGE_RESIZE_TARGET",
             "operateSlots": {
-                "value": "110" //目标百分比，可选参数，如果没有该字段，触发UI兜底
+                "value": "110" //目标百分比，可选参数，如果没有该字段，触发UI兜底「如缩放按钮的高亮」
             },
             "businessInfo": {}
         },
