@@ -7,9 +7,17 @@ from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
 from nlu.mlm.intent import IntentListConfig
 from tracker.context import ConversationContext
+from pydantic import BaseModel
 
 
 DEFAULT_END_UTTERANCE = "感谢您的使用，祝您生活愉快"
+
+class SlotFillingActionResponse(BaseModel):
+    code: int
+    message: str
+    answer: dict = {}
+    jump_out_flag: bool
+
 
 class EndDialogueAction(Action):
     """action to end the conversation with user"""
@@ -41,10 +49,10 @@ class SlotFillingAction(Action):
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
         detail = {
-            "slot": self.slots,
-            "intent": self.intent
+            "messageType": "FORMAT_TEXT",
+            "content": response
         }
-        return ActionResponse(text=response, extra_info=detail)
+        return SlotFillingActionResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 
 class IntentConfirmAction(Action):
