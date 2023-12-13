@@ -50,8 +50,6 @@ def process_files(directory):
                 # 解析并记录机器人的响应
                 if response.status_code == 200:
                     log_file.write(f"User: {user_input}\n")
-
-                    log_file.write(f"Bot: \n")
                     bot_response_jump_out = response.json()["response"]["jump_out_flag"]
                     if bot_response_jump_out == False:
                         bot_response_messageType = response.json()["response"]["answer"]["messageType"]
