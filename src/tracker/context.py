@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import List, Any
 
 from nlu.intent_with_entity import Entity, Intent
 from collections import deque
@@ -77,6 +77,7 @@ class ConversationContext:
         
     def update_intent(self, intent: Intent):
         if intent is not None:
+            self.has_update = True
             self.intent_queue.append(intent)
             if intent != self.current_intent:
                 self.inquiry_times = 0

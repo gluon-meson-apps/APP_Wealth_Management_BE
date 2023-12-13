@@ -89,7 +89,7 @@ class IntentClassifier:
             confidence = data.get("intent_confidence")
             intent = self.intent_list_config.get_intent(name)
             logger.info(f"find intent {name} with confidence {confidence}")
-            return Intent(name=name, confidence=confidence, description=intent.description if intent else "")
+            return Intent(name=name, confidence=confidence, description=intent.description if intent else "", business=intent.business)
         else:
             raise HTTPException(
                 status_code=response.status_code, detail={response.text}
@@ -111,6 +111,10 @@ class IntentClassifier:
             raise e
 
     def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
+        
+        # if intent same as last round, no need to update
+        if context.current_intent and next_intent.name == context.current_intent.name:
+            return context
 
         # if slot_filling intent found, we will not change current intent to next intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:

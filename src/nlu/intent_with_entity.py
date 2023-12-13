@@ -16,6 +16,7 @@ class Intent(HashableBaseModel):
     name: str
     description: str
     confidence: Optional[float] = 1
+    business: bool
 
 
 class Slot(HashableBaseModel):

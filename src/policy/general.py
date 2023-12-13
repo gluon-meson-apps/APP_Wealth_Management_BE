@@ -114,18 +114,17 @@ class AssistantPolicy(Policy):
         self.form_store = form_store
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
-        possible_slots = self.get_possible_slots(intent=IE)
-        print(possible_slots)
-        logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
-        form = self.form_store.get_form_from_intent(IE.intent)
+        potential_slots = self.get_possible_slots(intent=IE)
+        logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}")
+        inten_form = self.form_store.get_form_from_intent(IE.intent)
 
-        if not form:
+        if not inten_form:
             return False, None
         
         # 处理业务相关的意图
         if IE.intent.name in BUSINESS_INTENS and context.has_update:
             context.has_update = False
-            return True, BankRelatedAction(form.action, possible_slots, IE.intent, BaseOutputAdapter())
+            return True, BankRelatedAction(inten_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
         # 兜底
         return True, IntentFillingAction(prompt_manager=self.prompt_manager)
