@@ -2,7 +2,6 @@ name: enlarge_page
 description: 放大页面字体
 business: true
 slots:
-  - required: true
   - name: font_size
     description: 放大的比例
     slotType: numeric or text

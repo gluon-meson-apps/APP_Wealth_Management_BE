@@ -69,9 +69,9 @@ class IntentFillingPolicy(Policy):
             return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         
         # 有非辅助外的意图但是置信度低
-        elif IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in BUSINESS_INTENS:
+        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in BUSINESS_INTENS:
             context.set_state("intent_confirm")
-            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)        
+            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         return False, None
     
 class SlotFillingPolicy(Policy):
@@ -129,4 +129,7 @@ class AssistantPolicy(Policy):
         # 范围内意图但无更新
         if IE.intent.name in BUSINESS_INTENS:
             context.set_state("intent_confirm")
-            return True, IntentConfirmAction(prompt_manager=self.prompt_manager)
+            return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
+        
+        context.set_state("intent_filling")
+        return True, IntentFillingAction(prompt_manager=self.prompt_manager)

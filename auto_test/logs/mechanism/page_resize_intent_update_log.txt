@@ -10,7 +10,7 @@ JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 不对
 MessageType: FORMAT_TEXT
-Content: 您需要将页面字体放大至110%吗？
+Content: 您需要将页面字体放大到什么程度呢？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 还是到140%吧
@@ -19,7 +19,7 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT',
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
-MessageType: FORMAT_TEXT
-Content: 您好，请问您需要我帮您调整页面的字体大小吗？
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

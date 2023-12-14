@@ -2,7 +2,6 @@ name: page_resize
 description: 调整页面字体大小
 business: true
 slots:
-  - required: true
   - name: font_opt
     description: 页面是放大还是缩小
     slotType: categorical
