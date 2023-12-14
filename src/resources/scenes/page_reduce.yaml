@@ -2,7 +2,7 @@ name: reduce_page
 description: 缩小页面字体
 business: true
 slots:
-  - name: font_size
+  - name: font_change
     description: 缩小的比例
     slotType: numeric or text
     optional: True

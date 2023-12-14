@@ -65,9 +65,9 @@ ActionToOperateTypeDict = {
 
 ActionToValidSlotTypesDict = {
     "activate_function": ["functions"],
-    "page_reduce": ["font_decrease", "font_size"],
-    "page_enlarge": ["font_increase", "font_size"],
-    "page_resize": ["font_size"],
+    "page_reduce": ["font_change", "font_target"],
+    "page_enlarge": ["font_change", "font_target"],
+    "page_resize": ["font_target"],
     "add_header": ["header_element"],
     "remove_header": ["header_element", "header_position"],
 }
