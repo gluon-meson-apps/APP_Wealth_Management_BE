@@ -2,7 +2,7 @@ import configparser
 from loguru import logger
 from action.base import Action, ActionResponse, ActionName, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
     ActionToOperateTypeDict, ActionToValidSlotTypesDict, ActionResponseAnswerContent, ActionResponseAnswer, \
-    JumpOutResponse
+    JumpOutResponse, ResponseMessageType
 from output_adapter.base import OutputAdapter
 
 config = configparser.ConfigParser()
@@ -56,7 +56,7 @@ class BankRelatedAction(Action):
 
     def _prepare_answer(self, slot):
         return ActionResponseAnswer(
-            messageType="FORMAT_INTELLIGENT_EXEC",
+            messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
             content=ActionResponseAnswerContent(
                 businessId="N35010Operate",
                 operateType=ActionToOperateTypeDict[self.action_name],

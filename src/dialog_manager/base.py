@@ -39,13 +39,13 @@ class BaseDialogManager:
         conversation = self.conversation_tracker.load_conversation(session_id)
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
-        conversation.append_history('user', message)
+        conversation.append_user_history(message)
 
         plan = self.reasoner.think(conversation)
 
         action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
-        conversation.append_history('assistant', response.message)
+        conversation.append_assistant_history(response.answer)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         return response, conversation

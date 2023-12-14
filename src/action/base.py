@@ -5,6 +5,12 @@ from pydantic import BaseModel
 
 from action.context import ActionContext
 
+
+@unique
+class ResponseMessageType(str, Enum):
+    FORMAT_INTELLIGENT_EXEC = "FORMAT_INTELLIGENT_EXEC"
+    FORMAT_TEXT = "FORMAT_TEXT"
+
 class ActionResponseAnswerContent(BaseModel):
     businessId: str
     operateType: str
@@ -12,11 +18,11 @@ class ActionResponseAnswerContent(BaseModel):
     businessInfo: dict = {}
 
 class ActionResponseAnswer(BaseModel):
-    messageType: str = "FORMAT_INTELLIGENT_EXEC",
+    messageType: str = ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
     content: ActionResponseAnswerContent
 
 class ChatResponseAnswer(BaseModel):
-    messageType: str = "FORMAT_TEXT",
+    messageType: str = ResponseMessageType.FORMAT_TEXT,
     content: str
 
 class ActionResponse(BaseModel):
@@ -52,7 +58,6 @@ class ActionName(str, Enum):
     page_resize = "page_resize"
     add_header = "add_header"
     remove_header = "remove_header"
-
 
 ActionToOperateTypeDict = {
     "activate_function": "ACTIVATE_FUNCTION",
