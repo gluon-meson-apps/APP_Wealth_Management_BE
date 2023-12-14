@@ -34,7 +34,7 @@ class EntityExtractor:
         self.examples = self.prepare_examples()
 
     def construct_messages(self, user_input, intent, form: Form, conversation_context: ConversationContext) -> List[str]:
-        chat_history = conversation_context.get_history().format_to_string()
+        chat_history = conversation_context.get_history().format_string()
         final_user_message = self.user_message_template.format({"chat_history": chat_history,
                                                                 "user_intent": intent.name,
                                                                 "user_message": user_input,

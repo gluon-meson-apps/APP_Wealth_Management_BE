@@ -8,17 +8,17 @@ from collections import deque
 from loguru import logger
 
 class History:
-    def __init__(self, histories: List[dict[str, Any]], max_history: int = 6):
+    def __init__(self, rounds: List[dict[str, Any]], max_history: int = 6):
         self.max_history = max_history
-        self.histories = histories[-self.max_history:]
+        self.rounds = rounds[-self.max_history:]
 
     def add_history(self, role: str, message: str):
-        if len(self.histories) >= self.max_history:
-            self.histories.pop(0)
-        self.histories.append({'role': role, 'content': message})
+        if len(self.rounds) >= self.max_history:
+            self.rounds.pop(0)
+        self.rounds.append({'role': role, 'content': message})
 
-    def format_to_string(self):
-        return '\n'.join([f'{entry["role"]}: {entry["content"]}' for entry in self.histories])
+    def format_string(self):
+        return '\n'.join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
 
 
 class ConversationContext:

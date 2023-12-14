@@ -159,7 +159,7 @@ class IntentClassifier:
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input
         intent_list = self.intent_list_config.get_intent_list()
-        chat_history = conversation.get_history().format_to_string()
+        chat_history = conversation.get_history().format_string()
         intent_examples = self.get_intent_examples(user_input)
 
         intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, chat_history, user_input)

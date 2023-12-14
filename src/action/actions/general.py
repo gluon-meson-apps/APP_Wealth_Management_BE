@@ -34,7 +34,7 @@ class SlotFillingAction(Action):
         prompt = self.prompt_template.format({
             "fill_slot": slot_description,
             "intent": self.intent.description,
-            "history": context.conversation.get_history().format_to_string(),
+            "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
@@ -54,7 +54,7 @@ class IntentConfirmAction(Action):
         logger.info(f'exec action intent confirm')
         prompt = self.prompt_template.format({
             "intent": self.intent.description,
-            "history": context.conversation.get_history().format_to_string(),
+            "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)
@@ -76,7 +76,7 @@ class IntentFillingAction(Action):
         logger.info(f'exec action intent_filling')
         filtered_intents = [intent.description for intent in self.intents if intent.business]
         prompt = self.prompt_template.format({
-            "history": context.conversation.get_history().format_to_string(),
+            "history": context.conversation.get_history().format_string(),
             "intent_list": "和".join(filtered_intents)
         })
         logger.debug(prompt)
@@ -99,7 +99,7 @@ class SlotConfirmAction(Action):
             "intent": self.intent.description,
             "slot": self.slot.description,
             "slot_value": self.slot.value,
-            "history": context.conversation.get_history().format_to_string(),
+            "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
         response = self.llm.chat(prompt, max_length=128)

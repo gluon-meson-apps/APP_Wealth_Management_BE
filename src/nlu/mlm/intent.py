@@ -138,8 +138,13 @@ class IntentClassifier:
                     entity.possible_slot.confidence = 1.0
                     break
 
-        # if user deny in current round
-        if next_intent.name in ["negative"]:
+        # if user deny intent in current round
+        if next_intent.name in ["negative"] and context.state in ["intent_confirm"]:
             context.update_intent(None)
+        
+        # if user deny slot in current round
+        if next_intent.name in ["negative"] and context.state in ['slot_confirm']:
+            slot_name = context.state.split(':')[1].strip()
+            context.entities = [entity for entity in context.entities if entity.type != slot_name]
 
         return context
