@@ -1,12 +1,10 @@
 User: 页面看着不太清楚啊
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
-User: 是啊
-Bot: 
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+User: 页面为什么放大了
+MessageType: FORMAT_TEXT
+Content: 您好，根据您的描述，我理解您可能需要调整页面字体大小。请问您希望将字体放大还是缩小呢？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

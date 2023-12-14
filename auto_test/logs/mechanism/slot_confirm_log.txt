@@ -1,11 +1,9 @@
 User: 开通功能我把页面放
-Bot: 
 MessageType: FORMAT_TEXT
 Content: 您是想要开通某个功能吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
-Bot: 
 MessageType: FORMAT_TEXT
 Content: 您好，为了为您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
