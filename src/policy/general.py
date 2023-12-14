@@ -46,14 +46,12 @@ class JumpOutPolicy(Policy):
         # 处理闲聊意图
         if IE.intent.name == "chitchat":
             # 如果首轮就是闲聊或者整个历史意图队列都是闲聊，跳出
-            if len(context.intent_queue) < 2 or all(intent.name == "chitchat" for intent in context.intent_queue):
+            if len(context.intent_queue) < 2 or not any(intent.business for intent in context.intent_queue):
                 return True, JumpOut()
             # 尝试向其询问意图
             else:
                 context.intent_restore()
-                # context.set_state("intent_filling")
                 return False, None
-                #return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         return False, None
 
 class IntentFillingPolicy(Policy):
