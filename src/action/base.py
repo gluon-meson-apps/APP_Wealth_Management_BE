@@ -4,6 +4,7 @@ from enum import unique, Enum
 from pydantic import BaseModel
 
 from action.context import ActionContext
+from output_adapter.base import NormalizeType
 
 
 @unique
@@ -75,6 +76,14 @@ ActionToValidSlotTypesDict = {
     "page_resize": ["font_target"],
     "add_header": ["header_element"],
     "remove_header": ["header_element", "header_position"],
+}
+
+SlotTypeToNormalizeTypeDict = {
+    "functions": NormalizeType.STRING,
+    "font_change": NormalizeType.PERCENTAGE,
+    "font_target":  NormalizeType.PERCENTAGE,
+    "header_element": NormalizeType.STRING,
+    "header_position": NormalizeType.NUMBER,
 }
 
 ActionToSlotCategoryDict = {

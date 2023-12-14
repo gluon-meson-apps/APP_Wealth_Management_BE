@@ -2,7 +2,7 @@ import configparser
 from loguru import logger
 from action.base import Action, ActionResponse, ActionName, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
     ActionToOperateTypeDict, ActionToValidSlotTypesDict, ActionResponseAnswerContent, ActionResponseAnswer, \
-    JumpOutResponse, ResponseMessageType
+    JumpOutResponse, ResponseMessageType, SlotTypeToNormalizeTypeDict
 from output_adapter.base import OutputAdapter
 
 config = configparser.ConfigParser()
@@ -19,12 +19,10 @@ class BankRelatedAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action {self.action_name}')
         target_slots = [x for x in self.possible_slots if x.name in ActionToValidSlotTypesDict[self.action_name]]
-
         if len(target_slots) > 1:
             target_slots.sort(key=lambda x: x.priority, reverse=True)
 
         slot = self._prepare_slot(target_slots)
-
         answer = self._prepare_answer(slot)
         return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
@@ -46,11 +44,10 @@ class BankRelatedAction(Action):
         return slot
 
     def _get_target_slot_values(self, target_slots):
+        target_slot_name = target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
         target_slot_value = self.output_adapter.normalize_slot_value(
-            target_slots[0].value if target_slots else config.get('defaultActionSlotValue', self.action_name)
-        )
-        target_slot_name = self.output_adapter.normalize_slot_value(
-            target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
+            target_slots[0].value if target_slots else config.get('defaultActionSlotValue', self.action_name),
+            SlotTypeToNormalizeTypeDict[target_slot_name]
         )
         return target_slot_value, target_slot_name
 
