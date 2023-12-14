@@ -50,8 +50,8 @@ class ConversationContext:
         entity_map = {entity.type: entity for entity in self.entities}
 
         for new_entity in entities:
-            self.has_update = True
             if new_entity.type in entity_map:
+                self.has_update = True
                 existing_entity = entity_map[new_entity.type]
                 existing_entity.__dict__.update(new_entity.__dict__)
                 logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")

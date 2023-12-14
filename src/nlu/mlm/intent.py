@@ -127,9 +127,10 @@ class IntentClassifier:
         # if last round set conversation state "intent_confirm" and user confirmed in current round
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
             context.current_intent.confidence = 1.0
+            context.has_update = True
         
         # if last round set conversation state "slot_confirm" and user confirmed in current round
-        if next_intent.name in ["positive"] and context.state.startswith('slot_confirm'):
+        if next_intent.name in ["positive"] and context.state in ['slot_confirm']:
             slot_name = context.state.split(':')[1].strip()
             for entity in context.entities:
                 if entity.type == slot_name:
