@@ -1,8 +1,8 @@
 import configparser
 from loguru import logger
-from action.base import Action, ActionResponse, ActionName, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
-    ActionToOperateTypeDict, ActionToValidSlotTypesDict, ActionResponseAnswerContent, ActionResponseAnswer, \
-    JumpOutResponse, ResponseMessageType, SlotTypeToNormalizeTypeDict
+from action.base import Action, ActionResponse, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
+    ActionToValidSlotTypesDict, ActionResponseAnswerContent, ActionResponseAnswer, \
+    JumpOutResponse, ResponseMessageType, SlotTypeToNormalizeTypeDict, SlotType, SlotTypeToOperateTypeDict
 from output_adapter.base import OutputAdapter
 
 config = configparser.ConfigParser()
@@ -21,19 +21,17 @@ class BankRelatedAction(Action):
         target_slots = [x for x in self.possible_slots if x.name in ActionToValidSlotTypesDict[self.action_name]]
         if len(target_slots) > 1:
             target_slots.sort(key=lambda x: x.priority, reverse=True)
-
-        slot = self._prepare_slot(target_slots)
-        answer = self._prepare_answer(slot)
+        target_slot_value, target_slot_name = self._get_target_slot_values(target_slots)
+        slot = self._prepare_slot(target_slot_value, target_slot_name)
+        answer = self._prepare_answer(slot, target_slot_name)
         return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
-    def _prepare_slot(self, target_slots):
-        target_slot_value, target_slot_name = self._get_target_slot_values(target_slots)
-
-        if self.action_name in [ActionName.activate_function, ActionName.page_resize]:
+    def _prepare_slot(self, target_slot_value, target_slot_name):
+        if target_slot_name in [SlotType.functions, SlotType.font_target]:
             slot = {"value": target_slot_value}
-        elif self.action_name in [ActionName.page_reduce, ActionName.page_enlarge]:
+        elif target_slot_name in [SlotType.font_change]:
             slot = {"category": ActionToSlotCategoryDict[self.action_name], "value": target_slot_value}
-        elif self.action_name in [ActionName.add_header, ActionName.remove_header]:
+        elif target_slot_name in [SlotType.header_element, SlotType.header_position]:
             slot = {
                 "category": ActionToSlotCategoryDict[self.action_name],
                 "valueType": SlotTypeToSlotValueTypeDict[target_slot_name],
@@ -51,12 +49,12 @@ class BankRelatedAction(Action):
         )
         return target_slot_value, target_slot_name
 
-    def _prepare_answer(self, slot):
+    def _prepare_answer(self, slot, target_slot_name):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
             content=ActionResponseAnswerContent(
                 businessId="N35010Operate",
-                operateType=ActionToOperateTypeDict[self.action_name],
+                operateType=SlotTypeToOperateTypeDict[target_slot_name],
                 operateSlots=slot,
                 businessInfo={}
             )

@@ -60,13 +60,22 @@ class ActionName(str, Enum):
     add_header = "add_header"
     remove_header = "remove_header"
 
-ActionToOperateTypeDict = {
-    "activate_function": "ACTIVATE_FUNCTION",
-    "page_reduce": "PAGE_RESIZE_INCREMENT",
-    "page_enlarge": "PAGE_RESIZE_INCREMENT",
-    "page_resize": "PAGE_RESIZE_TARGET",
-    "add_header": "ADJUST_HEADER",
-    "remove_header": "ADJUST_HEADER",
+
+@unique
+class SlotType(str, Enum):
+    functions = "functions"
+    font_change = "font_change"
+    font_target = "font_target"
+    header_element = "header_element"
+    header_position = "header_position"
+
+
+SlotTypeToOperateTypeDict = {
+    "functions": "ACTIVATE_FUNCTION",
+    "font_change": "PAGE_RESIZE_INCREMENT",
+    "font_target": "PAGE_RESIZE_TARGET",
+    "header_element": "ADJUST_HEADER",
+    "header_position": "ADJUST_HEADER",
 }
 
 ActionToValidSlotTypesDict = {
@@ -81,7 +90,7 @@ ActionToValidSlotTypesDict = {
 SlotTypeToNormalizeTypeDict = {
     "functions": NormalizeType.STRING,
     "font_change": NormalizeType.PERCENTAGE,
-    "font_target":  NormalizeType.PERCENTAGE,
+    "font_target": NormalizeType.PERCENTAGE,
     "header_element": NormalizeType.STRING,
     "header_position": NormalizeType.NUMBER,
 }
