@@ -2,12 +2,17 @@ name: page_resize
 description: 调整页面字体大小
 business: true
 slots:
+  - required: true
   - name: font_opt
     description: 页面是放大还是缩小
     slotType: categorical
     optional: False
   - name: font_size
-    description: 需要调整到的目标值
-    slotType: text
+    description: 页面调整的比例
+    slotType: numeric or text
+    optional: True
+  - name: font_target
+    description: 页面想要调整到的的目标比例
+    slotType: numeric or text
     optional: True
 action: page_resize

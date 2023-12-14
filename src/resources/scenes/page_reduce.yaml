@@ -2,8 +2,13 @@ name: reduce_page
 description: 缩小页面字体
 business: true
 slots:
+  - required: true
   - name: font_size
-    description: 目标大小
-    slotType: text
+    description: 缩小的比例
+    slotType: numeric or text
+    optional: True
+  - name: font_target
+    description: 想要缩小的目标比例
+    slotType: numeric or text
     optional: True
 action: page_reduce
