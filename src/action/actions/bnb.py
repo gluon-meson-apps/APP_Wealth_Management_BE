@@ -46,9 +46,8 @@ class BankRelatedAction(Action):
         return slot
 
     def _get_target_slot_values(self, target_slots):
-        default_slot_value = config.get('defaultActionSlotValue', self.action_name)
         target_slot_value = self.output_adapter.normalize_slot_value(
-            target_slots[0].value if target_slots else default_slot_value
+            target_slots[0].value if target_slots else config.get('defaultActionSlotValue', self.action_name)
         )
         target_slot_name = self.output_adapter.normalize_slot_value(
             target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
