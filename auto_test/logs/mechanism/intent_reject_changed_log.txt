@@ -1,6 +1,6 @@
 User: 页面看着不太清楚啊
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+MessageType: FORMAT_TEXT
+Content: 您好，请问您在进行放大页面字体操作时，需要知道页面的目标放大比例是多少呢？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 这字太大了！
@@ -9,7 +9,7 @@ Content: 您是否希望将页面字体调小呢？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '0.2'}, 'businessInfo': {}}
+MessageType: FORMAT_TEXT
+Content: 您好，请问您希望将页面字体缩小到什么比例呢？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

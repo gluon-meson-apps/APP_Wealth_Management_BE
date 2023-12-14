@@ -1,11 +1,11 @@
 User: 帮我调整下页面
 MessageType: FORMAT_TEXT
-Content: 您好！在调整页面字体大小时，需要了解当前页面的放大或缩小状态。请您告诉我页面是放大还是缩小，以便我为您提供准确的解决方案。谢谢！
+Content: 您好，为了更好地满足您的需求，请您告诉我需要调整的页面是放大还是缩小。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 放大到110%可以吗
-MessageType: FORMAT_TEXT
-Content: 当然可以，页面已经成功调整至110%。
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 不对
@@ -14,10 +14,12 @@ Content: 您需要将页面字体放大至110%吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 还是到140%吧
-MessageType: FORMAT_TEXT
-Content: 您需要将页面字体大小调整为140%吗？
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
-JumpOutFlag: True
+MessageType: FORMAT_TEXT
+Content: 您好，请问您需要我帮您调整页面的字体大小吗？
+JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
