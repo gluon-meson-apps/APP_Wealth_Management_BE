@@ -50,7 +50,6 @@ class BaseDialogManager:
         conversation.current_round += 1
         return response, conversation
 
-
 class DialogManagerFactory:
     @staticmethod
     def create_dialog_manager():

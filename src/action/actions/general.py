@@ -116,7 +116,7 @@ class ChitChatAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action slot chitchat')
         # todo: add history from context
-        result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=1000)
+        result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=128)
         if result.response is None:
             return ActionResponse(text=self.default_template)
         else:

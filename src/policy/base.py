@@ -1,8 +1,6 @@
 from typing import List, Tuple
 
-from llm.self_host import ChatModel
-
-from action.actions.general import ChitChatAction
+from action.actions.general import EndDialogueAction
 from action.base import Action
 
 from tracker.context import ConversationContext
@@ -41,14 +39,12 @@ class BasePolicyManager(PolicyManager):
         self.prompt_manager = prompt_manager
         self.action_model_type = action_model_type
 
-    # 如果有多个action，用一个大的action包装起来，还是视为一个action，用到组合模式
     def get_action(self, intent: IntentWithEntity, conversation: ConversationContext, model_type: str) -> Action:
         conversation.set_status('decision_making')
-        model = self.action_model_type if self.action_model_type is not None else model_type
         if intent is not None:
             for policy in self.policies:
                 handled, action = policy.handle(intent, conversation)
                 if handled:
                     return action
                 
-        return ChitChatAction(model_type=model, chat_model=ChatModel(), user_input=conversation.current_user_input)
+        return EndDialogueAction()

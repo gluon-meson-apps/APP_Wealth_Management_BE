@@ -36,6 +36,7 @@ class JumpOutPolicy(Policy):
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         
+        # 没有意图
         if not IE.intent:
             return False, None
         
@@ -116,13 +117,16 @@ class AssistantPolicy(Policy):
         logger.debug(f"最终识别的\n意图：{IE.intent.name}\n实体：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}")
         inten_form = self.form_store.get_form_from_intent(IE.intent)
 
+        # 出现了预定义之外的意图
         if not inten_form:
-            return False, None
+            return True, JumpOut()
         
-        # 处理业务相关的意图
+        # 范围内意图，且此轮槽位有更新或者是新的意图
         if IE.intent.name in BUSINESS_INTENS and context.has_update:
             context.has_update = False
             return True, BankRelatedAction(inten_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
-        # 兜底
-        return True, IntentFillingAction(prompt_manager=self.prompt_manager)
+        # 范围内意图但无更新
+        if IE.intent.name in BUSINESS_INTENS:
+            context.set_state("intent_confirm")
+            return True, IntentConfirmAction(prompt_manager=self.prompt_manager)
