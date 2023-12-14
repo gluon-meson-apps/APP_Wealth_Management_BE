@@ -17,7 +17,7 @@ SLOT_SIG_TRH = 0.8
 
 MAX_FOLLOW_UP_TIMES = 2
 
-BUSINESS_INTENS = ["activate_function", "add_header", "enlarge_page", "reduce_page", "page_resize", "remove_header"]
+IN_SCOPE_INTENTS = ["activate_function", "add_header", "enlarge_page", "reduce_page", "page_resize", "remove_header"]
 
 class EndDialoguePolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
@@ -69,7 +69,7 @@ class IntentFillingPolicy(Policy):
             return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         
         # 有非辅助外的意图但是置信度低
-        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in BUSINESS_INTENS:
+        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in IN_SCOPE_INTENTS:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         return False, None
@@ -122,12 +122,12 @@ class AssistantPolicy(Policy):
             return True, JumpOut()
         
         # 范围内意图，且此轮槽位有更新或者是新的意图
-        if IE.intent.name in BUSINESS_INTENS and context.has_update:
+        if IE.intent.name in IN_SCOPE_INTENTS and context.has_update:
             context.has_update = False
             return True, BankRelatedAction(inten_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
         # 范围内意图但无更新
-        if IE.intent.name in BUSINESS_INTENS:
+        if IE.intent.name in IN_SCOPE_INTENTS:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         
