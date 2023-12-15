@@ -4,3 +4,9 @@ ACTIVATE_FUNCTION
 ''
 ''
 云支付
+False
+FORMAT_TEXT
+''
+''
+''
+''

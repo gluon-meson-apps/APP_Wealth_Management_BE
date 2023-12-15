@@ -28,26 +28,26 @@ def process_files(directory) -> []:
     for root, file_name in tqdm(file_list, desc="Processing", unit="file"):
         file_path = os.path.join(root, file_name)
         expect_path = (file_path
-                          .replace("scripts", "expects"))
+                       .replace("scripts", "expects"))
         session_id = str(uuid.uuid4())
         responses = []
 
         with open(file_path, 'r', encoding='utf-8') as file, open(expect_path, 'r',
                                                                   encoding='utf-8') as expect_file:
             lines = file.readlines()
-            for line in lines:
-                user_input = line.strip()
-                expect_lines = expect_file.readlines()
+            expect_lines = expect_file.readlines()
+            for i in range(len(lines)):
+                user_input = lines[i].strip()
                 response = {
                     "session_id": session_id,
                     "question": user_input,
-                    "flag": expect_lines[0].strip() == 'True',
+                    "flag": expect_lines[6 * i + 0].strip() == 'True',
                     "content": {
-                        'message_type': expect_lines[1].strip(),
-                        'operate_type': expect_lines[2].strip(),
-                        'category': expect_lines[3].strip(),
-                        'valueType': expect_lines[4].strip(),
-                        'value': expect_lines[5].strip()
+                        'message_type': expect_lines[6 * i + 1].strip(),
+                        'operate_type': expect_lines[6 * i + 2].strip(),
+                        'category': expect_lines[6 * i + 3].strip(),
+                        'valueType': expect_lines[6 * i + 4].strip(),
+                        'value': expect_lines[6 * i + 5].strip()
                     }
                 }
                 responses.append(response)
@@ -61,40 +61,43 @@ questions_and_expected_responses = process_files("")
 class TestIntentAndSlots(unittest.TestCase):
 
     @parameterized.expand(questions_and_expected_responses)
-    def test_single_chat_intent_and_slots(self, values):
-        response = requests.post('http://localhost:7788/chat/', json={
-            "user_input": values["question"],
-            "session_id": values["session_id"]
-        })
+    def test_single_chat_intent_and_slots(self, *expects):
+        for expect in expects:
+            response = requests.post('http://localhost:7788/chat/', json={
+                "user_input": expect["question"],
+                "session_id": expect["session_id"]
+            })
 
-        assert response.status_code == 200
-        response_chat = response.json()
+            assert response.status_code == 200
+            response_chat = response.json()
 
-        response_jump_out_flag = response_chat['response']['jump_out_flag']
-        assert values['flag'] == response_jump_out_flag
+            response_jump_out_flag = response_chat['response']['jump_out_flag']
+            assert expect['flag'] == response_jump_out_flag
 
-        if not values['flag']:
-            response_message_type = response_chat['response']['answer']['messageType']
-            assert response_message_type == values['content']['message_type']
+            if not expect['flag']:
+                response_message_type = response_chat['response']['answer']['messageType']
+                assert response_message_type == expect['content']['message_type']
 
-            if values['content']['message_type'] == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
-                response_action_operate_type = response_chat['response']['answer']['content']['operateType']
-                response_action_operate_slots_value = response_chat['response']['answer']['content']['operateSlots'][
-                    'value']
-                assert response_action_operate_type == values['content']['operate_type']
-                assert response_action_operate_slots_value == values['content']['value']
-
-                if values['content']['operate_type'] in ['PAGE_RESIZE_INCREMENT', 'PAGE_RESIZE_TARGET', 'ADJUST_HEADER']:
-                    response_action_operate_slots_category = \
+                if expect['content']['message_type'] == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
+                    response_action_operate_type = response_chat['response']['answer']['content']['operateType']
+                    response_action_operate_slots_value = \
                         response_chat['response']['answer']['content']['operateSlots'][
-                            'category']
-                    assert response_action_operate_slots_category == values['content']['category']
+                            'value']
+                    assert response_action_operate_type == expect['content']['operate_type']
+                    assert response_action_operate_slots_value == expect['content']['value']
 
-                if values['content']['operate_type'] in ['ADJUST_HEADER']:
-                    response_action_operate_slots_category = \
-                        response_chat['response']['answer']['content']['operateSlots'][
-                            'valueType']
-                    assert response_action_operate_slots_category == values['content']['valueType']
+                    if expect['content']['operate_type'] in ['PAGE_RESIZE_INCREMENT', 'PAGE_RESIZE_TARGET',
+                                                             'ADJUST_HEADER']:
+                        response_action_operate_slots_category = \
+                            response_chat['response']['answer']['content']['operateSlots'][
+                                'category']
+                        assert response_action_operate_slots_category == expect['content']['category']
+
+                    if expect['content']['operate_type'] in ['ADJUST_HEADER']:
+                        response_action_operate_slots_category = \
+                            response_chat['response']['answer']['content']['operateSlots'][
+                                'valueType']
+                        assert response_action_operate_slots_category == expect['content']['valueType']
 
 
 if __name__ == '__main__':
