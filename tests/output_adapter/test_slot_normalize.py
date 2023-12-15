@@ -6,19 +6,34 @@ from output_adapter.base import BaseOutputAdapter, NormalizeType
 
 input_and_expected_value = [
     [
-        '百分之50',
+        '百分之5',
         NormalizeType.PERCENTAGE,
-        '50',
+        '10',
     ],
     [
-        '百分之五十',
+        '百分之4',
         NormalizeType.PERCENTAGE,
-        '50',
+        '10',
     ],
     [
-        '50%',
+        '百分之15',
         NormalizeType.PERCENTAGE,
-        '50',
+        '20',
+    ],
+    [
+        '百分之14',
+        NormalizeType.PERCENTAGE,
+        '20',
+    ],
+    [
+        '百分之五',
+        NormalizeType.PERCENTAGE,
+        '10',
+    ],
+    [
+        '5%',
+        NormalizeType.PERCENTAGE,
+        '10',
     ],
     [
         '倒数第二列',

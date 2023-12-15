@@ -1,7 +1,7 @@
 from enum import Enum, unique
 
 import chinese2digits as c2d
-
+import numpy as np
 
 @unique
 class NormalizeType(str, Enum):
@@ -25,7 +25,10 @@ class BaseOutputAdapter(OutputAdapter):
     def normalize_slot_value(self, slot_value: str, normalize_type: NormalizeType) -> str:
         if normalize_type == NormalizeType.PERCENTAGE:
             result = c2d.takeNumberFromString(slot_value)
-            return str(round(float(result['digitsStringList'][0]) * 10) * 10)
+            result_value = result['digitsStringList'][0]
+            rounded_value = np.ceil(float(result_value) * 10)
+            result_str = str(int(rounded_value * 10))
+            return result_str
         if normalize_type == NormalizeType.NUMBER:
             replaced_value = (slot_value
                               .replace("倒数", "负")
