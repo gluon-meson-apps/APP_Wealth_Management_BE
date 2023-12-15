@@ -2,45 +2,57 @@ import unittest
 
 from parameterized import parameterized
 
-from output_adapter.base import BaseOutputAdapter
+from output_adapter.base import BaseOutputAdapter, NormalizeType
 
 input_and_expected_value = [
     [
         '百分之50',
-        '0.5',
+        NormalizeType.PERCENTAGE,
+        '50',
     ],
     [
         '百分之五十',
-        '0.5',
+        NormalizeType.PERCENTAGE,
+        '50',
     ],
     [
         '50%',
-        '0.5',
+        NormalizeType.PERCENTAGE,
+        '50',
     ],
     [
         '倒数第二列',
+        NormalizeType.NUMBER,
         '-2',
     ],
     [
         '第三列',
+        NormalizeType.NUMBER,
         '3',
     ],
     [
         '倒数三',
+        NormalizeType.NUMBER,
         '-3',
     ],
     [
         '倒数3',
+        NormalizeType.NUMBER,
         '-3',
     ],
+    [
+        '月消费',
+        NormalizeType.STRING,
+        '月消费'
+    ]
 ]
 
 
 class TestNormalizePercentage(unittest.TestCase):
     @parameterized.expand(input_and_expected_value)
-    def test_single_chat_intent_and_slots(self, input, expected_value):
+    def test_normalize_slot_value(self, input, normalize_type, expected_value):
         adapter = BaseOutputAdapter()
-        result = adapter.normalize_slot_value(input)
+        result = adapter.normalize_slot_value(input, normalize_type)
         assert result == expected_value
 
 
