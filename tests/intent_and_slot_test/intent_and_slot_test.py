@@ -24,7 +24,7 @@ questions_and_expected_responses = [
             'message_type': 'FORMAT_INTELLIGENT_EXEC',
             'operate_type': 'PAGE_RESIZE_INCREMENT',
             'category': 'INCREASE',
-            'value': '0'
+            'value': '10'
         }
     ],
     [
