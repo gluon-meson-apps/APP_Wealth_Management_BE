@@ -44,14 +44,16 @@ def process_files(directory) -> []:
                         "session_id": session_id,
                         "question": user_input,
                         "expect_file_path": expect_path,
-                        "flag": expect_lines[7 * i + 0].strip()[13:] == 'True',
+                        "flag": expect_lines[9 * i + 0].strip()[13:] == 'True',
                         "content": {
-                            'message_type': expect_lines[7 * i + 1].strip()[13:],
-                            'operate_type': expect_lines[7 * i + 2].strip()[13:],
-                            'category': expect_lines[7 * i + 3].strip()[10:],
-                            'valueType': expect_lines[7 * i + 4].strip()[11:],
-                            'value': expect_lines[7 * i + 5].strip()[7:]
-                        }
+                            'message_type': expect_lines[9 * i + 1].strip()[13:],
+                            'operate_type': expect_lines[9 * i + 2].strip()[13:],
+                            'category': expect_lines[9 * i + 3].strip()[10:],
+                            'valueType': expect_lines[9 * i + 4].strip()[11:],
+                            'value': expect_lines[9 * i + 5].strip()[7:],
+                        },
+                        'intent': expect_lines[9 * i + 6].strip()[8:],
+                        'status': expect_lines[9 * i + 7].strip()[8:]
                     }
                     responses.append(response)
             all_responses.append(responses)
@@ -81,7 +83,12 @@ class TestIntentAndSlots(unittest.TestCase):
 
             if not expect['flag']:
                 response_message_type = response_chat['response']['answer']['messageType']
+                response_current_intent = response_chat['conversation']['current_intent']['name']
+                response_status = response_chat['conversation']['status']
+
                 assert response_message_type == expect['content']['message_type']
+                assert response_current_intent == expect['intent']
+                assert response_status == expect['status']
 
                 if expect['content']['message_type'] == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
                     response_action_operate_type = response_chat['response']['answer']['content']['operateType']
@@ -106,7 +113,6 @@ class TestIntentAndSlots(unittest.TestCase):
             else:
                 assert response_chat['response']['answer'] == {}
                 print("No")
-
 
 
 if __name__ == '__main__':

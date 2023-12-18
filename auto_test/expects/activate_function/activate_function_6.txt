@@ -4,5 +4,7 @@ operateType: ACTIVATE_FUNCTION
 category:
 valueType:
 value: 薪资通
+intent: activate_function
+status: decision_making
 ---------------------
 
