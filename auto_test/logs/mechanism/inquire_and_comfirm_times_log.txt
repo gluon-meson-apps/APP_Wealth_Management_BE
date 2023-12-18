@@ -1,0 +1,46 @@
+User: 页面字体看着费劲
+MessageType: FORMAT_TEXT
+Content: 您好！请问您需要调整页面的字体大小吗？
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.39'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 有什么选择啊
+MessageType: FORMAT_TEXT
+Content: 您好！您可以调整页面的字体大小，具体操作方法是在页面顶部或者底部的设置中找到“字体大小”或“字号”选项，然后进行修改即可。如果您需要进一步的帮助，请告诉我您的具体需求。
+JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.39'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 我想想
+MessageType: FORMAT_TEXT
+Content: 好的，如果您有任何其他问题或需要帮助，请随时告诉我。
+JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.39'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 再想想
+JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'chitchat',  'confidence': '0.7'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 那调整表头吧
+MessageType: FORMAT_TEXT
+Content: 您是否希望调整表格的头部？
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'add_header',  'confidence': '0.77'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 
+MessageType: FORMAT_TEXT
+Content: 好的，我会帮您调整表格的头部。请问您需要对哪些列进行调整呢？
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'add_header',  'confidence': '0.77'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
