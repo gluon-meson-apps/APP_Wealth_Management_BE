@@ -58,7 +58,7 @@ class ConversationContext:
         elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
             return answer.content
         elif answer.messageType == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
-            return f"已为您完成 {self.current_intent.description}"
+            return f"已为您完成 {answer.content.businessInfo['instruction']}"
         else:
             return ""
 

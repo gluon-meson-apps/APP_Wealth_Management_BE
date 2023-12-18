@@ -4,13 +4,17 @@ from enum import unique, Enum
 from pydantic import BaseModel
 
 from action.context import ActionContext
-from output_adapter.base import NormalizeType
-
 
 @unique
 class ResponseMessageType(str, Enum):
     FORMAT_INTELLIGENT_EXEC = "FORMAT_INTELLIGENT_EXEC"
     FORMAT_TEXT = "FORMAT_TEXT"
+
+@unique
+class NormalizeType(str, Enum):
+    STRING = "STRING"
+    PERCENTAGE = "PERCENTAGE"
+    NUMBER = "NUMBER"
 
 class ActionResponseAnswerContent(BaseModel):
     businessId: str

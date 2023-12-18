@@ -23,7 +23,7 @@ class BankRelatedAction(Action):
             target_slots.sort(key=lambda x: x.priority, reverse=True)
         target_slot_value, target_slot_name = self._get_target_slot_values(target_slots)
         slot = self._prepare_slot(target_slot_value, target_slot_name)
-        answer = self._prepare_answer(slot, target_slot_name)
+        answer = self._prepare_answer(slot, target_slot_value, target_slot_name)
         return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
     def _prepare_slot(self, target_slot_value, target_slot_name):
@@ -49,17 +49,17 @@ class BankRelatedAction(Action):
         )
         return target_slot_value, target_slot_name
 
-    def _prepare_answer(self, slot, target_slot_name):
+    def _prepare_answer(self, slot, target_slot_value, target_slot_name):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
             content=ActionResponseAnswerContent(
                 businessId="N35010Operate",
                 operateType=SlotTypeToOperateTypeDict[target_slot_name],
                 operateSlots=slot,
-                businessInfo={}
-            )
-        )
-
+                businessInfo={
+                    "instruction": f"{self.intent.description}"
+                                   f"{self.output_adapter.transform_slot_value_to_natural_language(target_slot_value, target_slot_name)} "
+                }))
 
 class JumpOut(Action):
     def __init__(self):
