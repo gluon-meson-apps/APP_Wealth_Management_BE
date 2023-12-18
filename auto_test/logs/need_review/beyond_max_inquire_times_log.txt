@@ -2,15 +2,9 @@ User: 页面好像有点不太对劲啊
 MessageType: FORMAT_TEXT
 Content: 你好，请问有什么需要帮助的吗？
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '0.34'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面好像有点不太对劲啊
 MessageType: FORMAT_TEXT
 Content: 您好，您可能是想调整页面字体大小。请告诉我具体需要调整到什么程度，或者是否有其他问题需要我帮忙解决。
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '0.34'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

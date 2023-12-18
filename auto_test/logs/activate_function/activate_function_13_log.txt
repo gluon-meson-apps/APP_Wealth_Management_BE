@@ -8,9 +8,6 @@ CurrentEntity: {'name': 'functions', 'value': '薪资通', 'confidence': '1.0'}
 ------------------------------------------------------------------------------------------------------------------------
 User: AAA
 JumpOutFlag: True
-State: 
-CurrentIntent: {'name': 'other_skills',  'confidence': '0.94'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 打回单
 JumpOutFlag: True

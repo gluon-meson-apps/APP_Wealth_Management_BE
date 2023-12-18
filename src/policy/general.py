@@ -26,8 +26,12 @@ class EndDialoguePolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         logger.info(f"Inquiry_times: {context.inquiry_times}")
         # 追问次数超过最大值
-        if context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+        if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and context.current_intent is None:
             return True, EndDialogueAction()
+        
+        if context.current_intent is not None:
+            if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and context.current_intent.name not in IN_SCOPE_INTENTS:
+                return True, EndDialogueAction()
         return False, None
 
 class JumpOutPolicy(Policy):
@@ -69,7 +73,7 @@ class IntentFillingPolicy(Policy):
             return True, IntentFillingAction(prompt_manager=self.prompt_manager)
         
         # 有非辅助外的意图但是置信度低
-        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in IN_SCOPE_INTENTS:
+        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in IN_SCOPE_INTENTS and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         return False, None
@@ -88,7 +92,7 @@ class SlotFillingPolicy(Policy):
             logger.debug(f"需要填充的槽位： {[slot.name for slot in missed_slots if slot]}")
             
             # 追问槽位
-            if missed_slots:
+            if missed_slots and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
                 context.set_state("slot_filling")
                 return True, SlotFillingAction(missed_slots.pop(), IE.intent, prompt_manager=self.prompt_manager)
 
@@ -99,7 +103,7 @@ class SlotFillingPolicy(Policy):
                     return True, SlotConfirmAction(IE.intent, slot, prompt_manager=self.prompt_manager)
             
             # 如果所有的可选槽位都没有被填充且form.slot_required为True，则通过话术引导用户填充任意一个槽位
-            if form.slot_required:
+            if form.slot_required and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
                 optional_slots = [slot for slot in form.slots if slot.optional]
                 if optional_slots and len(possible_slots) == 0:
                     context.set_state("slot_filling")
@@ -127,9 +131,13 @@ class AssistantPolicy(Policy):
             return True, BankRelatedAction(inten_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
         # 范围内意图但无更新
-        if IE.intent.name in IN_SCOPE_INTENTS:
+        if IE.intent.name in IN_SCOPE_INTENTS and not context.has_update:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
+        
+        # 范围内意图但多轮追问都不能获取到必要的槽位
+        if IE.intent.name in IN_SCOPE_INTENTS and context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+            return True, BankRelatedAction(inten_form.action, potential_slots, IE.intent, BaseOutputAdapter())
         
         context.set_state("intent_filling")
         return True, IntentFillingAction(prompt_manager=self.prompt_manager)

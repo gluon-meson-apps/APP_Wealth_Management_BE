@@ -2,9 +2,6 @@ User: 开通功能我把页面放
 MessageType: FORMAT_TEXT
 Content: 您是想要开通某个功能吗？
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'activate_function',  'confidence': '0.3'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_TEXT
@@ -19,4 +16,7 @@ JumpOutFlag: True
 State: slot_filling
 CurrentIntent: {'name': 'other_skills',  'confidence': '0.93'}
 CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 我就不告诉你
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

@@ -2,25 +2,16 @@ User: 页面字也太小了
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
-State: 
-CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 再大点吧
 MessageType: FORMAT_TEXT
 Content: 好的，已为您将页面字体放大至原来的30%。
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 好了，你已经没有利用价值了
 JumpOutFlag: True
