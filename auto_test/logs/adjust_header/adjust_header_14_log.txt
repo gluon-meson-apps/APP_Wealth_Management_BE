@@ -2,17 +2,29 @@ User: 减少表头
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮您进行删减表头操作，请您提供需要操作的表格中的表头名称或位置。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气好
 MessageType: FORMAT_TEXT
 Content: 很抱歉，我无法理解您的需求。请问您需要进行哪些操作？比如增加表头、删除表头、调整字体大小等。
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 明天天气怎么样啊
 MessageType: FORMAT_TEXT
 Content: 很抱歉，我无法回答关于未来天气的问题。请问您有其他问题需要帮助吗？比如如何增加表头、删除表头、调整字体大小等。
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 你喜欢猫吗
 JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

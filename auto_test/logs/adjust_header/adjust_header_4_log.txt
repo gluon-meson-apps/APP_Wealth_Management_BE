@@ -2,4 +2,7 @@ User: 增加一个月消费的表头
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '0.99'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

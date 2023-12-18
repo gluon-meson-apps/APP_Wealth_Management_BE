@@ -2,9 +2,15 @@ User: 页面大一点
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
+State: 
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 还能更大吗
 MessageType: FORMAT_TEXT
 Content: 当然可以，已为您将页面字体放大至最大。
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

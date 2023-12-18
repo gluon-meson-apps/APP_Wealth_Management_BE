@@ -2,15 +2,27 @@ User: 我不喜欢这个页面
 MessageType: FORMAT_TEXT
 Content: 您好，请问您对页面有什么具体的要求吗？是需要增加、删减表头和放大/缩小页面字体大小吗？还是其他方面的问题呢？
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'None',  'confidence': 'None'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 可以调整吗
 JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 能换字体吗
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 除了这些呢
 JumpOutFlag: True
+State: slot_filling
+CurrentIntent: {'name': 'other_skills',  'confidence': '0.4'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

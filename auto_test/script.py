@@ -58,10 +58,33 @@ def process_files(directory):
                         log_file.write(f"Content: {bot_response_content}\n")
                     log_file.write(f"JumpOutFlag: {bot_response_jump_out}\n")
 
+                    bot_response_state = response.json()["conversation"]["state"]
+                    bot_response_current_intent_name = response.json()["conversation"]["current_intent"]["name"] if \
+                        response.json()["conversation"]["current_intent"] else None
+                    bot_response_current_intent_confidence = response.json()["conversation"]["current_intent"][
+                        "confidence"] if response.json()["conversation"]["current_intent"] else None
+                    log_file.write(f"State: {bot_response_state}\n")
+                    log_file.write(
+                        f"CurrentIntent: {{'name': '{bot_response_current_intent_name}',  "
+                        f"'confidence': '{bot_response_current_intent_confidence}'}}\n")
+
+                    bot_response_current_round = response.json()["conversation"]["current_round"]
+                    bot_response_entities = response.json()["conversation"]["entities"]
+                    bot_response_current_round_entities = [entity for entity in bot_response_entities if
+                                                           entity['round'] == bot_response_current_round - 1]
+                    for entity in bot_response_current_round_entities:
+                        log_file.write(
+                            f"CurrentEntity: {{'name': '{entity['possible_slot']['name']}', "
+                            f"'value': '{entity['possible_slot']['value']}', "
+                            f"'confidence': '{entity['possible_slot']['confidence']}'}}\n")
+                    if len(bot_response_current_round_entities) == 0:
+                        log_file.write(f"CurrentEntity: {{}}\n")
+
                     log_file.write("-" * 120)
                     log_file.write("\n")
                 else:
                     print(f"Error for file {file_name}: {response.status_code}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process files in a directory')

@@ -2,12 +2,21 @@ User: 页面不对
 MessageType: FORMAT_TEXT
 Content: 您好！请问您需要调整页面的字体大小吗？
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: emm
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 打回单
 JumpOutFlag: True
+State: slot_filling
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

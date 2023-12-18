@@ -2,19 +2,31 @@ User: 页面不对
 MessageType: FORMAT_TEXT
 Content: 您好！请问您需要调整页面的字体大小吗？
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不不不
 MessageType: FORMAT_TEXT
 Content: 抱歉，我可能没有理解您的需求。请问您能否重新描述一下您的问题？
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'None',  'confidence': 'None'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 。。。
 MessageType: FORMAT_TEXT
 Content: user: 非常抱歉，我可能没有理解您的需求。请问您能否重新描述一下您的问题？
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不太清楚哎
 MessageType: FORMAT_TEXT
 Content: 您可以再详细描述一下您的问题吗？例如，您是否需要调整页面的字体大小、颜色或者背景等。这样我才能更好地为您提供帮助。
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

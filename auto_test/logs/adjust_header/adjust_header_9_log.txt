@@ -2,4 +2,7 @@ User: 减少第一个表头
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'INDEX', 'value': '1'}, 'businessInfo': {'instruction': '删减表头第1个'}}
 JumpOutFlag: False
+State: 
+CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
+CurrentEntity: {'name': 'header_position', 'value': '第一个', 'confidence': '1.0'}
 ------------------------------------------------------------------------------------------------------------------------

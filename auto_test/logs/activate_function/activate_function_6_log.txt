@@ -2,4 +2,7 @@ User: 开通功能：薪资通
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {'instruction': '开通功能薪资通'}}
 JumpOutFlag: False
+State: 
+CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentEntity: {'name': 'functions', 'value': '薪资通', 'confidence': '1.0'}
 ------------------------------------------------------------------------------------------------------------------------

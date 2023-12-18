@@ -2,12 +2,21 @@ User: 开通功能
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我想想
 MessageType: FORMAT_TEXT
 Content: 好的，如果您需要帮助开通相关功能，请告诉我具体的功能名称，我将为您提供详细的操作指南。
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 算了，我想打回单
 JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

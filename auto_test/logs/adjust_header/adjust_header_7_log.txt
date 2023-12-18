@@ -2,17 +2,29 @@ User: 增加表头
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气很好
 MessageType: FORMAT_TEXT
 Content: 很抱歉，我无法帮您进行表头增加操作，因为我当前的工作范围仅限于帮助您进行增加表头、删减表头、放大页面字体、开通功能、调整页面字体大小和缩小页面字体等任务。请问您有其他相关需求吗？
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 你喜欢宠物狗吗
 MessageType: FORMAT_TEXT
 Content: assistant: 很抱歉，我无法回答这个问题，因为我是一个人工智能助手，没有个人喜好。请问您有其他问题需要我帮助解答吗？
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 明天天气是阴天吗
 JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'chitchat',  'confidence': '0.95'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

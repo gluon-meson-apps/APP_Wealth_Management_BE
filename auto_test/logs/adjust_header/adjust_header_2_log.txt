@@ -2,14 +2,23 @@ User: 增加一个月消费的表头
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '0.99'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气真好
 MessageType: FORMAT_TEXT
 Content: 很抱歉，我无法理解您的需求。请问您是否需要帮助您在工作范围内进行操作？例如，增加表头、删除表头、调整字体大小等。
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '0.99'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 放大页面
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
+State: intent_filling
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

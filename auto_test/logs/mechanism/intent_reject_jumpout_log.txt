@@ -1,3 +1,6 @@
 User: 页面太丑了吧
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.36'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

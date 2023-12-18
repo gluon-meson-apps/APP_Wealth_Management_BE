@@ -1,12 +1,24 @@
 User: 我要打印回单
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 四月
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 尾号是2345
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 没打印过的
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

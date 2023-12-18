@@ -2,9 +2,15 @@ User: 开通功能
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 收款通
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '收款通'}, 'businessInfo': {'instruction': '开通功能收款通'}}
 JumpOutFlag: False
+State: slot_filling
+CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentEntity: {'name': 'functions', 'value': '收款通', 'confidence': '1.0'}
 ------------------------------------------------------------------------------------------------------------------------

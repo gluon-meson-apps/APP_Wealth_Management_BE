@@ -1,9 +1,18 @@
 User: 怎么办理对账
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 入口在哪
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.97'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我们公司大的很
 JumpOutFlag: True
+State: 
+CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
