@@ -1,6 +1,0 @@
-JumpOutFlag: True
-MessageType:
-operateType:
-category:
-valueType:
-value:

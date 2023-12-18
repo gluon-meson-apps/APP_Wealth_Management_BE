@@ -1,6 +1,0 @@
-JumpOutFlag: False
-MessageType: FORMAT_INTELLIGENT_EXEC
-operateType: ADJUST_HEADER
-category: ADD
-valueType: NAME
-value: 月消费
