@@ -11,7 +11,7 @@ from action.base import ResponseMessageType
 
 def process_files(directory) -> []:
     # 指定文件夹路径
-    script_path = './intent_and_slot_test/scripts'  # 修改为你的文件夹路径
+    script_path = './scripts'  # 修改为你的文件夹路径
 
     # 获取文件列表
     file_list = []
@@ -33,27 +33,28 @@ def process_files(directory) -> []:
         session_id = str(uuid.uuid4())
         responses = []
 
-        with open(file_path, 'r', encoding='utf-8') as file, open(expect_path, 'r',
-                                                                  encoding='utf-8') as expect_file:
-            lines = file.readlines()
-            expect_lines = expect_file.readlines()
-            for i in range(len(lines)):
-                user_input = lines[i].strip()
-                response = {
-                    "session_id": session_id,
-                    "question": user_input,
-                    "expect_file_path": expect_path,
-                    "flag": expect_lines[7 * i + 0].strip()[13:] == 'True',
-                    "content": {
-                        'message_type': expect_lines[7 * i + 1].strip()[13:],
-                        'operate_type': expect_lines[7 * i + 2].strip()[13:],
-                        'category': expect_lines[7 * i + 3].strip()[10:],
-                        'valueType': expect_lines[7 * i + 4].strip()[11:],
-                        'value': expect_lines[7 * i + 5].strip()[7:]
+        if os.path.exists(expect_path):
+            with open(file_path, 'r', encoding='utf-8') as file, open(expect_path, 'r',
+                                                                      encoding='utf-8') as expect_file:
+                lines = file.readlines()
+                expect_lines = expect_file.readlines()
+                for i in range(len(lines)):
+                    user_input = lines[i].strip()
+                    response = {
+                        "session_id": session_id,
+                        "question": user_input,
+                        "expect_file_path": expect_path,
+                        "flag": expect_lines[7 * i + 0].strip()[13:] == 'True',
+                        "content": {
+                            'message_type': expect_lines[7 * i + 1].strip()[13:],
+                            'operate_type': expect_lines[7 * i + 2].strip()[13:],
+                            'category': expect_lines[7 * i + 3].strip()[10:],
+                            'valueType': expect_lines[7 * i + 4].strip()[11:],
+                            'value': expect_lines[7 * i + 5].strip()[7:]
+                        }
                     }
-                }
-                responses.append(response)
-        all_responses.append(responses)
+                    responses.append(response)
+            all_responses.append(responses)
     return all_responses
 
 

@@ -4,3 +4,5 @@ operateType: ADJUST_HEADER
 category: ADD
 valueType: NAME
 value: 月消费
+current_intent
+
