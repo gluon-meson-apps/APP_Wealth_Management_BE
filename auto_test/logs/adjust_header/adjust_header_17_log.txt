@@ -1,6 +1,6 @@
 User: 想购买理财产品
 JumpOutFlag: True
 State: 
-CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.99'}
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

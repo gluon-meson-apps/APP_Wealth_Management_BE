@@ -2,9 +2,23 @@ User: 页面好像有点不太对劲啊
 MessageType: FORMAT_TEXT
 Content: 你好，请问有什么需要帮助的吗？
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.38'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面好像有点不太对劲啊
 MessageType: FORMAT_TEXT
-Content: 您好，您可能是想调整页面字体大小。请告诉我具体需要调整到什么程度，或者是否有其他问题需要我帮忙解决。
+Content: 您好，您可能是想询问如何调整页面字体大小。请问您需要我帮您执行这个操作吗？
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.38'}
+CurrentEntity: {}
+------------------------------------------------------------------------------------------------------------------------
+User: 页面好像有点不太对劲啊
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.38'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

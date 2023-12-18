@@ -1,8 +1,8 @@
 User: 页面放大一倍
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '100'}, 'businessInfo': {'instruction': '放大页面字体100%'}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_change', 'value': '一倍', 'confidence': '0.96'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

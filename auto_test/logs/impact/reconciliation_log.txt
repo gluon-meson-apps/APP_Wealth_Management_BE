@@ -7,7 +7,7 @@ CurrentEntity: {}
 User: 入口在哪
 JumpOutFlag: True
 State: 
-CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.97'}
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.85'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我们公司大的很

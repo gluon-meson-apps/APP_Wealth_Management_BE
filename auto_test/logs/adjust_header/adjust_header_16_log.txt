@@ -1,16 +1,16 @@
 User: 列太少了不清楚
-MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
-State: slot_filling
-CurrentIntent: {'name': 'add_header',  'confidence': '0.95'}
+State: 
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.95'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 月消费列删除
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'NAME', 'value': '月消费'}, 'businessInfo': {'instruction': '删减表头月消费'}}
 JumpOutFlag: False
-State: slot_filling
-CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
-CurrentEntity: {'name': 'header_element', 'value': '月消费', 'confidence': '1.0'}
+State: 
+CurrentIntent: {'name': 'remove_header',  'confidence': '0.99'}
+CurrentEntity: {'name': 'header_element', 'value': '月消费', 'confidence': '0.98'}
 ------------------------------------------------------------------------------------------------------------------------

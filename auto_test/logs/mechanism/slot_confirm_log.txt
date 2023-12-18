@@ -1,22 +1,24 @@
 User: 开通功能我把页面放
 MessageType: FORMAT_TEXT
-Content: 您是想要开通某个功能吗？
+Content: 您好！为了更好地为您提供帮助，请问您需要调整页面的字体大小吗？
 JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.55'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
+Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
 JumpOutFlag: False
 State: slot_filling
-CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我就不告诉你
-JumpOutFlag: True
+MessageType: FORMAT_TEXT
+Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
+JumpOutFlag: False
 State: slot_filling
-CurrentIntent: {'name': 'other_skills',  'confidence': '0.93'}
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
 CurrentEntity: {}
-------------------------------------------------------------------------------------------------------------------------
-User: 我就不告诉你
-JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

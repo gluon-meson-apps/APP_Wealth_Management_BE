@@ -1,8 +1,8 @@
 User: 增加月消费的表头
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'ADD', 'valueType': 'NAME', 'value': '月消费'}, 'businessInfo': {'instruction': '增加表头月消费'}}
+MessageType: FORMAT_TEXT
+Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
-State: 
-CurrentIntent: {'name': 'add_header',  'confidence': '1.0'}
-CurrentEntity: {'name': 'header_element', 'value': '月消费', 'confidence': '1.0'}
+State: slot_filling
+CurrentIntent: {'name': 'add_header',  'confidence': '0.82'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

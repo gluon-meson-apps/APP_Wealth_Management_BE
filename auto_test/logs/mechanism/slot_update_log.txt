@@ -4,7 +4,7 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT',
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_change', 'value': '50%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_change', 'value': '50%', 'confidence': '0.97'}
 ------------------------------------------------------------------------------------------------------------------------
 User: 再放大10%
 MessageType: FORMAT_INTELLIGENT_EXEC
@@ -12,5 +12,5 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT',
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_change', 'value': '10%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_change', 'value': '10%', 'confidence': '0.96'}
 ------------------------------------------------------------------------------------------------------------------------

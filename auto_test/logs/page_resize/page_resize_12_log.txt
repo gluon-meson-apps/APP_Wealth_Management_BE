@@ -21,8 +21,10 @@ CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 除了这些呢
-JumpOutFlag: True
+MessageType: FORMAT_TEXT
+Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
+JumpOutFlag: False
 State: slot_filling
-CurrentIntent: {'name': 'other_skills',  'confidence': '0.4'}
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

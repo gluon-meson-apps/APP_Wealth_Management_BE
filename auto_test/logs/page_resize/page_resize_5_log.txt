@@ -1,16 +1,16 @@
 User: 页面太大了
-MessageType: FORMAT_TEXT
-Content: 您好！请问您需要我帮您调整页面字体大小吗？
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '20'}, 'businessInfo': {'instruction': '缩小页面字体20%'}}
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '0.68'}
+State: 
+CurrentIntent: {'name': 'reduce_page',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 现在又有点太小了
-MessageType: FORMAT_TEXT
-Content: 好的，我可以为您调整页面字体大小。请问您希望将字体调大还是调小呢？
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '0.68'}
+State: 
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.93'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

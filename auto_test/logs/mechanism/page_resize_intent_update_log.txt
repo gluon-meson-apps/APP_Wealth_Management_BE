@@ -12,7 +12,7 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_TARGET', 'o
 JumpOutFlag: False
 State: slot_filling
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_target', 'value': '到110%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_target', 'value': '到110%', 'confidence': '0.98'}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不对
 MessageType: FORMAT_TEXT
@@ -28,7 +28,7 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_TARGET', 'o
 JumpOutFlag: False
 State: intent_confirm
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_target', 'value': '到140%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_target', 'value': '到140%', 'confidence': '0.99'}
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_INTELLIGENT_EXEC

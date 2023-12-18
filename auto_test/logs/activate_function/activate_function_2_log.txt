@@ -1,14 +1,14 @@
 User: 页面不对
 MessageType: FORMAT_TEXT
-Content: 您好！请问您需要调整页面的字体大小吗？
+Content: 您好！请问您需要我帮您调整页面字体大小吗？
 JumpOutFlag: False
 State: intent_confirm
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.41'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不不不
 MessageType: FORMAT_TEXT
-Content: 您遇到问题了，请问需要我帮您进行哪些操作？
+Content: 抱歉，我无法理解您的需求。请问您能否用更简单明了的方式描述一下问题？
 JumpOutFlag: False
 State: intent_filling
 CurrentIntent: {'name': 'None',  'confidence': 'None'}
@@ -16,17 +16,17 @@ CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 。。。
 MessageType: FORMAT_TEXT
-Content: 您遇到问题了，请告诉我具体需要解决哪个方面的问题，我会尽力帮您。
+Content: user: 非常抱歉，我可能没有表述清楚。请问您能具体说明一下您的问题吗？是在调整页面的字体大小、颜色或者排版等方面遇到了问题吗？
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.41'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不太清楚哎
 MessageType: FORMAT_TEXT
-Content: 您好！请问您需要哪方面的帮助？我可以帮您增加表头、删减表头、放大页面字体、开通功能、调整页面字体大小以及缩小页面字体。请您描述一下您的需求，以便我更好地为您提供帮助。
+Content: 非常抱歉，我可能没有表述清楚。请问您能具体说明一下您的问题吗？是在调整页面的字体大小、颜色或者排版等方面遇到了问题吗？
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.41'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

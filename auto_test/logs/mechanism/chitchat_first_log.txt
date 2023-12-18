@@ -1,7 +1,7 @@
 User: 你好
 JumpOutFlag: True
 State: 
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.98'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面放大50%
@@ -10,14 +10,14 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT',
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_change', 'value': '50%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_change', 'value': '50%', 'confidence': '0.97'}
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气咋样
 MessageType: FORMAT_TEXT
 Content: 您的问题似乎与当前天气无关。请问您是否需要我帮您调整页面的字体大小或颜色？
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.98'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 空气咋样
@@ -25,12 +25,12 @@ MessageType: FORMAT_TEXT
 Content: 抱歉，我无法获取实时空气质量信息。不过，我可以帮您调整页面字体大小和颜色，以适应您的视觉需求。请问您需要我帮您进行设置吗？
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.98'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 生活咋样
 JumpOutFlag: True
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.98'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

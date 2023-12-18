@@ -1,8 +1,8 @@
 User: 减少月消费表头
 MessageType: FORMAT_TEXT
-Content: 您好！您想删除月消费表格的表头，确认一下是否是指删除“月消费”这一列？
+Content: 您好！请问您是想删除月消费表头吗？
 JumpOutFlag: False
-State: slot_confirm: header_element
-CurrentIntent: {'name': 'remove_header',  'confidence': '0.92'}
-CurrentEntity: {'name': 'header_element', 'value': '月消费', 'confidence': '0.77'}
+State: intent_confirm
+CurrentIntent: {'name': 'remove_header',  'confidence': '0.59'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

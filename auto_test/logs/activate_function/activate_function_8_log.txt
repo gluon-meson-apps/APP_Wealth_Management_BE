@@ -20,5 +20,5 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'op
 JumpOutFlag: False
 State: intent_filling
 CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
-CurrentEntity: {'name': 'functions', 'value': '国内保理', 'confidence': '1.0'}
+CurrentEntity: {'name': 'functions', 'value': '国内保理', 'confidence': '0.96'}
 ------------------------------------------------------------------------------------------------------------------------

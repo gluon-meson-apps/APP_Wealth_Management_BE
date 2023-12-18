@@ -9,12 +9,12 @@ CurrentEntity: {}
 User: 我想想
 JumpOutFlag: True
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.91'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 那放大一点吧
 JumpOutFlag: True
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.91'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

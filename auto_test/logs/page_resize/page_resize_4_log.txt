@@ -4,5 +4,5 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT',
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'reduce_page',  'confidence': '1.0'}
-CurrentEntity: {'name': 'font_change', 'value': '20%', 'confidence': '1.0'}
+CurrentEntity: {'name': 'font_change', 'value': '20%', 'confidence': '0.96'}
 ------------------------------------------------------------------------------------------------------------------------

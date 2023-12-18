@@ -1,24 +1,24 @@
 User: 页面不对
 MessageType: FORMAT_TEXT
-Content: 您好！请问您需要调整页面的字体大小吗？
+Content: 您好！请问您需要我帮您调整页面字体大小吗？
 JumpOutFlag: False
 State: intent_confirm
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.51'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.41'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: emm
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '20'}, 'businessInfo': {'instruction': '缩小页面字体20%'}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
-State: slot_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
+State: intent_confirm
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 开通财资管理云功能
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '财资管理云'}, 'businessInfo': {'instruction': '开通功能财资管理云'}}
 JumpOutFlag: False
-State: slot_filling
+State: intent_confirm
 CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
-CurrentEntity: {'name': 'functions', 'value': '财资管理云', 'confidence': '1.0'}
+CurrentEntity: {'name': 'functions', 'value': '财资管理云', 'confidence': '0.99'}
 ------------------------------------------------------------------------------------------------------------------------

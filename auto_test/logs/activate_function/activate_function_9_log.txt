@@ -16,12 +16,15 @@ CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我不知道
 MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
+Content: 您可以告诉我您想开通哪些功能，我将为您提供相关的操作指南。
 JumpOutFlag: False
-State: slot_filling
+State: intent_filling
 CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 不确认，我要看看
 JumpOutFlag: True
+State: intent_filling
+CurrentIntent: {'name': 'other_skills',  'confidence': '0.58'}
+CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

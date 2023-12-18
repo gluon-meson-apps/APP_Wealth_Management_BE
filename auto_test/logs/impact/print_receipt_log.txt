@@ -7,7 +7,7 @@ CurrentEntity: {}
 User: 四月
 JumpOutFlag: True
 State: 
-CurrentIntent: {'name': 'other_skills',  'confidence': '1.0'}
+CurrentIntent: {'name': 'chitchat',  'confidence': '0.95'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 尾号是2345

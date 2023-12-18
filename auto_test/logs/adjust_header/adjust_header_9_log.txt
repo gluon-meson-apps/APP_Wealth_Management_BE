@@ -4,5 +4,5 @@ Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operat
 JumpOutFlag: False
 State: 
 CurrentIntent: {'name': 'remove_header',  'confidence': '1.0'}
-CurrentEntity: {'name': 'header_position', 'value': '第一个', 'confidence': '1.0'}
+CurrentEntity: {'name': 'header_position', 'value': '第一个', 'confidence': '0.98'}
 ------------------------------------------------------------------------------------------------------------------------

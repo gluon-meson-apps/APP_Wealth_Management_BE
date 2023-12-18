@@ -8,9 +8,9 @@ CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 收款通
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '收款通'}, 'businessInfo': {'instruction': '开通功能收款通'}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '收款'}, 'businessInfo': {'instruction': '开通功能收款'}}
 JumpOutFlag: False
 State: slot_filling
 CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
-CurrentEntity: {'name': 'functions', 'value': '收款通', 'confidence': '1.0'}
+CurrentEntity: {'name': 'functions', 'value': '收款', 'confidence': '0.84'}
 ------------------------------------------------------------------------------------------------------------------------
