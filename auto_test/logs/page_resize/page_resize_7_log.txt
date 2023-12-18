@@ -1,12 +1,10 @@
 User: 页面大一点
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 还能更大吗
-Bot: 
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+MessageType: FORMAT_TEXT
+Content: 当然可以，已为您将页面字体放大至最大。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 User: 页面看着不太清楚啊
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面为什么放大了
 MessageType: FORMAT_TEXT
-Content: 您是否需要将页面字体放大？
+Content: 您是想了解为什么页面字体被放大了对吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

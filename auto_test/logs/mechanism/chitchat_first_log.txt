@@ -3,17 +3,17 @@ JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------
 User: 页面放大50%
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.5'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '50'}, 'businessInfo': {'instruction': '放大页面字体50%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气咋样
 MessageType: FORMAT_TEXT
-Content: 您想了解天气信息吗？您可以告诉我您所在的城市或者地区，我会帮您查询天气情况。
+Content: 您的问题似乎与当前天气无关。请问您是否需要我帮您调整页面的字体大小或颜色？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 空气咋样
 MessageType: FORMAT_TEXT
-Content: 您想了解天气和空气质量信息，是吗？我可以帮您查询，请问您所在的城市是哪里呢？
+Content: 抱歉，我无法获取实时空气质量信息。不过，我可以帮您调整页面字体大小和颜色，以适应您的视觉需求。请问您需要我帮您进行设置吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 生活咋样

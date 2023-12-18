@@ -1,12 +1,10 @@
 User: 列太少了不清楚
-Bot: 
 MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您进行表头增加操作，我需要了解您希望新增的表头名称。请您告诉我具体的表头名称，我将竭诚为您提供支持。
+Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 月消费列删除
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'NAME', 'value': '月消费'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'NAME', 'value': '月消费'}, 'businessInfo': {'instruction': '删减表头月消费'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

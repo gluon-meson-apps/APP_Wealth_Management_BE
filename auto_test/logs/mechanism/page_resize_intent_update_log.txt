@@ -1,25 +1,25 @@
 User: 帮我调整下页面
 MessageType: FORMAT_TEXT
-Content: 您好，为了更好地满足您的需求，请您告诉我需要调整的页面是放大还是缩小。
+Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 放大到110%可以吗
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_TARGET', 'operateSlots': {'value': '110'}, 'businessInfo': {'instruction': '放大页面字体到110%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 不对
 MessageType: FORMAT_TEXT
-Content: 您需要将页面字体放大到什么程度呢？
+Content: 抱歉，我之前的回复可能让您产生了误解。实际上，我无法直接为您调整页面字体大小。但是，我可以帮您找到相应的设置，以便您可以通过更改浏览器或编辑器的选项来调整字体大小。请问您需要我为您提供更多帮助吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 还是到140%吧
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_TARGET', 'operateSlots': {'value': '140'}, 'businessInfo': {'instruction': '放大页面字体到140%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_TARGET', 'operateSlots': {'value': '140'}, 'businessInfo': {'instruction': '放大页面字体到140%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

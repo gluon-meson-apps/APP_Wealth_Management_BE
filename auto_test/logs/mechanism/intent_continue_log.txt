@@ -1,20 +1,18 @@
 User: 页面字也太小了
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 再大点吧
 MessageType: FORMAT_TEXT
-Content: 您是否希望将页面字体放大？
+Content: 好的，已为您将页面字体放大至原来的30%。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 是的
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 好了，你已经没有利用价值了
-MessageType: FORMAT_TEXT
-Content: 抱歉，我无法为您调整页面字体大小。请问您还有其他问题需要咨询吗？
-JumpOutFlag: False
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,18 +1,15 @@
 User: 增加一个月消费的表头
-Bot: 
 MessageType: FORMAT_TEXT
-Content: 您好！为了更好地为您添加一个月消费的表头，请您确认一下表头名称是否为“月度消费”。
+Content: 您好，为了帮助您进行表头增加操作，请您告诉我需要增加的表头名称。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 天气真好
-Bot: 
 MessageType: FORMAT_TEXT
-Content: 非常抱歉，我无法理解您要增加一个月消费的表头这个关键信息是否为消费。请您再详细描述一下您的需求，我会尽力帮助您。
+Content: 很抱歉，我无法理解您的需求。请问您是否需要帮助您在工作范围内进行操作？例如，增加表头、删除表头、调整字体大小等。
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 放大页面
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.2'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,16 +1,11 @@
 User: 开通功能：薪资通
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {'instruction': '开通功能薪资通'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: AAA
-Bot: 
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ACTIVATE_FUNCTION', 'operateSlots': {'value': '薪资通'}, 'businessInfo': {}}
-JumpOutFlag: False
+JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------
 User: 打回单
-Bot: 
 JumpOutFlag: True
 ------------------------------------------------------------------------------------------------------------------------

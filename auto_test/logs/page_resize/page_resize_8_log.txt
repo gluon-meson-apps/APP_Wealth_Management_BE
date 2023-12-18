@@ -1,12 +1,10 @@
 User: 页面看起来不太对
-Bot: 
 MessageType: FORMAT_TEXT
-Content: 您好！请问您遇到什么问题了？需要我帮您查看页面吗？
+Content: 您好！请问您遇到了什么问题？需要我帮您调整页面字体大小吗？
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 能大一点吗
-Bot: 
-MessageType: FORMAT_TEXT
-Content: 您是否希望将页面字体放大？
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '20'}, 'businessInfo': {'instruction': '放大页面字体20%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

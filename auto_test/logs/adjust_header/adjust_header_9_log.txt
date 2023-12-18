@@ -1,6 +1,5 @@
 User: 减少第一个表头
-Bot: 
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'INDEX', 'value': '1'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'ADJUST_HEADER', 'operateSlots': {'category': 'REMOVE', 'valueType': 'INDEX', 'value': '1'}, 'businessInfo': {'instruction': '删减表头第1个'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------

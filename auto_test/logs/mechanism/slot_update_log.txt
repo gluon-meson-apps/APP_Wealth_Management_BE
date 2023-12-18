@@ -1,10 +1,10 @@
 User: 页面放大50%
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.5'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '50'}, 'businessInfo': {'instruction': '放大页面字体50%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
 User: 再放大10%
 MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '0.1'}, 'businessInfo': {}}
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'INCREASE', 'value': '10'}, 'businessInfo': {'instruction': '放大页面字体10%'}}
 JumpOutFlag: False
 ------------------------------------------------------------------------------------------------------------------------
