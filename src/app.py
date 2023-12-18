@@ -10,7 +10,10 @@ from uvicorn import run
 
 from action.base import ErrorResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
+import configparser
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 load_dotenv()
 
 app = FastAPI()
@@ -42,6 +45,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
                             content=ErrorResponse(
                                 code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__)
 
+
 class MessageInput(BaseModel):
     session_id: str
     user_input: str
@@ -52,7 +56,9 @@ def chat(data: MessageInput):
     session_id = data.session_id
     user_input = data.user_input
     result, conversation = dialog_manager.handle_message(user_input, session_id)
-    return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
+    if config.get('debugMode', 'debug') == "True":
+        return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
+    return {"response": result, "session_id": conversation.session_id}
 
 
 @app.get("/healthy/")
