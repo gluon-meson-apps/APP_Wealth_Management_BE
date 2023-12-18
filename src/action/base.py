@@ -5,10 +5,12 @@ from pydantic import BaseModel
 
 from action.context import ActionContext
 
+
 @unique
 class ResponseMessageType(str, Enum):
     FORMAT_INTELLIGENT_EXEC = "FORMAT_INTELLIGENT_EXEC"
     FORMAT_TEXT = "FORMAT_TEXT"
+
 
 @unique
 class NormalizeType(str, Enum):
@@ -16,19 +18,23 @@ class NormalizeType(str, Enum):
     PERCENTAGE = "PERCENTAGE"
     NUMBER = "NUMBER"
 
+
 class ActionResponseAnswerContent(BaseModel):
     businessId: str
     operateType: str
     operateSlots: dict = {}
     businessInfo: dict = {}
 
+
 class ActionResponseAnswer(BaseModel):
     messageType: str = ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
     content: ActionResponseAnswerContent
 
+
 class ChatResponseAnswer(BaseModel):
     messageType: str = ResponseMessageType.FORMAT_TEXT,
     content: str
+
 
 class ActionResponse(BaseModel):
     code: int
@@ -36,17 +42,20 @@ class ActionResponse(BaseModel):
     answer: ActionResponseAnswer
     jump_out_flag: bool
 
+
 class GeneralResponse(ActionResponse):
     code: int
     message: str
     answer: ChatResponseAnswer
     jump_out_flag: bool
 
+
 class JumpOutResponse(ActionResponse):
     code: int
     message: str
     answer: dict = {}
     jump_out_flag: bool = True
+
 
 class ErrorResponse(ActionResponse):
     code: int

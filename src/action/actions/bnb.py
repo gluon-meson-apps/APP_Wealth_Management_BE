@@ -1,9 +1,7 @@
-import configparser
 from loguru import logger
-from action.base import Action, ActionResponse, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
-    ActionToValidSlotTypesDict, ActionResponseAnswerContent, ActionResponseAnswer, \
-    JumpOutResponse, ResponseMessageType, SlotTypeToNormalizeTypeDict, SlotType, SlotTypeToOperateTypeDict
+from action.base import Action, ActionResponse, ActionToValidSlotTypesDict, JumpOutResponse, SlotTypeToNormalizeTypeDict
 from output_adapter.base import OutputAdapter
+import configparser
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -18,30 +16,20 @@ class BankRelatedAction(Action):
 
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action {self.action_name}')
+        target_slots = self.get_target_slots()
+        target_slot_value, target_slot_name = self.get_target_slot_name_and_value(target_slots)
+        slot = self.output_adapter.prepare_slot(self.action_name, target_slot_value, target_slot_name)
+        answer = self.output_adapter.prepare_answer(slot, self.intent.description,
+                                                    target_slot_value, target_slot_name)
+        return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+
+    def get_target_slots(self):
         target_slots = [x for x in self.possible_slots if x.name in ActionToValidSlotTypesDict[self.action_name]]
         if len(target_slots) > 1:
             target_slots.sort(key=lambda x: x.priority, reverse=True)
-        target_slot_value, target_slot_name = self._get_target_slot_values(target_slots)
-        slot = self._prepare_slot(target_slot_value, target_slot_name)
-        answer = self._prepare_answer(slot, target_slot_value, target_slot_name)
-        return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+        return target_slots
 
-    def _prepare_slot(self, target_slot_value, target_slot_name):
-        if target_slot_name in [SlotType.functions, SlotType.font_target]:
-            slot = {"value": target_slot_value}
-        elif target_slot_name in [SlotType.font_change]:
-            slot = {"category": ActionToSlotCategoryDict[self.action_name], "value": target_slot_value}
-        elif target_slot_name in [SlotType.header_element, SlotType.header_position]:
-            slot = {
-                "category": ActionToSlotCategoryDict[self.action_name],
-                "valueType": SlotTypeToSlotValueTypeDict[target_slot_name],
-                "value": target_slot_value
-            }
-        else:
-            slot = {}
-        return slot
-
-    def _get_target_slot_values(self, target_slots):
+    def get_target_slot_name_and_value(self, target_slots):
         target_slot_name = target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
         target_slot_value = self.output_adapter.normalize_slot_value(
             target_slots[0].value if target_slots else config.get('defaultActionSlotValue', self.action_name),
@@ -49,17 +37,6 @@ class BankRelatedAction(Action):
         )
         return target_slot_value, target_slot_name
 
-    def _prepare_answer(self, slot, target_slot_value, target_slot_name):
-        return ActionResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
-            content=ActionResponseAnswerContent(
-                businessId="N35010Operate",
-                operateType=SlotTypeToOperateTypeDict[target_slot_name],
-                operateSlots=slot,
-                businessInfo={
-                    "instruction": f"{self.intent.description}"
-                                   f"{self.output_adapter.transform_slot_value_to_natural_language(target_slot_value, target_slot_name)} "
-                }))
 
 class JumpOut(Action):
     def __init__(self):

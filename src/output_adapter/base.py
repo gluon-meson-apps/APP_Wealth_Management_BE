@@ -1,17 +1,36 @@
 import chinese2digits as c2d
 import numpy as np
 
-from action.base import SlotType, NormalizeType
+from action.base import SlotType, NormalizeType, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
+    ActionResponseAnswer, ResponseMessageType, \
+    ActionResponseAnswerContent, SlotTypeToOperateTypeDict
+
+
+def transform_slot_value_to_natural_language(slot_value: str, slot_type: SlotType) -> str:
+    if slot_type == SlotType.font_change:
+        return f"{slot_value}%"
+    if slot_type == SlotType.font_target:
+        return f"到{slot_value}%"
+    if slot_type == SlotType.header_position:
+        return f"第{slot_value}个"
+    return slot_value
+
+
+def prepare_instruction(intent_description: str, slot_value: str, slot_type: SlotType) -> str:
+    return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}"
 
 
 class OutputAdapter:
     def process_output(self, output: object) -> object:
         raise NotImplementedError()
 
-    def normalize_slot_value(self, output: str, normalize_type: NormalizeType) -> str:
+    def prepare_slot(self, action_name, target_slot_value, target_slot_name):
         raise NotImplementedError()
 
-    def transform_slot_value_to_natural_language(self, slot_value: str, slot_type: SlotType) -> str:
+    def prepare_answer(self, slot, intent_description, target_slot_value, target_slot_name):
+        raise NotImplementedError()
+
+    def normalize_slot_value(self, slot_value: str, normalize_type: NormalizeType) -> str:
         raise NotImplementedError()
 
 
@@ -34,11 +53,29 @@ class BaseOutputAdapter(OutputAdapter):
             return result['digitsStringList'][0]
         return slot_value
 
-    def transform_slot_value_to_natural_language(self, slot_value: str, slot_type: SlotType) -> str:
-        if slot_type == SlotType.font_change:
-            return f"{slot_value}%"
-        if slot_type == SlotType.font_target:
-            return f"到{slot_value}%"
-        if slot_type == SlotType.header_position:
-            return f"第{slot_value}个"
-        return slot_value
+    def prepare_slot(self, action_name, target_slot_value, target_slot_name):
+        if target_slot_name in [SlotType.functions, SlotType.font_target]:
+            slot = {"value": target_slot_value}
+        elif target_slot_name in [SlotType.font_change]:
+            slot = {"category": ActionToSlotCategoryDict[action_name], "value": target_slot_value}
+        elif target_slot_name in [SlotType.header_element, SlotType.header_position]:
+            slot = {
+                "category": ActionToSlotCategoryDict[action_name],
+                "valueType": SlotTypeToSlotValueTypeDict[target_slot_name],
+                "value": target_slot_value
+            }
+        else:
+            slot = {}
+        return slot
+
+    def prepare_answer(self, slot, intent_description, target_slot_value, target_slot_name, ):
+        return ActionResponseAnswer(
+            messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
+            content=ActionResponseAnswerContent(
+                businessId="N35010Operate",
+                operateType=SlotTypeToOperateTypeDict[target_slot_name],
+                operateSlots=slot,
+                businessInfo={
+                    "instruction": prepare_instruction(intent_description, target_slot_value,
+                                                       target_slot_name)
+                }))
