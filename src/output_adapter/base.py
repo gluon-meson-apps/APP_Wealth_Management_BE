@@ -102,9 +102,7 @@ class BaseOutputAdapter(OutputAdapter):
                 "valueType": SlotTypeToSlotValueTypeDict[target_slot_name],
                 "value": target_slot_value
             }
-        else:
-            slot = {"value": target_slot_value}
-        if not target_slot_name:
+        elif not target_slot_name:
             if action_name in [ActionName.remove_header, ActionName.add_header]:
                 slot = {
                     "category": ActionToSlotCategoryDict[action_name],
@@ -113,6 +111,8 @@ class BaseOutputAdapter(OutputAdapter):
                 }
             else:
                 slot = {"value": target_slot_value}
+        else:
+            slot = {"value": target_slot_value}
         return slot
 
     def prepare_answer(self, slot, intent_description, target_slot_value, target_slot_name, action_name):
