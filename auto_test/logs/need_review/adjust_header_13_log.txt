@@ -3,12 +3,12 @@ MessageType: FORMAT_TEXT
 Content: 您好，为了帮您进行删减表头操作，请您提供需要操作的表格中的表头名称或位置。
 JumpOutFlag: False
 State: slot_filling
-CurrentIntent: {'name': 'remove_header',  'confidence': '0.99'}
+CurrentIntent: {'name': 'remove_header',  'confidence': '0.98'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 月消费
 JumpOutFlag: True
 State: slot_filling
-CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '1.0'}
+CurrentIntent: {'name': 'skill_irrelevant',  'confidence': '0.97'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

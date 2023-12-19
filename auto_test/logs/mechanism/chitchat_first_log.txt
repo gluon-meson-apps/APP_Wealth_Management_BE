@@ -25,7 +25,7 @@ MessageType: FORMAT_TEXT
 Content: 抱歉，我无法获取实时空气质量信息。不过，我可以帮您调整页面字体大小和颜色，以适应您的视觉需求。请问您需要我帮您进行设置吗？
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '1.0'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 生活咋样

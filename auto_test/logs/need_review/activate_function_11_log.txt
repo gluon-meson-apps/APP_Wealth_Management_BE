@@ -2,7 +2,7 @@ User: 开通功能
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
-State: slot_filling
+State: slot_filling:functions
 CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ User: 算了，我想缩放页面
 MessageType: FORMAT_INTELLIGENT_EXEC
 Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '20'}, 'businessInfo': {'instruction': '缩小页面字体20%'}}
 JumpOutFlag: False
-State: intent_filling
-CurrentIntent: {'name': 'reduce_page',  'confidence': '1.0'}
+State: slot_filling:font_target
+CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

@@ -1,24 +1,16 @@
-User: 开通功能页面爆炸
-MessageType: FORMAT_TEXT
-Content: 您是想要开通某个功能吗？
-JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'activate_function',  'confidence': '0.55'}
-CurrentEntity: {}
-------------------------------------------------------------------------------------------------------------------------
-User: 是的
+User: 我要开通功能
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
 State: slot_filling:functions
-CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentIntent: {'name': 'activate_function',  'confidence': '0.99'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
-User: 我就不告诉你
+User: 我要开通功能
 MessageType: FORMAT_TEXT
 Content: 您好，为了帮助您开通相关功能，请您告诉我您想开通的具体功能名称。
 JumpOutFlag: False
 State: slot_filling:functions
-CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
+CurrentIntent: {'name': 'activate_function',  'confidence': '0.99'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

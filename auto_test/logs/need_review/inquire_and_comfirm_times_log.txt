@@ -1,42 +1,40 @@
 User: 页面字体看着费劲
 MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
+Content: 您好！请问您需要调整页面的字体大小吗？
 JumpOutFlag: False
-State: slot_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.88'}
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.42'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 有什么选择啊
 MessageType: FORMAT_TEXT
-Content: 您可以根据您的喜好选择字体大小，通常有 small、medium 和 large 三种选择。如果您想要具体的数据，请告诉我您的屏幕尺寸和分辨率，我可以为您推荐合适的字体大小。
+Content: 您好！您可以调整页面的字体大小，具体操作方法是在页面顶部或者底部的设置中找到“字体大小”或“字号”选项，然后进行修改即可。如果您需要进一步的帮助，请告诉我您的具体需求。
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.88'}
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.42'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 我想想
 MessageType: FORMAT_TEXT
-Content: 好的，您可以继续思考，我会在这里等待您的回答。
+Content: 好的，如果您有任何其他问题或需要帮助，请随时告诉我。
 JumpOutFlag: False
 State: intent_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '0.88'}
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.42'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 再想想
-JumpOutFlag: True
-State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.97'}
+MessageType: FORMAT_TEXT
+Content: 好的，如果您仍然不确定如何调整页面字体大小，可以尝试搜索相关教程或文档，以便更好地了解如何进行操作。
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'page_resize',  'confidence': '0.42'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 那调整表头吧
-JumpOutFlag: True
-State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.97'}
-CurrentEntity: {}
-------------------------------------------------------------------------------------------------------------------------
-User: 
-JumpOutFlag: True
-State: intent_filling
-CurrentIntent: {'name': 'chitchat',  'confidence': '0.97'}
+MessageType: FORMAT_TEXT
+Content: 好的，您想了解如何调整表头吗？请告诉我具体的操作步骤，我会尽力为您提供帮助。
+JumpOutFlag: False
+State: intent_confirm
+CurrentIntent: {'name': 'add_header',  'confidence': '0.76'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
