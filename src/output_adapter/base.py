@@ -124,7 +124,7 @@ class BaseOutputAdapter(OutputAdapter):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
             content=ActionResponseAnswerContent(
-                businessId="N35010Operate",
+                businessId="twAgentExec",
                 operateType=SlotTypeToOperateTypeDict[target_slot_name] if target_slot_name else
                 ActionTypeToOperateTypeDict[action_name],
                 operateSlots=slot,
