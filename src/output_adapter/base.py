@@ -4,9 +4,9 @@ import configparser
 
 from action.base import SlotType, NormalizeType, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
     ActionResponseAnswer, ResponseMessageType, \
-    ActionResponseAnswerContent, ActionName, \
-    actionsHaveDefaultValue, SlotTypeToNormalizeTypeDict, ActionToValidSlotTypesDict, ActionTypeToOperateTypeDict, \
-    SlotTypeToOperateTypeDict
+    ActionResponseAnswerContent, ActionName, SlotTypeToNormalizeTypeDict, ActionToValidSlotTypesDict, \
+    ActionTypeToOperateTypeDict, \
+    SlotTypeToOperateTypeDict, slotsHaveDefaultValue, actionsHaveDefaultValue
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -26,11 +26,19 @@ def prepare_instruction(intent_description: str, slot_value: str, slot_type: str
     return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}" if slot_type else ''
 
 
-def get_parsed_slot_value(action_name, value):
-    result = c2d.takeNumberFromString(value)
-    if action_name in actionsHaveDefaultValue:
+def get_parsed_slot_value(target_slot_name: str, slot_value: str, force_filter: bool = False):
+    if force_filter:
+        if '倍' in slot_value or '/' in slot_value:
+            return config.get('defaultSlotValue', target_slot_name) if target_slot_name in slotsHaveDefaultValue else ''
+
+        check_slash = c2d.takeNumberFromString(slot_value, percentConvert=False)['digitsStringList'][0]
+        if '/' in check_slash:
+            return config.get('defaultSlotValue', target_slot_name) if target_slot_name in slotsHaveDefaultValue else ''
+
+    result = c2d.takeNumberFromString(slot_value)
+    if target_slot_name in slotsHaveDefaultValue:
         result_value = result['digitsStringList'][0] if result['digitsStringList'] else config.get(
-            'defaultActionSlotValue', action_name)
+            'defaultSlotValue', target_slot_name)
     else:
         result_value = result['digitsStringList'][0] if result['digitsStringList'] else ''
     return result_value
@@ -68,9 +76,9 @@ class BaseOutputAdapter(OutputAdapter):
             target_slot_name = target_slots[0].name if target_slots else ''
         return target_slot_name
 
-    def get_slot_value(self, action_name: str, target_slots: []):
-        if action_name in actionsHaveDefaultValue:
-            slot_value = target_slots[0].value if target_slots else config.get('defaultActionSlotValue', action_name)
+    def get_slot_value(self, target_slot_name: str, target_slots: []):
+        if target_slot_name in slotsHaveDefaultValue:
+            slot_value = target_slots[0].value if target_slots else config.get('defaultSlotValue', target_slot_name)
         else:
             slot_value = target_slots[0].value if target_slots else ''
         return slot_value
@@ -81,7 +89,7 @@ class BaseOutputAdapter(OutputAdapter):
 
         normalize_type = SlotTypeToNormalizeTypeDict[target_slot_name]
         if normalize_type == NormalizeType.PERCENTAGE:
-            parsed_value = get_parsed_slot_value(action_name, slot_value)
+            parsed_value = get_parsed_slot_value(target_slot_name, slot_value, True)
             if not parsed_value:
                 return ''
             rounded_value = np.ceil(float(parsed_value) * 10)

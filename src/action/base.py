@@ -129,7 +129,8 @@ SlotTypeToSlotValueTypeDict = {
     "header_position": "INDEX",
 }
 
-actionsHaveDefaultValue = [ActionName.page_enlarge, ActionName.page_reduce]
+slotsHaveDefaultValue = [SlotType.font_change]
+actionsHaveDefaultValue = [ActionName.page_reduce, ActionName.page_enlarge]
 
 
 class Action(ABC):
