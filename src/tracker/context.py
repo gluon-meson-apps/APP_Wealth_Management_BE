@@ -15,8 +15,8 @@ def prepare_response_content(answer):
     elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
         return answer.content
     elif answer.messageType == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
-        return f"已为您完成 {answer.content.businessInfo['instruction']}" if {
-            answer.content.businessInfo['instruction']} else "ok"
+        return f"已为您完成 {answer.content.businessInfo['instruction']}" if answer.content.businessInfo[
+            'instruction'] else "ok"
     else:
         return ""
 
@@ -66,12 +66,12 @@ class ConversationContext:
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}
-        
+
         # todo: set as True when updated entity belong to current intent
         if len(entities) > 0:
             self.inquiry_times = 0
             self.has_update = True
-        
+
         for new_entity in entities:
             if new_entity.type in entity_map:
                 existing_entity = entity_map[new_entity.type]
