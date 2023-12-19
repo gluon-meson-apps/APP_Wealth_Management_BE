@@ -64,10 +64,14 @@ class ConversationContext:
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}
-
+        
+        # todo: set as True when updated entity belong to current intent
+        if len(entities) > 0:
+            self.inquiry_times = 0
+            self.has_update = True
+        
         for new_entity in entities:
             if new_entity.type in entity_map:
-                self.has_update = True
                 existing_entity = entity_map[new_entity.type]
                 existing_entity.__dict__.update(new_entity.__dict__)
                 logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")
@@ -87,8 +91,9 @@ class ConversationContext:
 
     def set_state(self, state: str):
         self.state = state
-        keywords = ["intent_filling", "intent_confirm"]
-        if any(keyword in state for keyword in keywords):
+        state_prefix = state.split(':')[0]
+        keywords = ["intent_filling", "intent_confirm", "slot_filling"]
+        if any(keyword in state_prefix for keyword in keywords):
             self.inquiry_times += 1
 
     def update_intent(self, intent: Intent):

@@ -110,15 +110,15 @@ class IntentClassifier:
             logger.error(f"An error occurred while getting intent from ES: {str(e)}")
             raise e
 
-    def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
-        
-        # if intent same as last round, no need to update
-        if context.current_intent and next_intent.name == context.current_intent.name:
-            return context
+    def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:            
 
         # if slot_filling intent found, we will not change current intent to next intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:
             context.update_intent(next_intent)
+            
+        # if intent same as last round, keep the confidence high
+        # if context.current_intent and next_intent.name == context.current_intent.name:
+        #     context.current_intent.confidence = 1
 
         # if no obviously intent found before, throw out to fusion engine
         if context.current_intent is None and next_intent.name in ["slot_filling", "positive", "negative"]:
@@ -128,9 +128,11 @@ class IntentClassifier:
         if next_intent.name in ["positive"] and context.state in ["intent_confirm"]:
             context.current_intent.confidence = 1.0
             context.has_update = True
+            context.inquiry_times = 0
         
         # if last round set conversation state "slot_confirm" and user confirmed in current round
-        if next_intent.name in ["positive"] and context.state in ['slot_confirm']:
+        if next_intent.name in ["positive"] and context.state.split(':')[0] in ['slot_confirm']:
+            context.inquiry_times = 0
             slot_name = context.state.split(':')[1].strip()
             for entity in context.entities:
                 if entity.type == slot_name:
@@ -139,11 +141,12 @@ class IntentClassifier:
                     break
 
         # if user deny intent in current round
-        if next_intent.name in ["negative"] and context.state in ["intent_confirm"]:
+        if next_intent.name in ["negative"] and context.state.split(':')[0] not in ["slot_confirm", "slot_filling"]:
             context.update_intent(None)
         
         # if user deny slot in current round
-        if next_intent.name in ["negative"] and context.state in ['slot_confirm']:
+        # todo: if slot found in negative utterance
+        if next_intent.name in ["negative"] and context.state.split(':')[0] in ['slot_confirm', 'slot_filling']:
             slot_name = context.state.split(':')[1].strip()
             context.entities = [entity for entity in context.entities if entity.type != slot_name]
 
