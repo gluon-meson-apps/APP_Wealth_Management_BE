@@ -20,7 +20,7 @@ class BankRelatedAction(Action):
         target_slot_value, target_slot_name = self.get_target_slot_name_and_value(target_slots)
         slot = self.output_adapter.prepare_slot(self.action_name, target_slot_value, target_slot_name)
         answer = self.output_adapter.prepare_answer(slot, self.intent.description,
-                                                    target_slot_value, target_slot_name)
+                                                    target_slot_value, target_slot_name, self.action_name)
         return ActionResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
     def get_target_slots(self):
@@ -30,8 +30,16 @@ class BankRelatedAction(Action):
         return target_slots
 
     def get_target_slot_name_and_value(self, target_slots):
-        target_slot_name = target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
-        target_slot_value = self.output_adapter.normalize_slot_value(target_slots, target_slot_name, self.action_name)
+        target_slot_name = self.output_adapter.get_slot_name(self.action_name, target_slots)
+        if target_slot_name:
+            slot_value = self.output_adapter.get_slot_value(self.action_name, target_slot_name, target_slots)
+            target_slot_value = self.output_adapter.normalize_slot_value(
+                slot_value,
+                target_slot_name,
+                self.action_name
+            )
+        else:
+            target_slot_value = ''
         return target_slot_value, target_slot_name
 
 
