@@ -1,5 +1,5 @@
 from loguru import logger
-from action.base import Action, ActionResponse, ActionToValidSlotTypesDict, JumpOutResponse, SlotTypeToNormalizeTypeDict
+from action.base import Action, ActionResponse, ActionToValidSlotTypesDict, JumpOutResponse
 from output_adapter.base import OutputAdapter
 import configparser
 
@@ -31,10 +31,7 @@ class BankRelatedAction(Action):
 
     def get_target_slot_name_and_value(self, target_slots):
         target_slot_name = target_slots[0].name if target_slots else ActionToValidSlotTypesDict[self.action_name][0]
-        target_slot_value = self.output_adapter.normalize_slot_value(
-            target_slots[0].value if target_slots else config.get('defaultActionSlotValue', self.action_name),
-            SlotTypeToNormalizeTypeDict[target_slot_name]
-        )
+        target_slot_value = self.output_adapter.normalize_slot_value(target_slots, target_slot_name, self.action_name)
         return target_slot_value, target_slot_name
 
 

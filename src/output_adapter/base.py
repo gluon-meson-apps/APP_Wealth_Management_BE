@@ -1,9 +1,13 @@
 import chinese2digits as c2d
 import numpy as np
+import configparser
 
 from action.base import SlotType, NormalizeType, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
     ActionResponseAnswer, ResponseMessageType, \
-    ActionResponseAnswerContent, SlotTypeToOperateTypeDict
+    ActionResponseAnswerContent, SlotTypeToOperateTypeDict, SlotTypeToNormalizeTypeDict, ActionName
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 def transform_slot_value_to_natural_language(slot_value: str, slot_type: SlotType) -> str:
@@ -30,7 +34,7 @@ class OutputAdapter:
     def prepare_answer(self, slot, intent_description, target_slot_value, target_slot_name):
         raise NotImplementedError()
 
-    def normalize_slot_value(self, slot_value: str, normalize_type: NormalizeType) -> str:
+    def normalize_slot_value(self, target_slots: [], target_slot_name: SlotType, action_name: ActionName) -> str:
         raise NotImplementedError()
 
 
@@ -38,13 +42,18 @@ class BaseOutputAdapter(OutputAdapter):
     def process_output(self, output: object) -> object:
         return output
 
-    def normalize_slot_value(self, slot_value: str, normalize_type: NormalizeType) -> str:
+    def normalize_slot_value(self, target_slots: [], target_slot_name: SlotType, action_name: ActionName) -> str:
+        normalize_type = SlotTypeToNormalizeTypeDict[target_slot_name]
+        slot_value = target_slots[0].value if target_slots else config.get('defaultActionSlotValue', action_name)
+
         if normalize_type == NormalizeType.PERCENTAGE:
             result = c2d.takeNumberFromString(slot_value)
-            result_value = result['digitsStringList'][0]
+            result_value = result['digitsStringList'][0] if result['digitsStringList'] else config.get(
+                'defaultActionSlotValue', action_name)
             rounded_value = np.ceil(float(result_value) * 10)
             result_str = str(int(rounded_value * 10))
             return result_str
+
         if normalize_type == NormalizeType.NUMBER:
             replaced_value = (slot_value
                               .replace("倒数", "负")
