@@ -9,6 +9,18 @@ from collections import deque
 from loguru import logger
 
 
+def prepare_response_content(answer):
+    if not answer:
+        return "Jump out"
+    elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
+        return answer.content
+    elif answer.messageType == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
+        return f"已为您完成 {answer.content.businessInfo['instruction']}" if {
+            answer.content.businessInfo['instruction']} else "ok"
+    else:
+        return ""
+
+
 class History:
     def __init__(self, rounds: List[dict[str, Any]], max_history: int = 6):
         self.max_history = max_history
@@ -49,18 +61,8 @@ class ConversationContext:
         self.history.add_history("user", message)
 
     def append_assistant_history(self, answer):
-        response_content = self._prepare_response_content(answer)
+        response_content = prepare_response_content(answer)
         self.history.add_history("assistant", response_content)
-
-    def _prepare_response_content(self, answer):
-        if not answer:
-            return "Jump out"
-        elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
-            return answer.content
-        elif answer.messageType == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
-            return f"已为您完成 {answer.content.businessInfo['instruction']}"
-        else:
-            return ""
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}
