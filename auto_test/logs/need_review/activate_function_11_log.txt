@@ -15,10 +15,10 @@ CurrentIntent: {'name': 'activate_function',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
 User: 算了，我想缩放页面
-MessageType: FORMAT_TEXT
-Content: 您好，为了帮助您调整页面字体大小并达到理想的比例，请您告诉我您希望将字体大小调整到何种程度以及目标比例是多少。
+MessageType: FORMAT_INTELLIGENT_EXEC
+Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '20'}, 'businessInfo': {'instruction': '缩小页面字体20%'}}
 JumpOutFlag: False
-State: slot_filling
-CurrentIntent: {'name': 'page_resize',  'confidence': '1.0'}
+State: intent_filling
+CurrentIntent: {'name': 'reduce_page',  'confidence': '1.0'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------

@@ -6,19 +6,11 @@ State:
 CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.98'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
-User: 这字太大了！
+User: 页面为什么放大了
 MessageType: FORMAT_TEXT
-Content: 好的，已为您调整页面字体大小。
+Content: 您是想了解为什么页面字体被放大了对吗？
 JumpOutFlag: False
 State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '0.46'}
-CurrentEntity: {}
-------------------------------------------------------------------------------------------------------------------------
-User: 是的
-MessageType: FORMAT_INTELLIGENT_EXEC
-Content: {'businessId': 'N35010Operate', 'operateType': 'PAGE_RESIZE_INCREMENT', 'operateSlots': {'category': 'DECREASE', 'value': '20'}, 'businessInfo': {'instruction': '缩小页面字体20%'}}
-JumpOutFlag: False
-State: intent_confirm
-CurrentIntent: {'name': 'reduce_page',  'confidence': '1.0'}
+CurrentIntent: {'name': 'enlarge_page',  'confidence': '0.98'}
 CurrentEntity: {}
 ------------------------------------------------------------------------------------------------------------------------
