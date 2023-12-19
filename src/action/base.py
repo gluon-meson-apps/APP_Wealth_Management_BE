@@ -83,6 +83,14 @@ class SlotType(str, Enum):
     header_position = "header_position"
 
 
+SlotTypeToOperateTypeDict = {
+    "functions": "ACTIVATE_FUNCTION",
+    "font_change": "PAGE_RESIZE_INCREMENT",
+    "font_target": "PAGE_RESIZE_TARGET",
+    "header_element": "ADJUST_HEADER",
+    "header_position": "ADJUST_HEADER",
+}
+
 ActionTypeToOperateTypeDict = {
     "activate_function": "ACTIVATE_FUNCTION",
     "page_reduce": "PAGE_RESIZE_INCREMENT",

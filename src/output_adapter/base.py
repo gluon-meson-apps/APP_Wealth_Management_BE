@@ -5,13 +5,14 @@ import configparser
 from action.base import SlotType, NormalizeType, ActionToSlotCategoryDict, SlotTypeToSlotValueTypeDict, \
     ActionResponseAnswer, ResponseMessageType, \
     ActionResponseAnswerContent, ActionName, \
-    actionsHaveDefaultValue, SlotTypeToNormalizeTypeDict, ActionToValidSlotTypesDict, ActionTypeToOperateTypeDict
+    actionsHaveDefaultValue, SlotTypeToNormalizeTypeDict, ActionToValidSlotTypesDict, ActionTypeToOperateTypeDict, \
+    SlotTypeToOperateTypeDict
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 
-def transform_slot_value_to_natural_language(slot_value: str, slot_type: SlotType) -> str:
+def transform_slot_value_to_natural_language(slot_value: str, slot_type: str) -> str:
     if slot_type == SlotType.font_change:
         return f"{slot_value}%"
     if slot_type == SlotType.font_target:
@@ -21,8 +22,8 @@ def transform_slot_value_to_natural_language(slot_value: str, slot_type: SlotTyp
     return slot_value
 
 
-def prepare_instruction(intent_description: str, slot_value: str, slot_type: SlotType) -> str:
-    return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}"
+def prepare_instruction(intent_description: str, slot_value: str, slot_type: str) -> str:
+    return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}" if slot_type else ''
 
 
 def get_parsed_slot_value(action_name, target_slot_name, value):
@@ -110,9 +111,6 @@ class BaseOutputAdapter(OutputAdapter):
                     "valueType": '',
                     "value": target_slot_value
                 }
-            elif action_name in [ActionName.activate_function, ActionName.page_resize]:
-                slot = {"value": target_slot_value}
-
             else:
                 slot = {"value": target_slot_value}
         return slot
@@ -122,7 +120,8 @@ class BaseOutputAdapter(OutputAdapter):
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
             content=ActionResponseAnswerContent(
                 businessId="N35010Operate",
-                operateType=ActionTypeToOperateTypeDict[action_name],
+                operateType=SlotTypeToOperateTypeDict[target_slot_name] if target_slot_name else
+                ActionTypeToOperateTypeDict[action_name],
                 operateSlots=slot,
                 businessInfo={
                     "instruction": prepare_instruction(intent_description, target_slot_value,
