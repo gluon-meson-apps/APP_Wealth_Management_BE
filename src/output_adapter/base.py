@@ -26,9 +26,9 @@ def prepare_instruction(intent_description: str, slot_value: str, slot_type: str
     return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}" if slot_type else ''
 
 
-def get_parsed_slot_value(action_name, target_slot_name, value):
+def get_parsed_slot_value(action_name, value):
     result = c2d.takeNumberFromString(value)
-    if target_slot_name in actionsHaveDefaultValue:
+    if action_name in actionsHaveDefaultValue:
         result_value = result['digitsStringList'][0] if result['digitsStringList'] else config.get(
             'defaultActionSlotValue', action_name)
     else:
@@ -40,19 +40,19 @@ class OutputAdapter:
     def process_output(self, output: object) -> object:
         raise NotImplementedError()
 
+    def get_slot_value(self, action_name, target_slots):
+        raise NotImplementedError()
+
+    def normalize_slot_value(self, slot_value: str, target_slot_name: str, action_name: ActionName) -> str:
+        raise NotImplementedError()
+
+    def get_slot_name(self, action_name, target_slots):
+        raise NotImplementedError()
+
     def prepare_slot(self, action_name, target_slot_value, target_slot_name):
         raise NotImplementedError()
 
     def prepare_answer(self, slot, intent_description, target_slot_value, target_slot_name, action_name):
-        raise NotImplementedError()
-
-    def normalize_slot_value(self, slot_value: str, target_slot_name: SlotType, action_name: ActionName) -> str:
-        raise NotImplementedError()
-
-    def get_slot_value(self, action_name, target_slot_name, target_slots):
-        raise NotImplementedError()
-
-    def get_slot_name(self, action_name, target_slots):
         raise NotImplementedError()
 
 
@@ -67,19 +67,22 @@ class BaseOutputAdapter(OutputAdapter):
             target_slot_name = target_slots[0].name if target_slots else ''
         return target_slot_name
 
-    def get_slot_value(self, action_name, target_slot_name, target_slots):
+    def get_slot_value(self, action_name, target_slots):
         if action_name in actionsHaveDefaultValue:
             slot_value = target_slots[0].value if target_slots else config.get('defaultActionSlotValue', action_name)
         else:
             slot_value = target_slots[0].value if target_slots else ''
         return slot_value
 
-    def normalize_slot_value(self, slot_value: str, target_slot_name: SlotType, action_name: ActionName) -> str:
+    def normalize_slot_value(self, slot_value: str, target_slot_name: str, action_name: ActionName) -> str:
+        if not target_slot_name:
+            return ''
+
         normalize_type = SlotTypeToNormalizeTypeDict[target_slot_name]
         if normalize_type == NormalizeType.PERCENTAGE:
-            parsed_value = get_parsed_slot_value(action_name, target_slot_name, slot_value)
+            parsed_value = get_parsed_slot_value(action_name, slot_value)
             if not parsed_value:
-                return parsed_value
+                return ''
             rounded_value = np.ceil(float(parsed_value) * 10)
             result_str = str(int(rounded_value * 10))
             return result_str
@@ -88,7 +91,7 @@ class BaseOutputAdapter(OutputAdapter):
             replaced_value = (slot_value
                               .replace("倒数", "负")
                               .replace("第", ""))
-            return get_parsed_slot_value(action_name, target_slot_name, replaced_value)
+            return get_parsed_slot_value(action_name, replaced_value)
         return slot_value
 
     def prepare_slot(self, action_name, target_slot_value, target_slot_name):
@@ -107,10 +110,10 @@ class BaseOutputAdapter(OutputAdapter):
                 slot = {
                     "category": ActionToSlotCategoryDict[action_name],
                     "valueType": '',
-                    "value": target_slot_value
+                    "value": ''
                 }
             else:
-                slot = {"value": target_slot_value}
+                slot = {"value": ''}
         else:
             slot = {"value": target_slot_value}
         return slot

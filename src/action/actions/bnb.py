@@ -31,15 +31,13 @@ class BankRelatedAction(Action):
 
     def get_target_slot_name_and_value(self, target_slots):
         target_slot_name = self.output_adapter.get_slot_name(self.action_name, target_slots)
-        if target_slot_name:
-            slot_value = self.output_adapter.get_slot_value(self.action_name, target_slot_name, target_slots)
-            target_slot_value = self.output_adapter.normalize_slot_value(
-                slot_value,
-                target_slot_name,
-                self.action_name
-            )
-        else:
-            target_slot_value = ''
+        slot_value = self.output_adapter.get_slot_value(self.action_name, target_slots)
+        target_slot_value = self.output_adapter.normalize_slot_value(
+            slot_value,
+            target_slot_name,
+            self.action_name
+        )
+
         return target_slot_value, target_slot_name
 
 
