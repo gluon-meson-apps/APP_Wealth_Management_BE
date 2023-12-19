@@ -29,7 +29,7 @@ class BankRelatedAction(Action):
             target_slots.sort(key=lambda x: x.priority, reverse=True)
         return target_slots
 
-    def get_target_slot_name_and_value(self, target_slots):
+    def get_target_slot_name_and_value(self, target_slots: []):
         target_slot_name = self.output_adapter.get_slot_name(self.action_name, target_slots)
         slot_value = self.output_adapter.get_slot_value(self.action_name, target_slots)
         target_slot_value = self.output_adapter.normalize_slot_value(
