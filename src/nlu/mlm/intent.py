@@ -6,7 +6,7 @@ import yaml
 from fastapi import HTTPException
 from loguru import logger
 
-from elastic_search_manager.base import ElasticsearchManager
+from caches.es import ElasticsearchCache
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
@@ -97,9 +97,9 @@ class IntentClassifier:
 
     @staticmethod
     def get_intent_from_es(conversation):
-        elasticsearch_manager = ElasticsearchManager()
+        elasticsearch_manager = ElasticsearchCache()
         try:
-            search_result = elasticsearch_manager.search_by_question(question=conversation.current_user_input)
+            search_result = elasticsearch_manager.search(question=conversation.current_user_input)
             logger.info(f"find intent from ES: {search_result}")
             if not search_result[1]:
                 name=""

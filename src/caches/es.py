@@ -1,11 +1,14 @@
 import base64
 import configparser
+from typing import Union
 
 import requests
 from loguru import logger
 
+from caches.base import Cache
 
-class ElasticsearchManager:
+
+class ElasticsearchCache(Cache):
     def __init__(self, list_flag=True, timeout=0.2):
         # 从config.ini文件中读取Elasticsearch连接参数
         config = configparser.ConfigParser()
@@ -23,10 +26,12 @@ class ElasticsearchManager:
             "Authorization": f"Basic {token}"
         }
 
-    def search_by_question(self, question, topk=20):
+    def search(self, content: str, exact_match: bool = False, similarity_score_threshold: float = 0.02, limit=None) -> Union[str, None]:
+        if not limit:
+            limit = 20
         logger.info("ES search start")
         body = {
-            "size": topk,
+            "size": limit,
             "query": {
                 "bool": {
                     "filter": [
@@ -34,7 +39,7 @@ class ElasticsearchManager:
                         {"term": {"status": {"value": self.status}}}
                     ],
                     "must": [
-                        {"match": {"content": question}},
+                        {"match": {"content": content}},
                         {"match": {"channel.name": self.channel}}
                     ]
                 }
