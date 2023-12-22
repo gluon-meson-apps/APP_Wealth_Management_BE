@@ -3,6 +3,7 @@ from typing import List
 
 import yaml
 
+from nlu.base import EntityExtractor
 from tracker.context import ConversationContext
 from gluon_meson_sdk.models.chat_model import ChatModel
 from loguru import logger
@@ -24,7 +25,7 @@ Entity_n: $Value_n
 """
 
 
-class EntityExtractor:
+class LLMEntityExtractor(EntityExtractor):
     def __init__(self, form_store: FormStore, chat_model: ChatModel, model_type: str, prompt_manager: PromptManager):
         self.form_store = form_store
         self.model = chat_model

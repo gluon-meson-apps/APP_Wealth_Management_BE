@@ -2,11 +2,11 @@ from loguru import logger
 from tracker.context import ConversationContext
 from nlu.base import Nlu
 from nlu.intent_with_entity import IntentWithEntity
-from nlu.llm.entity import EntityExtractor
-from nlu.llm.intent import IntentClassifier
+from nlu.llm.entity import LLMEntityExtractor
+from nlu.llm.intent import LLMIntentClassifier
 
 class LLMNlu(Nlu):
-    def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):
+    def __init__(self, intent_classifier: LLMIntentClassifier, entity_extractor: LLMEntityExtractor):
         self.intent_classifier = intent_classifier
         self.entity_extractor = entity_extractor
 

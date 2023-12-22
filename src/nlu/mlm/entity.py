@@ -6,6 +6,7 @@ import requests
 from fastapi import HTTPException
 from loguru import logger
 
+from nlu.base import EntityExtractor
 from tracker.context import ConversationContext
 
 from nlu.forms import FormStore
@@ -18,7 +19,8 @@ MODEL_URL = config['JointBert']['base_url']
 
 BASE_SIG_VALUE = 0.5
 
-class EntityExtractor:
+
+class MLMEntityExtractor(EntityExtractor):
     def __init__(self, form_store: FormStore):
         self.form_store = form_store
 
@@ -41,18 +43,18 @@ class EntityExtractor:
         检查实体是否有效
         """
         return (
-            name in slot_dict
-            and value is not None
-            and confidence > BASE_SIG_VALUE
-            and (isinstance(value, int) or len(value) > 0)
+                name in slot_dict
+                and value is not None
+                and confidence > BASE_SIG_VALUE
+                and (isinstance(value, int) or len(value) > 0)
         )
 
-    def get_entity_and_action(self, conversation_context: ConversationContext) -> (List[Entity], str):
+    def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         # 获取实体和动作
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
         current_round = conversation_context.current_round
-        
+
         form = self.form_store.get_form_from_intent(intent) if intent else None
 
         if not form:
@@ -81,10 +83,9 @@ class EntityExtractor:
 
         # 创建实体列表和动作
         entity_list = [
-            Entity(type=name, value=value, round=current_round, 
+            Entity(type=name, value=value, round=current_round,
                    confidence=confidence, possible_slot=get_slot(name, value, confidence, current_round))
             for name, value, confidence in valid_entities
         ]
-        action = form.action
 
-        return entity_list, action
+        return entity_list

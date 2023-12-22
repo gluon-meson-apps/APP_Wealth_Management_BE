@@ -1,15 +1,15 @@
 from loguru import logger
 from action.base import Action
 from tracker.context import ConversationContext
-from nlu.mlm.entity import EntityExtractor
-from nlu.mlm.intent import IntentClassifier
+from nlu.mlm.entity import MLMEntityExtractor
+from nlu.mlm.intent import MLMIntentClassifier
 from nlu.mlm.integrated import IntegratedNLU
 from policy.base import PolicyManager
 from reasoner.base import Plan, Reasoner
 
 class LlmReasoner(Reasoner):
 
-    def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor, policy_manager: PolicyManager, model_type: str):
+    def __init__(self, intent_classifier: MLMIntentClassifier, entity_extractor: MLMEntityExtractor, policy_manager: PolicyManager, model_type: str):
         self.intent_classifier = intent_classifier
         self.entity_extractor = entity_extractor
         self.policy_manager = policy_manager

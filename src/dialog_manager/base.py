@@ -9,8 +9,8 @@ from reasoner.base import Reasoner
 from loguru import logger
 from nlu.forms import FormStore
 
-from nlu.mlm.entity import EntityExtractor
-from nlu.mlm.intent import IntentClassifier, IntentListConfig
+from nlu.mlm.entity import MLMEntityExtractor
+from nlu.mlm.intent import MLMIntentClassifier, IntentListConfig
 from policy.base import BasePolicyManager
 from policy.general import AssistantPolicy, IntentFillingPolicy, SlotFillingPolicy, EndDialoguePolicy, JumpOutPolicy
 from prompt_manager.base import BasePromptManager
@@ -63,9 +63,9 @@ class DialogManagerFactory:
         intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
         prompt_manager = BasePromptManager(prompt_template_folder)
 
-        classifier = IntentClassifier(intent_list_config)
+        classifier = MLMIntentClassifier(intent_list_config)
         form_store = FormStore(intent_list_config)
-        entity_extractor = EntityExtractor(form_store)
+        entity_extractor = MLMEntityExtractor(form_store)
 
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)

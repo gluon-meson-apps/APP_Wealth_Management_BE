@@ -7,6 +7,8 @@ from fastapi import HTTPException
 from loguru import logger
 
 from caches.es import ElasticsearchCache
+from models.intents.intent_classification import IntentClassificationModel
+from nlu.base import IntentClassifier
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
 
@@ -14,6 +16,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
 
 MODEL_URL = config['JointBert']['base_url']
+use_cache = config.get('Cache', 'enable').lower() == 'true'
 
 
 class IntentConfig:
@@ -23,6 +26,7 @@ class IntentConfig:
         self.action = action
         self.slots = slots
         self.business = business
+
 
 class IntentListConfig:
     def __init__(self, intents):
@@ -75,34 +79,40 @@ class IntentListConfig:
 
         return cls(intents)
 
-class IntentClassifier:
-    def __init__(self, intent_list_config: IntentListConfig):
+
+class MLMIntentClassifier(IntentClassifier):
+    def __init__(self, intent_list_config: IntentListConfig, cache=ElasticsearchCache(),
+                 intent_model=IntentClassificationModel(), use_cache=use_cache):
         self.intent_list_config = intent_list_config
+        self.cache = cache
+        self.intent_model = intent_model
+        self.use_cache = use_cache
 
-    def get_intent_from_model(self, conversation: ConversationContext) -> Intent:
-        logger.info(f"user input is: {conversation.current_user_input}")
-        payload = {"input_text": conversation.current_user_input}
-        response = requests.post(MODEL_URL, json=payload)
-        if response.status_code == 200:
-            data = response.json()
-            name = data.get("intent_label")
-            confidence = data.get("intent_confidence")
-            intent = self.intent_list_config.get_intent(name)
-            logger.info(f"find intent {name} with confidence {confidence}")
-            return Intent(name=name, confidence=confidence, description=intent.description if intent else "", business=intent.business)
-        else:
-            raise HTTPException(
-                status_code=response.status_code, detail={response.text}
-            )
-
-    @staticmethod
-    def get_intent_from_es(conversation):
-        elasticsearch_manager = ElasticsearchCache()
+    def classify_intent(self, conversation: ConversationContext) -> Intent:
+        intent = None
         try:
-            search_result = elasticsearch_manager.search(question=conversation.current_user_input)
+            if self.use_cache:
+                intent = self.get_from_cache(conversation)
+        except Exception as e:
+            logger.error(f"Failed to retrieve intent from cache: {e}")
+        if not intent:
+            intent = self.get_intent_without_cache(conversation)
+        return intent
+
+    def get_intent_without_cache(self, conversation: ConversationContext) -> Intent:
+        intent = self.intent_model.predict(conversation.current_user_input)
+        name = intent.intent
+        confidence = intent.confidence
+        intent = self.intent_list_config.get_intent(name)
+        return Intent(name=name, confidence=confidence, description=intent.description if intent else "",
+                      business=intent.business)
+
+    def get_from_cache(self, conversation):
+        try:
+            search_result = self.cache.search(conversation.current_user_input)
             logger.info(f"find intent from ES: {search_result}")
             if not search_result[1]:
-                name=""
+                name = ""
             else:
                 name = search_result[1][0]
             return Intent(name=name, confidence=1.0, description="")
@@ -110,12 +120,12 @@ class IntentClassifier:
             logger.error(f"An error occurred while getting intent from ES: {str(e)}")
             raise e
 
-    def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:            
+    def handle_intent(self, context: ConversationContext, next_intent: Intent) -> ConversationContext:
 
         # if slot_filling intent found, we will not change current intent to next intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:
             context.update_intent(next_intent)
-            
+
         # if intent same as last round, keep the confidence high
         # if context.current_intent and next_intent.name == context.current_intent.name:
         #     context.current_intent.confidence = 1
@@ -129,7 +139,7 @@ class IntentClassifier:
             context.current_intent.confidence = 1.0
             context.has_update = True
             context.inquiry_times = 0
-        
+
         # if last round set conversation state "slot_confirm" and user confirmed in current round
         if next_intent.name in ["positive"] and context.state.split(':')[0] in ['slot_confirm']:
             context.inquiry_times = 0
@@ -143,7 +153,7 @@ class IntentClassifier:
         # if user deny intent in current round
         if next_intent.name in ["negative"] and context.state.split(':')[0] not in ["slot_confirm", "slot_filling"]:
             context.update_intent(None)
-        
+
         # if user deny slot in current round
         # todo: if slot found in negative utterance
         if next_intent.name in ["negative"] and context.state.split(':')[0] in ['slot_confirm', 'slot_filling']:

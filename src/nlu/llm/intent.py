@@ -3,6 +3,7 @@ from typing import List, Dict, Any
 from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
+from nlu.base import IntentClassifier
 from tracker.context import ConversationContext
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
@@ -82,7 +83,7 @@ class IntentListConfig:
         return cls(intents)
 
 
-class IntentClassifier:
+class LLMIntentClassifier(IntentClassifier):
     def __init__(self,
                  chat_model: ChatModel,
                  embedding_model: EmbeddingModel,
