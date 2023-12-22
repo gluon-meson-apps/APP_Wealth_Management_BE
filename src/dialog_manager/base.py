@@ -3,6 +3,7 @@ from typing import Any
 
 from action.runner import ActionRunner, SimpleActionRunner
 from action.context import ActionContext
+from nlu.mlm.integrated import IntegratedNLU
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
@@ -78,5 +79,6 @@ class DialogManagerFactory:
             prompt_manager=prompt_manager,
             action_model_type=action_model_type
         )
-        reasoner = LlmReasoner(classifier, entity_extractor, policy_manager, model_type)
+        nlu = IntegratedNLU(classifier, entity_extractor)
+        reasoner = LlmReasoner(nlu, policy_manager, model_type)
         return BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
