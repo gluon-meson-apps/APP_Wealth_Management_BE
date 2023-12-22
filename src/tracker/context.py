@@ -98,6 +98,46 @@ class ConversationContext:
         if any(keyword in state_prefix for keyword in keywords):
             self.inquiry_times += 1
 
+    def handle_intent(self, next_intent: Intent):
+
+        # if slot_filling intent found, we will not change current intent to next intent
+        if next_intent.name not in ["slot_filling", "negative", "positive"]:
+            self.update_intent(next_intent)
+
+        # if intent same as last round, keep the confidence high
+        # if self.current_intent and next_intent.name == self.current_intent.name:
+        #     self.current_intent.confidence = 1
+
+        # if no obviously intent found before, throw out to fusion engine
+        if self.current_intent is None and next_intent.name in ["slot_filling", "positive", "negative"]:
+            self.update_intent(None)
+
+        # if last round set conversation state "intent_confirm" and user confirmed in current round
+        if next_intent.name in ["positive"] and self.state in ["intent_confirm"]:
+            self.current_intent.confidence = 1.0
+            self.has_update = True
+            self.inquiry_times = 0
+
+        # if last round set conversation state "slot_confirm" and user confirmed in current round
+        if next_intent.name in ["positive"] and self.state.split(':')[0] in ['slot_confirm']:
+            self.inquiry_times = 0
+            slot_name = self.state.split(':')[1].strip()
+            for entity in self.entities:
+                if entity.type == slot_name:
+                    entity.confidence = 1.0
+                    entity.possible_slot.confidence = 1.0
+                    break
+
+        # if user deny intent in current round
+        if next_intent.name in ["negative"] and self.state.split(':')[0] not in ["slot_confirm", "slot_filling"]:
+            self.update_intent(None)
+
+        # if user deny slot in current round
+        # todo: if slot found in negative utterance
+        if next_intent.name in ["negative"] and self.state.split(':')[0] in ['slot_confirm', 'slot_filling']:
+            slot_name = self.state.split(':')[1].strip()
+            self.entities = [entity for entity in self.entities if entity.type != slot_name]
+
     def update_intent(self, intent: Intent):
         if intent is not None:
             self.has_update = True

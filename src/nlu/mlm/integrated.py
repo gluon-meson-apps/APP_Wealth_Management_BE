@@ -23,7 +23,7 @@ class IntegratedNLU(Nlu):
 
         current_intent = self.intent_classifier.classify_intent(conversation)
 
-        conversation = self.intent_classifier.handle_intent(conversation, current_intent)
+        conversation = conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
         logger.info("extracting utterance's slots")
