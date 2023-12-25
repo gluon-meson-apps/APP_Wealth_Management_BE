@@ -1,4 +1,5 @@
 import os
+import shutil
 import uuid
 from datetime import datetime
 from typing import List, Any
@@ -37,6 +38,27 @@ class History:
         return '\n'.join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
 
 
+class ConversationFiles:
+    def __init__(self, session_id: str):
+        self.session_id = session_id
+        self.file_dir = os.path.join(os.path.dirname(__file__), "../tmp", self.session_id)
+        self.filenames = []
+
+    def add_files(self, files: list[UploadFile]):
+        if files and len(files) > 0:
+            if not os.path.exists(self.file_dir):
+                os.makedirs(self.file_dir)
+            for f in files:
+                file_path = f"{self.file_dir}/{f.filename}"
+                self.filenames.append(f.filename)
+                with open(file_path, "w+") as fo:
+                    fo.write(f.file.read().decode('utf-8'))
+
+    def delete_files(self):
+        if os.path.exists(self.file_dir):
+            shutil.rmtree(self.file_dir)
+
+
 class ConversationContext:
     def __init__(self, current_user_input: str, session_id: str, current_user_intent: Intent = None):
         self.current_user_input = current_user_input
@@ -55,7 +77,7 @@ class ConversationContext:
         self.inquiry_times = 0
         self.has_update = False
         self.current_round = 0
-        self.files = []
+        self.files = ConversationFiles(self.session_id)
 
     def get_history(self) -> History:
         return self.history
@@ -68,15 +90,7 @@ class ConversationContext:
         self.history.add_history("assistant", response_content)
 
     def add_files(self, files: list[UploadFile]):
-        if files and len(files) > 0:
-            for f in files:
-                file_dir = os.path.join(os.path.dirname(__file__), "../tmp", self.session_id)
-                if not os.path.exists(file_dir):
-                    os.makedirs(file_dir)
-                file_path = f"{file_dir}/{f.filename}"
-                self.files.append(file_path)
-                with open(file_path, "w+") as fo:
-                    fo.write(f.file.read().decode('utf-8'))
+        self.files.add_files(files)
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}
