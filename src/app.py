@@ -5,7 +5,7 @@ from typing import Annotated
 from urllib.request import Request
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, File
 from loguru import logger
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
@@ -49,15 +49,9 @@ async def catch_exceptions_middleware(request: Request, call_next):
                                 code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__)
 
 
-class MessageInput(BaseModel):
-    session_id: str
-    user_input: str
-    files: list[UploadFile]
-
-
 @app.post("/chat/")
-def chat(user_input: Annotated[str, Form()], files: Annotated[list[UploadFile], Form()],
-         session_id: Annotated[str, Form()] | None = None, ):
+def chat(user_input: Annotated[str, Form()], session_id: Annotated[str | None, Form()] = None,
+         files: Annotated[list[UploadFile] | None, File()] = None):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
     #     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
