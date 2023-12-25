@@ -1,16 +1,14 @@
 import configparser
 import os
 
-import requests
 import yaml
-from fastapi import HTTPException
 from loguru import logger
 
 from caches.es import ElasticsearchCache
 from models.intents.intent_classification import IntentClassificationModel
 from nlu.base import IntentClassifier
-from tracker.context import ConversationContext
 from nlu.intent_with_entity import Intent
+from tracker.context import ConversationContext
 
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
@@ -47,6 +45,10 @@ class IntentListConfig:
 
     def get_intent_list(self):
         return self.intents
+
+    def get_intent_name(self):
+        # read resources/intent.yaml file and get intent list
+        return [intent.name for intent in self.intents]
 
     def get_intent(self, intent_name):
         return next((intent for intent in self.intents if intent.name == intent_name), None)

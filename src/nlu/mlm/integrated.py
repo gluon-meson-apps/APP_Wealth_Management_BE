@@ -1,12 +1,10 @@
 from loguru import logger
 from tracker.context import ConversationContext
-from nlu.base import Nlu
+from nlu.base import Nlu, IntentClassifier, EntityExtractor
 from nlu.intent_with_entity import IntentWithEntity
-from nlu.mlm.entity import MLMEntityExtractor
-from nlu.mlm.intent import MLMIntentClassifier
 
 class IntegratedNLU(Nlu):
-    def __init__(self, intent_classifier: MLMIntentClassifier, entity_extractor: MLMEntityExtractor):
+    def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):
         self.intent_classifier = intent_classifier
         self.entity_extractor = entity_extractor
 
@@ -23,7 +21,7 @@ class IntegratedNLU(Nlu):
 
         current_intent = self.intent_classifier.classify_intent(conversation)
 
-        conversation = conversation.handle_intent(current_intent)
+        conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
         logger.info("extracting utterance's slots")
@@ -36,4 +34,4 @@ class IntegratedNLU(Nlu):
         conversation.add_entity(current_entities)
         logger.info(f"Session {conversation.session_id}, entities: {entities_string}")
 
-        return IntentWithEntity(intent=conversation.current_intent, entities=merged_entities, action=None)
+        return IntentWithEntity(intent=conversation.current_intent, entities=merged_entities, action="")

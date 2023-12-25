@@ -159,7 +159,7 @@ class LLMIntentClassifier(IntentClassifier):
 
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input
-        intent_list = self.intent_list_config.get_intent_list()
+        intent_list = self.intent_list_config.get_intent_name()
         chat_history = conversation.get_history().format_string()
         intent_examples = self.get_intent_examples(user_input)
 

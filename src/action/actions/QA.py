@@ -121,7 +121,7 @@ A:
         logger.info("user %s, question: %s", context.get_user_id(), question)
         prompt = self.template.format(question=question)
         response = self.chat_model.chat(prompt, max_length=4096, temperature=0.01)
-        return ActionResponse(text=response.response)
+        return ActionResponse(text=response)
 
     def get_slot(self, slot_name):
         for slot in self.slots:

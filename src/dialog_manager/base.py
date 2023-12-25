@@ -3,7 +3,13 @@ from typing import Any
 
 from action.runner import ActionRunner, SimpleActionRunner
 from action.context import ActionContext
+from nlu.llm.entity import LLMEntityExtractor
+from nlu.llm.intent import LLMIntentClassifier
 from nlu.mlm.integrated import IntegratedNLU
+from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
+from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
+from sdk.src.gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
@@ -52,21 +58,35 @@ class BaseDialogManager:
         return response, conversation
 
 class DialogManagerFactory:
-    @staticmethod
-    def create_dialog_manager():
-        model_type = "chatglm"
-        action_model_type = "chatglm"
+    @classmethod
+    def create_dialog_manager(cls):
+        model_type = "azure-gpt-3.5-2"
+        action_model_type = "azure-gpt-3.5-2"
 
         pwd = os.path.dirname(os.path.abspath(__file__))
-        prompt_template_folder = os.path.join(pwd, '../', 'resources', 'prompt_templates')
         intent_config_file_path = os.path.join(pwd, '../', 'resources', 'scenes')
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        prompt_template_folder = os.path.join(pwd, '..', 'resources', 'prompt_templates')
+
+        reasoner = cls.create_reasoner(model_type, action_model_type, intent_config_file_path, prompt_template_folder)
+
+        return BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
+
+    @classmethod
+    def create_reasoner(cls, model_type, action_model_type, intent_config_file_path, prompt_template_folder):
+        embedding_model = EmbeddingModel()
 
         intent_list_config = IntentListConfig.from_scenes(intent_config_file_path)
         prompt_manager = BasePromptManager(prompt_template_folder)
 
-        classifier = MLMIntentClassifier(intent_list_config)
+        classifier = LLMIntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
+                                      milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
+                                      intent_list_config=intent_list_config,
+                                      model_type=model_type, prompt_manager=prompt_manager)
+
+
         form_store = FormStore(intent_list_config)
-        entity_extractor = MLMEntityExtractor(form_store)
+        entity_extractor = LLMEntityExtractor(form_store, ChatModel(), model_type=model_type, prompt_manager=prompt_manager)
 
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
@@ -80,5 +100,6 @@ class DialogManagerFactory:
             action_model_type=action_model_type
         )
         nlu = IntegratedNLU(classifier, entity_extractor)
+
         reasoner = LlmReasoner(nlu, policy_manager, model_type)
-        return BaseDialogManager(BaseConversationTracker(), reasoner, SimpleActionRunner(), BaseOutputAdapter())
+        return reasoner

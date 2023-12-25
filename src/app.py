@@ -1,8 +1,10 @@
 import os
+import traceback
 from urllib.request import Request
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from loguru import logger
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
@@ -40,7 +42,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
         return await call_next(request)
     except Exception as err:
         err_msg = f"Error occurred: {err}"
-        print(err_msg)
+        logger.info(traceback.format_exc())
         return JSONResponse(status_code=500,
                             content=ErrorResponse(
                                 code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__)
@@ -56,8 +58,8 @@ def chat(data: MessageInput):
     session_id = data.session_id
     user_input = data.user_input
     result, conversation = dialog_manager.handle_message(user_input, session_id)
-    if config.get('debugMode', 'debug') == "True":
-        return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
+    # if config.get('debugMode', 'debug') == "True":
+    #     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
     return {"response": result, "session_id": conversation.session_id}
 
 

@@ -82,8 +82,8 @@ class LLMEntityExtractor(EntityExtractor):
             return []
         prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
-        response = self.model.chat(prompt, history=history, max_length=2048)
-        entities = yaml.safe_load(self.extract_yaml_code(response))
+        response = self.model.chat_single(prompt, history=history, max_length=2048, model_type='azure-gpt-3.5-2')
+        entities = yaml.safe_load(self.extract_yaml_code(response.response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(filter(lambda tup: tup[0] in slot_name_to_slot and tup[1] is not None and (type(tup[1])==int or len(tup[1]) > 0),
@@ -94,7 +94,9 @@ class LLMEntityExtractor(EntityExtractor):
         def get_slot(name, value):
             if slot_name_to_slot:
                 if name in slot_name_to_slot:
-                    return slot_name_to_slot[name].copy(update={'value': value})
+                    slot = slot_name_to_slot[name].copy(update={'value': value})
+                    slot.confidence = 1
+                    return slot
             return None
 
         return [Entity(type=name, value=value, possible_slot=get_slot(name, value)) for name, value in

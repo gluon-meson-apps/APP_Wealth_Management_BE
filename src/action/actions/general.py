@@ -39,7 +39,7 @@ class SlotFillingAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128)
+        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -59,7 +59,7 @@ class IntentConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128)
+        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -83,7 +83,7 @@ class IntentFillingAction(Action):
             "intent_list": "和".join(filtered_intents)
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128)
+        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -106,7 +106,7 @@ class SlotConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128)
+        response = self.llm.chat(prompt, max_length=128, model_type="azure-gpt-3.5-2")
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -121,7 +121,7 @@ class ChitChatAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action slot chitchat')
         # todo: add history from context
-        result = self.chat_model.chat_single(self.user_input, model_type=self.model_type, max_length=128)
+        result = self.chat_model.chat(self.user_input, model_type=self.model_type, max_length=128)
         if result.response is None:
             return ActionResponse(text=self.default_template)
         else:

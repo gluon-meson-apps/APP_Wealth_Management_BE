@@ -14,9 +14,9 @@ class SlotType(str, Enum):
 
 class Intent(HashableBaseModel):
     name: str
-    description: str
+    description: Optional[str]
     confidence: Optional[float] = 1
-    business: bool
+    business: Optional[bool]
 
 
 class Slot(HashableBaseModel):
@@ -44,7 +44,7 @@ class Slot(HashableBaseModel):
 class Entity(HashableBaseModel):
     type: str
     value: str
-    round: int
+    role: Optional[str] = None
     confidence: Optional[float] = None
     possible_slot: Optional[Slot] = None
 
