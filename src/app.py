@@ -50,8 +50,8 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 
 @app.post("/chat/")
-def chat(user_input: Annotated[str, Form()], session_id: Annotated[str | None, Form()] = None,
-         files: Annotated[list[UploadFile] | None, File()] = None):
+def chat(user_input: Annotated[str, Form()], session_id: Annotated[str, Form()] = None,
+         files: Annotated[list[UploadFile], File()] = None):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
     #     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
