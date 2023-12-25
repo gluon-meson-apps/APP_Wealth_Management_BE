@@ -3,7 +3,7 @@ from enum import unique, Enum
 
 from pydantic import BaseModel
 
-from action.context import ActionContext
+from action.context import ActionContext, ActionConfigContext
 
 
 @unique
@@ -143,4 +143,11 @@ class Action(ABC):
 
     @abstractmethod
     def get_name(self) -> str:
+        pass
+
+
+class DynamicAction(Action, ABC):
+
+    @abstractmethod
+    def load_from_config_context(self, config_context: ActionConfigContext):
         pass
