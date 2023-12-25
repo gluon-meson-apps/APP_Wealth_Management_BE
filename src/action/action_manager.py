@@ -1,4 +1,4 @@
-from action.base import DynamicAction, ActionResponse
+from action.base import DynamicAction, ActionResponse, Action
 from action.context import ActionConfigContext
 from action.repository.action_repository import ActionRepository
 
@@ -7,6 +7,9 @@ class ActionManager:
     def __init__(self, action_repository: ActionRepository, action_config_context: ActionConfigContext):
         self.action_repository = action_repository
         self.action_config_context = action_config_context
+
+    def add_action(self, action: Action):
+        self.action_repository.save(action)
 
     def add_dynamic_action(self, action_code: str, class_name: str):
         the_globals = {

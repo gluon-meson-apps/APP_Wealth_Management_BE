@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Union
 
 from action.base import Action
 
@@ -9,7 +10,7 @@ class ActionRepository:
         pass
 
     @abstractmethod
-    def find_by_name(self, name) -> Action:
+    def find_by_name(self, name) -> Union[Action, None]:
         pass
 
 
@@ -20,7 +21,9 @@ class MemoryBasedActionRepository(ActionRepository):
     def save(self, action: Action):
         self.actions[action.get_name()] = action
 
-    def find_by_name(self, name) -> Action:
+    def find_by_name(self, name) -> Union[Action, None]:
+        if name not in self.actions:
+            return None
         return self.actions[name]
 
 
