@@ -4,7 +4,7 @@ import os
 from colorama import init
 from openai import OpenAI
 
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel as GMChatModel
+from gluon_meson_sdk.models.chat_model import ChatModel as GMChatModel
 
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), '../', 'config.ini'))

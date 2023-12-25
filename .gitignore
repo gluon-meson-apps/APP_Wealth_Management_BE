@@ -2,6 +2,7 @@
 venv/
 .idea
 *.log
+/poetry.toml
 .env
 .vscode
 .DS_Store

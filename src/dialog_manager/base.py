@@ -7,10 +7,10 @@ from action.context import ActionContext
 from nlu.llm.entity import LLMEntityExtractor
 from nlu.llm.intent import LLMIntentClassifier
 from nlu.mlm.integrated import IntegratedNLU
-from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
-from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
-from sdk.src.gluon_meson_sdk.models.embedding_model import EmbeddingModel
+from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
+from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
