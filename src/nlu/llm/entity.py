@@ -5,7 +5,7 @@ import yaml
 
 from nlu.base import EntityExtractor
 from tracker.context import ConversationContext
-from gluon_meson_sdk.models.chat_model import ChatModel
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
 from loguru import logger
 from nlu.forms import FormStore, Form
 from nlu.intent_with_entity import Entity

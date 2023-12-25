@@ -5,9 +5,9 @@ from pymilvus import FieldSchema, DataType
 
 from nlu.base import IntentClassifier
 from tracker.context import ConversationContext
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
+from sdk.src.gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from sdk.src.gluon_meson_sdk.models.chat_model import ChatModel
+from sdk.src.gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from loguru import logger
 from nlu.intent_with_entity import Intent
 from prompt_manager.base import PromptManager
