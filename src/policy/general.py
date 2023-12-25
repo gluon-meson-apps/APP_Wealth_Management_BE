@@ -20,6 +20,9 @@ MAX_FOLLOW_UP_TIMES = 2
 
 IN_SCOPE_INTENTS = ["activate_function", "add_header", "enlarge_page", "reduce_page", "page_resize", "remove_header"]
 
+def intent_in_scope(intent: str) -> bool:
+    return True
+
 class EndDialoguePolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         Policy.__init__(self, prompt_manager)
@@ -31,7 +34,7 @@ class EndDialoguePolicy(Policy):
             return True, EndDialogueAction()
         
         if context.current_intent is not None:
-            if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and context.current_intent.name not in IN_SCOPE_INTENTS:
+            if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and not intent_in_scope(context.current_intent.name):
                 return True, EndDialogueAction()
         return False, None
 
@@ -50,14 +53,6 @@ class JumpOutPolicy(Policy):
             return True, JumpOut()
         
         # 处理闲聊意图
-        if IE.intent.name == "chitchat":
-            # 如果首轮就是闲聊或者整个历史意图队列都是闲聊，跳出
-            if len(context.intent_queue) < 2 or not any(intent.business for intent in context.intent_queue):
-                return True, JumpOut()
-            # 尝试向其询问意图
-            else:
-                context.intent_restore()
-                return False, None
         return False, None
 
 class IntentFillingPolicy(Policy):
@@ -75,7 +70,7 @@ class IntentFillingPolicy(Policy):
             return True, IntentFillingAction(prompt_manager=self.prompt_manager, form_store=self.form_store)
         
         # 有非辅助外的意图但是置信度低
-        if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in IN_SCOPE_INTENTS and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
+        if IE.intent.confidence < INTENT_SIG_TRH and intent_in_scope(IE.intent.name) and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         return False, None
@@ -129,27 +124,30 @@ class AssistantPolicy(Policy):
         # 出现了预定义之外的意图
         if not intent_form:
             return True, JumpOut()
-        
+
+        action = self.action_repository.find_by_name(intent_form.action)
         # 范围内意图但多轮追问都不能获取到必要的槽位
-        if IE.intent.name in IN_SCOPE_INTENTS and IE.intent.confidence > INTENT_SIG_TRH and context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+        if intent_in_scope(IE.intent.name) and IE.intent.confidence > INTENT_SIG_TRH and context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+            if action is not None:
+                return True, action
             return True, BankRelatedAction(intent_form.action, potential_slots, IE.intent, BaseOutputAdapter())
         
         # 范围内意图但多轮追问都不能获取到必要的槽位
-        if IE.intent.name in IN_SCOPE_INTENTS and IE.intent.confidence <= INTENT_SIG_TRH and context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+        if intent_in_scope(IE.intent.name) and IE.intent.confidence <= INTENT_SIG_TRH and context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
             context.set_state("intent_confirm")
             return True, EndDialogueAction()
         
         # 范围内意图，且此轮槽位有更新或者是新的意图
-        if IE.intent.name in IN_SCOPE_INTENTS and context.has_update:
+        if intent_in_scope(IE.intent.name) and context.has_update:
             context.has_update = False
-            if action := self.action_repository.find_by_name(intent_form.action) is not None:
+            if action is not None:
                 return True, action
             return True, BankRelatedAction(intent_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
         # 范围内意图但无更新
-        if IE.intent.name in IN_SCOPE_INTENTS and not context.has_update:
+        if intent_in_scope(IE.intent.name) and not context.has_update:
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         
         context.set_state("intent_filling")
-        return True, IntentFillingAction(prompt_manager=self.prompt_manager)
+        return True, IntentFillingAction(prompt_manager=self.prompt_manager, form_store=self.form_store)

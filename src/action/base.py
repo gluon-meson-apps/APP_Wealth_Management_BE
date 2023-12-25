@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import unique, Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -39,7 +40,7 @@ class ChatResponseAnswer(BaseModel):
 class ActionResponse(BaseModel):
     code: int
     message: str
-    answer: ActionResponseAnswer
+    answer: Optional[ActionResponseAnswer]
     jump_out_flag: bool
 
 

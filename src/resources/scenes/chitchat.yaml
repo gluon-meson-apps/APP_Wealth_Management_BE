@@ -1,13 +1,5 @@
 name: chitchat
 description: 闲聊
 business: false
-slots:
-  - name: functions
-    description: 待开通的功能名称
-    slotType: text
-    optional: True
-  - name: header_element
-    description: 表头的相关信息
-    slotType: text
-    optional: True
+slots: []
 action: chitchat

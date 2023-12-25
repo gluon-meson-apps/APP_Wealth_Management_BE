@@ -70,6 +70,9 @@ class JumpOut(Action):
     def __init__(self):
         pass
 
+    def get_name(self) -> str:
+        return "jump_out"
+
     def run(self, context) -> ActionResponse:
         logger.debug("非范围内意图")
         return JumpOutResponse(
