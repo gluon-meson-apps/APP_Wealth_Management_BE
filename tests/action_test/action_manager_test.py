@@ -1,12 +1,16 @@
 import pytest
 
 from action.action_manager import ActionManager
+from action.context import ActionConfigContext
 from action.repository.action_repository import MemoryBasedActionRepository
+from nlu.forms import FormStore
+from prompt_manager.base import PromptManager
 
 
 @pytest.fixture
 def action_manager():
-    return ActionManager(MemoryBasedActionRepository(), None)
+    return ActionManager(MemoryBasedActionRepository(),
+                         ActionConfigContext(prompt_manager=PromptManager(), form_store=FormStore(None)))
 
 def test_add_dynamic_action(action_manager):
     dynamic_action_code = """
@@ -18,20 +22,15 @@ class TestAction(DynamicAction):
         return ActionResponse(code=200, message="success", answer={}, jump_out_flag=False)
         
     def load_from_config_context(self, config_context: ActionConfigContext):
-        pass
+        self.config_context = config_context
     
 """
     action_manager.add_dynamic_action(dynamic_action_code, "TestAction")
     assert action_manager.action_repository.find_by_name("test_action") is not None
+    assert action_manager.action_repository.find_by_name("test_action").config_context == action_manager.action_config_context
 
 def test_should_throw_error_when_import_unavailable_package(action_manager):
     dynamic_action_code = """
-from sys import addaudithook
-def block_mischief(event,arg):
-    if 'WRITE_LOCK' in globals() and ((event=='open' and arg[1]!='r') 
-            or event.split('.')[0] in ['subprocess', 'os', 'shutil', 'winreg']): raise IOError('file write forbidden')
-
-addaudithook(block_mischief)
 class TestAction(DynamicAction):
     def __init__(self):
         import os
