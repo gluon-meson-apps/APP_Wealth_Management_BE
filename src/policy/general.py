@@ -62,6 +62,7 @@ class JumpOutPolicy(Policy):
 class IntentFillingPolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         Policy.__init__(self, prompt_manager)
+        self.form_store = form_store
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)

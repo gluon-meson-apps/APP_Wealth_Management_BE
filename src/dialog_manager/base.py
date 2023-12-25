@@ -17,7 +17,8 @@ from loguru import logger
 from nlu.forms import FormStore
 
 from nlu.mlm.entity import MLMEntityExtractor
-from nlu.mlm.intent import MLMIntentClassifier, IntentListConfig
+from nlu.mlm.intent import MLMIntentClassifier
+from nlu.intent_config import IntentListConfig
 from policy.base import BasePolicyManager
 from policy.general import AssistantPolicy, IntentFillingPolicy, SlotFillingPolicy, EndDialoguePolicy, JumpOutPolicy
 from prompt_manager.base import BasePromptManager

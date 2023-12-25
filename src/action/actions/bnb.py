@@ -8,6 +8,9 @@ config.read('config.ini')
 
 
 class BankRelatedAction(Action):
+    def get_name(self) -> str:
+        return "bank_related_action"
+
     def __init__(self, action_name, possible_slots, intent, output_adapter: OutputAdapter):
         self.action_name = action_name
         self.possible_slots = possible_slots

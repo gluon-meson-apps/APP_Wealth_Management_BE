@@ -4,14 +4,18 @@ from loguru import logger
 from action.base import Action, ActionResponse, GeneralResponse, ChatResponseAnswer, JumpOutResponse, \
     ResponseMessageType
 from llm.self_host import ChatModel
+from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
-from nlu.mlm.intent import IntentListConfig
+from nlu.intent_config import IntentListConfig
 from tracker.context import ConversationContext
 
 
 class EndDialogueAction(Action):
     """action to end the conversation with user"""
+
+    def get_name(self) -> str:
+        return 'end_dialogue'
 
     def run(self, context):
         return JumpOutResponse(code=200, message="success", answer={}, jump_out_flag=True)
@@ -19,6 +23,9 @@ class EndDialogueAction(Action):
 
 class SlotFillingAction(Action):
     """Slot filling action using large language models."""
+
+    def get_name(self) -> str:
+        return 'slot_filling'
 
     def __init__(self, slots: Union[List[Slot], Slot], intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='slot_filling')
@@ -47,6 +54,9 @@ class SlotFillingAction(Action):
 class IntentConfirmAction(Action):
     """Intent confirm action using large language models."""
 
+    def get_name(self) -> str:
+        return 'intent_confirm'
+
     def __init__(self, intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='intent_confirm')
         self.llm = ChatModel()
@@ -67,13 +77,13 @@ class IntentConfirmAction(Action):
 class IntentFillingAction(Action):
     """Intent filling action using large language models."""
 
-    def __init__(self, prompt_manager: PromptManager):
+    def get_name(self) -> str:
+        return 'intent_filling'
+
+    def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         self.prompt_template = prompt_manager.load(name='intent_filling')
         self.llm = ChatModel()
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(pwd, '../../', 'resources', 'scenes')
-        intent_list_config = IntentListConfig.from_scenes(file_path)
-        self.intents = intent_list_config.get_intent_list()
+        self.intents = form_store.intent_list_config.get_intent_list()
 
     def run(self, context):
         logger.info(f'exec action intent_filling')
@@ -90,6 +100,9 @@ class IntentFillingAction(Action):
 
 class SlotConfirmAction(Action):
     """Slot confirm action using large language models."""
+
+    def get_name(self) -> str:
+        return 'slot_confirm'
 
     def __init__(self, intent: Intent, slot: Slot, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name='slot_confirm')
@@ -112,6 +125,9 @@ class SlotConfirmAction(Action):
 
 
 class ChitChatAction(Action):
+    def get_name(self) -> str:
+        return 'chitchat'
+
     def __init__(self, model_type: str, chat_model: ChatModel, user_input):
         self.model_type = model_type
         self.chat_model = chat_model
@@ -122,6 +138,26 @@ class ChitChatAction(Action):
         logger.info(f'exec action slot chitchat')
         # todo: add history from context
         result = self.chat_model.chat(self.user_input, model_type=self.model_type, max_length=128)
+        if result.response is None:
+            return ActionResponse(text=self.default_template)
+        else:
+            return ActionResponse(text=result.response)
+
+
+class QAAction(Action):
+    def get_name(self) -> str:
+        return 'qa'
+
+    def __init__(self, model_type: str, chat_model: ChatModel, user_input):
+        self.model_type = model_type
+        self.chat_model = chat_model
+        self.user_input = user_input
+        self.default_template = "我不知道该怎么回答好了"
+
+    def run(self, context) -> ActionResponse:
+        logger.info(f'exec action slot chitchat')
+        # todo: add history from context
+        result = self.chat_model.chat(self.user_input, model_type=self.model_type, max_length=256)
         if result.response is None:
             return ActionResponse(text=self.default_template)
         else:

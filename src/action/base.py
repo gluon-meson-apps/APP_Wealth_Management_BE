@@ -140,3 +140,7 @@ class Action(ABC):
     def run(self, context: ActionContext) -> ActionResponse:
         """Run the action given the context."""
         pass
+
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
