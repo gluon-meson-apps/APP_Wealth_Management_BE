@@ -1,5 +1,6 @@
 import os
 from typing import Any
+from fastapi import UploadFile
 
 from action.runner import ActionRunner, SimpleActionRunner
 from action.context import ActionContext
@@ -42,12 +43,13 @@ class BaseDialogManager:
         self.conversation_tracker.save_conversation(user_id, conversation)
         return response
 
-    def handle_message(self, message: Any, session_id: str) -> Any:
+    def handle_message(self, message: Any, session_id: str, files: list[UploadFile]) -> Any:
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_user_history(message)
+        conversation.add_files(files)
 
         plan = self.reasoner.think(conversation)
 
@@ -57,6 +59,7 @@ class BaseDialogManager:
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         return response, conversation
+
 
 class DialogManagerFactory:
     @classmethod
@@ -81,13 +84,13 @@ class DialogManagerFactory:
         prompt_manager = BasePromptManager(prompt_template_folder)
 
         classifier = LLMIntentClassifier(chat_model=ChatModel(), embedding_model=embedding_model,
-                                      milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
-                                      intent_list_config=intent_list_config,
-                                      model_type=model_type, prompt_manager=prompt_manager)
-
+                                         milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
+                                         intent_list_config=intent_list_config,
+                                         model_type=model_type, prompt_manager=prompt_manager)
 
         form_store = FormStore(intent_list_config)
-        entity_extractor = LLMEntityExtractor(form_store, ChatModel(), model_type=model_type, prompt_manager=prompt_manager)
+        entity_extractor = LLMEntityExtractor(form_store, ChatModel(), model_type=model_type,
+                                              prompt_manager=prompt_manager)
 
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
@@ -96,7 +99,8 @@ class DialogManagerFactory:
         jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
 
         policy_manager = BasePolicyManager(
-            policies=[end_dialogue_policy, jump_out_policy, intent_filling_policy, slot_filling_policy, assitant_policy],
+            policies=[end_dialogue_policy, jump_out_policy, intent_filling_policy, slot_filling_policy,
+                      assitant_policy],
             prompt_manager=prompt_manager,
             action_model_type=action_model_type
         )

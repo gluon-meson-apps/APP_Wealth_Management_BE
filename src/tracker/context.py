@@ -1,6 +1,8 @@
+import os
 import uuid
 from datetime import datetime
 from typing import List, Any
+from fastapi import UploadFile
 
 from action.base import ResponseMessageType
 from nlu.intent_with_entity import Entity, Intent
@@ -53,6 +55,7 @@ class ConversationContext:
         self.inquiry_times = 0
         self.has_update = False
         self.current_round = 0
+        self.files = []
 
     def get_history(self) -> History:
         return self.history
@@ -63,6 +66,17 @@ class ConversationContext:
     def append_assistant_history(self, answer):
         response_content = prepare_response_content(answer)
         self.history.add_history("assistant", response_content)
+
+    def add_files(self, files: list[UploadFile]):
+        if files and len(files) > 0:
+            for f in files:
+                file_dir = os.path.join(os.path.dirname(__file__), "../tmp", self.session_id)
+                if not os.path.exists(file_dir):
+                    os.makedirs(file_dir)
+                file_path = f"{file_dir}/{f.filename}"
+                self.files.append(file_path)
+                with open(file_path, "w+") as fo:
+                    fo.write(f.file.read().decode('utf-8'))
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}
