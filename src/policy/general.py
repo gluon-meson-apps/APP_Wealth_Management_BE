@@ -71,7 +71,7 @@ class IntentFillingPolicy(Policy):
         # 没有非辅助外的意图
         if IE.intent is None:
             context.set_state("intent_filling")
-            return True, IntentFillingAction(prompt_manager=self.prompt_manager)
+            return True, IntentFillingAction(prompt_manager=self.prompt_manager, form_store=self.form_store)
         
         # 有非辅助外的意图但是置信度低
         if IE.intent.confidence < INTENT_SIG_TRH and IE.intent.name in IN_SCOPE_INTENTS and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
