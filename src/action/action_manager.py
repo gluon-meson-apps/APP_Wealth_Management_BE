@@ -8,14 +8,18 @@ class ActionManager:
         self.action_repository = action_repository
         self.action_config_context = action_config_context
 
-    def add_dynamic_action(self, action_code: str):
-        globals = {
+    def add_dynamic_action(self, action_code: str, class_name: str):
+        the_globals = {
             "DynamicAction": DynamicAction,
             "ActionResponse": ActionResponse,
             "ActionConfigContext": ActionConfigContext,
-            "__builtins__": __builtins__,
+            '__builtins__': {
+                '__build_class__': __build_class__,
+                '__name__': __name__,
+                'str': str,
+            }
         }
-        exec(action_code, globals)
-        action: DynamicAction = globals['returned_action']
+        the_locals = {}
+        exec(action_code +f"\nreturned_action={class_name}()", the_globals, the_locals)
+        action: DynamicAction = the_locals['returned_action']
         self.action_repository.save(action)
-
