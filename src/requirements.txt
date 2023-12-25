@@ -4,10 +4,11 @@ pyyaml==6.0.1
 colorama
 openai==1.3.7
 loguru
-uvicorn==0.24.0
+uvicorn==0.25.0
 schedule
 python-dotenv
 parameterized==0.8.1
 urllib3==1.26.6
 chinese2digits
 numpy
+elasticsearch
