@@ -53,7 +53,7 @@ class IntentListConfig:
 
     def get_intent_list(self):
         # read resources/intent.yaml file and get intent list
-        return [intent.description for intent in self.intents]
+        return [intent.name for intent in self.intents]
 
     def get_intent(self, intent_name):
         intents = [intent for intent in self.intents if intent.name == intent_name]
