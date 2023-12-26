@@ -1,6 +1,7 @@
 import unittest
 import uuid
 
+import pytest
 from parameterized import parameterized
 import requests
 
@@ -47,6 +48,7 @@ questions_and_expected_responses = [
 class TestIntentAndSlots(unittest.TestCase):
 
     @parameterized.expand(questions_and_expected_responses)
+    @pytest.mark.skip(reason="not start app to run test in CI")
     def test_single_chat_intent_and_slots(self, question, jump_out_flag, content):
         random_uuid = uuid.uuid4()
         response = requests.post('http://localhost:7788/chat/', json={
@@ -82,6 +84,7 @@ class TestIntentAndSlots(unittest.TestCase):
                         response_chat['response']['answer']['content']['operateSlots'][
                             'valueType']
                     assert content['valueType'] == response_action_operate_slots_category
+
 
 
 if __name__ == '__main__':
