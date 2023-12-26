@@ -15,6 +15,7 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM ${PYTHON_IMAGE}-slim as runtime

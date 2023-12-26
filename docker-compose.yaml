@@ -4,6 +4,8 @@ services:
   service:
     build:
       context: .
+      ssh:
+        - default=${GM_SDK_GIT_SSH_KEY:-$HOME/.ssh/id_rsa}
     image: thought-agent:latest
     restart: unless-stopped
     ports:
