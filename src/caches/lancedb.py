@@ -17,7 +17,7 @@ class LancedbCache(Cache):
         self.db = lancedb.connect(cache_path)
         try:
             self.cache = self.db.open_table(cache_table_name)
-        except:
+        except: # noqa: E722
             self.logger.info("No cache table found, trying to create one")
             schema = pa.schema(
                 [

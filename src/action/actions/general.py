@@ -1,4 +1,3 @@
-import os
 from typing import List, Union
 from loguru import logger
 from action.base import (
@@ -13,7 +12,6 @@ from llm.self_host import ChatModel
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
-from nlu.intent_config import IntentListConfig
 from tracker.context import ConversationContext
 
 
@@ -47,7 +45,7 @@ class SlotFillingAction(Action):
         self.slots = slots
 
     def run(self, context):
-        logger.info(f"exec action slot filling")
+        logger.info("exec action slot filling")
         if isinstance(self.slots, list):
             slot_description = "或".join(slot.description for slot in self.slots)
         else:
@@ -82,7 +80,7 @@ class IntentConfirmAction(Action):
         self.intent = intent
 
     def run(self, context: ConversationContext):
-        logger.info(f"exec action intent confirm")
+        logger.info("exec action intent confirm")
         prompt = self.prompt_template.format(
             {
                 "intent": self.intent.description,
@@ -111,7 +109,7 @@ class IntentFillingAction(Action):
         self.intents = form_store.intent_list_config.get_intent_list()
 
     def run(self, context):
-        logger.info(f"exec action intent_filling")
+        logger.info("exec action intent_filling")
         filtered_intents = [
             intent.description for intent in self.intents if intent.business
         ]
@@ -144,7 +142,7 @@ class SlotConfirmAction(Action):
         self.slot = slot
 
     def run(self, context: ConversationContext):
-        logger.info(f"exec action slot confirm")
+        logger.info("exec action slot confirm")
         prompt = self.prompt_template.format(
             {
                 "intent": self.intent.description,
@@ -174,7 +172,7 @@ class ChitChatAction(Action):
         self.default_template = "我不知道该怎么回答好了"
 
     def run(self, context) -> ActionResponse:
-        logger.info(f"exec action slot chitchat")
+        logger.info("exec action slot chitchat")
         # todo: add history from context
         result = self.chat_model.chat(
             self.user_input, model_type=self.model_type, max_length=128
@@ -196,7 +194,7 @@ class QAAction(Action):
         self.default_template = "我不知道该怎么回答好了"
 
     def run(self, context) -> ActionResponse:
-        logger.info(f"exec action slot chitchat")
+        logger.info("exec action slot chitchat")
         # todo: add history from context
         result = self.chat_model.chat(
             self.user_input, model_type=self.model_type, max_length=256

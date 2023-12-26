@@ -7,7 +7,6 @@ from urllib.request import Request
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, File
 from loguru import logger
-from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run

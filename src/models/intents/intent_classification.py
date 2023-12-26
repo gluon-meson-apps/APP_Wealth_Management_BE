@@ -6,8 +6,6 @@ from fastapi import HTTPException
 from loguru import logger
 from pydantic import BaseModel
 
-from nlu.intent_with_entity import Intent
-
 
 class IntentClassificationModelResponse(BaseModel):
     intent: str

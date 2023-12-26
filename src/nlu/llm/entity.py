@@ -120,7 +120,7 @@ class LLMEntityExtractor(EntityExtractor):
                 filter(
                     lambda tup: tup[0] in slot_name_to_slot
                     and tup[1] is not None
-                    and (type(tup[1]) == int or len(tup[1]) > 0),
+                    and (isinstance(tup[1], int) or len(tup[1]) > 0),
                     list(entities.items()),
                 )
             )

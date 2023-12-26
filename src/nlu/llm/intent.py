@@ -11,6 +11,7 @@ from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from loguru import logger
 from nlu.intent_with_entity import Intent
 from prompt_manager.base import PromptManager
+import yaml
 
 
 # should extract to a config file
@@ -37,7 +38,6 @@ system_template_without_example = """
 
 topic = "test_topic_for_intent"
 
-import yaml
 
 
 class IntentConfig:

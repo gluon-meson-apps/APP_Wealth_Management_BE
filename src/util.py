@@ -62,7 +62,7 @@ def dispatch_tool(tool_name: str, tool_params: dict) -> str:
     tool_call = _TOOL_HOOKS[tool_name]
     try:
         ret = tool_call(**tool_params)
-    except:
+    except: # noqa: E722
         ret = traceback.format_exc()
     return str(ret)
 
