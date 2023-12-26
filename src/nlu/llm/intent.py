@@ -191,5 +191,5 @@ class LLMIntentClassifier(IntentClassifier):
             logger.info("session %s, intent: %s", conversation.session_id, intent_name)
             return Intent(name=intent_name, confidence=1.0)
 
-        logger.info("intent: %s is not predefined", intent_name)
+        logger.info(f"intent: {intent_name} is not predefined")
         return None
