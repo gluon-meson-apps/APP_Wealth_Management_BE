@@ -9,4 +9,4 @@ services:
     image: thought-agent:latest
     restart: unless-stopped
     ports:
-      - 18002:8000
+      - 18002:7788
