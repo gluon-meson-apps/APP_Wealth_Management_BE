@@ -1,3 +1,5 @@
+def GM_SDK_GIT_SSH_KEY_CREDS_ID='svc-gluon-meson'
+
 pipeline {
     agent any
 
@@ -22,7 +24,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker compose build'
+                    withCredentials([sshUserPrivateKey(credentialsId: "${GM_SDK_GIT_SSH_KEY_CREDS_ID}", keyFileVariable: "GM_SDK_GIT_SSH_KEY")]) {
+                        sh "eval \"\$(ssh-agent -s)\" && ssh-add ${GM_SDK_GIT_SSH_KEY}"
+                        sh "GM_SDK_GIT_SSH_KEY=${GM_SDK_GIT_SSH_KEY} docker compose build"
+                    }
                 }
             }
         }
