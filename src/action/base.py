@@ -27,12 +27,12 @@ class ActionResponseAnswerContent(BaseModel):
 
 
 class ActionResponseAnswer(BaseModel):
-    messageType: str = ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
+    messageType: str = (ResponseMessageType.FORMAT_INTELLIGENT_EXEC,)
     content: ActionResponseAnswerContent
 
 
 class ChatResponseAnswer(BaseModel):
-    messageType: str = ResponseMessageType.FORMAT_TEXT,
+    messageType: str = (ResponseMessageType.FORMAT_TEXT,)
     content: str
 
 
@@ -147,7 +147,6 @@ class Action(ABC):
 
 
 class DynamicAction(Action, ABC):
-
     @abstractmethod
     def load_from_config_context(self, config_context: ActionConfigContext):
         pass

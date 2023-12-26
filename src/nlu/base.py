@@ -5,12 +5,16 @@ from nlu.intent_with_entity import IntentWithEntity, Entity, Intent
 
 
 class Nlu:
-    def extract_intents_and_entities(self, conversation_context: ConversationContext) -> IntentWithEntity:
+    def extract_intents_and_entities(
+        self, conversation_context: ConversationContext
+    ) -> IntentWithEntity:
         raise NotImplementedError()
 
 
 class BaseNlu(Nlu):
-    def extract_intents_and_entities(self, conversation_context: ConversationContext) -> IntentWithEntity:
+    def extract_intents_and_entities(
+        self, conversation_context: ConversationContext
+    ) -> IntentWithEntity:
         pass
 
 

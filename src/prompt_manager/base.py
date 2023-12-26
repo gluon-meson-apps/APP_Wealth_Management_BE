@@ -18,14 +18,13 @@ class PromptManager:
 
 
 class BasePromptManager(PromptManager):
-
     def __init__(self, prompt_template_folder) -> None:
         super().__init__()
         self.prompt_service = LocalPromptService(prompt_template_folder)
 
     def load(self, name, domain=None) -> PromptWrapper:
         if domain is not None:
-            name = domain + '_' + name
+            name = domain + "_" + name
 
         prompt = self.prompt_service.get_prompt(name)
         if prompt is None:

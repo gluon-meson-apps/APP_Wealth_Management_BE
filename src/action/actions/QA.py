@@ -2,8 +2,8 @@ from loguru import logger
 from src.action.base import Action, ActionResponse
 from llm.self_host import ChatModel
 
-class RAGAction(Action):
 
+class RAGAction(Action):
     template = """
 ### 角色：假设你是保险产品专家，你的特点是逻辑性特别强，思维清晰，回答简明扼要，一般只回答和问题以及和具体产品相关的内容
 ### 任务：负责回答客户的问题，答案需要像聊天一样，但回答中不要向客户提及产品名称
@@ -116,8 +116,8 @@ A:
         self.slots = slots
 
     def run(self, context) -> ActionResponse:
-        context.set_status('action:rag_qa')
-        question = self.get_slot('问题').value
+        context.set_status("action:rag_qa")
+        question = self.get_slot("问题").value
         logger.info("user %s, question: %s", context.get_user_id(), question)
         prompt = self.template.format(question=question)
         response = self.chat_model.chat(prompt, max_length=4096, temperature=0.01)

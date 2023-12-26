@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-    
+
 from copy import deepcopy
 import inspect
 from pprint import pformat
@@ -14,6 +14,7 @@ _TOOL_DESCRIPTIONS = {}
 class HashableBaseModel(BaseModel):
     def __hash__(self):
         return hash((type(self),) + tuple(self.__dict__.values()))
+
 
 def register_tool(func: callable):
     tool_name = func.__name__
@@ -34,16 +35,18 @@ def register_tool(func: callable):
         if not isinstance(required, bool):
             raise TypeError(f"Required for `{name}` must be a bool")
 
-        tool_params.append({
-            "name": name,
-            "description": description,
-            "type": typ,
-            "required": required
-        })
+        tool_params.append(
+            {
+                "name": name,
+                "description": description,
+                "type": typ,
+                "required": required,
+            }
+        )
     tool_def = {
         "name": tool_name,
         "description": tool_description,
-        "params": tool_params
+        "params": tool_params,
     }
 
     print("[registered tool] " + pformat(tool_def))
@@ -51,6 +54,7 @@ def register_tool(func: callable):
     _TOOL_DESCRIPTIONS[tool_name] = tool_def
 
     return func
+
 
 def dispatch_tool(tool_name: str, tool_params: dict) -> str:
     if tool_name not in _TOOL_HOOKS:

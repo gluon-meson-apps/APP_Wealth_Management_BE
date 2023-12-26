@@ -13,9 +13,9 @@ from nlu.forms import FormStore
 from nlu.intent_with_entity import Entity
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
+config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
 
-MODEL_URL = config['JointBert']['base_url']
+MODEL_URL = config["JointBert"]["base_url"]
 
 BASE_SIG_VALUE = 0.5
 
@@ -26,7 +26,7 @@ class MLMEntityExtractor(EntityExtractor):
 
     def extract_slots(self, utterance):
         # 提取槽位信息
-        payload = {'input_text': utterance}
+        payload = {"input_text": utterance}
         response = requests.post(MODEL_URL, json=payload)
         if response.status_code == 200:
             data = response.json()
@@ -43,10 +43,10 @@ class MLMEntityExtractor(EntityExtractor):
         检查实体是否有效
         """
         return (
-                name in slot_dict
-                and value is not None
-                and confidence > BASE_SIG_VALUE
-                and (isinstance(value, int) or len(value) > 0)
+            name in slot_dict
+            and value is not None
+            and confidence > BASE_SIG_VALUE
+            and (isinstance(value, int) or len(value) > 0)
         )
 
     def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
@@ -69,22 +69,35 @@ class MLMEntityExtractor(EntityExtractor):
 
         if entities:
             valid_entities = [
-                (name, detail['value'], round(detail['confidence'], 2))
+                (name, detail["value"], round(detail["confidence"], 2))
                 for name, detail in entities.items()
-                if self.is_valid_entity(name, detail['value'], detail['confidence'], slot_dict)
+                if self.is_valid_entity(
+                    name, detail["value"], detail["confidence"], slot_dict
+                )
             ]
         else:
             valid_entities = []
 
         def get_slot(name, value, confidence, priority):
             if slot_dict and name in slot_dict:
-                return slot_dict[name].copy(update={'value': value, 'confidence': confidence, 'priority': priority})
+                return slot_dict[name].copy(
+                    update={
+                        "value": value,
+                        "confidence": confidence,
+                        "priority": priority,
+                    }
+                )
             return None
 
         # 创建实体列表和动作
         entity_list = [
-            Entity(type=name, value=value, round=current_round,
-                   confidence=confidence, possible_slot=get_slot(name, value, confidence, current_round))
+            Entity(
+                type=name,
+                value=value,
+                round=current_round,
+                confidence=confidence,
+                possible_slot=get_slot(name, value, confidence, current_round),
+            )
             for name, value, confidence in valid_entities
         ]
 

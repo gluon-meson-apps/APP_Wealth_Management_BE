@@ -11,7 +11,13 @@ class Plan:
     action: Action
     parameters: List[object]
 
-    def __init__(self, intent: IntentWithEntity, content: str, action: Action, parameters: List[object]):
+    def __init__(
+        self,
+        intent: IntentWithEntity,
+        content: str,
+        action: Action,
+        parameters: List[object],
+    ):
         self.intent = intent
         self.content = content
         self.action = action

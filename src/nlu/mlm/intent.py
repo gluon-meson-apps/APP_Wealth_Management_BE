@@ -11,15 +11,20 @@ from nlu.intent_with_entity import Intent
 from tracker.context import ConversationContext
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
+config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
 
-MODEL_URL = config['JointBert']['base_url']
-use_cache = config.get('Cache', 'enable').lower() == 'true'
+MODEL_URL = config["JointBert"]["base_url"]
+use_cache = config.get("Cache", "enable").lower() == "true"
 
 
 class MLMIntentClassifier(IntentClassifier):
-    def __init__(self, intent_list_config: IntentListConfig, cache=ElasticsearchCache(),
-                 intent_model=IntentClassificationModel(), use_cache=use_cache):
+    def __init__(
+        self,
+        intent_list_config: IntentListConfig,
+        cache=ElasticsearchCache(),
+        intent_model=IntentClassificationModel(),
+        use_cache=use_cache,
+    ):
         self.intent_list_config = intent_list_config
         self.cache = cache
         self.intent_model = intent_model
@@ -41,8 +46,12 @@ class MLMIntentClassifier(IntentClassifier):
         name = intent.intent
         confidence = intent.confidence
         intent = self.intent_list_config.get_intent(name)
-        return Intent(name=name, confidence=confidence, description=intent.description if intent else "",
-                      business=intent.business)
+        return Intent(
+            name=name,
+            confidence=confidence,
+            description=intent.description if intent else "",
+            business=intent.business,
+        )
 
     def get_from_cache(self, conversation):
         try:

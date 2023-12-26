@@ -9,7 +9,9 @@ import pyarrow as pa
 class LancedbCache(Cache):
     logger = init_logger(__name__)
 
-    def __init__(self, embedding_model: Embedding, cache_path: str, cache_table_name: str) -> None:
+    def __init__(
+        self, embedding_model: Embedding, cache_path: str, cache_table_name: str
+    ) -> None:
         self.embedding_model = embedding_model
         self.cache_path = cache_path
         self.db = lancedb.connect(cache_path)
@@ -19,17 +21,26 @@ class LancedbCache(Cache):
             self.logger.info("No cache table found, trying to create one")
             schema = pa.schema(
                 [
-                    pa.field("vector", pa.list_(pa.float32(),
-                                                list_size=self.embedding_model.embedding_size * 2)),  # note *2, to seprate system prompt and user query
+                    pa.field(
+                        "vector",
+                        pa.list_(
+                            pa.float32(),
+                            list_size=self.embedding_model.embedding_size * 2,
+                        ),
+                    ),  # note *2, to seprate system prompt and user query
                     ("system", pa.string()),
                     ("query", pa.string()),
-                    ("response", pa.string())
+                    ("response", pa.string()),
                 ]
             )
-            self.cache = self.db.create_table(
-                name=cache_table_name, schema=schema)
+            self.cache = self.db.create_table(name=cache_table_name, schema=schema)
 
-    def search_cache(self, messages: List, exact_match: bool = False, similarity_score_threshold: float = 0.02) -> Union[str, None]:
+    def search_cache(
+        self,
+        messages: List,
+        exact_match: bool = False,
+        similarity_score_threshold: float = 0.02,
+    ) -> Union[str, None]:
         """
         Search the cache table, if found, return cached result, else, return None
         """
@@ -37,8 +48,9 @@ class LancedbCache(Cache):
         system, query = self.format_query(messages)
         vector = self.calculate_vector(system, query)
         # always only return the first result
-        cache_search_results = self.cache.search(
-            vector).metric("cosine").limit(1).to_list()
+        cache_search_results = (
+            self.cache.search(vector).metric("cosine").limit(1).to_list()
+        )
 
         if len(cache_search_results) > 0:
             distance = cache_search_results[0]["_distance"]
@@ -46,20 +58,24 @@ class LancedbCache(Cache):
                 # not possible for exact zero, set a small float number
                 if abs(distance) <= 1e-05:
                     self.logger.info(
-                        f"Find exact match query, the distance is {distance}")
+                        f"Find exact match query, the distance is {distance}"
+                    )
                     return cache_search_results[0]["response"]
                 else:
                     self.logger.info(
-                        f"No exact result found in cache, the min distance is {distance}")
+                        f"No exact result found in cache, the min distance is {distance}"
+                    )
                     return None
             else:
                 if abs(distance) <= similarity_score_threshold:
                     self.logger.info(
-                        f"Find similar result in cache, the distance is {distance}")
+                        f"Find similar result in cache, the distance is {distance}"
+                    )
                     return cache_search_results[0]["response"]
                 else:
                     self.logger.info(
-                        f"No similar result found in cache, the min distance is {distance}")
+                        f"No similar result found in cache, the min distance is {distance}"
+                    )
                     return None
         else:
             self.logger.info("No result found in cache.")
@@ -69,14 +85,15 @@ class LancedbCache(Cache):
         self.logger.info("Adding to cache...")
         system, query = self.format_query(messages)
         vector = self.calculate_vector(system, query)
-        self.cache.add([
-            {
-                "vector": vector,
-                "system": system,
-                "query": query,
-                "response": response
-            }
-        ],
+        self.cache.add(
+            [
+                {
+                    "vector": vector,
+                    "system": system,
+                    "query": query,
+                    "response": response,
+                }
+            ],
         )
 
     def calculate_vector(self, system: str, query: str) -> List:

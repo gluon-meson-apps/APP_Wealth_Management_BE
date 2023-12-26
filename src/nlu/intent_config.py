@@ -22,7 +22,7 @@ class IntentListConfig:
         fixed_intents = [
             ("slot_filling", "追问槽位", False, "slot_filling", []),
             ("positive", "肯定", False, "positive", []),
-            ("negative", "否认", False, "negative", [])
+            ("negative", "否认", False, "negative", []),
         ]
 
         for intent_data in fixed_intents:
@@ -38,31 +38,37 @@ class IntentListConfig:
         return [intent.name for intent in self.intents]
 
     def get_intent(self, intent_name):
-        return next((intent for intent in self.intents if intent.name == intent_name), None)
+        return next(
+            (intent for intent in self.intents if intent.name == intent_name), None
+        )
 
     def get_intent_and_attrs(self):
         return [
-            {'intent': intent.name, 'examples': intent.examples, 'description': intent.description}
+            {
+                "intent": intent.name,
+                "examples": intent.examples,
+                "description": intent.description,
+            }
             for intent in self.intents
         ]
 
     @classmethod
     def from_scenes(cls, folder_path):
         intents = []
-        files = [f for f in os.listdir(folder_path) if f.endswith('.yaml')]
+        files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
 
         for file_name in files:
             file_path = os.path.join(folder_path, file_name)
 
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(file_path, "r", encoding="utf-8") as file:
                 data = yaml.safe_load(file)
 
             intent = IntentConfig(
-                name=data.get('name'),
-                description=data.get('description'),
-                business=data.get('business'),
-                action=data.get('action'),
-                slots=data.get('slots')
+                name=data.get("name"),
+                description=data.get("description"),
+                business=data.get("business"),
+                action=data.get("action"),
+                slots=data.get("slots"),
             )
             intents.append(intent)
 

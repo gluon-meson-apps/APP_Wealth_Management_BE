@@ -7,7 +7,6 @@ class SmartHomeOperatingAction(Action):
         self.response = response
 
     def run(self, context) -> ActionResponse:
-        context.set_status('action:smart_home_operating')
+        context.set_status("action:smart_home_operating")
         logger.debug("成功控制了智能家居")
         return ActionResponse(text=self.response)
-    

@@ -18,10 +18,12 @@ class IntentClassificationModel:
     def predict(self, text):
         return IntentClassificationModelResponse(intent="greet", confidence=0.9)
 
-config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), '../../', 'config.ini'))
 
-MODEL_URL = config['JointBert']['base_url']
+config = configparser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
+
+MODEL_URL = config["JointBert"]["base_url"]
+
 
 class JoinBertIntentClassificationModel(IntentClassificationModel):
     def __init__(self, model_url: str = MODEL_URL):

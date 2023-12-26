@@ -9,17 +9,17 @@ pipeline {
                 checkout scm
             }
         }
-//
-//         stage('Lint & Test') {
-//             steps {
-//                 script {
-//                     sh 'curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python3 -'
-//                     sh '/opt/poetry/bin/poetry install'
-//                     sh '/opt/poetry/bin/poetry run make lint'
+
+        stage('Lint & Test') {
+            steps {
+                script {
+                    sh 'curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python3 -'
+                    sh '/opt/poetry/bin/poetry install'
+                    sh '/opt/poetry/bin/poetry run make lint'
 //                     sh '/opt/poetry/bin/poetry run make test'
-//                 }
-//             }
-//         }
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             steps {

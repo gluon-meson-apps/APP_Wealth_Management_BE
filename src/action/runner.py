@@ -29,7 +29,7 @@ class BaseActionRunner(ActionRunner):
     def register_actions(self, name, action):
         """
         Register an action by name.
-        
+
         Args:
             name: Name to register action under.
             action: Action instance to register.
@@ -39,11 +39,11 @@ class BaseActionRunner(ActionRunner):
     def run(self, action_name: str, context: ActionContext):
         """
         Run registered action by name.
-        
+
         Args:
             action_name: Name of registered action.
             context: Action context.
-            
+
         Raises:
             Exception: If action name not found.
         """

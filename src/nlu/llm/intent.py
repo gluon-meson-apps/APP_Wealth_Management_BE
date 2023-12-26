@@ -60,23 +60,26 @@ class IntentListConfig:
         return intents[0] if len(intents) > 0 else None
 
     def get_intent_and_examples(self):
-        return [{'intent': intent_config.name, 'examples': intent_config.examples} for intent_config in self.intents]
+        return [
+            {"intent": intent_config.name, "examples": intent_config.examples}
+            for intent_config in self.intents
+        ]
 
     @classmethod
     def from_scenes(cls, file_path):
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
 
         intents = []
-        for intent_details in data['intents']:
+        for intent_details in data["intents"]:
             intent_name, examples, slots = None, None, None
             for key in intent_details:
-                if 'examples' == key:
-                    examples = intent_details['examples']
-                elif 'intent' == key:
-                    intent_name = intent_details['intent']
-                elif 'slots' == key:
-                    slots = intent_details['slots']
+                if "examples" == key:
+                    examples = intent_details["examples"]
+                elif "intent" == key:
+                    intent_name = intent_details["intent"]
+                elif "slots" == key:
+                    slots = intent_details["slots"]
             intent = IntentConfig(intent_name, examples, slots)
             intents.append(intent)
 
@@ -84,13 +87,15 @@ class IntentListConfig:
 
 
 class LLMIntentClassifier(IntentClassifier):
-    def __init__(self,
-                 chat_model: ChatModel,
-                 embedding_model: EmbeddingModel,
-                 milvus_for_langchain: MilvusForLangchain,
-                 intent_list_config,
-                 model_type: str,
-                 prompt_manager: PromptManager):
+    def __init__(
+        self,
+        chat_model: ChatModel,
+        embedding_model: EmbeddingModel,
+        milvus_for_langchain: MilvusForLangchain,
+        intent_list_config,
+        model_type: str,
+        prompt_manager: PromptManager,
+    ):
         self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
@@ -99,13 +104,16 @@ class LLMIntentClassifier(IntentClassifier):
         self.model_type = model_type
         self.intent_list_config = intent_list_config
         self.prompt_manager = prompt_manager
-        self.system_template_without_example = prompt_manager.load(name='intent_classification')
+        self.system_template_without_example = prompt_manager.load(
+            name="intent_classification"
+        )
 
     def train(self):
         # recreate topic
         # save all intent to milvus
         self.milvus_for_langchain.recreate_topic(
-            topic, embedding_type=self.embedding_type,
+            topic,
+            embedding_type=self.embedding_type,
             extra_meta_fields=[FieldSchema("intent", DataType.VARCHAR, max_length=256)],
             max_length=1024,
         )
@@ -117,42 +125,55 @@ class LLMIntentClassifier(IntentClassifier):
             for example in examples:
                 doc = Document(
                     page_content=example,
-                    metadata={'intent': intent, 'source': 'user upload'}
+                    metadata={"intent": intent, "source": "user upload"},
                 )
                 docs.append(doc)
-        self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
+        self.milvus_for_langchain.add_documents(
+            topic, docs, embedding_type=self.embedding_type
+        )
 
     def get_intent_examples(self, user_input: str) -> list[dict[str, Any]]:
-        search_with_score = self.milvus_for_langchain.query_docs(topic, user_input, embedding_type=self.embedding_type,
-                                                                 k=self.retrieval_counts)
+        search_with_score = self.milvus_for_langchain.query_docs(
+            topic,
+            user_input,
+            embedding_type=self.embedding_type,
+            k=self.retrieval_counts,
+        )
         intents = []
         for result in search_with_score:
             example = result[0].page_content
-            intent = result[0].metadata['intent']
+            intent = result[0].metadata["intent"]
             score = result[1]
-            intents.append({
-                "example": example,
-                "intent": intent,
-                "score": score
-            })
+            intents.append({"example": example, "intent": intent, "score": score})
         return intents
 
-    def classify_intent_using_llm_with_few_shot_history(self, intent_list: List[str], examples: List[Dict[str, Any]],
-                                                        chat_history: str, question: str) -> str:
+    def classify_intent_using_llm_with_few_shot_history(
+        self,
+        intent_list: List[str],
+        examples: List[Dict[str, Any]],
+        chat_history: str,
+        question: str,
+    ) -> str:
         intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
-        system_message = self.system_template_without_example.format({
-            "intent_list": intent_list_str,
-            "chat_history": chat_history,
-        })
-        history = [('system', system_message)]
+        system_message = self.system_template_without_example.format(
+            {
+                "intent_list": intent_list_str,
+                "chat_history": chat_history,
+            }
+        )
+        history = [("system", system_message)]
         user_template = """消息：{question}
 意图："""
         for example in examples:
-            history.append(('user', user_template.format(question=example['example'])))
-            history.append(('assistant', example['intent']))
+            history.append(("user", user_template.format(question=example["example"])))
+            history.append(("assistant", example["intent"]))
 
-        intent = self.model.chat_single(user_template.format(question=question), history=history,
-                                        model_type=self.model_type, max_length=1024)
+        intent = self.model.chat_single(
+            user_template.format(question=question),
+            history=history,
+            model_type=self.model_type,
+            max_length=1024,
+        )
         logger.debug(question)
         logger.debug(history)
         return intent.response
@@ -163,10 +184,12 @@ class LLMIntentClassifier(IntentClassifier):
         chat_history = conversation.get_history().format_string()
         intent_examples = self.get_intent_examples(user_input)
 
-        intent_name = self.classify_intent_using_llm_with_few_shot_history(intent_list, intent_examples, chat_history, user_input)
+        intent_name = self.classify_intent_using_llm_with_few_shot_history(
+            intent_list, intent_examples, chat_history, user_input
+        )
         if intent_name in intent_list:
-            logger.info('session %s, intent: %s', conversation.session_id, intent_name)
+            logger.info("session %s, intent: %s", conversation.session_id, intent_name)
             return Intent(name=intent_name, confidence=1.0)
 
-        logger.info('intent: %s is not predefined', intent_name)
+        logger.info("intent: %s is not predefined", intent_name)
         return None

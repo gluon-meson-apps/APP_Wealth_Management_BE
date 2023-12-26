@@ -23,4 +23,5 @@ class MemoryBasedActionRepository(ActionRepository):
     def find_by_name(self, name) -> Action:
         return self.actions[name]
 
+
 action_repository = MemoryBasedActionRepository()

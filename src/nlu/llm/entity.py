@@ -26,52 +26,78 @@ Entity_n: $Value_n
 
 
 class LLMEntityExtractor(EntityExtractor):
-    def __init__(self, form_store: FormStore, chat_model: ChatModel, model_type: str, prompt_manager: PromptManager):
+    def __init__(
+        self,
+        form_store: FormStore,
+        chat_model: ChatModel,
+        model_type: str,
+        prompt_manager: PromptManager,
+    ):
         self.form_store = form_store
         self.model = chat_model
         self.model_type = model_type
         self.prompt_manager = prompt_manager
-        self.user_message_template = prompt_manager.load('slot_extraction_user_message')
+        self.user_message_template = prompt_manager.load("slot_extraction_user_message")
         self.examples = self.prepare_examples()
 
-    def construct_messages(self, user_input, intent, form: Form, conversation_context: ConversationContext) -> List[str]:
+    def construct_messages(
+        self, user_input, intent, form: Form, conversation_context: ConversationContext
+    ) -> List[str]:
         chat_history = conversation_context.get_history().format_string()
-        final_user_message = self.user_message_template.format({"chat_history": chat_history,
-                                                                "user_intent": intent.name,
-                                                                "user_message": user_input,
-                                                                "entity_types_and_values": form.get_available_slots_str()})
-        history = [('system', system_template)]
+        final_user_message = self.user_message_template.format(
+            {
+                "chat_history": chat_history,
+                "user_intent": intent.name,
+                "user_message": user_input,
+                "entity_types_and_values": form.get_available_slots_str(),
+            }
+        )
+        history = [("system", system_template)]
         for example in self.examples:
-            history.append(('user', example[0]))
-            history.append(('assistant', example[1]))
+            history.append(("user", example[0]))
+            history.append(("assistant", example[1]))
         return final_user_message, history
 
     def prepare_examples(self):
         examples = [
-            (self.user_message_template.format({"chat_history": "user: 帮忙打开客厅的灯", "user_intent": "控制智能家居",
-                                                "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]"}),
-             """```yaml
+            (
+                self.user_message_template.format(
+                    {
+                        "chat_history": "user: 帮忙打开客厅的灯",
+                        "user_intent": "控制智能家居",
+                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                    }
+                ),
+                """```yaml
 位置: 客厅
 操作: 打开
 对象: 灯
 操作值: 开启
-```"""),
-            (self.user_message_template.format({"chat_history": """user: 帮忙调亮客厅的灯
+```""",
+            ),
+            (
+                self.user_message_template.format(
+                    {
+                        "chat_history": """user: 帮忙调亮客厅的灯
         assistant: 请问需要将客厅的灯调到多亮呢？
-        user: 调到50%的亮度""", "user_intent": "控制智能家居/补充信息",
-                                                "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]"}),
-             """```yaml
+        user: 调到50%的亮度""",
+                        "user_intent": "控制智能家居/补充信息",
+                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                    }
+                ),
+                """```yaml
  位置: 客厅
  操作: 打开
  对象: 灯
  操作值: 0.5
- ```"""),
+ ```""",
+            ),
         ]
         return examples
 
     def extract_yaml_code(self, response) -> str:
         logger.debug(response)
-        return re.match('```yaml((.|\n)*)```', response).group(1)
+        return re.match("```yaml((.|\n)*)```", response).group(1)
 
     def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input
@@ -80,26 +106,36 @@ class LLMEntityExtractor(EntityExtractor):
         if not form:
             logger.debug(f"该意图[{intent.name}]不需要提取实体")
             return []
-        prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
+        prompt, history = self.construct_messages(
+            user_input, intent, form, conversation_context
+        )
         logger.debug(prompt)
-        response = self.model.chat_single(prompt, history=history, max_length=2048, model_type='azure-gpt-3.5-2')
+        response = self.model.chat_single(
+            prompt, history=history, max_length=2048, model_type="azure-gpt-3.5-2"
+        )
         entities = yaml.safe_load(self.extract_yaml_code(response.response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
-            entity_list = list(filter(lambda tup: tup[0] in slot_name_to_slot and tup[1] is not None and (type(tup[1])==int or len(tup[1]) > 0),
-                                    list(entities.items())))
+            entity_list = list(
+                filter(
+                    lambda tup: tup[0] in slot_name_to_slot
+                    and tup[1] is not None
+                    and (type(tup[1]) == int or len(tup[1]) > 0),
+                    list(entities.items()),
+                )
+            )
         else:
             entity_list = []
 
         def get_slot(name, value):
             if slot_name_to_slot:
                 if name in slot_name_to_slot:
-                    slot = slot_name_to_slot[name].copy(update={'value': value})
+                    slot = slot_name_to_slot[name].copy(update={"value": value})
                     slot.confidence = 1
                     return slot
             return None
 
-        return [Entity(type=name, value=value, possible_slot=get_slot(name, value)) for name, value in
-                entity_list]
-
-
+        return [
+            Entity(type=name, value=value, possible_slot=get_slot(name, value))
+            for name, value in entity_list
+        ]

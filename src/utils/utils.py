@@ -1,6 +1,7 @@
 import os
 import logging
 import logging.handlers
+
 # from aliyun.log import QueuedLogHandler
 
 
@@ -11,11 +12,14 @@ def get_value_or_default_from_dict(dictionary, key, default_value=None):
 def init_logger(module_name):
     env = get_value_or_default_from_dict(os.environ, "DEVELOPMENT_ENV", "dev")
     log_file_folder_path = get_value_or_default_from_dict(
-        os.environ, "LOG_FILE_FOLDER_PATH", "")
-    single_log_file_max_byte = int(get_value_or_default_from_dict(
-        os.environ, "MAX_LOG_BYTES", 50000000))
-    log_backup_count = int(get_value_or_default_from_dict(
-        os.environ, "LOG_BACKUP_COUNT", 5))
+        os.environ, "LOG_FILE_FOLDER_PATH", ""
+    )
+    single_log_file_max_byte = int(
+        get_value_or_default_from_dict(os.environ, "MAX_LOG_BYTES", 50000000)
+    )
+    log_backup_count = int(
+        get_value_or_default_from_dict(os.environ, "LOG_BACKUP_COUNT", 5)
+    )
 
     log_level_by_env = {
         "local": logging.DEBUG,
@@ -30,7 +34,7 @@ def init_logger(module_name):
     file_handler = logging.handlers.RotatingFileHandler(
         os.path.join(log_file_folder_path, "app.log"),
         maxBytes=single_log_file_max_byte,
-        backupCount=log_backup_count
+        backupCount=log_backup_count,
     )
 
     file_handler.setLevel(logger.level)
@@ -50,7 +54,8 @@ def init_logger(module_name):
     # cloud_log_handler.setLevel(logger.level)
 
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s')
+        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s"
+    )
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     # cloud_log_handler.setFormatter(formatter)

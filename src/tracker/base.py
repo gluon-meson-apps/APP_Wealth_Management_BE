@@ -9,7 +9,9 @@ from tracker.context import ConversationContext
 
 
 class ConversationTracker:
-    def save_conversation(self, session_id: str, conversation_context: ConversationContext):
+    def save_conversation(
+        self, session_id: str, conversation_context: ConversationContext
+    ):
         raise NotImplementedError
 
     def load_conversation(self, session_id: str) -> ConversationContext:
@@ -27,7 +29,6 @@ def start_schedule():
 
 
 class BaseConversationTracker(ConversationTracker):
-
     def __init__(self):
         self.conversation_caches = {}
         # 每天固定时间执行clear_inactive_conversations函数
@@ -37,7 +38,9 @@ class BaseConversationTracker(ConversationTracker):
         schedule_thread = threading.Thread(target=start_schedule)
         schedule_thread.start()
 
-    def save_conversation(self, session_id: str, conversation_context: ConversationContext):
+    def save_conversation(
+        self, session_id: str, conversation_context: ConversationContext
+    ):
         self.conversation_caches[session_id] = conversation_context
 
     def load_conversation(self, session_id: str) -> ConversationContext:
@@ -50,8 +53,11 @@ class BaseConversationTracker(ConversationTracker):
 
     def clear_inactive_conversations(self):
         current_time = datetime.now()
-        inactive_conversations = [session_id for session_id, conversation in self.conversation_caches.items()
-                                  if (current_time - conversation.updated_at) > timedelta(hours=24)]
+        inactive_conversations = [
+            session_id
+            for session_id, conversation in self.conversation_caches.items()
+            if (current_time - conversation.updated_at) > timedelta(hours=24)
+        ]
         for session_id in inactive_conversations:
             logger.info(f"clear history for {session_id}")
             conversation = self.conversation_caches[session_id]

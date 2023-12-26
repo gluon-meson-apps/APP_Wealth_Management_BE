@@ -18,8 +18,11 @@ def prepare_response_content(answer):
     elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
         return answer.content
     elif answer.messageType == ResponseMessageType.FORMAT_INTELLIGENT_EXEC:
-        return f"已为您完成 {answer.content.businessInfo['instruction']}" if answer.content.businessInfo[
-            'instruction'] else "ok"
+        return (
+            f"已为您完成 {answer.content.businessInfo['instruction']}"
+            if answer.content.businessInfo["instruction"]
+            else "ok"
+        )
     else:
         return ""
 
@@ -27,21 +30,25 @@ def prepare_response_content(answer):
 class History:
     def __init__(self, rounds: List[dict[str, Any]], max_history: int = 6):
         self.max_history = max_history
-        self.rounds = rounds[-self.max_history:]
+        self.rounds = rounds[-self.max_history :]
 
     def add_history(self, role: str, message: str):
         if len(self.rounds) >= self.max_history:
             self.rounds.pop(0)
-        self.rounds.append({'role': role, 'content': message})
+        self.rounds.append({"role": role, "content": message})
 
     def format_string(self):
-        return '\n'.join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
+        return "\n".join(
+            [f'{entry["role"]}: {entry["content"]}' for entry in self.rounds]
+        )
 
 
 class ConversationFiles:
     def __init__(self, session_id: str):
         self.session_id = session_id
-        self.file_dir = os.path.join(os.path.dirname(__file__), "../tmp", self.session_id)
+        self.file_dir = os.path.join(
+            os.path.dirname(__file__), "../tmp", self.session_id
+        )
         self.filenames = []
 
     def add_files(self, files: list[UploadFile]):
@@ -52,7 +59,7 @@ class ConversationFiles:
                 file_path = f"{self.file_dir}/{f.filename}"
                 self.filenames.append(f.filename)
                 with open(file_path, "w+") as fo:
-                    fo.write(f.file.read().decode('utf-8'))
+                    fo.write(f.file.read().decode("utf-8"))
 
     def delete_files(self):
         if os.path.exists(self.file_dir):
@@ -60,14 +67,19 @@ class ConversationFiles:
 
 
 class ConversationContext:
-    def __init__(self, current_user_input: str, session_id: str, current_user_intent: Intent = None):
+    def __init__(
+        self,
+        current_user_input: str,
+        session_id: str,
+        current_user_intent: Intent = None,
+    ):
         self.current_user_input = current_user_input
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
         self.intent_queue = deque(maxlen=3)
         self.history = History([])
         # used for logging
-        self.status = 'start'
+        self.status = "start"
         # used for condition jughment
         self.state = ""
         self.entities = []
@@ -104,10 +116,14 @@ class ConversationContext:
             if new_entity.type in entity_map:
                 existing_entity = entity_map[new_entity.type]
                 existing_entity.__dict__.update(new_entity.__dict__)
-                logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")
+                logger.info(
+                    f"Updated entity {new_entity.type} for session {self.session_id}"
+                )
             else:
                 self.entities.append(new_entity)
-                logger.info(f"Added entity {new_entity.type} for session {self.session_id}")
+                logger.info(
+                    f"Added entity {new_entity.type} for session {self.session_id}"
+                )
 
     def get_entities(self):
         return self.entities
@@ -121,13 +137,12 @@ class ConversationContext:
 
     def set_state(self, state: str):
         self.state = state
-        state_prefix = state.split(':')[0]
+        state_prefix = state.split(":")[0]
         keywords = ["intent_filling", "intent_confirm", "slot_filling"]
         if any(keyword in state_prefix for keyword in keywords):
             self.inquiry_times += 1
 
     def handle_intent(self, next_intent: Intent):
-
         # if slot_filling intent found, we will not change current intent to next intent
         if next_intent.name not in ["slot_filling", "negative", "positive"]:
             self.update_intent(next_intent)
@@ -137,7 +152,11 @@ class ConversationContext:
         #     self.current_intent.confidence = 1
 
         # if no obviously intent found before, throw out to fusion engine
-        if self.current_intent is None and next_intent.name in ["slot_filling", "positive", "negative"]:
+        if self.current_intent is None and next_intent.name in [
+            "slot_filling",
+            "positive",
+            "negative",
+        ]:
             self.update_intent(None)
 
         # if last round set conversation state "intent_confirm" and user confirmed in current round
@@ -147,9 +166,11 @@ class ConversationContext:
             self.inquiry_times = 0
 
         # if last round set conversation state "slot_confirm" and user confirmed in current round
-        if next_intent.name in ["positive"] and self.state.split(':')[0] in ['slot_confirm']:
+        if next_intent.name in ["positive"] and self.state.split(":")[0] in [
+            "slot_confirm"
+        ]:
             self.inquiry_times = 0
-            slot_name = self.state.split(':')[1].strip()
+            slot_name = self.state.split(":")[1].strip()
             for entity in self.entities:
                 if entity.type == slot_name:
                     entity.confidence = 1.0
@@ -157,14 +178,22 @@ class ConversationContext:
                     break
 
         # if user deny intent in current round
-        if next_intent.name in ["negative"] and self.state.split(':')[0] not in ["slot_confirm", "slot_filling"]:
+        if next_intent.name in ["negative"] and self.state.split(":")[0] not in [
+            "slot_confirm",
+            "slot_filling",
+        ]:
             self.update_intent(None)
 
         # if user deny slot in current round
         # todo: if slot found in negative utterance
-        if next_intent.name in ["negative"] and self.state.split(':')[0] in ['slot_confirm', 'slot_filling']:
-            slot_name = self.state.split(':')[1].strip()
-            self.entities = [entity for entity in self.entities if entity.type != slot_name]
+        if next_intent.name in ["negative"] and self.state.split(":")[0] in [
+            "slot_confirm",
+            "slot_filling",
+        ]:
+            slot_name = self.state.split(":")[1].strip()
+            self.entities = [
+                entity for entity in self.entities if entity.type != slot_name
+            ]
 
     def update_intent(self, intent: Intent):
         if intent is not None:
