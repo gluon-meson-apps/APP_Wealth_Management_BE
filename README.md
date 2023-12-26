@@ -4,12 +4,13 @@ Requires at least Python3.9.0
 
 ## start service in local
 
-install poetry, make sure poetry is installed, poetry related commands https://python-poetry.org/docs/cli/
+install poetry and virtualenv, make sure poetry and virtualenv is installed, poetry related commands https://python-poetry.org/docs/cli/
 ```bash
 pip install poetry
+pip install virtualenv
 ```
 
-use python3.9
+specify python3.9
 ```bash
 poetry env use python3.9
 ```
