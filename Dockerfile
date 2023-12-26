@@ -1,15 +1,43 @@
-FROM csbase.registry.cmbchina.cn/paas/cmb-python-3.9.5:latest
+ARG PYTHON_IMAGE=python:3.9
 
-WORKDIR /opt/deployments
+FROM $PYTHON_IMAGE
 
-COPY ./ /opt/deployments/
+FROM ${PYTHON_IMAGE} as builder
 
-RUN cd /opt/deployments/ && \
-pip install --no-cache-dir -r requirements.txt \
--i  http://central.jaf.cmbchina.cn/artifactory/api/pypi/group-pypi/simple \
---trusted-host central.jaf.cmbchina.cn --retries 10 --timeout 20
+RUN pip install poetry==1.4.2
 
-EXPOSE 7788
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
-# Start the FastAPI application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7788"]
+WORKDIR /app
+
+COPY pyproject.toml poetry.lock ./
+
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+
+FROM ${PYTHON_IMAGE}-slim as runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+
+
+COPY . /app
+
+# Set the PYTHONPATH environment variable
+ENV PYTHONPATH=.
+
+# Define the command to start the application
+CMD cd /app/src && python app.py

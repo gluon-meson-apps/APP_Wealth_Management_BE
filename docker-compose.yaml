@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  service:
+    build:
+      context: .
+    image: gluon-meson-unified-search:latest
+    restart: unless-stopped
+    ports:
+      - 18002:8000
