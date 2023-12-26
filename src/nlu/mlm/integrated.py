@@ -28,6 +28,10 @@ class IntegratedNLU(Nlu):
 
         current_intent = self.intent_classifier.classify_intent(conversation)
 
+        if current_intent is None:
+            logger.info("No intent found")
+            return IntentWithEntity(intent=None, entities=[], action="")
+
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
