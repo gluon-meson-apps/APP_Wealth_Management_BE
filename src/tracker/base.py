@@ -61,5 +61,5 @@ class BaseConversationTracker(ConversationTracker):
         for session_id in inactive_conversations:
             logger.info(f"clear history for {session_id}")
             conversation = self.conversation_caches[session_id]
-            conversation.files.delete_files()
+            conversation.delete_files()
             del conversation

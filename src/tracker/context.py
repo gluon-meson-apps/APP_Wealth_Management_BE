@@ -58,8 +58,8 @@ class ConversationFiles:
             for f in files:
                 file_path = f"{self.file_dir}/{f.filename}"
                 self.filenames.append(f.filename)
-                with open(file_path, "w+") as fo:
-                    fo.write(f.file.read().decode("utf-8"))
+                with open(file_path, "wb+") as fo:
+                    shutil.copyfileobj(f.file, fo)
 
     def delete_files(self):
         if os.path.exists(self.file_dir):
@@ -103,6 +103,9 @@ class ConversationContext:
 
     def add_files(self, files: list[UploadFile]):
         self.files.add_files(files)
+
+    def delete_files(self):
+        self.files.delete_files()
 
     def add_entity(self, entities: List[Entity]):
         entity_map = {entity.type: entity for entity in self.entities}

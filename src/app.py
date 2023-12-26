@@ -1,11 +1,11 @@
 import configparser
 import os
 import traceback
-from typing import Annotated
+from typing import Optional
 from urllib.request import Request
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, Form, File
+from fastapi import FastAPI, UploadFile, Form
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
@@ -45,17 +45,13 @@ async def catch_exceptions_middleware(request: Request, call_next):
         logger.info(traceback.format_exc())
         return JSONResponse(
             status_code=500,
-            content=ErrorResponse(
-                code=500, message=err_msg, answer={}, jump_out_flag=True
-            ).__dict__,
+            content=ErrorResponse(code=500, message=err_msg, answer={}, jump_out_flag=True).__dict__,
         )
 
 
 @app.post("/chat/")
 def chat(
-    user_input: Annotated[str, Form()],
-    session_id: Annotated[str, Form()] = None,
-    files: Annotated[list[UploadFile], File()] = None,
+    user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
 ):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
