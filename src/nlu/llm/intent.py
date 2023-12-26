@@ -4,6 +4,8 @@ from langchain.schema import Document
 from pymilvus import FieldSchema, DataType
 
 from nlu.base import IntentClassifier
+from nlu.intent_config import IntentListConfig
+from nlu.llm.intent_call import IntentCall
 from tracker.context import ConversationContext
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
@@ -47,44 +49,6 @@ class IntentConfig:
         self.slots = slots
 
 
-class IntentListConfig:
-    def __init__(self, intents):
-        self.intents = intents
-
-    def get_intent_list(self):
-        # read resources/intent.yaml file and get intent list
-        return [intent.name for intent in self.intents]
-
-    def get_intent(self, intent_name):
-        intents = [intent for intent in self.intents if intent.name == intent_name]
-        return intents[0] if len(intents) > 0 else None
-
-    def get_intent_and_examples(self):
-        return [
-            {"intent": intent_config.name, "examples": intent_config.examples}
-            for intent_config in self.intents
-        ]
-
-    @classmethod
-    def from_scenes(cls, file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-
-        intents = []
-        for intent_details in data["intents"]:
-            intent_name, examples, slots = None, None, None
-            for key in intent_details:
-                if "examples" == key:
-                    examples = intent_details["examples"]
-                elif "intent" == key:
-                    intent_name = intent_details["intent"]
-                elif "slots" == key:
-                    slots = intent_details["slots"]
-            intent = IntentConfig(intent_name, examples, slots)
-            intents.append(intent)
-
-        return cls(intents)
-
 
 class LLMIntentClassifier(IntentClassifier):
     def __init__(
@@ -92,7 +56,7 @@ class LLMIntentClassifier(IntentClassifier):
         chat_model: ChatModel,
         embedding_model: EmbeddingModel,
         milvus_for_langchain: MilvusForLangchain,
-        intent_list_config,
+        intent_list_config: IntentListConfig,
         model_type: str,
         prompt_manager: PromptManager,
     ):
@@ -106,6 +70,12 @@ class LLMIntentClassifier(IntentClassifier):
         self.prompt_manager = prompt_manager
         self.system_template_without_example = prompt_manager.load(
             name="intent_classification"
+        )
+        self.intent_call = IntentCall(
+            intent_list_config.get_intent_list(),
+            prompt_manager.load(name="intent_classification_v2").template,
+            chat_model,
+            model_type,
         )
 
     def train(self):
@@ -147,49 +117,16 @@ class LLMIntentClassifier(IntentClassifier):
             intents.append({"example": example, "intent": intent, "score": score})
         return intents
 
-    def classify_intent_using_llm_with_few_shot_history(
-        self,
-        intent_list: List[str],
-        examples: List[Dict[str, Any]],
-        chat_history: str,
-        question: str,
-    ) -> str:
-        intent_list_str = "\n".join([f"- {intent}" for intent in intent_list])
-        system_message = self.system_template_without_example.format(
-            {
-                "intent_list": intent_list_str,
-                "chat_history": chat_history,
-            }
-        )
-        history = [("system", system_message)]
-        user_template = """消息：{question}
-意图："""
-        for example in examples:
-            history.append(("user", user_template.format(question=example["example"])))
-            history.append(("assistant", example["intent"]))
-
-        intent = self.model.chat_single(
-            user_template.format(question=question),
-            history=history,
-            model_type=self.model_type,
-            max_length=1024,
-        )
-        logger.debug(question)
-        logger.debug(history)
-        return intent.response
-
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input
-        intent_list = self.intent_list_config.get_intent_name()
+        intent_name_list = self.intent_list_config.get_intent_name()
         chat_history = conversation.get_history().format_string()
         intent_examples = self.get_intent_examples(user_input)
+        intent = self.intent_call.classify_intent(user_input, chat_history, intent_examples)
 
-        intent_name = self.classify_intent_using_llm_with_few_shot_history(
-            intent_list, intent_examples, chat_history, user_input
-        )
-        if intent_name in intent_list:
-            logger.info("session %s, intent: %s", conversation.session_id, intent_name)
-            return Intent(name=intent_name, confidence=1.0)
+        if intent.intent in intent_name_list:
+            logger.info("session %s, intent: %s", conversation.session_id, intent.intent)
+            return Intent(name=intent.intent, confidence=intent.confidence)
 
-        logger.info(f"intent: {intent_name} is not predefined")
+        logger.info(f"intent: {intent.intent} is not predefined")
         return None
