@@ -1,3 +1,7 @@
+import os
+
+from loguru import logger
+
 from prompt_manager.local_prompt_service import LocalPromptService
 
 
@@ -18,8 +22,11 @@ class PromptManager:
 
 
 class BasePromptManager(PromptManager):
-    def __init__(self, prompt_template_folder) -> None:
+    def __init__(self, prompt_template_folder=None) -> None:
         super().__init__()
+        if prompt_template_folder is None:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            prompt_template_folder = os.path.join(current_dir, '..', "resources", "prompt_templates")
         self.prompt_service = LocalPromptService(prompt_template_folder)
 
     def load(self, name, domain=None) -> PromptWrapper:
@@ -28,5 +35,6 @@ class BasePromptManager(PromptManager):
 
         prompt = self.prompt_service.get_prompt(name)
         if prompt is None:
+            logger.warning(f"Prompt {name} not found")
             return None
         return PromptWrapper(prompt)

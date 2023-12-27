@@ -38,7 +38,7 @@ system_template_without_example = """
 {intent_list}
 """
 
-topic = "test_topic_for_intent"
+topic = "hsbc_topic_for_intent"
 
 
 
@@ -120,12 +120,12 @@ class LLMIntentClassifier(IntentClassifier):
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input
         intent_name_list = self.intent_list_config.get_intent_name()
-        chat_history = conversation.get_history().format_string()
+        chat_history = conversation.get_history().format_messages()
         intent_examples = self.get_intent_examples(user_input)
         intent = self.intent_call.classify_intent(user_input, chat_history, intent_examples)
 
         if intent.intent in intent_name_list:
-            logger.info("session %s, intent: %s", conversation.session_id, intent.intent)
+            logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
             return Intent(name=intent.intent, confidence=intent.confidence)
 
         logger.info(f"intent: {intent.intent} is not predefined")

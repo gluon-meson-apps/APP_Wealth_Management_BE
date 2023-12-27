@@ -26,25 +26,34 @@ class IntentCall:
         self.intent_list = intent_list
         self.template = template
 
-
     def format_jinjia_template(self, template: str, **kwargs) -> str:
         template = Environment().from_string(template)
         return template.render(**kwargs)
 
-    def construct_system_prompt(self, chat_history):
-        intent_list_str = json.dumps([{'name': intent.name, 'description': intent.description} for intent in self.intent_list])
+    def construct_system_prompt(self, chat_history: list[dict[str, str]]):
+        intent_list_str = json.dumps(
+            [{'name': intent.name, 'description': intent.description} for intent in self.intent_list])
 
-        system_message = self.format_jinjia_template(self.template, intent_list=intent_list_str)
+        chat_history_str = ""
+        for chat in chat_history:
+            i_or_you = "I" if chat["role"] == "user" else "You"
+            chat_history_str += f"{i_or_you}: {chat['content']}\n"
+
+        system_message = self.format_jinjia_template(self.template, intent_list=intent_list_str,
+                                                     chat_history=chat_history_str)
         return system_message
 
-    def classify_intent(self, query: str, chat_history, examples) -> IntentClassificationResponse:
+    def format_message(self, role, content):
+        return dict(role=role, content=content)
+
+    def classify_intent(self, query: str, chat_history: list[dict[str, str]], examples) -> IntentClassificationResponse:
         system_message = self.construct_system_prompt(chat_history)
-        history = [("system", system_message)]
-        user_template = """消息：{question}
-意图："""
-        # for example in examples:
-        #     history.append(("user", user_template.format(question=example["example"])))
-        #     history.append(("assistant", example["intent"]))
+        history = [{"role": "system", "content": system_message}]
+        logger.debug(examples)
+        for example in examples:
+            history.append(self.format_message("user", example["example"]))
+            history.append(self.format_message("assistant", example["intent"]))
+        history = history
 
         intent = self.model.chat(
             query,
@@ -57,5 +66,5 @@ class IntentCall:
         logger.debug(system_message)
         logger.debug(intent)
         response = IntentClassificationResponse.parse_obj(json.loads(intent))
-        
+
         return response

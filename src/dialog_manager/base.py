@@ -16,6 +16,8 @@ from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
 from loguru import logger
 from nlu.forms import FormStore
+from llm.self_host import ChatModel as SelfHostChatModel
+
 
 from nlu.intent_config import IntentListConfig
 from policy.base import BasePolicyManager
@@ -117,7 +119,7 @@ class DialogManagerFactory:
         prompt_manager = BasePromptManager(prompt_template_folder)
 
         classifier = LLMIntentClassifier(
-            chat_model=ChatModel(),
+            chat_model=SelfHostChatModel(),
             embedding_model=embedding_model,
             milvus_for_langchain=MilvusForLangchain(
                 embedding_model, MilvusConnection()

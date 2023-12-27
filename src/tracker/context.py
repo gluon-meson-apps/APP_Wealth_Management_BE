@@ -42,6 +42,9 @@ class History:
             [f'{entry["role"]}: {entry["content"]}' for entry in self.rounds]
         )
 
+    def format_messages(self):
+        return [{"role": entry["role"], "content": entry["content"]} for entry in self.rounds]
+
 
 class ConversationFiles:
     def __init__(self, session_id: str):
