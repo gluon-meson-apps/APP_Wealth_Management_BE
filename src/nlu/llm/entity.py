@@ -13,7 +13,8 @@ from prompt_manager.base import PromptManager
 
 system_template = """
 ## Role & Task
-你是一个聊天机器人，你需要根据"User Intent"和"Chat History"，结合提供的"Entities Types & Description"，提取出相应的实体。
+你是一个聊天机器人，你需要根据"User Intent"和"Chat History"，
+结合提供的"Entities Types & Description"，提取出相应的实体。
 如果没有找到对应的实体，输出空字符串，数值型的实体，需要输出的是用户明确表示的具体数值。
 
 ## Output Format
@@ -27,11 +28,11 @@ Entity_n: $Value_n
 
 class LLMEntityExtractor(EntityExtractor):
     def __init__(
-        self,
-        form_store: FormStore,
-        chat_model: ChatModel,
-        model_type: str,
-        prompt_manager: PromptManager,
+            self,
+            form_store: FormStore,
+            chat_model: ChatModel,
+            model_type: str,
+            prompt_manager: PromptManager,
     ):
         self.form_store = form_store
         self.model = chat_model
@@ -41,7 +42,7 @@ class LLMEntityExtractor(EntityExtractor):
         self.examples = self.prepare_examples()
 
     def construct_messages(
-        self, user_input, intent, form: Form, conversation_context: ConversationContext
+            self, user_input, intent, form: Form, conversation_context: ConversationContext
     ) -> List[str]:
         chat_history = conversation_context.get_history().format_string()
         final_user_message = self.user_message_template.format(
@@ -65,7 +66,9 @@ class LLMEntityExtractor(EntityExtractor):
                     {
                         "chat_history": "user: 帮忙打开客厅的灯",
                         "user_intent": "控制智能家居",
-                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                        "entity_types_and_values":
+                            "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
+                            "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
                     }
                 ),
                 """```yaml
@@ -82,7 +85,9 @@ class LLMEntityExtractor(EntityExtractor):
         assistant: 请问需要将客厅的灯调到多亮呢？
         user: 调到50%的亮度""",
                         "user_intent": "控制智能家居/补充信息",
-                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                        "entity_types_and_values":
+                            "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
+                            "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
                     }
                 ),
                 """```yaml
@@ -119,8 +124,8 @@ class LLMEntityExtractor(EntityExtractor):
             entity_list = list(
                 filter(
                     lambda tup: tup[0] in slot_name_to_slot
-                    and tup[1] is not None
-                    and (isinstance(tup[1], int) or len(tup[1]) > 0),
+                                and tup[1] is not None
+                                and (isinstance(tup[1], int) or len(tup[1]) > 0),
                     list(entities.items()),
                 )
             )

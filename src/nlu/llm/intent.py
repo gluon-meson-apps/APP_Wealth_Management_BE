@@ -1,20 +1,18 @@
-from typing import List, Dict, Any
+from typing import Any
 
+from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from langchain.schema import Document
+from loguru import logger
 from pymilvus import FieldSchema, DataType
 
 from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
-from nlu.llm.intent_call import IntentCall
-from tracker.context import ConversationContext
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
-from loguru import logger
 from nlu.intent_with_entity import Intent
+from nlu.llm.intent_call import IntentCall
 from prompt_manager.base import PromptManager
-import yaml
-
+from tracker.context import ConversationContext
 
 # should extract to a config file
 system_template = """

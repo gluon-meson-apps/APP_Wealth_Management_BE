@@ -134,7 +134,8 @@ class ChitChatAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
         # todo: add history from context
-        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type, max_length=128)
+        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
+                                      max_length=128)
         if result is None:
             return ActionResponse(code=200, message=self.default_template, jump_out_flag=False)
         else:
@@ -153,7 +154,8 @@ class QAAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
         # todo: add history from context
-        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type, max_length=256)
+        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
+                                      max_length=256)
         if result is None:
             return ActionResponse(code=200, message=self.default_template, jump_out_flag=False)
         else:

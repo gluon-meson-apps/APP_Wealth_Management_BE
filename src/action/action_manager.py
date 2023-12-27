@@ -24,6 +24,9 @@ class ActionManager:
             }
         }
         the_locals = {}
-        exec(action_code +f"\nreturned_action={class_name}()\nreturned_action.load_from_config_context(action_config_context)", the_globals, the_locals)
+        exec(
+            action_code + f"\nreturned_action={class_name}()\n"
+                          f"returned_action.load_from_config_context(action_config_context)",
+            the_globals, the_locals)
         action: DynamicAction = the_locals['returned_action']
         self.action_repository.save(action)
