@@ -1,4 +1,4 @@
-import threading
+# import threading
 import time
 from datetime import datetime, timedelta
 from loguru import logger
@@ -32,11 +32,11 @@ class BaseConversationTracker(ConversationTracker):
     def __init__(self):
         self.conversation_caches = {}
         # 每天固定时间执行clear_inactive_conversations函数
-        schedule.every().day.at("00:00").do(self.clear_inactive_conversations)
+        # schedule.every().day.at("00:00").do(self.clear_inactive_conversations)
 
         # 启动定时任务
-        schedule_thread = threading.Thread(target=start_schedule)
-        schedule_thread.start()
+        # schedule_thread = threading.Thread(target=start_schedule)
+        # schedule_thread.start()
 
     def save_conversation(
         self, session_id: str, conversation_context: ConversationContext
