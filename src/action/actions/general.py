@@ -137,9 +137,11 @@ class ChitChatAction(Action):
         result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
                                       max_length=128)
         if result is None:
-            return ActionResponse(code=200, message=self.default_template, jump_out_flag=False)
+            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
+            return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
         else:
-            return ActionResponse(code=200, message=result, jump_out_flag=False)
+            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=result)
+            return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
 
 
 class QAAction(Action):
@@ -157,6 +159,8 @@ class QAAction(Action):
         result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
                                       max_length=256)
         if result is None:
-            return ActionResponse(code=200, message=self.default_template, jump_out_flag=False)
+            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
+            return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
         else:
-            return ActionResponse(code=200, message=result, jump_out_flag=False)
+            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=result)
+            return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
