@@ -13,12 +13,14 @@ from uvicorn import run
 
 from action.base import ErrorResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
+from router import api_router
 
 config = configparser.ConfigParser()
 config.read("config.ini")
 load_dotenv()
 
 app = FastAPI()
+app.include_router(api_router)
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
 if os.getenv("LOCAL_MODE") == "1":
