@@ -67,8 +67,8 @@ class IntentFillingPolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(
-            f"当前状态\n待明确的意图：{IE.intent}\n"
-            f"实体：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
+            f"current status\nintent to clarify：{IE.intent}\n"
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
 
         # 没有非辅助外的意图
         if IE.intent is None:
@@ -91,12 +91,12 @@ class SlotFillingPolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(
-            f"当前状态\n意图：{IE.intent.name}\n"
-            f"实体：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
+            f"current status\nintent：{IE.intent.name}\n"
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
         if form := self.form_store.get_form_from_intent(IE.intent):
             missed_slots = set(form.slots) - possible_slots
             missed_slots = list(filter(lambda slot: slot.optional is not True, missed_slots))
-            logger.debug(f"需要填充的槽位： {[slot.name for slot in missed_slots if slot]}")
+            logger.debug(f"Slots to be filled： {[slot.name for slot in missed_slots if slot]}")
 
             # 追问槽位
             if missed_slots and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
@@ -131,8 +131,8 @@ class AssistantPolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
         potential_slots = self.get_possible_slots(intent=IE)
         logger.debug(
-            f"最终识别的\n意图：{IE.intent.name}\n"
-            f"实体：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}")
+            f"final:\nintent：{IE.intent.name}\n"
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}")
         intent_form = self.form_store.get_form_from_intent(IE.intent)
 
         # 出现了预定义之外的意图
