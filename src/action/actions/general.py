@@ -34,13 +34,14 @@ class SlotFillingAction(Action):
     def run(self, context):
         logger.info('exec action slot filling')
         if isinstance(self.slots, list):
-            slot_description = '或'.join(slot.description for slot in self.slots)
+            slot_description = ' or '.join(slot.description for slot in self.slots)
         else:
             slot_description = self.slots.description
 
         prompt = self.prompt_template.format({
             "fill_slot": slot_description,
-            "intent": self.intent.description,
+            "intent_name": self.intent.name,
+            "intent_description": self.intent.description,
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
@@ -143,6 +144,11 @@ class ChitChatAction(Action):
             answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=result)
             return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
 
+def find_entity(entities, entity_type):
+    for entity in entities:
+        if entity.type == entity_type:
+            return entity
+    return None
 
 class QAAction(Action):
     def get_name(self) -> str:
@@ -155,12 +161,19 @@ class QAAction(Action):
 
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
-        # todo: add history from context
-        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
-                                      max_length=256)
-        if result is None:
-            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
-            return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
-        else:
-            answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=result)
-            return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
+        answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=f'I will search it for you', intent=context.conversation.current_intent.name)
+        return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
+
+class FileValidationAction(Action):
+    def get_name(self) -> str:
+        return 'file_validation'
+
+    def __init__(self, model_type: str, chat_model: ChatModel):
+        self.model_type = model_type
+        self.chat_model = chat_model
+        self.default_template = "我不知道该怎么回答好了"
+
+    def run(self, context) -> ActionResponse:
+        logger.info('exec action slot chitchat')
+        answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=f'your file in {find_entity(context.conversation.get_entities(), "file_format").value} format is valid', intent=context.conversation.current_intent.name)
+        return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)

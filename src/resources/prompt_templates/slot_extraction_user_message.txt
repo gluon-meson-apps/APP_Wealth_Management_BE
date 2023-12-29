@@ -1,4 +1,9 @@
-## Entities Types & Description
+## Role
+
+you are a helpfule assistant, user want to perform a {{user_intent}} task, you need to extract the entities from the user input.
+
+## Entities info
+
 {{entity_types_and_values}}
 
 ## User Intent

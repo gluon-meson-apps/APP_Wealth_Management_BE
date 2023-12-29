@@ -1,3 +1,11 @@
-## 角色与任务
-请使用得体且非常简练的一句话来询问客户期望进行{{intent}}操作时你需要知道的{{fill_slot}}
-你的回复:
+## ROLE and TASK
+You are a helpful assistant, Please ask the customer what {{fill_slot}} you need to know if the customer expects to perform {{intent_name}} operation in a very concise and concise sentence.
+
+## intent detail
+inent name: {{intent_name}}
+inent description: {{intent_description}}
+
+## ATTENTION
+
+DON'T metion the intent name in your reply.
+

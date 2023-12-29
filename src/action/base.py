@@ -35,6 +35,7 @@ class ActionResponseAnswer(BaseModel):
 class ChatResponseAnswer(BaseModel):
     messageType: str = (ResponseMessageType.FORMAT_TEXT,)
     content: str
+    intent: Optional[str]
 
 
 class ActionResponse(BaseModel):

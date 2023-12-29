@@ -124,7 +124,8 @@ class LLMIntentClassifier(IntentClassifier):
 
         if intent.intent in intent_name_list:
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
-            return Intent(name=intent.intent, confidence=intent.confidence)
+            description = self.intent_list_config.get_intent(intent.intent).description
+            return Intent(name=intent.intent, confidence=intent.confidence, description=description)
 
         logger.info(f"intent: {intent.intent} is not predefined")
         return None
