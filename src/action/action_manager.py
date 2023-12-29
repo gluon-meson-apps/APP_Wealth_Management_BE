@@ -1,4 +1,4 @@
-from action.base import DynamicAction, ActionResponse, Action
+from action.base import DynamicAction, ActionResponse, Action, ChatResponseAnswer, GeneralResponse, ResponseMessageType
 from action.context import ActionConfigContext
 from action.repository.action_repository import ActionRepository
 
@@ -15,6 +15,9 @@ class ActionManager:
         the_globals = {
             "DynamicAction": DynamicAction,
             "ActionResponse": ActionResponse,
+            "ChatResponseAnswer": ChatResponseAnswer,
+            "GeneralResponse": GeneralResponse,
+            "ResponseMessageType": ResponseMessageType,
             "ActionConfigContext": ActionConfigContext,
             "action_config_context": self.action_config_context,
             '__builtins__': {
