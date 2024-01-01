@@ -1,6 +1,7 @@
 import configparser
 import os
 import traceback
+import json
 from typing import Optional
 from urllib.request import Request
 
@@ -69,7 +70,7 @@ def chat(
 ):
     result, conversation = dialog_manager.handle_message(score_command.question, score_command.id, [])
     def generator():
-        yield {"data": {"answer": result.answer.content, "session_id": conversation.session_id}}
+        yield {"data": json.dumps({"answer": result.answer.content, "session_id": conversation.session_id})}
     return EventSourceResponse(generator())
 
 
