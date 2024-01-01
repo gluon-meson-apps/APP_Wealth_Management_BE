@@ -4,8 +4,10 @@ import traceback
 from typing import Optional
 from urllib.request import Request
 
+
+from sse_starlette import EventSourceResponse
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, Depends
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
@@ -13,6 +15,7 @@ from uvicorn import run
 
 from action.base import ErrorResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
+from promptflow.command import ScoreCommand
 from router import api_router
 
 config = configparser.ConfigParser()
@@ -59,6 +62,15 @@ def chat(
     # if config.get('debugMode', 'debug') == "True":
     #     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
     return {"response": result, "session_id": conversation.session_id}
+
+@app.post("/score/")
+def chat(
+    score_command: ScoreCommand
+):
+    result, conversation = dialog_manager.handle_message(score_command.question, score_command.id, [])
+    def generator():
+        yield {"data": {"answer": result.answer, "session_id": conversation.session_id}}
+    return EventSourceResponse(generator())
 
 
 @app.get("/healthy/")
