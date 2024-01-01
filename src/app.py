@@ -69,7 +69,7 @@ def chat(
 ):
     result, conversation = dialog_manager.handle_message(score_command.question, score_command.id, [])
     def generator():
-        yield {"data": {"answer": result.answer, "session_id": conversation.session_id}}
+        yield {"data": {"answer": result.answer.content, "session_id": conversation.session_id}}
     return EventSourceResponse(generator())
 
 
