@@ -1,0 +1,8 @@
+name: file_validation
+description: help user to validate the format of files
+slots:
+  - name: file_format
+    description: the format of the file
+    slotType: text
+    optional: False
+action: file_validation
