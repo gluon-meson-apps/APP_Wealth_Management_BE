@@ -2,6 +2,7 @@ import logging
 import os
 import requests
 from gluon_meson_sdk.models.util import request_with_exception_process
+from gluon_meson_sdk.models.model_factory import ModelFactory
 
 
 class BaseScenarioModelRegistryCenter:
@@ -24,7 +25,8 @@ class DefaultScenarioModelRegistryCenter(BaseScenarioModelRegistryCenter):
         scenario_model_info = self.get_scenario_model(scenario_model)
         if scenario_model_info is None:
             raise Exception(f'scenario model {scenario_model} not existed')
-        #  TODO: call sdk to get  model instance
+        model_instance = ModelFactory().get_model(source="GM", model_type=scenario_model_info["model_type"])
+        return model_instance, scenario_model_info["model_name"]
 
     def get_scenario_model(self, scenario_model: str):
         return request_with_exception_process(

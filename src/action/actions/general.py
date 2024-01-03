@@ -6,6 +6,7 @@ from llm.self_host import ChatModel
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
+from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from tracker.context import ConversationContext
 
 
@@ -30,6 +31,8 @@ class SlotFillingAction(Action):
         self.llm = ChatModel()
         self.intent = intent
         self.slots = slots
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "slot_filling_action"
 
     def run(self, context):
         logger.info('exec action slot filling')
@@ -45,7 +48,9 @@ class SlotFillingAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
+        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
+            response = i.response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -60,6 +65,9 @@ class IntentConfirmAction(Action):
         self.prompt_template = prompt_manager.load(name='intent_confirm')
         self.llm = ChatModel()
         self.intent = intent
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "intent_confirmation_action"
+
 
     def run(self, context: ConversationContext):
         logger.info('exec action intent confirm')
@@ -68,7 +76,9 @@ class IntentConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
+        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
+            response = i.response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -83,16 +93,20 @@ class IntentFillingAction(Action):
         self.prompt_template = prompt_manager.load(name='intent_filling')
         self.llm = ChatModel()
         self.intents = form_store.intent_list_config.get_intent_list()
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "intent_filling_action"
 
     def run(self, context):
         logger.info('exec action intent_filling')
         filtered_intents = [intent.description for intent in self.intents if intent.business]
         prompt = self.prompt_template.format({
             "history": context.conversation.get_history().format_string(),
-            "intent_list": "和".join(filtered_intents)
+            "intent_list": "or".join(filtered_intents)
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128, model_type='azure-gpt-3.5-2')
+        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
+            response = i.response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -108,6 +122,8 @@ class SlotConfirmAction(Action):
         self.llm = ChatModel()
         self.intent = intent
         self.slot = slot
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "slot_confirm_action"
 
     def run(self, context: ConversationContext):
         logger.info('exec action slot confirm')
@@ -118,7 +134,9 @@ class SlotConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        response = self.llm.chat(prompt, max_length=128, model_type="azure-gpt-3.5-2")
+        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
+            response = i.response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -130,13 +148,15 @@ class ChitChatAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel):
         self.model_type = model_type
         self.chat_model = chat_model
-        self.default_template = "我不知道该怎么回答好了"
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "chit_chat_action"
 
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
         # todo: add history from context
-        result = self.chat_model.chat(context.conversation.current_user_input, model_type=self.model_type,
-                                      max_length=128)
+        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        for i in chat_model.chat(context.conversation.current_user_input, max_length=128, model_type=model_name):
+            result = i.response
         if result is None:
             answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
             return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
@@ -157,7 +177,7 @@ class QAAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel):
         self.model_type = model_type
         self.chat_model = chat_model
-        self.default_template = "我不知道该怎么回答好了"
+        self.default_template = "I don't know how to answer"
 
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
@@ -171,7 +191,7 @@ class FileValidationAction(Action):
     def __init__(self, model_type: str, chat_model: ChatModel):
         self.model_type = model_type
         self.chat_model = chat_model
-        self.default_template = "我不知道该怎么回答好了"
+        self.default_template = "I don't know how to answer"
 
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
