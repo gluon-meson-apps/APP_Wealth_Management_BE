@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Union
 
 from action.actions.general import ChitChatAction, QAAction, FileValidationAction
+from action.actions.tb_guru.standard_pricing_check_action import StandardPricingCheckAction
 from action.base import Action
 from llm.self_host import ChatModel
 
@@ -32,3 +33,4 @@ action_repository = MemoryBasedActionRepository()
 action_repository.save(ChitChatAction("azure-gpt-3.5-2", ChatModel()))
 action_repository.save(QAAction("azure-gpt-3.5-2", ChatModel()))
 action_repository.save(FileValidationAction("azure-gpt-3.5-2", ChatModel()))
+action_repository.save(StandardPricingCheckAction("azure-gpt-3.5-2", ChatModel()))

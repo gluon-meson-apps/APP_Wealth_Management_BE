@@ -1,0 +1,24 @@
+name: standard_pricing_check
+description: validate if the pricing offered to the customer is compliant with the standard pricing
+slots:
+  - name: country
+    description: the country of the product
+    slotType: text
+    optional: False
+  - name: product group
+    description: "the type or product group of the product; available values: Payments, Liquidity, Digital Channel, Account Services"
+    slotType: categorical
+    optional: False
+  - name: product
+    description: the product name
+    slotType: text
+    optional: False
+  - name: offered unit price
+    description: the offered unit price
+    slotType: float
+    optional: False
+  - name: charge currency
+    description: the currency of the price
+    slotType: text
+    optional: False
+action: standard_pricing_check

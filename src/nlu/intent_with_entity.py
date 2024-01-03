@@ -7,7 +7,8 @@ from util import HashableBaseModel
 class SlotType(str, Enum):
     TEXT = "text"
     CATEGORICAL = "categorical"
-    NUMERIC = "numeric"
+    INTEGER = "integer"
+    FLOAT = "float"
     BOOLEAN = "boolean"
     NUMERIC_OR_TEXT = "numeric or text"
 
