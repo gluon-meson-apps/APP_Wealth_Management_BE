@@ -1,5 +1,15 @@
+from loguru import logger
+
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
+
+
+def handle_response(response):
+    if response.status_code != 200:
+        logger.error(f"{response.status_code}: {response.text}")
+        return []
+    print(response.json())
+    return SearchResponse.model_validate(response.json())
 
 
 class UnifiedSearch:
@@ -10,6 +20,22 @@ class UnifiedSearch:
         response = requests.post(self.base_url + "/search", json=search_param.dict())
         print(response.json())
         return [SearchResponse.parse_obj(item) for item in response.json()]
+
+    def upload_intents_examples(self, table, intent_examples):
+        response = requests.post(
+            f"{self.base_url}/vector/{table}/intent_examples",
+            json=intent_examples
+        )
+
+        return handle_response(response)
+
+    def search_for_intent_examples(self, table, user_input):
+        response = requests.post(
+            url=f"{self.base_url}/vector/{table}/search",
+            json={"query": user_input}
+        )
+
+        return handle_response(response)
 
 
 if __name__ == "__main__":

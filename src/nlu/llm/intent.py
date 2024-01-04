@@ -1,5 +1,3 @@
-import json
-import os
 from typing import Any
 
 from langchain.schema import Document
@@ -14,8 +12,9 @@ from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from nlu.llm.intent_call import IntentCall
 from prompt_manager.base import PromptManager
+from third_system.search_entity import SearchResponse, SearchItem
+from third_system.unified_search import UnifiedSearch
 from tracker.context import ConversationContext
-from unified_search_client.unified_search_client import UnifiedSearchClient
 
 # should extract to a config file
 system_template = """
@@ -50,37 +49,39 @@ class IntentConfig:
 
 
 def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
-    unified_search_client = UnifiedSearchClient(f"{os.getenv('UNIFIED_SEARCH_URL')}")
-    searching_response = unified_search_client.send_request(
-        method="POST",
-        path="/vector/search",
-        params={"query": user_input.strip()}
-    )
+    unified_search_client = UnifiedSearch()
+    response: SearchResponse = unified_search_client.search_for_intent_examples(table="TTBBB_system",
+                                                                                user_input=user_input.strip())
 
-    if searching_response.status_code != 200:
-        logger.error(searching_response.text)
-        raise Exception(f"{searching_response.status_code}: {searching_response.text}")
-
-    response_text = json.loads(searching_response.text)
-
-    intents_examples = extract_examples_from_response_text(response_text)
+    intents_examples = extract_examples_from_response_text(response)
     return intents_examples
 
 
-def extract_examples_from_response_text(response_text):
+def extract_examples_from_response_text(response: SearchResponse):
     intents_examples = []
-    for result in response_text:
+    if response.total > 0:
         try:
-            content = json.loads(result["text"])
-            example = content["example"]
-            intent = content["intent"]
-            score = result["meta__score"]
+            intent, example, score = extract_info(response.items)
             intents_examples.append({"example": example, "intent": intent, "score": score})
         except Exception as e:
             logger.warning(str(e))
         finally:
             logger.info("No examples found")
     return intents_examples
+
+
+def get_highest_scored_item(items: list[SearchItem]):
+    sorted_items = sorted(items, key=lambda item: item.meta__score, reverse=True)
+    return sorted_items[0]
+
+
+def extract_info(items):
+    highest_scored_item = get_highest_scored_item(items)
+    sep_position = highest_scored_item["text"].find(": ")
+    intent = highest_scored_item["text"][:sep_position]
+    example = highest_scored_item["text"][sep_position + 2:]
+    score = highest_scored_item["meta__score"]
+    return intent, example, score
 
 
 class LLMIntentClassifier(IntentClassifier):

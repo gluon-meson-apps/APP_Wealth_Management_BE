@@ -4,10 +4,11 @@ import uuid
 
 import yaml
 
-from unified_search_client.unified_search_client import UnifiedSearchClient
+from third_system.unified_search import UnifiedSearch
 
 intent_yaml_file_folder = os.path.join(os.getcwd(), "src", "resources", "scenes")
 unified_search_base_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
+
 
 def retrieve_intent_examples_from_intent_yaml(folder_path):
     files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
@@ -20,12 +21,16 @@ def retrieve_intent_examples_from_intent_yaml(folder_path):
             data = yaml.safe_load(file)
 
         if "examples" in data:
-            intent_examples.append({
-                "intent": data.get("name"),
-                "examples": data.get("examples")
-            })
+            for example in data["examples"]:
+                intent_examples.append(
+                    {
+                        "intent": data["name"],
+                        "example": example
+                    }
+                )
 
     return intent_examples
+
 
 def generate_tmp_example_file(intent_examples):
     file_name = f"intent_examples_{str(uuid.uuid4())}.txt"
@@ -34,24 +39,17 @@ def generate_tmp_example_file(intent_examples):
         f.write(json.dumps(intent_examples))
     return file_name, file_path
 
+
 def vectorize_examples(intent_examples):
-    unified_search_client = UnifiedSearchClient(unified_search_base_url)
+    unified_search_client = UnifiedSearch()
 
-    tmp_file_name, tmp_file_path = generate_tmp_example_file(intent_examples)
-    f = open(tmp_file_path, "r")
-    files = [("files", (tmp_file_name, f, "text/plain"))]
-
-    data = {
-        "tag": "new_tag"
-    }
-    response = unified_search_client.post_files_and_tag(
-        path="/vector/embedding",
-        files=files,
-        data=data,
+    response = unified_search_client.upload_intents_examples(
+        table="TTBBB_system",
+        intent_examples=intent_examples
     )
-    f.close()
-    os.remove(tmp_file_path)
+
     return response
+
 
 def main():
     intent_examples = retrieve_intent_examples_from_intent_yaml(intent_yaml_file_folder)
@@ -60,8 +58,9 @@ def main():
         print("No examples")
         return
 
-    response = vectorize_examples(intent_examples)
-    print(response.status_code, response.text)
+    responses = vectorize_examples(intent_examples)
+    print(responses)
+
 
 if __name__ == "__main__":
     main()
