@@ -42,7 +42,6 @@ system_template_without_example = """
 topic = "hsbc_topic_for_intent"
 
 
-
 class IntentConfig:
     def __init__(self, name, examples, slots):
         self.name = name
@@ -57,17 +56,30 @@ def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
         path="/vector/search",
         params={"query": user_input.strip()}
     )
+
     if searching_response.status_code != 200:
         logger.error(searching_response.text)
         raise Exception(f"{searching_response.status_code}: {searching_response.text}")
-    intents_examples = []
+
     response_text = json.loads(searching_response.text)
+
+    intents_examples = extract_examples_from_response_text(response_text)
+    return intents_examples
+
+
+def extract_examples_from_response_text(response_text):
+    intents_examples = []
     for result in response_text:
-        content = json.loads(result["text"])
-        example = content["example"]
-        intent = content["intent"]
-        score = result["meta__score"]
-        intents_examples.append({"example": example, "intent": intent, "score": score})
+        try:
+            content = json.loads(result["text"])
+            example = content["example"]
+            intent = content["intent"]
+            score = result["meta__score"]
+            intents_examples.append({"example": example, "intent": intent, "score": score})
+        except Exception as e:
+            logger.warning(str(e))
+        finally:
+            logger.info("No examples found")
     return intents_examples
 
 
