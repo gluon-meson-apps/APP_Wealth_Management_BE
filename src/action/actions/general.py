@@ -48,9 +48,8 @@ class SlotFillingAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
-        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
-            response = i.response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -76,9 +75,8 @@ class IntentConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
-        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
-            response = i.response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -104,9 +102,8 @@ class IntentFillingAction(Action):
             "intent_list": "or".join(filtered_intents)
         })
         logger.debug(prompt)
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
-        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
-            response = i.response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -134,9 +131,8 @@ class SlotConfirmAction(Action):
             "history": context.conversation.get_history().format_string(),
         })
         logger.debug(prompt)
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
-        for i in chat_model.chat(prompt, max_length=128, model_type=model_name):
-            response = i.response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -154,9 +150,8 @@ class ChitChatAction(Action):
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
         # todo: add history from context
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
-        for i in chat_model.chat(context.conversation.current_user_input, max_length=128, model_type=model_name):
-            result = i.response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        result = chat_model.chat(context.conversation.current_user_input, max_length=128, model_type=model_name).response
         if result is None:
             answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
             return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
