@@ -4,6 +4,7 @@ from typing import List
 import yaml
 
 from nlu.base import EntityExtractor
+from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from tracker.context import ConversationContext
 from gluon_meson_sdk.models.chat_model import ChatModel
 from loguru import logger
@@ -40,6 +41,8 @@ class LLMEntityExtractor(EntityExtractor):
         self.prompt_manager = prompt_manager
         self.user_message_template = prompt_manager.load("slot_extraction_user_message")
         self.examples = self.prepare_examples()
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "llm_entity_extractor"
 
     def construct_messages(
             self, user_input, intent, form: Form, conversation_context: ConversationContext
@@ -115,9 +118,8 @@ class LLMEntityExtractor(EntityExtractor):
             user_input, intent, form, conversation_context
         )
         logger.debug(prompt)
-        response = self.model.chat_single(
-            prompt, history=history, max_length=2048, model_type="azure-gpt-3.5-2"
-        )
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        response = chat_model.chat(prompt, history=history, max_length=1024)
         entities = yaml.safe_load(self.extract_yaml_code(response.response))
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:

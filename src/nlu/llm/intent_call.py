@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from llm.self_host import ChatModel
 from nlu.intent_config import IntentConfig
+from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
 
 class IntentClassificationResponse(BaseModel):
@@ -25,6 +26,8 @@ class IntentCall:
         self.model_type = model_type
         self.intent_list = intent_list
         self.template = template
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "intent_call"
 
     def format_jinjia_template(self, template: str, **kwargs) -> str:
         template = Environment().from_string(template)
@@ -55,12 +58,8 @@ class IntentCall:
             history.append(self.format_message("assistant", example["intent"]))
         history = history
 
-        intent = self.model.chat(
-            query,
-            history=history,
-            model_type=self.model_type,
-            max_length=1024,
-        )
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        intent = chat_model.chat(query, max_length=1024).response
         logger.debug(query)
         logger.debug(history)
         logger.debug(system_message)

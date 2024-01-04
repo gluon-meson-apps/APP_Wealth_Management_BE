@@ -151,7 +151,7 @@ class ChitChatAction(Action):
         logger.info('exec action slot chitchat')
         # todo: add history from context
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
-        result = chat_model.chat(context.conversation.current_user_input, max_length=128, model_type=model_name).response
+        result = chat_model.chat(context.conversation.current_user_input, max_length=128).response
         if result is None:
             answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)
             return GeneralResponse(code=200, message='failed', answer=answer, jump_out_flag=False)
