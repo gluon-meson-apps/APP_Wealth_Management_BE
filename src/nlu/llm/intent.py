@@ -1,18 +1,21 @@
+import json
+import os
 from typing import Any
 
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from langchain.schema import Document
 from loguru import logger
 from pymilvus import FieldSchema, DataType
 
+from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from nlu.llm.intent_call import IntentCall
 from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
+from unified_search_client.unified_search_client import UnifiedSearchClient
 
 # should extract to a config file
 system_template = """
@@ -47,16 +50,36 @@ class IntentConfig:
         self.slots = slots
 
 
+def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
+    unified_search_client = UnifiedSearchClient(f"{os.getenv('UNIFIED_SEARCH_URL')}")
+    searching_response = unified_search_client.send_request(
+        method="POST",
+        path="/vector/search",
+        params={"query": user_input.strip()}
+    )
+    if searching_response.status_code != 200:
+        logger.error(searching_response.text)
+        raise Exception(f"{searching_response.status_code}: {searching_response.text}")
+    intents_examples = []
+    response_text = json.loads(searching_response.text)
+    for result in response_text:
+        content = json.loads(result["text"])
+        example = content["example"]
+        intent = content["intent"]
+        score = result["meta__score"]
+        intents_examples.append({"example": example, "intent": intent, "score": score})
+    return intents_examples
+
 
 class LLMIntentClassifier(IntentClassifier):
     def __init__(
-        self,
-        chat_model: ChatModel,
-        embedding_model: EmbeddingModel,
-        milvus_for_langchain: MilvusForLangchain,
-        intent_list_config: IntentListConfig,
-        model_type: str,
-        prompt_manager: PromptManager,
+            self,
+            chat_model: ChatModel,
+            embedding_model: EmbeddingModel,
+            milvus_for_langchain: MilvusForLangchain,
+            intent_list_config: IntentListConfig,
+            model_type: str,
+            prompt_manager: PromptManager,
     ):
         self.model = chat_model
         self.embedding = embedding_model
@@ -100,26 +123,11 @@ class LLMIntentClassifier(IntentClassifier):
             topic, docs, embedding_type=self.embedding_type
         )
 
-    def get_intent_examples(self, user_input: str) -> list[dict[str, Any]]:
-        search_with_score = self.milvus_for_langchain.query_docs(
-            topic,
-            user_input,
-            embedding_type=self.embedding_type,
-            k=self.retrieval_counts,
-        )
-        intents = []
-        for result in search_with_score:
-            example = result[0].page_content
-            intent = result[0].metadata["intent"]
-            score = result[1]
-            intents.append({"example": example, "intent": intent, "score": score})
-        return intents
-
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input
         intent_name_list = self.intent_list_config.get_intent_name()
         chat_history = conversation.get_history().format_messages()
-        intent_examples = self.get_intent_examples(user_input)
+        intent_examples = get_intent_examples(user_input)
         intent = self.intent_call.classify_intent(user_input, chat_history, intent_examples)
 
         if intent.intent in intent_name_list:
