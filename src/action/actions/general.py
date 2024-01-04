@@ -99,7 +99,7 @@ class IntentFillingAction(Action):
         filtered_intents = [intent.description for intent in self.intents if intent.business]
         prompt = self.prompt_template.format({
             "history": context.conversation.get_history().format_string(),
-            "intent_list": "or".join(filtered_intents)
+            "intent_list": " or ".join(filtered_intents)
         })
         logger.debug(prompt)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)

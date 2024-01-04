@@ -27,7 +27,7 @@ class DefaultScenarioModelRegistryCenter(BaseScenarioModelRegistryCenter):
             raise Exception(f'scenario model {scenario_model} not existed')
         model_instance = ModelFactory().get_model(source="GM", model_type=scenario_model_info["model_type"],
                                                   model_name=scenario_model_info["model_name"],
-                                                  modle_endpoint=scenario_model_info["endpoint"])
+                                                  model_endpoint=scenario_model_info["endpoint"])
         return model_instance
 
     def get_scenario_model(self, scenario_model: str):

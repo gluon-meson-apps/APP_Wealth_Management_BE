@@ -1,7 +1,6 @@
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
-from llm.self_host import ChatModel
 from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
@@ -67,15 +66,10 @@ class StandardPricingCheckAction(Action):
 
     def run(self, context) -> ActionResponse:
         logger.info(f'exec action: {self.get_name()} ')
-        chat_model, model_name = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 
         summary_prompt = summary_prompt_template.format(entities='\n'.join([entity.json() for entity in context.conversation.get_entities()]), chat_history=context.conversation.get_history().format_string())
-        result = ""
-        for i in chat_model.chat(summary_prompt, max_length=1024, model_type=model_name):
-            result = i.response
-        logger.info(f'chat result: {result}')
-
-
+        result = chat_model.chat(summary_prompt, max_length=1024).response
 
         # todo: process multi round case
         response = self.unified_search.search(SearchParam(query=result))
@@ -88,9 +82,7 @@ class StandardPricingCheckAction(Action):
         ) for entity in context.conversation.get_entities()]
         final_prompt = prompt.format(all_products=all_products, product_info=product_info, user_input=context.conversation.current_user_input)
         logger.info(f'final prompt: {final_prompt}')
-        result = ""
-        for i in chat_model.chat(final_prompt, max_length=2048, model_type=model_name):
-            result = i.response
+        result = chat_model.chat(final_prompt, max_length=2048).response
         # result = self.chat_model.chat(final_prompt, model_type=self.model_type, max_length=1024)
         logger.info(f'chat result: {result}')
 
