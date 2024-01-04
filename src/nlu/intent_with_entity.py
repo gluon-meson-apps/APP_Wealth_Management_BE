@@ -17,7 +17,7 @@ class Intent(HashableBaseModel):
     name: str
     description: Optional[str]
     confidence: Optional[float] = 1
-    business: Optional[bool]
+    business: Optional[bool] = False
 
 
 class Slot(HashableBaseModel):
@@ -48,7 +48,7 @@ class Slot(HashableBaseModel):
 
 class Entity(HashableBaseModel):
     type: str
-    value: str
+    value: Union[str, int, float, bool]
     role: Optional[str] = None
     confidence: Optional[float] = None
     possible_slot: Optional[Slot] = None
