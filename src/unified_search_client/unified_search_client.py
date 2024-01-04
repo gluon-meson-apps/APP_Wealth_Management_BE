@@ -9,4 +9,7 @@ class UnifiedSearchClient:
         if method == 'GET':
             return requests.get(self.base_url + path, params=params)
         if method == 'POST':
-            return requests.post(self.base_url + path, data=params)
+            return requests.post(self.base_url + path, json=params)
+
+    def post_files_and_tag(self, path, files, data):
+        return requests.post(self.base_url + path, files=files, data=data)
