@@ -65,8 +65,6 @@ def extract_examples_from_response_text(response: SearchResponse):
             intents_examples.append({"example": example, "intent": intent, "score": score})
         except Exception as e:
             logger.warning(str(e))
-        finally:
-            logger.info("No examples found")
     return intents_examples
 
 
@@ -77,10 +75,11 @@ def get_highest_scored_item(items: list[SearchItem]):
 
 def extract_info(items):
     highest_scored_item = get_highest_scored_item(items)
-    sep_position = highest_scored_item["text"].find(": ")
-    intent = highest_scored_item["text"][:sep_position]
-    example = highest_scored_item["text"][sep_position + 2:]
-    score = highest_scored_item["meta__score"]
+    text = highest_scored_item.model_extra["text"]
+    sep_position = text.find(": ")
+    intent = text[:sep_position]
+    example = text[sep_position + 2:]
+    score = highest_scored_item.meta__score
     return intent, example, score
 
 
