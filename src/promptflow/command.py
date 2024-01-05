@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Union
 
 from pydantic import BaseModel
 
@@ -6,4 +6,5 @@ from pydantic import BaseModel
 class ScoreCommand(BaseModel):
     question: str
     id: str
-    chat_history: Optional[list[dict[str, Any]]]
+    file_url: Union[str, None] = None
+    chat_history: Union[list[dict[str, Any]], None] = None

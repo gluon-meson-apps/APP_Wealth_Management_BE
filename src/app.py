@@ -1,15 +1,14 @@
 import configparser
+import json
 import os
 import traceback
-import json
 from typing import Optional
 from urllib.request import Request
 
-
-from sse_starlette import EventSourceResponse
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
 from loguru import logger
+from sse_starlette import EventSourceResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
@@ -18,6 +17,7 @@ from action.base import ErrorResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
+from third_system.unified_search import UnifiedSearch
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -64,13 +64,16 @@ def chat(
     #     return {"response": result, "conversation": conversation, "session_id": conversation.session_id}
     return {"response": result, "session_id": conversation.session_id}
 
+
 @app.post("/score/")
-def chat(
-    score_command: ScoreCommand
-):
+def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()):
+    file_res = unified_search.download_file_from_minio(score_command.file_url) if score_command.file_url else None
+    print(file_res)
     result, conversation = dialog_manager.handle_message(score_command.question, score_command.id, [])
+
     def generator():
         yield {"data": json.dumps({"answer": result.answer.content, "session_id": conversation.session_id})}
+
     return EventSourceResponse(generator())
 
 
