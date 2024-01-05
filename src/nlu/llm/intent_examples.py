@@ -4,9 +4,11 @@ import uuid
 
 import yaml
 
+from nlu.llm.intent import topic
+from resources.util import get_resources
 from third_system.unified_search import UnifiedSearch
 
-intent_yaml_file_folder = os.path.join(os.getcwd(), "src", "resources", "scenes")
+intent_yaml_file_folder = get_resources("scenes")
 unified_search_base_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
 
 
@@ -44,7 +46,7 @@ def vectorize_examples(intent_examples):
     unified_search_client = UnifiedSearch()
 
     response = unified_search_client.upload_intents_examples(
-        table="TTBBB_system",
+        table=topic,
         intent_examples=intent_examples
     )
 

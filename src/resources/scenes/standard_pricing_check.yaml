@@ -1,5 +1,8 @@
 name: standard_pricing_check
 description: validate if the pricing offered to the customer is compliant with the standard pricing
+examples:
+  - Hi TB Guru, please help me to cross check the standard pricing of ACH payment  and see if I can offer a unit rate of SGD 0.01 to the client.
+  - Hi TB Guru, please help me to cross check the standard pricing of AHH payment in HK and see if I can offer a unit rate of SGD 0.1 to the client.
 slots:
   - name: country
     description: the country of the product
