@@ -25,6 +25,7 @@ sse-starlette = "^1.8.2"
 fastapi = "0.108.0"
 lancedb = "0.4.3"
 pymilvus = "2.2.4"
+pre-commit = "^3.6.0"
 
 
 
