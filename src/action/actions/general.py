@@ -176,7 +176,7 @@ class QAAction(Action):
 
     def run(self, context) -> ActionResponse:
         logger.info('exec action slot chitchat')
-        answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=f'I will search it for you', intent=context.conversation.current_intent.name)
+        answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content='I will search it for you', intent=context.conversation.current_intent.name)
         return GeneralResponse(code=200, message='success', answer=answer, jump_out_flag=False)
 
 class FileValidationAction(Action):
