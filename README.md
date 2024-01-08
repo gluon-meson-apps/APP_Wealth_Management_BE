@@ -29,3 +29,8 @@ run lint and test
 poetry run make lint
 poetry run make test
 ```
+
+install pre-commit hook
+```bash
+pre-commit install
+```
