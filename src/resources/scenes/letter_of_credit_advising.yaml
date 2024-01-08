@@ -1,0 +1,19 @@
+name: letter_of_credit_advising
+description: check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC Singapore
+examples:
+  - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
+  - Hi TB Guru, Can you advise if HSBC Singapore is able to accept an LC from Meezan Bank in Pakistan
+slots:
+  - name: bank entity name
+    description: the entity name of the bank to be checked by HSBC bank
+    slotType: text
+    optional: False
+  - name: country
+    description: the country of the bank to be checked
+    slotType: text
+    optional: False
+  - name: swift
+    description: SWIFT/BIC address of the Counterparty Bank
+    slotType: text
+    optional: True
+action: letter_of_credit_advising

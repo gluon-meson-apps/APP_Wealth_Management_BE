@@ -3,8 +3,9 @@ from typing import Union
 
 from action.actions.general import ChitChatAction, QAAction, FileValidationAction
 from action.actions.tb_guru.standard_pricing_check_action import StandardPricingCheckAction
+from action.actions.tb_guru.letter_of_credit_advising import LetterOfCreditAdvisingAction
 from action.base import Action
-from actions.tb_guru.summarize_products_in_br_action import SummarizeProductsInBrAction
+from action.actions.tb_guru.summarize_products_in_br_action import SummarizeProductsInBrAction
 from llm.self_host import ChatModel
 
 
@@ -36,3 +37,4 @@ action_repository.save(QAAction("azure-gpt-3.5-2", ChatModel()))
 action_repository.save(FileValidationAction("azure-gpt-3.5-2", ChatModel()))
 action_repository.save(StandardPricingCheckAction())
 action_repository.save(SummarizeProductsInBrAction("azure-gpt-3.5-2", ChatModel()))
+action_repository.save(LetterOfCreditAdvisingAction())
