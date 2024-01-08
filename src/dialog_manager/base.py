@@ -11,6 +11,7 @@ from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
+from policy.Summarize_products_in_br import SummarizeProductsInBr
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
@@ -142,6 +143,7 @@ class DialogManagerFactory:
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
         jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
+        summarize_products_in_br_policy = SummarizeProductsInBr(prompt_manager, form_store)
 
         policy_manager = BasePolicyManager(
             policies=[
@@ -150,6 +152,7 @@ class DialogManagerFactory:
                 intent_filling_policy,
                 slot_filling_policy,
                 assitant_policy,
+                summarize_products_in_br_policy,
             ],
             prompt_manager=prompt_manager,
             action_model_type=action_model_type,
