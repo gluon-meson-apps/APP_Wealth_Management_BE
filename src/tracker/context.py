@@ -11,6 +11,8 @@ from collections import deque
 
 from loguru import logger
 
+from third_system.search_entity import SearchResponse
+
 
 def prepare_response_content(answer):
     if not answer:
@@ -38,9 +40,7 @@ class History:
         self.rounds.append({"role": role, "content": message})
 
     def format_string(self):
-        return "\n".join(
-            [f'{entry["role"]}: {entry["content"]}' for entry in self.rounds]
-        )
+        return "\n".join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
 
     def format_messages(self):
         return [{"role": entry["role"], "content": entry["content"]} for entry in self.rounds]
@@ -49,9 +49,7 @@ class History:
 class ConversationFiles:
     def __init__(self, session_id: str):
         self.session_id = session_id
-        self.file_dir = os.path.join(
-            os.path.dirname(__file__), "../tmp", self.session_id
-        )
+        self.file_dir = os.path.join(os.path.dirname(__file__), "../tmp", self.session_id)
         self.filenames = []
 
     def add_files(self, files: list[UploadFile]):
@@ -93,6 +91,7 @@ class ConversationContext:
         self.has_update = False
         self.current_round = 0
         self.files = ConversationFiles(self.session_id)
+        self.uploaded_file_contents: list[SearchResponse] = []
 
     def get_history(self) -> History:
         return self.history
@@ -106,6 +105,9 @@ class ConversationContext:
 
     def add_files(self, files: list[UploadFile]):
         self.files.add_files(files)
+
+    def add_file_contents(self, contents: list[SearchResponse]):
+        self.uploaded_file_contents.extend(contents)
 
     def delete_files(self):
         self.files.delete_files()
@@ -122,14 +124,10 @@ class ConversationContext:
             if new_entity.type in entity_map:
                 existing_entity = entity_map[new_entity.type]
                 existing_entity.__dict__.update(new_entity.__dict__)
-                logger.info(
-                    f"Updated entity {new_entity.type} for session {self.session_id}"
-                )
+                logger.info(f"Updated entity {new_entity.type} for session {self.session_id}")
             else:
                 self.entities.append(new_entity)
-                logger.info(
-                    f"Added entity {new_entity.type} for session {self.session_id}"
-                )
+                logger.info(f"Added entity {new_entity.type} for session {self.session_id}")
 
     def get_entities(self):
         return self.entities
@@ -172,9 +170,7 @@ class ConversationContext:
             self.inquiry_times = 0
 
         # if last round set conversation state "slot_confirm" and user confirmed in current round
-        if next_intent.name in ["positive"] and self.state.split(":")[0] in [
-            "slot_confirm"
-        ]:
+        if next_intent.name in ["positive"] and self.state.split(":")[0] in ["slot_confirm"]:
             self.inquiry_times = 0
             slot_name = self.state.split(":")[1].strip()
             for entity in self.entities:
@@ -197,9 +193,7 @@ class ConversationContext:
             "slot_filling",
         ]:
             slot_name = self.state.split(":")[1].strip()
-            self.entities = [
-                entity for entity in self.entities if entity.type != slot_name
-            ]
+            self.entities = [entity for entity in self.entities if entity.type != slot_name]
 
     def update_intent(self, intent: Intent):
         if intent is not None:

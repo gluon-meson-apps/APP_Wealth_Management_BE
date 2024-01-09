@@ -1,4 +1,0 @@
-name: qa_TTBBB
-description: question and answer about TTBBB system, any name start with TTBBB is related to TTBBB system
-slots: []
-action: qa_TTBBB

@@ -8,6 +8,7 @@ class SlotType(str, Enum):
     TEXT = "text"
     CATEGORICAL = "categorical"
     INTEGER = "integer"
+    LIST = "list"
     FLOAT = "float"
     BOOLEAN = "boolean"
     NUMERIC_OR_TEXT = "numeric or text"
@@ -48,7 +49,7 @@ class Slot(HashableBaseModel):
 
 class Entity(HashableBaseModel):
     type: str
-    value: Union[str, int, float, bool]
+    value: Union[str, int, float, bool, list]
     role: Optional[str] = None
     confidence: Optional[float] = None
     possible_slot: Optional[Slot] = None

@@ -69,10 +69,20 @@ def chat(
 def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()):
     file_res = unified_search.download_file_from_minio(score_command.file_url) if score_command.file_url else None
     print(file_res)
-    result, conversation = dialog_manager.handle_message(score_command.question, score_command.id, [])
+    result, conversation = dialog_manager.handle_message(
+        score_command.question, score_command.id, file_contents=[file_res]
+    )
 
     def generator():
-        yield {"data": json.dumps({"answer": result.answer.content, "session_id": conversation.session_id})}
+        yield {
+            "data": json.dumps(
+                {
+                    "answer": result.answer.content,
+                    "session_id": conversation.session_id,
+                    "attachment": result.attachment,
+                }
+            )
+        }
 
     return EventSourceResponse(generator())
 

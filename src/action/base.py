@@ -52,6 +52,14 @@ class GeneralResponse(ActionResponse):
     jump_out_flag: bool
 
 
+class AttachmentResponse(ActionResponse):
+    code: int
+    message: str
+    answer: ChatResponseAnswer
+    attachment: str
+    jump_out_flag: bool
+
+
 class JumpOutResponse(ActionResponse):
     code: int
     message: str

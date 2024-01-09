@@ -12,6 +12,7 @@ from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from policy.Summarize_products_in_br import SummarizeProductsInBr
+from third_system.search_entity import SearchResponse
 from tracker.base import BaseConversationTracker, ConversationTracker
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from reasoner.base import Reasoner
@@ -56,25 +57,26 @@ class BaseDialogManager:
         return response
 
     def handle_message(
-        self, message: Any, session_id: str, files: list[UploadFile]
+        self, message: Any, session_id: str, files: list[UploadFile] = None, file_contents: list[SearchResponse] = None
     ) -> Any:
+        if files is None:
+            files = []
+        if file_contents is None:
+            file_contents = []
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_user_history(message)
         conversation.add_files(files)
+        conversation.add_file_contents(file_contents)
 
         plan = self.reasoner.think(conversation)
 
-        action_response = self.action_runner.run(
-            plan.action, ActionContext(conversation)
-        )
+        action_response = self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         conversation.append_assistant_history(response.answer)
-        self.conversation_tracker.save_conversation(
-            conversation.session_id, conversation
-        )
+        self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         return response, conversation
 
@@ -88,9 +90,7 @@ class DialogManagerFactory:
         pwd = os.path.dirname(os.path.abspath(__file__))
         intent_config_file_path = os.path.join(pwd, "../", "resources", "scenes")
         pwd = os.path.dirname(os.path.abspath(__file__))
-        prompt_template_folder = os.path.join(
-            pwd, "..", "resources", "prompt_templates"
-        )
+        prompt_template_folder = os.path.join(pwd, "..", "resources", "prompt_templates")
 
         reasoner = cls.create_reasoner(
             model_type,
@@ -122,9 +122,7 @@ class DialogManagerFactory:
         classifier = LLMIntentClassifier(
             chat_model=SelfHostChatModel(),
             embedding_model=embedding_model,
-            milvus_for_langchain=MilvusForLangchain(
-                embedding_model, MilvusConnection()
-            ),
+            milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
             intent_list_config=intent_list_config,
             model_type=model_type,
             prompt_manager=prompt_manager,

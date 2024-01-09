@@ -1,0 +1,12 @@
+name: file_batch_qa
+description: Batch Q&A about general questions based on csv/excel file
+examples:
+  - answer the questions in the csv file
+  - answer the questions in the excel file
+  - I've prepared a csv file, please answer the questions in it
+slots:
+  - name: topics
+    description: the topics of the question, the topics should be represented as a list of string (like ["topic1", "topic2", "topic3"])
+    slotType: list
+    optional: True
+action: file_batch_qa
