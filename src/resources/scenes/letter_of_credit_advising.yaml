@@ -5,7 +5,7 @@ examples:
   - Hi TB Guru, Can you advise if HSBC Singapore is able to accept an LC from Meezan Bank in Pakistan
 slots:
   - name: bank entity name
-    description: the entity name of the bank to be checked by HSBC bank
+    description: the entity name of the LC bank other than HSBC Singapore
     slotType: text
     optional: False
   - name: country
