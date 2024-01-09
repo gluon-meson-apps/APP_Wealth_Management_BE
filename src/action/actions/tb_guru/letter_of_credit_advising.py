@@ -21,7 +21,7 @@ the $bank cannot be found in the Counterparty Bank file, and that they should do
 
 4. check the issuing bank has RMA arrangement
 
-5. if use is just asking about RMA, then just reply
+5. if user is asking about RMA, then just reply the result
 
 6. if user is asking about the HSBC is able to accept a letter of credit from that issuing bank , then you need to 
 check whether the bank's counterparty type is FIG Client or HSBC Group or Network Bank. if not, then reply

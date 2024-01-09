@@ -9,9 +9,13 @@ slots:
     slotType: text
     optional: False
   - name: country
-    description: the country of the bank to be checked
+    description: the full country name of the bank to be checked
     slotType: text
-    optional: False
+    optional: True
+  - name: country code
+    description: the country abbreviation code of the bank's country
+    slotType: text
+    optional: True
   - name: swift
     description: SWIFT/BIC address of the Counterparty Bank
     slotType: text
