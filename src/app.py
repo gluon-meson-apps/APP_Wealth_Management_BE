@@ -68,9 +68,9 @@ def chat(
 @app.post("/score/")
 def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()):
     file_res = unified_search.download_file_from_minio(score_command.file_url) if score_command.file_url else None
-    print(file_res)
+    logger.info(f"get file res: {file_res[:100]}")
     result, conversation = dialog_manager.handle_message(
-        score_command.question, score_command.id, file_contents=[file_res]
+        score_command.question, score_command.conversation_id, file_contents=[file_res]
     )
 
     def generator():
