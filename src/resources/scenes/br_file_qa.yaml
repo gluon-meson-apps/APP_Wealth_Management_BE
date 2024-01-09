@@ -1,0 +1,11 @@
+name: br_file_qa
+description: according to provided board resolution file, answer the questions from user input
+business: false
+slots:
+  - name: country
+    description: the country of the product
+    slotType: text
+    optional: True
+action: br_file_qa
+examples:
+  - "Examine the board resolution and highlight which HSBC product or service is the draft referring to."

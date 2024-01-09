@@ -13,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
-from action.base import ErrorResponse
+from action.base import ErrorResponse, AttachmentResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
@@ -79,7 +79,7 @@ def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()
                 {
                     "answer": result.answer.content,
                     "session_id": conversation.session_id,
-                    "attachment": result.attachment,
+                    **(dict(attachment=result.attachment) if isinstance(result, AttachmentResponse) else {}),
                 }
             )
         }
