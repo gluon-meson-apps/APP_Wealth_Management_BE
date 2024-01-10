@@ -3,7 +3,7 @@ import json
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
 

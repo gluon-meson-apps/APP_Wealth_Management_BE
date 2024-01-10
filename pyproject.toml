@@ -12,7 +12,7 @@ default= true
 
 [tool.poetry.dependencies]
 python = "^3.9"
-gluon-meson-sdk = {git = "ssh://git@github.com/gluon-meson/sdk.git", rev = "hsbc-tb-guru5"}
+gluon-meson-sdk = {git = "ssh://git@github.com/gluon-meson/sdk.git", rev = "hsbc-tb-guru7"}
 loguru = "^0.7.2"
 schedule = "^1.2.1"
 parameterized = "0.8.1"

@@ -1,7 +1,7 @@
 from loguru import logger
 
 from action.base import Action, ChatResponseAnswer, ResponseMessageType, GeneralResponse, ErrorResponse
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchResponse, SearchItem
 

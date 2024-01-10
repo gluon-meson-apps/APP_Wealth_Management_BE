@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from llm.self_host import ChatModel
 from nlu.intent_config import IntentConfig
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
 
 class IntentClassificationResponse(BaseModel):
@@ -16,12 +16,13 @@ class IntentClassificationResponse(BaseModel):
 
 
 class IntentCall:
-    def __init__(self,
-                 intent_list: List[IntentConfig],
-                 template: str,
-                 model: ChatModel,
-                 model_type: str,
-                 ):
+    def __init__(
+        self,
+        intent_list: List[IntentConfig],
+        template: str,
+        model: ChatModel,
+        model_type: str,
+    ):
         self.model = model
         self.model_type = model_type
         self.intent_list = intent_list
@@ -35,15 +36,17 @@ class IntentCall:
 
     def construct_system_prompt(self, chat_history: list[dict[str, str]]):
         intent_list_str = json.dumps(
-            [{'name': intent.name, 'description': intent.description} for intent in self.intent_list])
+            [{"name": intent.name, "description": intent.description} for intent in self.intent_list]
+        )
 
         chat_history_str = ""
         for chat in chat_history:
             i_or_you = "I" if chat["role"] == "user" else "You"
             chat_history_str += f"{i_or_you}: {chat['content']}\n"
 
-        system_message = self.format_jinjia_template(self.template, intent_list=intent_list_str,
-                                                     chat_history=chat_history_str)
+        system_message = self.format_jinjia_template(
+            self.template, intent_list=intent_list_str, chat_history=chat_history_str
+        )
         return system_message
 
     def format_message(self, role, content):
@@ -56,10 +59,7 @@ class IntentCall:
         for example in examples:
             history.append(self.format_message("user", example["example"]))
             history.append(self.format_message("assistant", example["intent"]))
-        gm_history = [
-            (h["role"], h["content"])
-            for h in history
-        ]
+        gm_history = [(h["role"], h["content"]) for h in history]
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         intent = chat_model.chat(query, history=gm_history, max_length=1024).response
         logger.debug(query)

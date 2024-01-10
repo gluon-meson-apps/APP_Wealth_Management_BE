@@ -12,7 +12,7 @@ from llm.self_host import ChatModel
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from tracker.context import ConversationContext
 
 

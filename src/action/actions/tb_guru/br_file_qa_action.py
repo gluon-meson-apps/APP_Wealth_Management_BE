@@ -3,7 +3,7 @@ from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from action.context import ActionContext
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.unified_search import UnifiedSearch
 
 prompt = """## Role

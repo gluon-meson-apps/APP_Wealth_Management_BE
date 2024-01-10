@@ -4,7 +4,7 @@ from typing import List
 import yaml
 
 from nlu.base import EntityExtractor
-from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from tracker.context import ConversationContext
 from gluon_meson_sdk.models.chat_model import ChatModel
 from loguru import logger
@@ -29,11 +29,11 @@ Entity_n: $Value_n
 
 class LLMEntityExtractor(EntityExtractor):
     def __init__(
-            self,
-            form_store: FormStore,
-            chat_model: ChatModel,
-            model_type: str,
-            prompt_manager: PromptManager,
+        self,
+        form_store: FormStore,
+        chat_model: ChatModel,
+        model_type: str,
+        prompt_manager: PromptManager,
     ):
         self.form_store = form_store
         self.model = chat_model
@@ -45,7 +45,7 @@ class LLMEntityExtractor(EntityExtractor):
         self.scenario_model = "llm_entity_extractor"
 
     def construct_messages(
-            self, user_input, intent, form: Form, conversation_context: ConversationContext
+        self, user_input, intent, form: Form, conversation_context: ConversationContext
     ) -> List[str]:
         chat_history = conversation_context.get_history().format_string()
         final_user_message = self.user_message_template.format(
@@ -69,9 +69,8 @@ class LLMEntityExtractor(EntityExtractor):
                     {
                         "chat_history": "user: 帮忙打开客厅的灯",
                         "user_intent": "控制智能家居",
-                        "entity_types_and_values":
-                            "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
-                            "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
+                        "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
                     }
                 ),
                 """```yaml
@@ -88,9 +87,8 @@ class LLMEntityExtractor(EntityExtractor):
         assistant: 请问需要将客厅的灯调到多亮呢？
         user: 调到50%的亮度""",
                         "user_intent": "控制智能家居/补充信息",
-                        "entity_types_and_values":
-                            "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
-                            "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
+                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
+                        "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
                     }
                 ),
                 """```yaml
@@ -114,9 +112,7 @@ class LLMEntityExtractor(EntityExtractor):
         if not form:
             logger.debug(f"该意图[{intent.name}]不需要提取实体")
             return []
-        prompt, history = self.construct_messages(
-            user_input, intent, form, conversation_context
-        )
+        prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         response = chat_model.chat(prompt, history=history, max_length=1024)
@@ -126,8 +122,8 @@ class LLMEntityExtractor(EntityExtractor):
             entity_list = list(
                 filter(
                     lambda tup: tup[0] in slot_name_to_slot
-                                and tup[1] is not None
-                                and (isinstance(tup[1], int) or len(str(tup[1])) > 0),
+                    and tup[1] is not None
+                    and (isinstance(tup[1], int) or len(str(tup[1])) > 0),
                     list(entities.items()),
                 )
             )
@@ -142,7 +138,4 @@ class LLMEntityExtractor(EntityExtractor):
                     return slot
             return None
 
-        return [
-            Entity(type=name, value=value, possible_slot=get_slot(name, value))
-            for name, value in entity_list
-        ]
+        return [Entity(type=name, value=value, possible_slot=get_slot(name, value)) for name, value in entity_list]
