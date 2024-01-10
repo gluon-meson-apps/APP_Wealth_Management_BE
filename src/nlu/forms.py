@@ -25,15 +25,15 @@ class FormStore:
 
     @staticmethod
     def _valid_slot(slot):
-        return all(
-            key in slot for key in ["name", "description", "slotType", "optional"]
-        )
+        return all(key in slot for key in ["name", "description", "slotType", "optional"])
 
     def _filter_and_process_slots(self, intent_slots):
-        filtered_slots = [slot for slot in intent_slots if self._valid_slot(slot)]
-        slot_objects = [Slot.from_dict(slot) for slot in filtered_slots]
-        slot_required = any(slot.get("required", False) for slot in intent_slots)
-        return slot_objects, slot_required
+        if intent_slots:
+            filtered_slots = [slot for slot in intent_slots if self._valid_slot(slot)]
+            slot_objects = [Slot.from_dict(slot) for slot in filtered_slots]
+            slot_required = any(slot.get("required", False) for slot in intent_slots)
+            return slot_objects, slot_required
+        return [], False
 
     def get_form_from_intent(self, intent: Intent) -> Optional[Form]:
         if not intent:
