@@ -41,12 +41,14 @@ now, answer the question step by step, and reply the final result.
 
 """
 
-summary_prompt_template = """## Role
-you are a chatbot, you need to validate if the pricing offered to the customer is compliant with the standard pricing
+summary_prompt_template = """## INSTRUCTION
+please summarize the chat history
 
 ## chat history
 
 {chat_history}
+
+## Result
 
 """
 
@@ -64,12 +66,12 @@ class StandardPricingCheckAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 
-        entities_without_unit_rate = "\n".join(
-            [
-                json.dumps({entity.type: entity.value})
-                for entity in context.conversation.get_simplified_entities()
-                if entity.type != "unit_rate"
-            ]
+        entities_without_unit_rate = json.dumps(
+            {
+                key: value
+                for key, value in context.conversation.get_simplified_entities().items()
+                if key != "offered unit price"
+            }
         )
         summary_prompt = summary_prompt_template.format(chat_history=context.conversation.get_history().format_string())
         logger.info(f"summary_prompt: {summary_prompt}")
