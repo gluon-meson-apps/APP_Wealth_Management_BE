@@ -35,14 +35,14 @@ def get_first_file_content(context) -> str:
     return ""
 
 
-class XmlFileValidation(Action):
+class FileValidation(Action):
     def __init__(self):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
         self.hsbc_connect_api = HsbcConnectApi()
 
     def get_name(self) -> str:
-        return "xml_file_validation"
+        return "file_validation"
 
     def run(self, context):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)

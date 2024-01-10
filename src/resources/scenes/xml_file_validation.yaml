@@ -1,5 +1,0 @@
-name: xml_file_validation
-description: xml v3 file validation to check the file match the standard
-examples:
-  - Hi TB Guru, Please help me to check if the file provided by client below is valid. It is in @XML-V3 format.
-action: xml_file_validation
