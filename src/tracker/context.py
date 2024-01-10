@@ -132,6 +132,9 @@ class ConversationContext:
     def get_entities(self):
         return self.entities
 
+    def get_simplified_entities(self):
+        return {entity.type: entity.value for entity in self.entities}
+
     def flush_entities(self):
         self.entities = []
 
