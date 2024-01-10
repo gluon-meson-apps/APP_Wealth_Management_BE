@@ -6,6 +6,7 @@ from action.actions.tb_guru.br_file_qa_action import BrFileQAAction
 from action.actions.tb_guru.file_batch_qa import FileBatchAction
 from action.actions.tb_guru.standard_pricing_check_action import StandardPricingCheckAction
 from action.actions.tb_guru.letter_of_credit_advising import LetterOfCreditAdvisingAction
+from action.actions.tb_guru.xml_file_validation import XmlFileValidation
 from action.base import Action
 from llm.self_host import ChatModel
 
@@ -40,3 +41,4 @@ action_repository.save(FileValidationAction("azure-gpt-3.5-2", ChatModel()))
 action_repository.save(StandardPricingCheckAction())
 action_repository.save(BrFileQAAction())
 action_repository.save(LetterOfCreditAdvisingAction())
+action_repository.save(XmlFileValidation())

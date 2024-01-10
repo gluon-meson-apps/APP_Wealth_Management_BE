@@ -24,6 +24,7 @@ class SearchParam(BaseModel):
     size: Union[int, None] = None
     configs: Union[dict, None] = None
 
+
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
