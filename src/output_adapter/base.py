@@ -2,6 +2,9 @@ import chinese2digits as c2d
 import numpy as np
 import configparser
 
+from fastapi import Depends
+from loguru import logger
+
 from action.base import (
     SlotType,
     NormalizeType,
@@ -17,7 +20,9 @@ from action.base import (
     SlotTypeToOperateTypeDict,
     slotsHaveDefaultValue,
     actionsHaveDefaultValue,
+    AttachmentResponse,
 )
+from third_system.unified_search import UnifiedSearch
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -33,36 +38,18 @@ def transform_slot_value_to_natural_language(slot_value: str, slot_type: str) ->
     return slot_value
 
 
-def prepare_instruction(
-    intent_description: str, slot_value: str, slot_type: str
-) -> str:
-    return (
-        f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}"
-        if slot_type
-        else ""
-    )
+def prepare_instruction(intent_description: str, slot_value: str, slot_type: str) -> str:
+    return f"{intent_description}{transform_slot_value_to_natural_language(slot_value, slot_type)}" if slot_type else ""
 
 
-def get_parsed_slot_value(
-    target_slot_name: str, slot_value: str, force_filter: bool = False
-):
+def get_parsed_slot_value(target_slot_name: str, slot_value: str, force_filter: bool = False):
     if force_filter:
         if "倍" in slot_value or "/" in slot_value:
-            return (
-                config.get("defaultSlotValue", target_slot_name)
-                if target_slot_name in slotsHaveDefaultValue
-                else ""
-            )
+            return config.get("defaultSlotValue", target_slot_name) if target_slot_name in slotsHaveDefaultValue else ""
 
-        check_slash = c2d.takeNumberFromString(slot_value, percentConvert=False)[
-            "digitsStringList"
-        ][0]
+        check_slash = c2d.takeNumberFromString(slot_value, percentConvert=False)["digitsStringList"][0]
         if "/" in check_slash:
-            return (
-                config.get("defaultSlotValue", target_slot_name)
-                if target_slot_name in slotsHaveDefaultValue
-                else ""
-            )
+            return config.get("defaultSlotValue", target_slot_name) if target_slot_name in slotsHaveDefaultValue else ""
 
     result = c2d.takeNumberFromString(slot_value)
     if target_slot_name in slotsHaveDefaultValue:
@@ -72,9 +59,7 @@ def get_parsed_slot_value(
             else config.get("defaultSlotValue", target_slot_name)
         )
     else:
-        result_value = (
-            result["digitsStringList"][0] if result["digitsStringList"] else ""
-        )
+        result_value = result["digitsStringList"][0] if result["digitsStringList"] else ""
     return result_value
 
 
@@ -88,14 +73,10 @@ class OutputAdapter:
     def get_slot_value(self, action_name: str, target_slots: []):
         raise NotImplementedError()
 
-    def normalize_slot_value(
-        self, slot_value: str, target_slot_name: str, action_name: ActionName
-    ) -> str:
+    def normalize_slot_value(self, slot_value: str, target_slot_name: str, action_name: ActionName) -> str:
         raise NotImplementedError()
 
-    def prepare_slot(
-        self, action_name: ActionName, target_slot_value: str, target_slot_name: str
-    ):
+    def prepare_slot(self, action_name: ActionName, target_slot_value: str, target_slot_name: str):
         raise NotImplementedError()
 
     def prepare_answer(
@@ -110,34 +91,31 @@ class OutputAdapter:
 
 
 class BaseOutputAdapter(OutputAdapter):
+    def __init__(self, unified_search: UnifiedSearch = Depends()):
+        self.unified_search = unified_search
+
     def process_output(self, output: object) -> object:
+        if isinstance(output, AttachmentResponse):
+            logger.info(f"process attachment: {output.attachment}")
+            output.answer.content += f"\n ------------------ \n attachment: {output.attachment.url}"
+            return output
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):
         if action_name in actionsHaveDefaultValue:
-            target_slot_name = (
-                target_slots[0].name
-                if target_slots
-                else ActionToValidSlotTypesDict[action_name][0]
-            )
+            target_slot_name = target_slots[0].name if target_slots else ActionToValidSlotTypesDict[action_name][0]
         else:
             target_slot_name = target_slots[0].name if target_slots else ""
         return target_slot_name
 
     def get_slot_value(self, target_slot_name: str, target_slots: []):
         if target_slot_name in slotsHaveDefaultValue:
-            slot_value = (
-                target_slots[0].value
-                if target_slots
-                else config.get("defaultSlotValue", target_slot_name)
-            )
+            slot_value = target_slots[0].value if target_slots else config.get("defaultSlotValue", target_slot_name)
         else:
             slot_value = target_slots[0].value if target_slots else ""
         return slot_value
 
-    def normalize_slot_value(
-        self, slot_value: str, target_slot_name: str, action_name: ActionName
-    ) -> str:
+    def normalize_slot_value(self, slot_value: str, target_slot_name: str, action_name: ActionName) -> str:
         if not target_slot_name:
             return ""
 
@@ -155,9 +133,7 @@ class BaseOutputAdapter(OutputAdapter):
             return get_parsed_slot_value(action_name, replaced_value)
         return slot_value
 
-    def prepare_slot(
-        self, action_name: ActionName, target_slot_value: str, target_slot_name: str
-    ):
+    def prepare_slot(self, action_name: ActionName, target_slot_value: str, target_slot_name: str):
         if target_slot_name in [SlotType.functions, SlotType.font_target]:
             slot = {"value": target_slot_value}
         elif target_slot_name in [SlotType.font_change]:
@@ -201,9 +177,7 @@ class BaseOutputAdapter(OutputAdapter):
                 else ActionTypeToOperateTypeDict[action_name],
                 operateSlots=slot,
                 businessInfo={
-                    "instruction": prepare_instruction(
-                        intent_description, target_slot_value, target_slot_name
-                    )
+                    "instruction": prepare_instruction(intent_description, target_slot_value, target_slot_name)
                 },
             ),
         )

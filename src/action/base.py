@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import unique, Enum
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -52,11 +52,18 @@ class GeneralResponse(ActionResponse):
     jump_out_flag: bool
 
 
+class Attachment(BaseModel):
+    path: str
+    name: str
+    content_type: str
+    url: Union[str, None] = None
+
+
 class AttachmentResponse(ActionResponse):
     code: int
     message: str
     answer: ChatResponseAnswer
-    attachment: str
+    attachment: Attachment
     jump_out_flag: bool
 
 

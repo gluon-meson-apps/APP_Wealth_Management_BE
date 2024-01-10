@@ -78,7 +78,11 @@ def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()
                 {
                     "answer": result.answer.content,
                     "session_id": conversation.session_id,
-                    **(dict(attachment=result.attachment) if isinstance(result, AttachmentResponse) else {}),
+                    **(
+                        dict(attachment=result.attachment.model_dump_json())
+                        if isinstance(result, AttachmentResponse)
+                        else {}
+                    ),
                 }
             )
         }

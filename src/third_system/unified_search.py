@@ -41,8 +41,17 @@ class UnifiedSearch:
 
         return handle_response(response)
 
+    def upload_file_to_minio(self, files) -> list[str]:
+        response = requests.post(url=f"{self.base_url}/file", files=files)
+        return response.json()
+
 
 if __name__ == "__main__":
+    files = [
+        ("files", ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), "text/plain")),
+    ]
+    print(UnifiedSearch().upload_file_to_minio(files))
+
     UnifiedSearch().search(
         SearchParam(
             query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client."

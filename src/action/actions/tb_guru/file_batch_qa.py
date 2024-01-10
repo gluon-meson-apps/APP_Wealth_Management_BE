@@ -2,7 +2,7 @@ from loguru import logger
 from io import StringIO
 import pandas as pd
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, AttachmentResponse
+from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, AttachmentResponse, Attachment
 from scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
@@ -81,6 +81,16 @@ class FileBatchAction(Action):
             intent=context.conversation.current_intent.name,
         )
 
+        file_name = f"{context.conversation.session_id}.csv"
+        file_path = f"/tmp/{file_name}"
+        content_type = "text/csv"
+        df.to_csv(file_path, index=False)
+        files = [
+            ("files", (file_name, open(file_path), content_type)),
+        ]
+        urls = self.unified_search.upload_file_to_minio(files)
+        attachment = Attachment(path=file_path, name=file_name, content_type=content_type, url=urls[0])
+
         return AttachmentResponse(
-            code=200, message="success", answer=answer, jump_out_flag=False, attachment=df.to_csv(index=False)
+            code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachment
         )
