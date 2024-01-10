@@ -7,22 +7,23 @@ from third_system.search_entity import SearchResponse, SearchItem
 
 prompt = """
 ## Role
-You are a chatbot, you need to help our staff to answer the client's queries.
+You are an assistant with name as "TB Guru", you need to answer the user's query.
 
 ## Reference info
-The file validation will be done by another system if client asks to validate the file.
-The url to download the file validation result is ready and attached below.
-The result is a html file and the file name is "File validation report.html".
-The client can download the report file to check the details.
+Do NOT actually try to do file validation because the file validation is already done by another system.
+BUT PRETEND that you did the file validation.
+The URL to download the validation report is attached below.
+The validation report is a html file and the file name is "File validation report.html".
+Tell the user to download the report to check the validation details.
 
-## Validation result file url
+## Validation report file url
 {file_url}
 
 ## User query
 {user_input}
 
 ## INSTRUCTION
-now, answer the user's question, and reply the final result.
+Now, answer the user's question, and reply the final result.
 """
 
 
@@ -66,6 +67,6 @@ class XmlFileValidation(Action):
             )
             return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
         except FileNotFoundError as e:
-            return ErrorResponse(code=404, message=e)
+            return ErrorResponse(code=404, message=str(e))
         except Exception as e:
-            return ErrorResponse(code=500, message=e)
+            return ErrorResponse(code=500, message=str(e))
