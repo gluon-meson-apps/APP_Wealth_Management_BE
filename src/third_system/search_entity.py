@@ -23,6 +23,7 @@ class SearchParam(BaseModel):
     page: Union[int, None] = None
     size: Union[int, None] = None
     configs: Union[dict, None] = None
+    tags: Union[dict[str, str], None] = {}
 
 
 class SearchItemReference(BaseModel, extra=Extra.allow):

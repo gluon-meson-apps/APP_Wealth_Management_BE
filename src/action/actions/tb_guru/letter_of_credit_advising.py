@@ -51,8 +51,6 @@ you are a chatbot, you need to check whether the issuing bank is in the counterp
 ## INSTRUCTION
 currently you should summary the result of the conversation, and the result should contains the following information:
 
-{entities}
-
 ## chat history
 
 {chat_history}
