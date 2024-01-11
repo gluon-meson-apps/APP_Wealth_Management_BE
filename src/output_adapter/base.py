@@ -97,7 +97,7 @@ class BaseOutputAdapter(OutputAdapter):
     def process_output(self, output: object) -> object:
         if isinstance(output, AttachmentResponse):
             logger.info(f"process attachment: {output.attachment}")
-            output.answer.content += f"\n\nAttachment------------------{output.attachment.url}"
+            output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
             return output
         return output
 
