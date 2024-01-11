@@ -3,4 +3,9 @@ description: file validation to check if the file is valid and match the standar
 examples:
   - Hi TB Guru, Please help me to check if the file provided by client below is valid. It is in @XML-V3 format.
   - Hi TB Guru, Please help me to check if the file match our standard. It is an excel.
+slots:
+  - name: file_format
+    description: "the format of the file; available values: XML-V3, XML-V4, Excel, CSV"
+    slotType: text
+    optional: True
 action: file_validation

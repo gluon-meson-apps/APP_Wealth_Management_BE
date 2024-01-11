@@ -1,7 +1,9 @@
+from typing import Union
+
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ChatResponseAnswer, ResponseMessageType, GeneralResponse, ErrorResponse
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from action.base import Action, ChatResponseAnswer, ResponseMessageType, GeneralResponse
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchResponse, SearchItem
 from third_system.unified_search import UnifiedSearch
@@ -16,7 +18,13 @@ You are an assistant with name as "TB Guru", you need to answer the user's query
 Do NOT actually try to do file validation because the file validation is already done by another system.
 BUT PRETEND that you did the file validation.
 The URL to download the validation report is attached below and the validation report is a html file.
-Tell the user to download the report to check the validation details.
+Reply should be 2 parts:
+1. include the upload file info
+2. tell the user to download the report to check if the file valid or not.
+
+## User upload file info
+File name: {upload_filename}
+File format: {upload_file_format}
 
 ## Validation report file info
 File name: {report_filename}
@@ -30,12 +38,11 @@ Now, answer the user's question, and reply the final result.
 """
 
 
-def get_first_file_content(context) -> str:
+def get_first_file(context) -> Union[SearchItem, None]:
     if context.conversation.uploaded_file_contents:
         file_response: SearchResponse = context.conversation.uploaded_file_contents[0]
-        first_file_item: SearchItem = file_response.items[0] if file_response.items else None
-        return first_file_item.text if first_file_item else ""
-    return ""
+        return file_response.items[0] if file_response.items else None
+    return None
 
 
 class FileValidation(Action):
@@ -60,28 +67,27 @@ class FileValidation(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         logger.info(f"exec action: {self.get_name()} ")
 
-        file_content_text: str = get_first_file_content(context)
+        first_file: SearchItem = get_first_file(context)
 
-        try:
-            res = self.hsbc_connect_api.validate_file(file_content_text)
-            download_link = self._upload_file(res)
+        res = self.hsbc_connect_api.validate_file(first_file)
+        download_link = self._upload_file(res)
 
-            final_prompt = prompt.format(
-                user_input=context.conversation.current_user_input,
-                file_url=download_link,
-                report_filename=report_filename,
-            )
-            logger.info(f"final prompt: {final_prompt}")
-            result = chat_model.chat(final_prompt, max_length=1024).response
-            logger.info(f"chat result: {result}")
+        final_prompt = prompt.format(
+            user_input=context.conversation.current_user_input,
+            file_url=download_link,
+            report_filename=report_filename,
+            upload_filename=first_file.meta__reference.meta__source_name,
+            upload_file_format=context.conversation.entities[0].value
+            if context.conversation.entities
+            else first_file.meta__reference.meta__source_type,
+        )
+        logger.info(f"final prompt: {final_prompt}")
+        result = chat_model.chat(final_prompt, max_length=1024).response
+        logger.info(f"chat result: {result}")
 
-            answer = ChatResponseAnswer(
-                messageType=ResponseMessageType.FORMAT_TEXT,
-                content=result,
-                intent=context.conversation.current_intent.name,
-            )
-            return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
-        except FileNotFoundError as e:
-            return ErrorResponse(code=404, message=str(e))
-        except Exception as e:
-            return ErrorResponse(code=500, message=str(e))
+        answer = ChatResponseAnswer(
+            messageType=ResponseMessageType.FORMAT_TEXT,
+            content=result,
+            intent=context.conversation.current_intent.name,
+        )
+        return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
