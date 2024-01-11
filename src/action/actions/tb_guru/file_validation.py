@@ -63,7 +63,7 @@ class FileValidation(Action):
             return links[0]
         raise Exception("Upload file failed.")
 
-    def run(self, context):
+    async def run(self, context):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         logger.info(f"exec action: {self.get_name()} ")
 

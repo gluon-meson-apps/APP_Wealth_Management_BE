@@ -29,7 +29,7 @@ class BrFileQAAction(Action):
     def get_name(self) -> str:
         return "br_file_qa"
 
-    def run(self, context: ActionContext) -> ActionResponse:
+    async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
         file_content = "\n".join([i.text for i in context.conversation.uploaded_file_contents[0].items])

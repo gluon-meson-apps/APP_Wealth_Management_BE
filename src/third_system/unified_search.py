@@ -1,3 +1,4 @@
+import aiohttp
 from loguru import logger
 
 from third_system.search_entity import SearchParam, SearchResponse
@@ -10,6 +11,14 @@ def handle_response(response) -> SearchResponse:
         return []
     print(response.json())
     return SearchResponse.model_validate(response.json())
+
+
+async def handle_aio_response(response) -> SearchResponse:
+    if response.status != 200:
+        logger.error(f"{response.status}: {await response.text}")
+        return []
+    print(await response.json())
+    return SearchResponse.model_validate(await response.json())
 
 
 class UnifiedSearch:
@@ -40,6 +49,11 @@ class UnifiedSearch:
         response = requests.get(url=f"{self.base_url}/file/download", params={"file_url": file_url})
 
         return handle_response(response)
+
+    async def adownload_file_from_minio(self, file_url: str) -> SearchResponse:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
+                return await handle_aio_response(resp)
 
     def upload_file_to_minio(self, files) -> list[str]:
         response = requests.post(url=f"{self.base_url}/file", files=files)

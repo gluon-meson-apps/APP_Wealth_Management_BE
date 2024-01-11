@@ -64,7 +64,7 @@ class FileBatchAction(Action):
 
         return get_result_from_llm
 
-    def run(self, context) -> ActionResponse:
+    async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
         TESTDATA = StringIO(context.conversation.uploaded_file_contents[0].items[0].text)

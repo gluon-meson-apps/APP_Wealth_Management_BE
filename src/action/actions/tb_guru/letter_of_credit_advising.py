@@ -69,7 +69,7 @@ class LetterOfCreditAdvisingAction(Action):
     def get_name(self) -> str:
         return "letter_of_credit_advising"
 
-    def run(self, context) -> ActionResponse:
+    async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 

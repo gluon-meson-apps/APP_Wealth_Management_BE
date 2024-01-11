@@ -62,7 +62,7 @@ class StandardPricingCheckAction(Action):
     def get_name(self) -> str:
         return "standard_pricing_check"
 
-    def run(self, context) -> ActionResponse:
+    async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 

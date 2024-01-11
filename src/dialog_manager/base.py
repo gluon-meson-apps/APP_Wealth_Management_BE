@@ -55,7 +55,7 @@ class BaseDialogManager:
         self.conversation_tracker.save_conversation(user_id, conversation)
         return response
 
-    def handle_message(
+    async def handle_message(
         self, message: Any, session_id: str, files: list[UploadFile] = None, file_contents: list[SearchResponse] = None
     ) -> Any:
         if files is None:
@@ -72,7 +72,7 @@ class BaseDialogManager:
 
         plan = self.reasoner.think(conversation)
 
-        action_response = self.action_runner.run(plan.action, ActionContext(conversation))
+        action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
         response = self.output_adapter.process_output(action_response)
         conversation.append_assistant_history(response.answer)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)

@@ -22,7 +22,7 @@ class EndDialogueAction(Action):
     def get_name(self) -> str:
         return "end_dialogue"
 
-    def run(self, context):
+    async def run(self, context):
         return JumpOutResponse(code=200, message="success", answer={}, jump_out_flag=True)
 
 
@@ -40,7 +40,7 @@ class SlotFillingAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "slot_filling_action"
 
-    def run(self, context):
+    async def run(self, context):
         logger.info("exec action slot filling")
         if isinstance(self.slots, list):
             slot_description = " or ".join(slot.description for slot in self.slots)
@@ -75,7 +75,7 @@ class IntentConfirmAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_confirmation_action"
 
-    def run(self, context: ConversationContext):
+    async def run(self, context: ConversationContext):
         logger.info("exec action intent confirm")
         prompt = self.prompt_template.format(
             {
@@ -103,7 +103,7 @@ class IntentFillingAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_filling_action"
 
-    def run(self, context):
+    async def run(self, context):
         logger.info("exec action intent_filling")
         filtered_intents = [intent.description for intent in self.intents if intent.business]
         prompt = self.prompt_template.format(
@@ -133,7 +133,7 @@ class SlotConfirmAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "slot_confirm_action"
 
-    def run(self, context: ConversationContext):
+    async def run(self, context: ConversationContext):
         logger.info("exec action slot confirm")
         prompt = self.prompt_template.format(
             {
@@ -160,7 +160,7 @@ class ChitChatAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "chit_chat_action"
 
-    def run(self, context) -> ActionResponse:
+    async def run(self, context) -> ActionResponse:
         logger.info("exec action slot chitchat")
         # todo: add history from context
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
@@ -189,7 +189,7 @@ class QAAction(Action):
         self.chat_model = chat_model
         self.default_template = "I don't know how to answer"
 
-    def run(self, context) -> ActionResponse:
+    async def run(self, context) -> ActionResponse:
         logger.info("exec action slot chitchat")
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,

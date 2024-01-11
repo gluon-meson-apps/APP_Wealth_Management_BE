@@ -36,7 +36,7 @@ class BaseActionRunner(ActionRunner):
         """
         self.actions[name] = action
 
-    def run(self, action_name: str, context: ActionContext):
+    async def run(self, action_name: str, context: ActionContext):
         """
         Run registered action by name.
 
@@ -51,5 +51,5 @@ class BaseActionRunner(ActionRunner):
             raise Exception(f"Action {action_name} not found")
 
         action = self.actions[action_name]
-        result = action.run(context)
+        result = await action.run(context)
         return result

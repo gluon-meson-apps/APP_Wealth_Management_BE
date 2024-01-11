@@ -154,7 +154,7 @@ class Action(ABC):
     """Base abstract class for all actions."""
 
     @abstractmethod
-    def run(self, context: ActionContext) -> ActionResponse:
+    async def run(self, context: ActionContext) -> ActionResponse:
         """Run the action given the context."""
         pass
 

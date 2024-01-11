@@ -86,6 +86,7 @@ class LLMEntityExtractor(EntityExtractor):
         logger.debug(prompt)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         response = chat_model.chat(prompt, history=history, max_length=1024)
+        logger.debug(response.response)
         entities = json.loads(response.response)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
