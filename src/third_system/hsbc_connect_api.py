@@ -7,7 +7,7 @@ def mock_validate_res():
     mock_response = Response()
     mock_response.status_code = 200
     mock_response._content = """
-    <body><div id="dummycontext"></div><div id="dummystatus"></div><div id="dummysummary"></div></body>
+    <body><h1>test file</h1><div>test content</div></body>
     """.encode()
     return mock_response
 
