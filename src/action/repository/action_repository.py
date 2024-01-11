@@ -7,6 +7,7 @@ from action.actions.tb_guru.file_batch_qa import FileBatchAction
 from action.actions.tb_guru.letter_of_credit_advising import LetterOfCreditAdvisingAction
 from action.actions.tb_guru.standard_pricing_check_action import StandardPricingCheckAction
 from action.actions.tb_guru.file_validation import FileValidation
+from action.actions.tb_guru.wcs_data_query import WcsDataQuery
 from action.base import Action
 from llm.self_host import ChatModel
 
@@ -41,3 +42,4 @@ action_repository.save(StandardPricingCheckAction())
 action_repository.save(BrFileQAAction())
 action_repository.save(LetterOfCreditAdvisingAction())
 action_repository.save(FileValidation())
+action_repository.save(WcsDataQuery())

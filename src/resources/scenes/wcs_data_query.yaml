@@ -1,0 +1,19 @@
+name: wcs_data_query
+description: query data from WCS system
+examples:
+  - Hi TB Guru, Please help me to extract CDT N.V. company data from the @WCS system, and share some data insight with me.
+    Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
+  - Hi TB Guru, Please help me to extract CDT N.V. company data from the @WCS system, and generate the insight as my request below,
+    Q1. Describe CDT N.V. company's CCC figure changes across year and the reason behind it.
+    Q2. Compare CDT N.V. company's figure against other companies and benchmark.
+    Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
+slots:
+  - name: company
+    description: the company name
+    slotType: text
+    optional: True
+  - name: days
+    description: the specific period of the data, should be like "FY21", "FY20", "FY19"
+    slotType: text
+    optional: True
+action: wcs_data_query
