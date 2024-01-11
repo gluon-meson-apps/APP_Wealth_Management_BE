@@ -1,7 +1,6 @@
-import re
+import json
 from typing import List
 
-import yaml
 
 from nlu.base import EntityExtractor
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
@@ -39,24 +38,25 @@ class LLMEntityExtractor(EntityExtractor):
         self.model = chat_model
         self.model_type = model_type
         self.prompt_manager = prompt_manager
-        self.user_message_template = prompt_manager.load("slot_extraction_user_message")
+        self.slot_extraction_prompt = prompt_manager.load("slot_extraction")
         self.examples = self.prepare_examples()
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "llm_entity_extractor"
 
+    def construct_system_prompt(self, conversation_context: ConversationContext, slots: str, intent):
+        return self.slot_extraction_prompt.format_jinja(
+            user_intent=intent.name,
+            chat_history=conversation_context.get_history().format_string(),
+            entity_types_and_values=slots,
+        )
+
     def construct_messages(
         self, user_input, intent, form: Form, conversation_context: ConversationContext
     ) -> List[str]:
-        chat_history = conversation_context.get_history().format_string()
-        final_user_message = self.user_message_template.format(
-            {
-                "chat_history": chat_history,
-                "user_intent": intent.name,
-                "user_message": user_input,
-                "entity_types_and_values": form.get_available_slots_str(),
-            }
-        )
-        history = [("system", system_template)]
+        final_user_message = user_input
+        history = [
+            ("system", self.construct_system_prompt(conversation_context, form.get_available_slots_str(), intent))
+        ]
         for example in self.examples:
             history.append(("user", example[0]))
             history.append(("assistant", example[1]))
@@ -65,58 +65,28 @@ class LLMEntityExtractor(EntityExtractor):
     def prepare_examples(self):
         examples = [
             (
-                self.user_message_template.format(
-                    {
-                        "chat_history": "user: 帮忙打开客厅的灯",
-                        "user_intent": "控制智能家居",
-                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
-                        "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
-                    }
-                ),
-                """```yaml
-位置: 客厅
-操作: 打开
-对象: 灯
-操作值: 开启
-```""",
+                "help me to turn on the light in the living room",
+                """{ "position": "living room", "operation": "turn on", "object": "light", "operation_value": "on" }""",
             ),
             (
-                self.user_message_template.format(
-                    {
-                        "chat_history": """user: 帮忙调亮客厅的灯
-        assistant: 请问需要将客厅的灯调到多亮呢？
-        user: 调到50%的亮度""",
-                        "user_intent": "控制智能家居/补充信息",
-                        "entity_types_and_values": "位置[智能家居所处的房间]、操作[对智能家居进行的操作]、"
-                        "对象[哪一种智能家居]、操作值[操作的时候，需要考虑的参数]",
-                    }
-                ),
-                """```yaml
- 位置: 客厅
- 操作: 打开
- 对象: 灯
- 操作值: 0.5
- ```""",
+                "turn to 50% brightness",
+                """{ "position": "living room", "operation": "turn on", "object": "light", "operation_value": "0.5" }""",
             ),
         ]
         return examples
-
-    def extract_yaml_code(self, response) -> str:
-        logger.debug(response)
-        return re.match("```yaml((.|\n)*)```", response).group(1)
 
     def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
         form = self.form_store.get_form_from_intent(intent)
         if not form:
-            logger.debug(f"该意图[{intent.name}]不需要提取实体")
+            logger.debug(f"this intent [{intent.name}] does not need to extract entity")
             return []
         prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         response = chat_model.chat(prompt, history=history, max_length=1024)
-        entities = yaml.safe_load(self.extract_yaml_code(response.response))
+        entities = json.loads(response.response)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(

@@ -2,24 +2,23 @@ import os
 import logging
 import logging.handlers
 
-# from aliyun.log import QueuedLogHandler
+from jinja2 import Environment
 
 
 def get_value_or_default_from_dict(dictionary, key, default_value=None):
     return dictionary[key] if key in dictionary else default_value
 
 
+def format_jinja_template(template: str, **kwargs) -> str:
+    template = Environment().from_string(template)
+    return template.render(**kwargs)
+
+
 def init_logger(module_name):
     env = get_value_or_default_from_dict(os.environ, "DEVELOPMENT_ENV", "dev")
-    log_file_folder_path = get_value_or_default_from_dict(
-        os.environ, "LOG_FILE_FOLDER_PATH", ""
-    )
-    single_log_file_max_byte = int(
-        get_value_or_default_from_dict(os.environ, "MAX_LOG_BYTES", 50000000)
-    )
-    log_backup_count = int(
-        get_value_or_default_from_dict(os.environ, "LOG_BACKUP_COUNT", 5)
-    )
+    log_file_folder_path = get_value_or_default_from_dict(os.environ, "LOG_FILE_FOLDER_PATH", "")
+    single_log_file_max_byte = int(get_value_or_default_from_dict(os.environ, "MAX_LOG_BYTES", 50000000))
+    log_backup_count = int(get_value_or_default_from_dict(os.environ, "LOG_BACKUP_COUNT", 5))
 
     log_level_by_env = {
         "local": logging.DEBUG,
@@ -53,9 +52,7 @@ def init_logger(module_name):
     # )
     # cloud_log_handler.setLevel(logger.level)
 
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     # cloud_log_handler.setFormatter(formatter)

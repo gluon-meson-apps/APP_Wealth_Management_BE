@@ -50,8 +50,9 @@ class IntentConfig:
 
 def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
-    response: SearchResponse = unified_search_client.search_for_intent_examples(table=topic,
-                                                                                user_input=user_input.strip())
+    response: SearchResponse = unified_search_client.search_for_intent_examples(
+        table=topic, user_input=user_input.strip()
+    )
 
     intents_examples = extract_examples_from_response_text(response)
     return intents_examples
@@ -76,7 +77,7 @@ def get_highest_scored_item(items: list[SearchItem]):
 def extract_info(items):
     highest_scored_item = get_highest_scored_item(items)
     text = highest_scored_item.model_extra["text"]
-    intent = highest_scored_item.meta__reference.model_extra['meta__intent_result']
+    intent = highest_scored_item.meta__reference.model_extra["meta__intent_result"]
     example = text
     score = highest_scored_item.meta__score
     return intent, example, score
@@ -84,13 +85,13 @@ def extract_info(items):
 
 class LLMIntentClassifier(IntentClassifier):
     def __init__(
-            self,
-            chat_model: ChatModel,
-            embedding_model: EmbeddingModel,
-            milvus_for_langchain: MilvusForLangchain,
-            intent_list_config: IntentListConfig,
-            model_type: str,
-            prompt_manager: PromptManager,
+        self,
+        chat_model: ChatModel,
+        embedding_model: EmbeddingModel,
+        milvus_for_langchain: MilvusForLangchain,
+        intent_list_config: IntentListConfig,
+        model_type: str,
+        prompt_manager: PromptManager,
     ):
         self.model = chat_model
         self.embedding = embedding_model
@@ -100,12 +101,10 @@ class LLMIntentClassifier(IntentClassifier):
         self.model_type = model_type
         self.intent_list_config = intent_list_config
         self.prompt_manager = prompt_manager
-        self.system_template_without_example = prompt_manager.load(
-            name="intent_classification"
-        )
+        self.system_template_without_example = prompt_manager.load(name="intent_classification")
         self.intent_call = IntentCall(
             intent_list_config.get_intent_list(),
-            prompt_manager.load(name="intent_classification_v2").template,
+            prompt_manager.load(name="intent_classification_v2"),
             chat_model,
             model_type,
         )
@@ -130,9 +129,7 @@ class LLMIntentClassifier(IntentClassifier):
                     metadata={"intent": intent, "source": "user upload"},
                 )
                 docs.append(doc)
-        self.milvus_for_langchain.add_documents(
-            topic, docs, embedding_type=self.embedding_type
-        )
+        self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
     def classify_intent(self, conversation: ConversationContext) -> Intent:
         user_input = conversation.current_user_input

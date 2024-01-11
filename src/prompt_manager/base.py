@@ -3,6 +3,7 @@ import os
 from loguru import logger
 
 from prompt_manager.local_prompt_service import LocalPromptService
+from utils.utils import format_jinja_template
 
 
 class PromptWrapper:
@@ -15,9 +16,12 @@ class PromptWrapper:
             formatted = formatted.replace("{{" + key + "}}", str(value))
         return formatted
 
+    def format_jinja(self, **values):
+        return format_jinja_template(self.template, **values)
+
 
 class PromptManager:
-    def load(self, name, domain) -> str:
+    def load(self, name, domain=None) -> PromptWrapper:
         raise NotImplementedError()
 
 
@@ -26,7 +30,7 @@ class BasePromptManager(PromptManager):
         super().__init__()
         if prompt_template_folder is None:
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            prompt_template_folder = os.path.join(current_dir, '..', "resources", "prompt_templates")
+            prompt_template_folder = os.path.join(current_dir, "..", "resources", "prompt_templates")
         self.prompt_service = LocalPromptService(prompt_template_folder)
 
     def load(self, name, domain=None) -> PromptWrapper:

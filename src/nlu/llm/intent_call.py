@@ -1,13 +1,14 @@
 import json
 from typing import List
 
-from jinja2 import Environment
 from loguru import logger
 from pydantic import BaseModel
 
 from llm.self_host import ChatModel
 from nlu.intent_config import IntentConfig
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+
+from prompt_manager.base import PromptWrapper
 
 
 class IntentClassificationResponse(BaseModel):
@@ -19,7 +20,7 @@ class IntentCall:
     def __init__(
         self,
         intent_list: List[IntentConfig],
-        template: str,
+        template: PromptWrapper,
         model: ChatModel,
         model_type: str,
     ):
@@ -29,10 +30,6 @@ class IntentCall:
         self.template = template
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_call"
-
-    def format_jinjia_template(self, template: str, **kwargs) -> str:
-        template = Environment().from_string(template)
-        return template.render(**kwargs)
 
     def construct_system_prompt(self, chat_history: list[dict[str, str]]):
         intent_list_str = json.dumps(
@@ -44,9 +41,7 @@ class IntentCall:
             i_or_you = "I" if chat["role"] == "user" else "You"
             chat_history_str += f"{i_or_you}: {chat['content']}\n"
 
-        system_message = self.format_jinjia_template(
-            self.template, intent_list=intent_list_str, chat_history=chat_history_str
-        )
+        system_message = self.template.format_jinja(intent_list=intent_list_str, chat_history=chat_history_str)
         return system_message
 
     def format_message(self, role, content):
