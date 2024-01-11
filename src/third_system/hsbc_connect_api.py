@@ -1,6 +1,3 @@
-import os
-
-import requests
 from requests import Response
 
 from third_system.search_entity import SearchItem
@@ -22,11 +19,12 @@ class HsbcConnectApi:
     def validate_file(self, file: SearchItem) -> str:
         if file and file.text:
             # todo: currently mock response here
-            response = (
-                mock_validate_res()
-                if os.getenv("LOCAL_MODE") == "1"
-                else requests.post(self.base_url, files={"Attachment": file}, verify=False)
-            )
+            # response = (
+            #     mock_validate_res()
+            #     if os.getenv("LOCAL_MODE") == "1"
+            #     else requests.post(self.base_url, files={"Attachment": file}, verify=False)
+            # )
+            response = mock_validate_res()
             if response.status_code == 200:
                 return response.text
         raise FileNotFoundError("No file valid.")
