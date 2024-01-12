@@ -84,6 +84,7 @@ class LLMEntityExtractor(EntityExtractor):
             return []
         prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
+        logger.debug(history)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         response = chat_model.chat(prompt, history=history, max_length=1024)
         logger.debug(response.response)
