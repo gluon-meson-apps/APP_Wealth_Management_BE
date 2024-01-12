@@ -1,6 +1,7 @@
 import aiohttp
 from loguru import logger
 
+from action.base import UploadFileContentType
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
 
@@ -62,7 +63,10 @@ class UnifiedSearch:
 
 if __name__ == "__main__":
     files = [
-        ("files", ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), "text/plain")),
+        (
+            "files",
+            ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), UploadFileContentType.TXT),
+        ),
     ]
     print(UnifiedSearch().upload_file_to_minio(files))
 

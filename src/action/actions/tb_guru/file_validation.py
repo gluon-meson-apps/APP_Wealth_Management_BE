@@ -3,7 +3,14 @@ from typing import Union
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ChatResponseAnswer, ResponseMessageType, AttachmentResponse, Attachment
+from action.base import (
+    Action,
+    ChatResponseAnswer,
+    ResponseMessageType,
+    AttachmentResponse,
+    Attachment,
+    UploadFileContentType,
+)
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchResponse, SearchItem
 from third_system.unified_search import UnifiedSearch
@@ -60,7 +67,7 @@ class FileValidation(Action):
         return "file_validation"
 
     def _upload_file(self, res: str) -> str:
-        file = (report_filename, res, "text/html")
+        file = (report_filename, res, UploadFileContentType.HTML)
         files = [("files", file)]
         links = self.unified_search.upload_file_to_minio(files)
         if links and links[0]:

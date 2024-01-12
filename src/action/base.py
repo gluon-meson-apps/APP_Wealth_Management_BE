@@ -20,6 +20,14 @@ class NormalizeType(str, Enum):
     NUMBER = "NUMBER"
 
 
+@unique
+class UploadFileContentType(str, Enum):
+    PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    CSV = "text/csv"
+    HTML = "text/html"
+    TXT = "text/plain"
+
+
 class ActionResponseAnswerContent(BaseModel):
     businessId: str
     operateType: str

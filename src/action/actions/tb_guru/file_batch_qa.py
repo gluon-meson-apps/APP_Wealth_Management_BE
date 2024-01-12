@@ -2,7 +2,15 @@ from loguru import logger
 from io import StringIO
 import pandas as pd
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, AttachmentResponse, Attachment
+from action.base import (
+    Action,
+    ActionResponse,
+    ResponseMessageType,
+    ChatResponseAnswer,
+    AttachmentResponse,
+    Attachment,
+    UploadFileContentType,
+)
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
@@ -83,7 +91,7 @@ class FileBatchAction(Action):
 
         file_name = f"{context.conversation.session_id}.csv"
         file_path = f"/tmp/{file_name}"
-        content_type = "text/csv"
+        content_type = UploadFileContentType.CSV
         df.to_csv(file_path, index=False)
         files = [
             ("files", (file_name, open(file_path), content_type)),
