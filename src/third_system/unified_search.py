@@ -1,6 +1,7 @@
 import aiohttp
 from loguru import logger
 
+from third_system.BusinessException import UnifiedSearchClientException
 from action.base import UploadFileContentType
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
@@ -22,10 +23,26 @@ async def handle_aio_response(response) -> SearchResponse:
     return SearchResponse.model_validate(await response.json())
 
 
+def error_handler(exception):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+                return result
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                raise exception
+
+        return wrapper
+
+    return decorator
+
+
 class UnifiedSearch:
     def __init__(self):
         self.base_url = "http://localhost:8000"
 
+    @error_handler(UnifiedSearchClientException("unified search error", error_code=1001))
     def search(self, search_param: SearchParam) -> list[SearchResponse]:
         response = requests.post(self.base_url + "/search", json=search_param.dict())
         print(response.json())
