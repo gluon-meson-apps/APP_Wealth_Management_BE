@@ -3,7 +3,7 @@ from typing import Union
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ChatResponseAnswer, ResponseMessageType, GeneralResponse
+from action.base import Action, ChatResponseAnswer, ResponseMessageType, AttachmentResponse, Attachment
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchResponse, SearchItem
 from third_system.unified_search import UnifiedSearch
@@ -15,21 +15,24 @@ prompt = """
 You are an assistant with name as "TB Guru", you need to answer the user's query.
 
 ## Reference info
-Do NOT actually try to do file validation because the file validation is already done by another system.
-BUT PRETEND that you did the file validation.
+You DO NOT need the file to process file validation because the file validation is already done by another system.
+BUT PRETEND you did the file validation.
 The URL to download the validation report is attached below and the validation report is a html file.
-Reply should be 2 parts:
-1. include the upload file info
-2. include the report info and tell the user to download the report to check if the file valid or not.
-   the report URL link should open in a new browser tab with :target="_blank" if user click it.
+
+## Reply requirements
+Your reply should include following 2 parts:
+1. Your reply should include the upload file info
+2. Your reply should include the report info and tell the user to download the report to check if the file valid or not.
+   please note: the report URL link should be wrapped by a HTML <a> tag with :target="_blank" attribute.
 
 ## User upload file info
-File name: {upload_filename}
-File format: {upload_file_format}
+Upload file name: {upload_filename}
+Upload file URL: {upload_file_url}
+Upload file format: {upload_file_format}
 
 ## Validation report file info
-File name: {report_filename}
-File URL: {file_url}
+Report file name: {report_filename}
+Report file URL: {file_url}
 
 ## User query
 {user_input}
@@ -78,6 +81,7 @@ class FileValidation(Action):
             file_url=download_link,
             report_filename=report_filename,
             upload_filename=first_file.meta__reference.meta__source_name,
+            upload_file_url=first_file.meta__reference.meta__source_url,
             upload_file_format=context.conversation.entities[0].value
             if context.conversation.entities
             else first_file.meta__reference.meta__source_type,
@@ -91,4 +95,7 @@ class FileValidation(Action):
             content=result,
             intent=context.conversation.current_intent.name,
         )
-        return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+        attachment = Attachment(path=download_link, name=report_filename, content_type="text/html", url=download_link)
+        return AttachmentResponse(
+            code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachment
+        )
