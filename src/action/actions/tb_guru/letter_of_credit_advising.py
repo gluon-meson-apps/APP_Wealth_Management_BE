@@ -45,22 +45,6 @@ we are not able to accept a letter of credit from the $bank
 now, answer the question step by step, and reply the final result
 """
 
-summary_prompt_template = """## Role
-you are a chatbot, you need to check whether the issuing bank is in the counterparty bank list
-
-## INSTRUCTION
-currently you should summary the result of the conversation, and the result should contains the following information:
-
-## entities
-
-{entities}
-
-## chat history
-
-{chat_history}
-
-"""
-
 
 class LetterOfCreditAdvisingAction(Action):
     def __init__(self):
@@ -75,13 +59,8 @@ class LetterOfCreditAdvisingAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 
-        summary_prompt = summary_prompt_template.format(
-            entities="\n".join([entity.json() for entity in context.conversation.get_entities()]),
-            chat_history=context.conversation.get_history().format_string(),
-        )
-        result = chat_model.chat(summary_prompt, max_length=1024).response
         query = (
-                result
+                "search the counterparty bank"
                 + f"\n #extra infos: fields to be queried: {context.conversation.get_entities()} "
         )
         logger.info(f"search query: {query}")

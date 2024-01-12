@@ -34,3 +34,9 @@ install pre-commit hook
 ```bash
 pre-commit install
 ```
+
+
+intent example init
+```bash
+poetry run python  src/nlu/llm/intent_examples.py
+```
