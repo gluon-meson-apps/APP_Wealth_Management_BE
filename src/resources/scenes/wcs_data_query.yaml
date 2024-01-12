@@ -17,4 +17,8 @@ slots:
     description: the specific period of the data, should be like "FY21", "FY20", "FY19"
     slotType: text
     optional: True
+  - name: is_ppt_output
+    description: if the user asks to generate PPT or not
+    slotType: boolean
+    optional: True
 action: wcs_data_query

@@ -1,12 +1,10 @@
-import json
-
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
-
+from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
 you are a chatbot, you need to validate if the pricing offered to the customer is compliant with the standard pricing
@@ -66,13 +64,7 @@ class StandardPricingCheckAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
 
-        entities_without_unit_rate = json.dumps(
-            {
-                key: value
-                for key, value in context.conversation.get_simplified_entities().items()
-                if key != "offered unit price"
-            }
-        )
+        entities_without_unit_rate = format_entities_for_search(context.conversation, ["offered unit price"])
         summary_prompt = summary_prompt_template.format(chat_history=context.conversation.get_history().format_string())
         logger.info(f"summary_prompt: {summary_prompt}")
         result = chat_model.chat(summary_prompt, max_length=1024).response

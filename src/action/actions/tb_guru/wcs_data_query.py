@@ -1,11 +1,10 @@
-import json
-
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import Action, ChatResponseAnswer, ResponseMessageType, GeneralResponse, ActionResponse
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
+from utils.action_helper import format_entities_for_search
 
 report_filename = "file_validation_report.html"
 
@@ -42,12 +41,12 @@ class WcsDataQuery(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model)
         logger.info(f"exec action: {self.get_name()} ")
 
-        fields = json.dumps(context.conversation.get_simplified_entities())
+        entities_without_ppt = format_entities_for_search(context.conversation, ["is_ppt_output"])
         search_res = self.unified_search.search(
             SearchParam(
                 query=f"""
         Query WCS data with below fields:
-        {fields}
+        {entities_without_ppt}
         """
             )
         )
