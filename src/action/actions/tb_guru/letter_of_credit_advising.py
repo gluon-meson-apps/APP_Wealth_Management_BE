@@ -51,6 +51,10 @@ you are a chatbot, you need to check whether the issuing bank is in the counterp
 ## INSTRUCTION
 currently you should summary the result of the conversation, and the result should contains the following information:
 
+## entities
+
+{entities}
+
 ## chat history
 
 {chat_history}
@@ -76,9 +80,13 @@ class LetterOfCreditAdvisingAction(Action):
             chat_history=context.conversation.get_history().format_string(),
         )
         result = chat_model.chat(summary_prompt, max_length=1024).response
-        logger.info(f"search query: {result}")
+        query = (
+                result
+                + f"\n #extra infos: fields to be queried: {context.conversation.get_entities()} "
+        )
+        logger.info(f"search query: {query}")
 
-        response = self.unified_search.search(SearchParam(query=result))
+        response = self.unified_search.search(SearchParam(query=query))
         logger.info(f"search response: {response}")
         all_banks = "\n".join([item.json() for item in response])
         bank_info = [
