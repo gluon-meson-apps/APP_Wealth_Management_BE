@@ -8,6 +8,16 @@ you are a helpfule assistant
 2. you have to refer to the chat_history to extract the entities.
 3. if you can't find the entities, you should output empty string. if the entities is a number, you should output the number that user explicitly expressed.
 
+## ATTENTION
+
+your result should be a json string, like this:
+
+{
+    "entity1": "value of entity1",
+    "entity2": "value of entity2",
+    ...
+}
+
 ## Entities info
 
 {{entity_types_and_values}}
