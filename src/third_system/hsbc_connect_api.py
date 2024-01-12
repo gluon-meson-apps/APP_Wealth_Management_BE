@@ -1,15 +1,17 @@
+import os
+
 from requests import Response
 
 from third_system.search_entity import SearchItem
 
 
 def mock_validate_res():
-    mock_response = Response()
-    mock_response.status_code = 200
-    mock_response._content = """
-    <body><h1>test file</h1><div>test content</div></body>
-    """.encode()
-    return mock_response
+    file_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+    with open(f"{file_dir}/file_validation_report.html", "r") as f:
+        mock_response = Response()
+        mock_response.status_code = 200
+        mock_response._content = f.read().encode("utf-8")
+        return mock_response
 
 
 class HsbcConnectApi:

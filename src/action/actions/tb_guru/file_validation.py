@@ -20,7 +20,8 @@ BUT PRETEND that you did the file validation.
 The URL to download the validation report is attached below and the validation report is a html file.
 Reply should be 2 parts:
 1. include the upload file info
-2. tell the user to download the report to check if the file valid or not.
+2. include the report info and tell the user to download the report to check if the file valid or not.
+   the report URL link should open in a new browser tab with :target="_blank" if user click it.
 
 ## User upload file info
 File name: {upload_filename}
@@ -28,7 +29,7 @@ File format: {upload_file_format}
 
 ## Validation report file info
 File name: {report_filename}
-File url: {file_url}
+File URL: {file_url}
 
 ## User query
 {user_input}

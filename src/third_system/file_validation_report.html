@@ -1,0 +1,3352 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<html>
+<head>
+    <title>Error report</title>
+    <style type="text/css">
+        body {
+            background: none repeat scroll 0 0 #FFFFFF;
+            border: 1px solid #FFFFFF;
+            margin: 0 0 1em;
+            padding: 10px;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 0.9em;
+        @charset "UTF-8";
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            align: left;
+        }
+
+        .global_table {
+            width: 1100px;
+            margin-top: 25px;
+            margin-left: 50px;
+            margin-right: auto;
+            border: 1px solid grey;
+        }
+
+        .global_table td, .global_table th {
+            background-color: #FFFFFF;
+            min-width: 200px;
+            vertical-align: top;
+            /*border: 1px solid grey;*/
+        }
+
+        .global_table tr.header td {
+            color: #FFFFFF;
+            background-color: #3356BC;
+            padding-bottom: 3px;
+            padding-top: 3px;
+            font-size: 1.2em;
+            align: left;
+        }
+
+
+        .global_table tr.alt td {
+            /*background-color:#3356BC;*/
+            background-color: #B9C9FE;
+            padding-bottom: 3px;
+            padding-top: 3px;
+            font-size: 1.2em;
+            align: left;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+            border-bottom-color: grey;
+        }
+
+        .global_table tr.alt td:first-child {
+            border-right-width: 5px;
+            border-right-style: solid;
+            border-right-color: white;
+        }
+
+        .global_table tr.alt td:last-child {
+            border-left-width: 5px;
+            border-left-style: solid;
+            border-left-color: white;
+        }
+
+
+        .context_table {
+        }
+
+        .hidden_div {
+            display: none;
+        }
+
+        .hidden_table {
+            display: none;
+        }
+
+        .context_table td, .context_table th {
+            font-size: 1em;
+            padding-top: 3px;
+            padding-left: 3px;
+            padding-bottom: 2px;
+            padding-right: 35px;
+            white-space: nowrap;
+            color: #000;
+            background-color: #FFFFFF;
+            align: left;
+        }
+
+        .error_report_tbl {
+            width: 1100px;
+            margin-top: 25px;
+            margin-left: 50px;
+            margin-right: auto;
+            border: 1px solid grey;
+        }
+
+        .error_report_tbl td, .error_report_tbl th {
+            vertical-align: text-top;
+            font-size: 0.9em;
+            padding-top: 3px;
+            padding-left: 7px;
+            padding-bottom: 3px;
+            padding-right: 7px;
+            white-space: normal;
+            background-color: #FFFFFF;
+            /*border: 1px solid #2BB0D7;*/
+        }
+
+        tr.row-separator td {
+            color: #000;
+            background-color: #B9C9FE;
+            /*background-color:#84AAFF;*/
+            padding-top: 3px;
+            padding-left: 7px;
+            padding-bottom: 3px;
+            padding-right: 7px;
+            font-size: 1em;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+            border-bottom-color: grey;
+        }
+
+        tr.row-separator-field td {
+            color: #000;
+            /*background-color:#FFE4C1;*/
+            background-color: #B9C9FE;
+            padding-top: 3px;
+            padding-left: 7px;
+            padding-bottom: 3px;
+            padding-right: 7px;
+            font-size: 1em;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+            border-bottom-color: grey;
+        }
+
+        tr.row-separator-field td:first-child {
+            background-color: #FFFFFF;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
+            border-bottom-color: white;
+        }
+
+        tr.separator {
+            height: 15px;
+            background-color: #FFFFFF;
+        }
+
+        .context_table tr.alt td {
+            font-size: 1.2em;
+            color: #FFFFFF;
+            background-color: #335FBC;
+            padding-bottom: 3px;
+            padding-top: 3px;
+        }
+
+        .error_report_tbl tr.alt td {
+            color: #FFFFFF;
+            background-color: #335FBC;
+            text-align: Left;
+            padding-bottom: 3px;
+            padding-top: 3px;
+            font-size: 1.2em;
+        }
+
+        font-size:
+
+        0.9
+        em
+
+        ;
+        padding-right:
+
+        40
+        px
+
+        ;
+        white-space: nowrap
+
+        ;
+        }
+
+        .font_italic {
+            font-style: italic;
+        }
+
+        .font_bold {
+            font-weight: bold;
+        }
+
+        .font_red {
+            color: red;
+        }
+
+        .font_error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .font_warning {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .font_info {
+            color: green;
+            font-weight: bold;
+        }
+
+        .font_uppercase {
+            text-transform: uppercase;
+        }
+
+        .tooltip {
+            border-bottom: 1px dotted #000000;
+            color: #000000;
+            outline: none;
+            cursor: help;
+            text-decoration: none;
+            position: relative;
+        }
+
+        a.tooltip span.custom {
+            margin-left: -999em;
+            position: absolute;
+            white-space: nowrap;
+        }
+
+        .tooltip:hover span.custom {
+            border-radius: 5px 5px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+            -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+            -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+            font-family: Calibri, Tahoma, Geneva, sans-serif;
+            position: absolute;
+            left: 1em;
+            top: 1em;
+            z-index: 99;
+            margin-left: 0;
+            padding-right: 10px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            font-size: 86%
+        }
+
+        .tooltipcaption {
+            font-family: Candara, Tahoma, Geneva, sans-serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: block;
+            padding: 0.2em 0 0.2em 0;
+        }
+
+        .tooltip:hover img {
+            border: 0;
+            margin: -10px 0 0 -35px;
+            float: left;
+            position: absolute;
+            z-index: 99;
+            display: block;
+            width: 32px;
+
+        }
+
+        .critical {
+            background: #FFCCAA;
+            border: 1px solid #FF3334;
+        }
+
+        .info {
+            background: #9FDAEE;
+            border: 1px solid #2BB0D7;
+        }
+
+        .property_table table, .property_table td, .property_table th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            font-family: "Courier New", Monospace;
+            font-size: 0.9em;
+        }
+
+        .property_table th {
+            font-size: 1em;
+            text-align: left;
+            padding-left: 5px;
+            background-color: grey;
+            color: #fff;
+        }
+
+        .property_table td {
+            text-align: right;
+        }
+
+        .zebra {
+            /*width:100%;*/
+            border-collapse: collapse;
+        }
+
+        .zebra td, .zebra th {
+            font-size: 0.9em;
+            /*border:1px solid grey;*/
+            padding-top: 3px;
+            padding-left: 7px;
+            padding-bottom: 2px;
+            padding-right: 7px;
+            white-space: nowrap;
+        }
+
+        .zebra th {
+            font-size: 1em;
+            text-align: left;
+            padding-top: 5px;
+            padding-bottom: 4px;
+            background-color: grey;
+            color: #fff;
+        }
+
+        .zebra tr.alt td {
+            color: #000;
+            background-color: #E8EDFF;
+        }
+    </style>
+</head>
+<body>
+
+<div id="dummycontext"></div>
+<div id="dummystatus"></div>
+<div id="dummysummary"></div>
+<table class="error_report_tbl">
+    <tr class="alt">
+        <td colspan="3">Validation Report</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">checkLevel</td>
+                    <td colspan="1">ACK1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ackTimestamp</td>
+                    <td colspan="1">2023-12-01T09:29:47Z</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">levelName</td>
+                    <td colspan="1">File</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orgnlMsgFormat</td>
+                    <td colspan="1">pain.001.001.03</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orgnlIntrchgId</td>
+                    <td colspan="1">7458424_SG_ACH</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orglTimestamp</td>
+                    <td colspan="1">2019-05-24T08:29:36</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">General Error</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_error">Error</span></td>
+        <td colspan="2"><span class="font_bold">File creation date too old</span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2">000606<br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">given CreDtTm</td>
+                    <td colspan="1">2019-05-24T08:29:36</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">permitted scope</td>
+                    <td colspan="1">5 day(s) in the past</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orglNumberOfTransactions</td>
+                    <td colspan="1">2</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orglCtrlSum</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">initiatingPartyOtherId</td>
+                    <td colspan="1">ABC00102991</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/GrpHdr</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">checkLevel</td>
+                    <td colspan="1">ACK1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ackTimestamp</td>
+                    <td colspan="1">2023-12-01T09:29:47Z</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">levelName</td>
+                    <td colspan="1">Batch</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">paymentInformationId</td>
+                    <td colspan="1">7458424_38000_SG_ACH</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">paymentMethod</td>
+                    <td colspan="1">TRF</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orglNumberOfTransactions</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">orglCtrlSum</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">valueDate</td>
+                    <td colspan="1">2019-05-25</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">firstPartyName</td>
+                    <td colspan="1">Debtor Name</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">firstPartyAccount</td>
+                    <td colspan="1">141225xxxxx1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">firstPartyAccountIBAN</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">firstPartyInstitutionId</td>
+                    <td colspan="1">HSBCSGSGXXX</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">firstPartyClearingSystemMemberId</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ultimateDebtorName</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">checkLevel</td>
+                    <td colspan="1">ACK1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">levelName</td>
+                    <td colspan="1">Transaction</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructionId</td>
+                    <td colspan="1">100000000689</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">endToEndId</td>
+                    <td colspan="1">100000000689</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructedAmount</td>
+                    <td colspan="1">1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructedAmountCurrency</td>
+                    <td colspan="1">SGD</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">equivalentAmount</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">equivalentCurrency</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ultimateDebtorName</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAgentBIC</td>
+                    <td colspan="1">DBSSSGSGXXX</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyClearingSystemMemberId</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyName</td>
+                    <td colspan="1">Creditor</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAccountIBAN</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAccount</td>
+                    <td colspan="1">0019999001</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ultimateCreditorName</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">checkLevel</td>
+                    <td colspan="1">ACK1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">levelName</td>
+                    <td colspan="1">Transaction</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructionId</td>
+                    <td colspan="1">100000000690</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">endToEndId</td>
+                    <td colspan="1">100000000690</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructedAmount</td>
+                    <td colspan="1">1</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">instructedAmountCurrency</td>
+                    <td colspan="1">SGD</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">equivalentAmount</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">equivalentCurrency</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ultimateDebtorName</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAgentBIC</td>
+                    <td colspan="1">OCBCSGSGXXX</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyClearingSystemMemberId</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyName</td>
+                    <td colspan="1">Creditor</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAccountIBAN</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">secondPartyAccount</td>
+                    <td colspan="1">1234123412</td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Info</td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_info">Information</span></td>
+        <td colspan="2"><span class="font_bold"></span></td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2"><br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2">
+            <table class="context_table">
+                <tr class="row-separator">
+                    <td colspan="3">Parameter</td>
+                </tr>
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">ultimateCreditorName</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="1">DOCINFO_TARGET</td>
+                    <td colspan="1">ALL</td>
+                    <td colspan="1"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf</td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="row-separator">
+        <td colspan="1">Segment</td>
+        <td id="s0" colspan="2"></td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1"><span class="font_error">Error</span></td>
+        <td colspan="2"><span class="font_bold">cvc-minLength-valid: Value &apos;&apos; with length = &apos;0&apos; is not facet-valid with respect to minLength &apos;1&apos; for type &apos;ExternalPurpose1Code&apos;.</span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="1">Code</td>
+        <td colspan="2">290804 - XML Parser Error<br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2"></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td colspan="1">Path</td>
+        <td colspan="2">Document/CstmrCdtTrfInitn/PmtInf/CdtTrfTxInf/Purp</td>
+    </tr>
+    <tr class="row-separator-field">
+        <td colspan="1"></td>
+        <td id="f-1" colspan="1">Field</td>
+        <td colspan="2">Cd</td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"><span class="font_error">Error</span></td>
+        <td colspan="1"><span class="font_bold">Expected at least 1 characters, but found 0</span></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1">Code</td>
+        <td colspan="1">290712 - Field too short<br/></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="2"></td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+    <tr class="separator">
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+        <td colspan="1"></td>
+    </tr>
+</table>
+<div class="hidden_div" id="status">
+    <table class="global_table">
+        <tr class="header">
+            <td colspan="2">Status</td>
+        </tr>
+        <tr>
+            <td colspan="1">NOT COMPLIANT</td>
+        </tr>
+    </table>
+</div>
+<div class="hidden_div" id="summary">
+    <table class="global_table">
+        <tr class="header">
+            <td colspan="2">Summary</td>
+            <td colspan="1"></td>
+        </tr>
+        <tr class="separator">
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+        <tr class="alt">
+            <td colspan="1">Error Code</td>
+            <td colspan="1">Error Message</td>
+            <td colspan="1">Count</td>
+        </tr>
+        <tr>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">000606</td>
+            <td colspan="1">File creation date too old</td>
+            <td colspan="1">1</td>
+        </tr>
+        <tr>
+            <td colspan="1">290804</td>
+            <td colspan="1">XML Parser Error</td>
+            <td colspan="1">1</td>
+        </tr>
+        <tr>
+            <td colspan="1">290712</td>
+            <td colspan="1">Field too short</td>
+            <td colspan="1">1</td>
+        </tr>
+        <tr class="separator">
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+        <tr class="alt">
+            <td colspan="1">Info Code</td>
+            <td colspan="1">Info Message</td>
+            <td colspan="1">Count</td>
+        </tr>
+        <tr>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+        <tr>
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+            <td colspan="1">53</td>
+        </tr>
+    </table>
+</div>
+<div class="hidden_div" id="context">
+    <table class="global_table">
+        <tr class="header">
+            <td colspan="2">Validation Report (SEEAPPACK)</td>
+        </tr>
+        <tr class="separator">
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+        <tr class="alt">
+            <td colspan="1">Validated Message (--)</td>
+            <td colspan="1">SEEAPPACK-Details</td>
+        </tr>
+        <tr class="separator">
+            <td colspan="1">
+                <table class="context_table">
+                    <tr>
+                        <td colspan="1">Message Type</td>
+                        <td colspan="1">--</td>
+                    </tr>
+                    <tr>
+                        <td colspan="1">Interchange Reference</td>
+                        <td colspan="1">7458424_SG_ACH</td>
+                    </tr>
+                    <tr>
+                        <td colspan="1">Creation Date</td>
+                        <td colspan="1">--</td>
+                    </tr>
+                    <tr>
+                        <td colspan="1">Delivery Date</td>
+                        <td colspan="1">--</td>
+                    </tr>
+                </table>
+            </td>
+            <td colspan="1">
+                <table class="context_table">
+                    <tr>
+                        <td colspan="1">Message Type</td>
+                        <td colspan="1">SEEAPPACK</td>
+                    </tr>
+                    <tr>
+                        <td colspan="1">Interchange Reference</td>
+                        <td colspan="1">--</td>
+                    </tr>
+                    <tr>
+                        <td colspan="1">Creation Date</td>
+                        <td colspan="1">01.12.2023 - 09:29</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr class="separator">
+            <td colspan="1"></td>
+            <td colspan="1"></td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    window.onload = function () {
+        document.getElementById('dummycontext').innerHTML = document.getElementById('context').innerHTML;
+        document.getElementById('dummystatus').innerHTML = document.getElementById('status').innerHTML;
+        document.getElementById('dummysummary').innerHTML = document.getElementById('summary').innerHTML;
+    }</script>
+
+</body>
+</html>
