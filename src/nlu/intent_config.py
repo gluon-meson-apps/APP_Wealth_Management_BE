@@ -12,6 +12,12 @@ class IntentConfig:
         self.business = business
         self.examples = examples or []
 
+    def minial_info(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+        }
+
 
 class IntentListConfig:
     def __init__(self, intents: list[IntentConfig]):
@@ -35,12 +41,10 @@ class IntentListConfig:
 
     def get_intent_name(self):
         # read resources/intent.yaml file and get intent list
-        return [intent.name for intent in self.intents]
+        return [intent.name for intent in self.intents if intent.name != "unknown"]
 
     def get_intent(self, intent_name):
-        return next(
-            (intent for intent in self.intents if intent.name == intent_name), None
-        )
+        return next((intent for intent in self.intents if intent.name == intent_name), None)
 
     def get_intent_and_attrs(self):
         return [

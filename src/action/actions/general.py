@@ -1,3 +1,4 @@
+import json
 from typing import List, Union
 from loguru import logger
 from action.base import (
@@ -105,11 +106,11 @@ class IntentFillingAction(Action):
 
     async def run(self, context):
         logger.info("exec action intent_filling")
-        filtered_intents = [intent.description for intent in self.intents if intent.business]
+        filtered_intents = [intent.minial_info() for intent in self.intents if intent.business]
         prompt = self.prompt_template.format(
             {
                 "history": context.conversation.get_history().format_string(),
-                "intent_list": " or ".join(filtered_intents),
+                "intent_list": json.dumps(filtered_intents),
             }
         )
         logger.debug(prompt)

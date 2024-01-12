@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 from typing import List
 
 from loguru import logger
@@ -61,6 +62,9 @@ class IntentCall:
         logger.debug(history)
         logger.debug(system_message)
         logger.debug(intent)
-        response = IntentClassificationResponse.parse_obj(json.loads(intent))
-
+        try:
+            response = IntentClassificationResponse.parse_obj(json.loads(intent))
+        except JSONDecodeError as e:
+            logger.error(e)
+            response = IntentClassificationResponse(intent="unknown", confidence=1.0)
         return response
