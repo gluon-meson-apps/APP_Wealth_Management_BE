@@ -1,6 +1,6 @@
 name: br_file_qa
 description: according to provided board resolution file, answer the questions from user input
-business: false
+business: true
 slots:
   - name: country
     description: the country of the product

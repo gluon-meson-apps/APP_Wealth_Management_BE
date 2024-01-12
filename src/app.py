@@ -13,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
-from action.base import ErrorResponse, AttachmentResponse
+from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
@@ -76,19 +76,22 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
     )
 
     def generator():
-        yield {
-            "data": json.dumps(
-                {
-                    "answer": result.answer.content,
-                    "session_id": conversation.session_id,
-                    **(
-                        dict(attachment=result.attachment.model_dump_json())
-                        if isinstance(result, AttachmentResponse)
-                        else {}
-                    ),
-                }
-            )
-        }
+        if isinstance(result, JumpOutResponse):
+            yield {"data": json.dumps({"answer": "Sorry, I can't help you with that."})}
+        else:
+            yield {
+                "data": json.dumps(
+                    {
+                        "answer": result.answer.content,
+                        "session_id": conversation.session_id,
+                        **(
+                            dict(attachment=result.attachment.model_dump_json())
+                            if isinstance(result, AttachmentResponse)
+                            else {}
+                        ),
+                    }
+                )
+            }
 
     return EventSourceResponse(generator())
 

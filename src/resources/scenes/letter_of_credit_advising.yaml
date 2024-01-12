@@ -1,4 +1,5 @@
 name: letter_of_credit_advising
+business: true
 description: check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC Singapore
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?

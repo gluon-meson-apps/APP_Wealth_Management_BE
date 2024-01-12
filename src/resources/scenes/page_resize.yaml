@@ -1,9 +1,0 @@
-name: page_resize
-description: 调整页面字体大小
-business: true
-slots:
-  - name: font_target
-    description: 页面想要调整到的的目标比例
-    slotType: numeric or text
-    optional: False
-action: page_resize
