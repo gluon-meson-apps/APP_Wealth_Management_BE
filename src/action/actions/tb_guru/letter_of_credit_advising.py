@@ -1,3 +1,4 @@
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
@@ -30,15 +31,15 @@ we are not able to accept a letter of credit from the $bank
 
 ## all banks info
 
-{all_banks}
+{{all_banks}}
 
 ## bank to be check info\n
 
-{bank_info}
+{{bank_info}}
 
 ## user input
 
-{user_input}
+{{user_input}}
 
 ## INSTRUCT
 
@@ -68,13 +69,18 @@ class LetterOfCreditAdvisingAction(Action):
         response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
         all_banks = "\n".join([item.json() for item in response])
-        final_prompt = prompt.format(
+
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user",
+            prompt,
             all_banks=all_banks,
             bank_info=format_entities_for_search(context.conversation),
             user_input=context.conversation.current_user_input,
         )
-        logger.info(f"final prompt: {final_prompt}")
-        result = chat_model.chat(final_prompt, max_length=2048).response
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

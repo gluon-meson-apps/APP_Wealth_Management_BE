@@ -1,5 +1,6 @@
 from typing import Union
 
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
@@ -33,16 +34,16 @@ Your reply should include following 2 parts:
    please note: the report URL link should be wrapped by a HTML <a> tag with :target="_blank" attribute.
 
 ## User upload file info
-Upload file name: {upload_filename}
-Upload file URL: {upload_file_url}
-Upload file format: {upload_file_format}
+Upload file name: {{upload_filename}}
+Upload file URL: {{upload_file_url}}
+Upload file format: {{upload_file_format}}
 
 ## Validation report file info
-Report file name: {report_filename}
-Report file URL: {file_url}
+Report file name: {{report_filename}}
+Report file URL: {{file_url}}
 
 ## User query
-{user_input}
+{{user_input}}
 
 ## INSTRUCTION
 Now, answer the user's question, and reply the final result.
@@ -83,7 +84,10 @@ class FileValidation(Action):
         res = self.hsbc_connect_api.validate_file(first_file)
         download_link = self._upload_file(res)
 
-        final_prompt = prompt.format(
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user",
+            prompt,
             user_input=context.conversation.current_user_input,
             file_url=download_link,
             report_filename=report_filename,
@@ -93,8 +97,9 @@ class FileValidation(Action):
             if context.conversation.entities
             else first_file.meta__reference.meta__source_type,
         )
-        logger.info(f"final prompt: {final_prompt}")
-        result = chat_model.chat(final_prompt, max_length=1024).response
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

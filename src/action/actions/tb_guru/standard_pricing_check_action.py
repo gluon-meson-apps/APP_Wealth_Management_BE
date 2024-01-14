@@ -1,3 +1,4 @@
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
@@ -23,15 +24,15 @@ According to the standard pricing of $product in $country, the unit rate should 
 
 ## all products info
 
-{all_products}
+{{all_products}}
 
 ## product to be check info\n
 
-{product_info}
+{{product_info}}
 
 ## chat history
 
-{chat_history}
+{{chat_history}}
 
 ## INSTRUCT
 
@@ -44,7 +45,7 @@ please summarize the chat history
 
 ## chat history
 
-{chat_history}
+{{chat_history}}
 
 ## Result
 
@@ -66,9 +67,12 @@ class StandardPricingCheckAction(Action):
 
         entities_without_unit_rate = format_entities_for_search(context.conversation, ["offered unit price"])
         history = context.conversation.get_history().format_string()
-        summary_prompt = summary_prompt_template.format(chat_history=history)
-        logger.info(f"summary_prompt: {summary_prompt}")
-        result = chat_model.chat(summary_prompt, max_length=1024).response
+
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message("user", summary_prompt_template, chat_history=history)
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
         query = f"""## User input:
 {result}
 
@@ -89,9 +93,14 @@ class StandardPricingCheckAction(Action):
             )
             for entity in context.conversation.get_entities()
         ]
-        final_prompt = prompt.format(all_products=all_products, product_info=product_info, chat_history=history)
-        logger.info(f"final prompt: {final_prompt}")
-        result = chat_model.chat(final_prompt, max_length=2048).response
+
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user", prompt, all_products=all_products, product_info=product_info, chat_history=history
+        )
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         # result = self.chat_model.chat(final_prompt, model_type=self.model_type, max_length=1024)
         logger.info(f"chat result: {result}")
 

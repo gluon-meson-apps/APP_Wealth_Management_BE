@@ -1,4 +1,6 @@
 import re
+
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
@@ -11,11 +13,11 @@ You are a helpful assistant, you need to answer the question from user based on 
 
 ## business resolution file content
 
-{br_file_content}
+{{br_file_content}}
 
 ## user input
 
-{user_input}
+{{user_input}}
 
 """
 
@@ -39,11 +41,13 @@ class BrFileQAAction(Action):
 
         # get the url from entity
 
-        final_prompt = prompt.format(
-            br_file_content=br_file_content, user_input=context.conversation.current_user_input
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user", prompt, br_file_content=br_file_content, user_input=context.conversation.current_user_input
         )
-        logger.info(f"final prompt: {final_prompt}")
-        result = chat_model.chat(final_prompt, max_length=2048).response
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

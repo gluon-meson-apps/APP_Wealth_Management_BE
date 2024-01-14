@@ -1,3 +1,4 @@
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 from io import StringIO
 import pandas as pd
@@ -21,29 +22,15 @@ you are a chatbot, you need to answer the question from user
 
 ## context
 
-{context_info}
+{{context_info}}
 
 ## user input
 
-{user_input}
+{{user_input}}
 
 ## INSTRUCT
 
 based on the context, answer the question;
-
-"""
-
-summary_prompt_template = """## Role
-you are a chatbot, you need to validate if the pricing offered to the customer is compliant with the standard pricing
-
-## INSTRUCTION
-currently you should summary the result of the conversation, and the result should contains the following information:
-
-{entities}
-
-## chat history
-
-{chat_history}
 
 """
 
@@ -62,10 +49,17 @@ class FileBatchAction(Action):
             response = self.unified_search.vector_search(SearchParam(query=question), "faq")
             logger.info(f"search response: {response}")
             context_info = "\n".join([item.json() for item in response])
-            final_prompt = prompt.format(context_info=context_info, user_input=question)
-            logger.info(f"final prompt: {final_prompt}")
-            result = chat_model.chat(final_prompt, max_length=2048).response
-            # result = self.chat_model.chat(final_prompt, model_type=self.model_type, max_length=1024)
+
+            chat_message_preparation = ChatMessagePreparation()
+            chat_message_preparation.add_message(
+                "user",
+                prompt,
+                context_info=context_info,
+                user_input=question,
+            )
+            chat_message_preparation.log(logger)
+
+            result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
             logger.info(f"chat result: {result}")
 
             return result
@@ -81,8 +75,7 @@ class FileBatchAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, context)
         df["answer"] = df.apply(lambda row: get_result_from_llm(self, row["questions"]), axis=1)
-        # summary_prompt = summary_prompt_template.format(entities='\n'.join([entity.json() for entity in context.conversation.get_entities()]), chat_history=context.conversation.get_history().format_string())
-        # result = chat_model.chat(summary_prompt, max_length=1024).response
+
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content="Already replied all questions in file",

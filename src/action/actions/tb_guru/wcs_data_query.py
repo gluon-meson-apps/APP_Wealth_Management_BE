@@ -4,6 +4,7 @@ import uuid
 from typing import Union, Any
 
 import pandas as pd
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
@@ -31,10 +32,10 @@ If the WCS data is empty, then tell the user that we cannot find data, ask them 
 Please note: IGNORE user's requirements for generating PPT and do NOT mention any PPT things in your reply.
 
 ## WCS data
-{wcs_data}
+{{wcs_data}}
 
 ## user question
-{user_input}
+{{user_input}}
 
 ## INSTRUCT
 now, answer the question step by step, and reply the final result.
@@ -47,7 +48,7 @@ We have generated a PPT for the user and the link is attached below, tell the us
 If the PPT link is empty, tell the user that we cannot generate PPT now. Please ask them to try again later.
 
 ## PPT link
-{ppt_link}
+{{ppt_link}}
 
 ## INSTRUCT
 now, reply your result.
@@ -114,19 +115,26 @@ class WcsDataQuery(Action):
 
         all_companies_data, current_company_data = await self._search(context)
 
-        final_prompt = prompt.format(
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user",
+            prompt,
             user_input=context.conversation.current_user_input,
             wcs_data="\n".join([item.model_dump_json() for item in current_company_data + all_companies_data]),
         )
-        logger.info(f"final prompt: {final_prompt}")
-        result = chat_model.chat(final_prompt, max_length=1024).response
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
         logger.info(f"chat result: {result}")
 
         if is_ppt_output and current_company_data and all_companies_data:
             ppt_link = self._generate_ppt(current_company_data, all_companies_data, result)
-            final_prompt = ppt_prompt.format(ppt_link=ppt_link)
-            logger.info(f"ppt prompt: {final_prompt}")
-            result = chat_model.chat(final_prompt, max_length=1024).response
+
+            chat_message_preparation = ChatMessagePreparation()
+            chat_message_preparation.add_message("user", ppt_prompt, ppt_link=ppt_link)
+            chat_message_preparation.log(logger)
+
+            result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
             logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

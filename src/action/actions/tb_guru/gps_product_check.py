@@ -1,5 +1,6 @@
 import json
 
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 from tabulate import tabulate
 
@@ -7,7 +8,6 @@ from action.base import Action, ActionResponse, ResponseMessageType, ChatRespons
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
-
 
 prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on below provided gps products
@@ -17,11 +17,11 @@ gps known as global payment system
 
 ## all gps products
 
-{gps_products}
+{{gps_products}}
 
 ## user input
 
-{user_input}
+{{user_input}}
 
 ## INSTRUCT
 
@@ -75,8 +75,11 @@ class GPSProductCheckAction(Action):
             gps_products = tabulate(pure_values, headers=headers)
             logger.info(f"headers: {gps_products}")
 
-        final_prompt = prompt.format(gps_products=gps_products, user_input=user_input)
-        result = chat_model.chat(final_prompt, max_length=2048).response
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message("user", prompt, gps_products=gps_products, user_input=user_input)
+        chat_message_preparation.log(logger)
+
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(
