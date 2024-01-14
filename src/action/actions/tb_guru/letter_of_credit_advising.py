@@ -57,15 +57,15 @@ class LetterOfCreditAdvisingAction(Action):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         query = (
-                "search the counterparty bank"
-                + f"\n #extra infos: fields to be queried: {context.conversation.get_entities()} "
+            "search the counterparty bank"
+            + f"\n #extra infos: fields to be queried: {context.conversation.get_entities()} "
         )
         logger.info(f"search query: {query}")
 
-        response = self.unified_search.search(SearchParam(query=query))
+        response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
         all_banks = "\n".join([item.json() for item in response])
         final_prompt = prompt.format(

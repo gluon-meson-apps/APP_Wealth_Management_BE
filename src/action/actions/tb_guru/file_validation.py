@@ -75,7 +75,7 @@ class FileValidation(Action):
         raise Exception("Upload file failed.")
 
     async def run(self, context):
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         logger.info(f"exec action: {self.get_name()} ")
 
         first_file: SearchItem = get_first_file(context)

@@ -29,9 +29,9 @@ According to the standard pricing of $product in $country, the unit rate should 
 
 {product_info}
 
-## user input
+## chat history
 
-{user_input}
+{chat_history}
 
 ## INSTRUCT
 
@@ -62,20 +62,23 @@ class StandardPricingCheckAction(Action):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         entities_without_unit_rate = format_entities_for_search(context.conversation, ["offered unit price"])
-        summary_prompt = summary_prompt_template.format(chat_history=context.conversation.get_history().format_string())
+        history = context.conversation.get_history().format_string()
+        summary_prompt = summary_prompt_template.format(chat_history=history)
         logger.info(f"summary_prompt: {summary_prompt}")
         result = chat_model.chat(summary_prompt, max_length=1024).response
-        query = (
-            result
-            + f"\n #extra infos: 1. offered unit rate should not be a query field, 2. fields to be queried: {entities_without_unit_rate} "
-        )
+        query = f"""## User input:
+{result}
+
+## ATTENTION
+1. offered unit rate should not be a query field
+2. fields to be queried: {entities_without_unit_rate}"""
         logger.info(f"query: {query}")
 
         # todo: process multi round case
-        response = self.unified_search.search(SearchParam(query=query))
+        response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
         all_products = "\n".join([item.json() for item in response])
         product_info = [
@@ -86,9 +89,7 @@ class StandardPricingCheckAction(Action):
             )
             for entity in context.conversation.get_entities()
         ]
-        final_prompt = prompt.format(
-            all_products=all_products, product_info=product_info, user_input=context.conversation.current_user_input
-        )
+        final_prompt = prompt.format(all_products=all_products, product_info=product_info, chat_history=history)
         logger.info(f"final prompt: {final_prompt}")
         result = chat_model.chat(final_prompt, max_length=2048).response
         # result = self.chat_model.chat(final_prompt, model_type=self.model_type, max_length=1024)

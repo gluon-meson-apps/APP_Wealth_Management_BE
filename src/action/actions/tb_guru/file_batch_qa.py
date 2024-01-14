@@ -78,7 +78,7 @@ class FileBatchAction(Action):
         TESTDATA = StringIO(context.conversation.uploaded_file_contents[0].items[0].text)
 
         df = pd.read_csv(TESTDATA, sep=";")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, context)
         df["answer"] = df.apply(lambda row: get_result_from_llm(self, row["questions"]), axis=1)
         # summary_prompt = summary_prompt_template.format(entities='\n'.join([entity.json() for entity in context.conversation.get_entities()]), chat_history=context.conversation.get_history().format_string())

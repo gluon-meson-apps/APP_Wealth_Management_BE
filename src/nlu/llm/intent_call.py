@@ -48,7 +48,9 @@ class IntentCall:
     def format_message(self, role, content):
         return dict(role=role, content=content)
 
-    def classify_intent(self, query: str, chat_history: list[dict[str, str]], examples) -> IntentClassificationResponse:
+    def classify_intent(
+        self, query: str, chat_history: list[dict[str, str]], examples, session_id
+    ) -> IntentClassificationResponse:
         system_message = self.construct_system_prompt(chat_history)
         history = [{"role": "system", "content": system_message}]
         logger.debug(examples)
@@ -56,8 +58,10 @@ class IntentCall:
             history.append(self.format_message("user", example["example"]))
             history.append(self.format_message("assistant", example["intent"]))
         gm_history = [(h["role"], h["content"]) for h in history]
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
-        intent = chat_model.chat(query, history=gm_history, max_length=1024).response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
+
+        # TODO: drop history if it is too long
+        intent = chat_model.chat(query, history=gm_history, max_length=4096).response
         logger.debug(query)
         logger.debug(history)
         logger.debug(system_message)

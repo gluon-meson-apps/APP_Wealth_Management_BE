@@ -57,8 +57,8 @@ class SlotFillingAction(Action):
             }
         )
         logger.debug(prompt)
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
-        response = chat_model.chat(prompt, max_length=128).response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        response = chat_model.chat(prompt, max_length=256).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -76,7 +76,7 @@ class IntentConfirmAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_confirmation_action"
 
-    async def run(self, context: ConversationContext):
+    async def run(self, context):
         logger.info("exec action intent confirm")
         prompt = self.prompt_template.format(
             {
@@ -85,7 +85,7 @@ class IntentConfirmAction(Action):
             }
         )
         logger.debug(prompt)
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
@@ -114,8 +114,8 @@ class IntentFillingAction(Action):
             }
         )
         logger.debug(prompt)
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
-        response = chat_model.chat(prompt, max_length=128).response
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        response = chat_model.chat(prompt, max_length=1024, temperature=0.5).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -145,7 +145,7 @@ class SlotConfirmAction(Action):
             }
         )
         logger.debug(prompt)
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         response = chat_model.chat(prompt, max_length=128).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
@@ -164,7 +164,7 @@ class ChitChatAction(Action):
     async def run(self, context) -> ActionResponse:
         logger.info("exec action slot chitchat")
         # todo: add history from context
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         result = chat_model.chat(context.conversation.current_user_input, max_length=128).response
         if result is None:
             answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=self.default_template)

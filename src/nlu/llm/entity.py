@@ -85,8 +85,9 @@ class LLMEntityExtractor(EntityExtractor):
         prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
         logger.debug(prompt)
         logger.debug(history)
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
-        response = chat_model.chat(prompt, history=history, max_length=1024)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, log_id=conversation_context.session_id)
+        # TODO: drop history if it is too long
+        response = chat_model.chat(prompt, history=history, max_length=4096)
         logger.debug(response.response)
         if response is None or response.response == "None":
             return []

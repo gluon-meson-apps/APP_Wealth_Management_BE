@@ -40,14 +40,30 @@ class GPSProductCheckAction(Action):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         user_input = context.conversation.current_user_input
 
-        response = self.unified_search.search(SearchParam(query=user_input, tags={"product_line": "gps_product"}))
+        response = self.unified_search.search(
+            SearchParam(query=user_input, tags={"product_line": "gps_product"}), context.conversation.session_id
+        )
         logger.info(f"search response: {response}")
         data = [item.json() for item in response[0].items]
-        keys_to_exclude = ["meta__score", "meta__reference", "id", "seg_bb_rm", "seg_mme", "seg_lc", "seg_mc", "seg_fi",
-                           "seg_nbfi", "seg_af", "seg_ps", "seg_rbb", "seg_gpb", "seg_bb_non_rm"]
+        keys_to_exclude = [
+            "meta__score",
+            "meta__reference",
+            "id",
+            "seg_bb_rm",
+            "seg_mme",
+            "seg_lc",
+            "seg_mc",
+            "seg_fi",
+            "seg_nbfi",
+            "seg_af",
+            "seg_ps",
+            "seg_rbb",
+            "seg_gpb",
+            "seg_bb_non_rm",
+        ]
         gps_products = ""
         if len(data) > 0:
             headers = (json.loads(data[0])).keys()

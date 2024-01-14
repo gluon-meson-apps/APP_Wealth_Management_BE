@@ -43,8 +43,10 @@ class UnifiedSearch:
         self.base_url = "http://localhost:8000"
 
     @error_handler(UnifiedSearchClientException("unified search error", error_code=1001))
-    def search(self, search_param: SearchParam) -> list[SearchResponse]:
-        response = requests.post(self.base_url + "/search", json=search_param.dict())
+    def search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
+        response = requests.post(
+            self.base_url + "/search", json=search_param.dict(), headers={"conversation-id": conversation_id}
+        )
         print(response.json())
         return [SearchResponse.parse_obj(item) for item in response.json()]
 

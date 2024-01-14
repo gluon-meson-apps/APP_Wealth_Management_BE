@@ -96,7 +96,9 @@ class WcsDataQuery(Action):
         ]
         if "company" in entity_dict:
             query_list.append(f"""Query WCS data with company {entity_dict["company"]}:""")
-        search_res = [self.unified_search.search(SearchParam(query=q)) for q in query_list]
+        search_res = [
+            self.unified_search.search(SearchParam(query=q), context.conversation.session_id) for q in query_list
+        ]
         items = [s[0].items if s else [] for s in search_res]
         all_companies_data, current_company_data = items[0], items[1] if len(items) > 1 else []
         latest_period = all_companies_data[0].days if all_companies_data else ""
@@ -105,7 +107,7 @@ class WcsDataQuery(Action):
         ) if latest_period else [], current_company_data
 
     async def run(self, context) -> ActionResponse:
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model)
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         logger.info(f"exec action: {self.get_name()} ")
 
         is_ppt_output = context.conversation.get_simplified_entities()["is_ppt_output"]

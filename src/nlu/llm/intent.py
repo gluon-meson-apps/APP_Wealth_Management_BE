@@ -136,7 +136,7 @@ class LLMIntentClassifier(IntentClassifier):
         intent_name_list = self.intent_list_config.get_intent_name()
         chat_history = conversation.get_history().format_messages()
         intent_examples = get_intent_examples(user_input)
-        intent = self.intent_call.classify_intent(user_input, chat_history, intent_examples)
+        intent = self.intent_call.classify_intent(user_input, chat_history, intent_examples, conversation.session_id)
 
         if intent.intent in intent_name_list:
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
