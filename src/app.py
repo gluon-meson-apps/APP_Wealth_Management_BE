@@ -73,22 +73,29 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
     )
     print(file_res)
     err_msg = ""
+    result = None
+    conversation = None
+    session_id = score_command.conversation_id
     try:
         result, conversation = await dialog_manager.handle_message(
-            score_command.question, score_command.conversation_id, file_contents=[file_res]
+            score_command.question, session_id, file_contents=[file_res]
         )
     except Exception as err:
         logger.info(traceback.format_exc())
         err_msg = f"Error occurred: {err}"
 
     def generator():
-        if isinstance(result, JumpOutResponse):
+        answer = "unknown error occurred"
+        if result is None:
+            if err_msg:
+                answer = json.dumps({"answer": err_msg})
+        elif isinstance(result, JumpOutResponse):
             answer = json.dumps({"answer": "Sorry, I can't help you with that."})
         else:
             answer = json.dumps(
                 {
                     "answer": result.answer.content,
-                    "session_id": conversation.session_id,
+                    "session_id": session_id,
                     **(
                         dict(attachment=result.attachment.model_dump_json())
                         if isinstance(result, AttachmentResponse)
@@ -96,17 +103,17 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
                     ),
                 }
             )
-        if err_msg:
-            answer = json.dumps({"answer": err_msg})
 
         yield {"data": answer}
-        full_history = conversation.history.format_messages()
+        full_history = []
+        if conversation is not None:
+            full_history = conversation.history.format_messages()
         PGModelLogService().log(
-            conversation.session_id,
+            session_id,
             "overall",
             "no_model",
-            full_history[:-1],
-            full_history[-1]["content"] if "content" in full_history[-1] else "",
+            full_history[:-1] if len(full_history) > 0 else [],
+            full_history[-1]["content"] if len(full_history) > 0 and "content" in full_history[-1] else "",
             {},
             err_msg,
         )
