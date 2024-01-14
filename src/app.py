@@ -7,6 +7,7 @@ from urllib.request import Request
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
+from gluon_meson_sdk.models.longging.pg_log_service import PGModelLogService
 from loguru import logger
 from sse_starlette import EventSourceResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -71,27 +72,44 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
         await unified_search.adownload_file_from_minio(score_command.file_url) if score_command.file_url else None
     )
     print(file_res)
-    result, conversation = await dialog_manager.handle_message(
-        score_command.question, score_command.conversation_id, file_contents=[file_res]
-    )
+    err_msg = ""
+    try:
+        result, conversation = await dialog_manager.handle_message(
+            score_command.question, score_command.conversation_id, file_contents=[file_res]
+        )
+    except Exception as err:
+        logger.info(traceback.format_exc())
+        err_msg = f"Error occurred: {err}"
 
     def generator():
         if isinstance(result, JumpOutResponse):
-            yield {"data": json.dumps({"answer": "Sorry, I can't help you with that."})}
+            answer = json.dumps({"answer": "Sorry, I can't help you with that."})
         else:
-            yield {
-                "data": json.dumps(
-                    {
-                        "answer": result.answer.content,
-                        "session_id": conversation.session_id,
-                        **(
-                            dict(attachment=result.attachment.model_dump_json())
-                            if isinstance(result, AttachmentResponse)
-                            else {}
-                        ),
-                    }
-                )
-            }
+            answer = json.dumps(
+                {
+                    "answer": result.answer.content,
+                    "session_id": conversation.session_id,
+                    **(
+                        dict(attachment=result.attachment.model_dump_json())
+                        if isinstance(result, AttachmentResponse)
+                        else {}
+                    ),
+                }
+            )
+        if err_msg:
+            answer = json.dumps({"answer": err_msg})
+
+        yield {"data": answer}
+        full_history = conversation.history.format_messages()
+        PGModelLogService().log(
+            conversation.session_id,
+            "overall",
+            "no_model",
+            full_history[:-1],
+            full_history[-1]["content"] if "content" in full_history[-1] else "",
+            {},
+            err_msg,
+        )
 
     return EventSourceResponse(generator())
 

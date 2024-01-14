@@ -31,6 +31,7 @@ from policy.general import (
 )
 from prompt_manager.base import BasePromptManager
 from reasoner.llm_reasoner import LlmReasoner
+from tracker.context import ConversationContext
 
 
 class BaseDialogManager:
@@ -57,7 +58,7 @@ class BaseDialogManager:
 
     async def handle_message(
         self, message: Any, session_id: str, files: list[UploadFile] = None, file_contents: list[SearchResponse] = None
-    ) -> Any:
+    ) -> tuple[Any, ConversationContext]:
         if files is None:
             files = []
         if file_contents is None:
