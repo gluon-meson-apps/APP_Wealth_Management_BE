@@ -1,6 +1,7 @@
 import json
 from typing import List
 
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 
 from nlu.base import EntityExtractor
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
@@ -51,16 +52,25 @@ class LLMEntityExtractor(EntityExtractor):
         )
 
     def construct_messages(
-        self, user_input, intent, form: Form, conversation_context: ConversationContext
-    ) -> List[str]:
-        final_user_message = user_input
-        history = [
-            ("system", self.construct_system_prompt(conversation_context, form.get_available_slots_str(), intent))
-        ]
+        self,
+        user_input,
+        intent,
+        form: Form,
+        conversation_context: ConversationContext,
+        preparation: ChatMessagePreparation,
+    ) -> None:
+        slots = form.get_available_slots_str()
+        preparation.add_message(
+            "system",
+            self.slot_extraction_prompt.template,
+            user_intent=intent.name,
+            chat_history=conversation_context.get_history().format_string(),
+            entity_types_and_values=slots,
+        )
         for example in self.examples:
-            history.append(("user", example[0]))
-            history.append(("assistant", example[1]))
-        return final_user_message, history
+            preparation.add_message("user", example[0])
+            preparation.add_message("assistant", example[1])
+        preparation.add_message("user", user_input)
 
     def prepare_examples(self):
         examples = [
@@ -82,16 +92,19 @@ class LLMEntityExtractor(EntityExtractor):
         if not form:
             logger.debug(f"this intent [{intent.name}] does not need to extract entity")
             return []
-        prompt, history = self.construct_messages(user_input, intent, form, conversation_context)
-        logger.debug(prompt)
-        logger.debug(history)
+
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, log_id=conversation_context.session_id)
+
         # TODO: drop history if it is too long
-        response = chat_model.chat(prompt, history=history, max_length=4096)
-        logger.debug(response.response)
-        if response is None or response.response == "None":
+        chat_message_preparation = ChatMessagePreparation()
+        self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
+        chat_message_preparation.log(logger)
+        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True).response
+
+        logger.debug(result)
+        if result == "None":
             return []
-        entities = json.loads(response.response)
+        entities = json.loads(result)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(
