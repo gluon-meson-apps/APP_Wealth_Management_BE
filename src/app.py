@@ -114,7 +114,7 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
             "no_model",
             full_history[:-1] if len(full_history) > 0 else [],
             full_history[-1]["content"] if len(full_history) > 0 and "content" in full_history[-1] else "",
-            {},
+            score_command.model_dump(),
             err_msg,
         )
 
