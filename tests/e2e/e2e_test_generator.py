@@ -8,8 +8,9 @@ from utils.utils import format_jinja_template
 
 
 class E2eTestGenerator:
-    def __init__(self, connection):
+    def __init__(self, connection, get_log_id_filter=None):
         self.connection = connection
+        self.get_log_id_filter = get_log_id_filter
 
     def process_one_params(self, params):
         print(params)
@@ -29,5 +30,5 @@ class E2eTestGenerator:
                 wf.write(format_jinja_template(template, params_list=params_list))
     def process(self):
         query = "SELECT * FROM model_log where as_test_case = true and scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
-        df = pd.read_sql(query, self.connection)
+        df = pd.read_sql(query + self.get_log_id_filter, self.connection)
         df.sort_values(["created_at"]).groupby(['log_id']).apply(self.process_one_group)

@@ -7,8 +7,9 @@ from tests.e2e.generate_unit_test import generate_one_unit_test
 
 
 class UnitTestGenerator:
-    def __init__(self, connection):
+    def __init__(self, connection, get_log_id_filter=None):
         self.connection = connection
+        self.get_log_id_filter = get_log_id_filter
     def add_round_group_to_df(self, inner_df):
         inner_df = inner_df.sort_values(by=['created_at'])
         inner_df['round'] = inner_df['scenario'] == 'overall' # 10 hours
@@ -51,7 +52,7 @@ class UnitTestGenerator:
 
 
     def process(self):
-        df = pd.read_sql("SELECT * FROM model_log", self.connection)
+        df = pd.read_sql("SELECT * FROM model_log where 1=1" + self.get_log_id_filter, self.connection)
         df['session_name'] = df['log_id'].apply(lambda x: x.split('__')[-1])
         df['test'] = df['log_id'].apply(lambda x: x.startswith('test__'))
         df = df.groupby('log_id').apply(self.add_round_group_to_df).reset_index(drop=True)
