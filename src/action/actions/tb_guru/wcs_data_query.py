@@ -60,7 +60,7 @@ class WcsDataQuery(Action):
         self.unified_search = UnifiedSearch()
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
-        self.tmp_file_dir = "./tmp/wcs"
+        self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/wcs")
 
     def get_name(self) -> str:
         return "wcs_data_query"
@@ -143,3 +143,9 @@ class WcsDataQuery(Action):
             intent=context.conversation.current_intent.name,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+
+
+if __name__ == "__main__":
+    file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/wcs")
+    with open(f"{file_dir}/test.txt", "w") as f:
+        f.write("test")
