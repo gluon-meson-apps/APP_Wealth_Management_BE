@@ -1,0 +1,35 @@
+import os
+os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+
+{% for data in data_list %}
+    {%- for key, value in data["kwargs"].items() %}
+{{ key }}="""{{ value }}"""
+    {%- endfor %}
+
+{% endfor %}
+
+scenario_model_registry = DefaultScenarioModelRegistryCenter()
+chat_model = scenario_model_registry.get_model('{{ scenario }}')
+params = {
+{%- for key, value in params.items() %}
+    "{{ key }}": {{ value }},
+{%- endfor %}
+}
+chat_message_preparation = ChatMessagePreparation()
+{%- for data in data_list %}
+{%- set template_name = 'template' ~ loop.index %}
+chat_message_preparation.add_message(
+    '{{ data['role'] }}',
+    """{{ data["template"] }}""",
+    {%- for key, value in data["kwargs"].items() %}
+    {{ key }}={{ key }},
+    {%- endfor %}
+)
+{%- endfor %}
+
+result = chat_model.chat(**chat_message_preparation.to_chat_params(), **params).response
+print(result)
+
+previous_output = """{{ output }}"""

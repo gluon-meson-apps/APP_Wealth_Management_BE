@@ -1,0 +1,17 @@
+import requests
+
+{% for params in params_list %}
+{%- set param_name = 'params' ~ loop.index %}
+{%- set response_name = 'response' ~ loop.index %}
+{{ param_name }} = {
+{%- for key, value in params.items() %}
+{%- if value is not none %}
+  "{{ key|e }}": "{{ value|e }}",
+{%- endif %}
+{%- endfor %}
+}
+
+{{ response_name }} = requests.post("http://localhost:7788/score", json={{ param_name }})
+print({{ param_name }}['question'])
+print({{ response_name }}.text)
+{% endfor %}

@@ -1,0 +1,72 @@
+{%- for data in data_list %}
+{%- for import in data['imports'] %}
+{{ import }}
+{%- endfor %}
+{%- endfor %}
+
+{% for data in data_list %}
+    {%- set round_name = data['round_name'] %}
+    {%- set response_name = 'response' ~ loop.index %}
+    {%- set keys_not_to_render_automatically = ['response', 'round_name', 'round', 'user', 'imports'] %}
+{{ round_name }} = {
+    "{{ "user" }}": '{{ data["user"] }}',
+    {{ data["response"][1] }}: """
+    {{ data["response"][0] }}
+""",
+    {%- for key, value in data.items() %}
+        {%- if value is not none and key not in keys_not_to_render_automatically %}
+    {{ value[1] }}: """
+    {{ value[0] }}
+""",
+        {%- endif %}
+    {%- endfor %}
+}
+
+{% endfor %}
+
+{#    {{ response_name }} = requests.post("http://localhost:7788/score", json={{ param_name }})#}
+{#    print({{ param_name }}['question'])#}
+{#    print({{ response_name }}.text)#}
+{#{% endfor %}#}
+{##}
+{#round1 = {#}
+{#    "user": """#}
+{#    asdjifoa#}
+{#    sadjofasjdo#}
+{#    asdoifj#}
+{#    asdofij#}
+{#    """,#}
+{#    "intent": ("intent", retry_round1_intent),#}
+{#    "entities": ("entities1", retry_round1_enetities),#}
+{#    "response": ("""#}
+{#    sdjfoi#}
+{#    sadijojas#}
+{#    ajisodf#}
+{#    asjdiojasdo#}
+{#    asdjiojasodi#}
+{#    jasiodfao#}
+{#    """, retry_round1_response),#}
+{#}#}
+{##}
+{#round1_test = {#}
+{#    "user": """#}
+{#    asdjifoa#}
+{#    sadjofasjdo#}
+{#    asdoifj#}
+{#    asdofij#}
+{#    """,#}
+{#    "intent": ("intent", retry_round1_intent),#}
+{#    "entities": ("entities1", retry_round1_enetities),#}
+{#    "response": ("""#}
+{#    sdjfoi#}
+{#    sadijojas#}
+{#    ajisodf#}
+{#    asjdiojasdo#}
+{#    asdjiojasodi#}
+{#    jasiodfao#}
+{#    """, retry_round1_response),#}
+{#}#}
+{##}
+{#round2 = {#}
+{##}
+{#}#}
