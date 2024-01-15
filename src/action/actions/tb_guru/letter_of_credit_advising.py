@@ -5,7 +5,7 @@ from action.base import Action, ActionResponse, ResponseMessageType, ChatRespons
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
-from utils.action_helper import format_entities_for_search
+# from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
 you are a chatbot, you need to check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC Singapore
@@ -71,11 +71,18 @@ class LetterOfCreditAdvisingAction(Action):
         all_banks = "\n".join([item.json() for item in response])
 
         chat_message_preparation = ChatMessagePreparation()
+        bank_info = [
+            dict(
+                field=entity.type,
+                value=entity.value,
+            )
+            for entity in context.conversation.get_entities()
+        ]
         chat_message_preparation.add_message(
             "user",
             prompt,
             all_banks=all_banks,
-            bank_info=format_entities_for_search(context.conversation),
+            bank_info=bank_info,
             user_input=context.conversation.current_user_input,
         )
         chat_message_preparation.log(logger)
