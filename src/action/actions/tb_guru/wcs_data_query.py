@@ -26,19 +26,18 @@ prompt = """
 ## Role
 You are an assistant with name as "TB Guru", you need to answer the user's question.
 
-## Reference info
-The data needed are already extracted from WCS system and attached below. Please use this data to answer user's question.
-If the WCS data is empty, then tell the user that we cannot find data, ask them to check their input question.
-Please note: IGNORE user's requirements for generating PPT and do NOT mention any PPT things in your reply.
+## User question
+{{user_input}}
+Please IGNORE my requirements for PPT and DO NOT mention anything about PPT in your reply.
+You also DO NOT need to extract data from WSC system because I will provide you WCS data as below.
 
 ## WCS data
 {{wcs_data}}
 
-## user question
-{{user_input}}
-
-## INSTRUCT
-now, answer the question step by step, and reply the final result.
+## Instruction
+The data needed are already extracted from WCS system and attached above. Use this data to answer user's question.
+If the WCS data is empty, then tell the user that we cannot find data, ask them to check their input question.
+Now, answer user's question and reply the result.
 """
 
 ppt_prompt = """
@@ -50,7 +49,7 @@ If the PPT link is empty, tell the user that we cannot generate PPT now. Please 
 ## PPT link
 {{ppt_link}}
 
-## INSTRUCT
+## Instruction
 now, reply your result.
 """
 
