@@ -10,7 +10,7 @@ examples:
     Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
 slots:
   - name: company
-    description: the company name
+    description: the company name, return empty if the company name is "WCS" or "@WCS"
     slotType: text
     optional: True
   - name: days

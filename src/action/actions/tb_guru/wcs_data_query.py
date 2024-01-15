@@ -88,8 +88,9 @@ class WcsDataQuery(Action):
         shutil.rmtree(file_dir)
         return links[0] if links else ""
 
-    async def _search(self, context) -> tuple[Union[list[SearchItem], list[Any]], Union[list[SearchItem], list[Any]]]:
-        entity_dict = context.conversation.get_simplified_entities()
+    async def _search(
+        self, entity_dict, session_id
+    ) -> tuple[Union[list[SearchItem], list[Any]], Union[list[SearchItem], list[Any]]]:
         query_list = [
             f"""Query WCS data with days as {entity_dict["days"]}:"""
             if "days" in entity_dict
@@ -97,9 +98,7 @@ class WcsDataQuery(Action):
         ]
         if "company" in entity_dict:
             query_list.append(f"""Query WCS data with company {entity_dict["company"]}:""")
-        search_res = [
-            self.unified_search.search(SearchParam(query=q), context.conversation.session_id) for q in query_list
-        ]
+        search_res = [self.unified_search.search(SearchParam(query=q), session_id) for q in query_list]
         items = [s[0].items if s else [] for s in search_res]
         all_companies_data, current_company_data = items[0], items[1] if len(items) > 1 else []
         latest_period = all_companies_data[0].days if all_companies_data else ""
@@ -111,9 +110,10 @@ class WcsDataQuery(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         logger.info(f"exec action: {self.get_name()} ")
 
-        is_ppt_output = context.conversation.get_simplified_entities()["is_ppt_output"]
+        entity_dict = context.conversation.get_simplified_entities()
+        is_ppt_output = entity_dict["is_ppt_output"] if "is_ppt_output" in entity_dict else False
 
-        all_companies_data, current_company_data = await self._search(context)
+        all_companies_data, current_company_data = await self._search(entity_dict, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(

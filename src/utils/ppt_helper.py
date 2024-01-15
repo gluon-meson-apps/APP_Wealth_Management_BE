@@ -1,9 +1,14 @@
+import os
+
 import matplotlib.pyplot as plt
+import pandas as pd
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_VERTICAL_ANCHOR, MSO_AUTO_SIZE
 from pptx.oxml.xmlchemy import OxmlElement
+
+from third_system.search_entity import SearchItem, SearchItemReference
 
 
 def plot_graph(df, title, filter_col, output_name):
@@ -154,6 +159,7 @@ def trial(tables, location, slide, company_name):
             if i == 0:
                 for j in range(3):
                     table.cell(i, j).text_frame.paragraphs[0].font.bold = True
+                    table.cell(i, j).text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)
 
             if i < rows - 1:
                 for j in range(3):
@@ -236,7 +242,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox = first_slide.shapes.add_textbox(Inches(0.9), Inches(6.75), Inches(2), Inches(0.5))
     source_textbox.text = "Source: S&P Capital IQ"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(10.1)
+    source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
@@ -273,7 +279,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox.text = "Working Capital Efficiency Rankings"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.bold = True
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(15.1)
+    source_textbox.text_frame.paragraphs[0].font.size = Pt(15)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
@@ -281,7 +287,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox = second_slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(2), Inches(0.5))
     source_textbox.text = "Source: S&P Capital IQ"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(10.1)
+    source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
@@ -290,7 +296,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox.text = "Key Insights"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.bold = True
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(15.1)
+    source_textbox.text_frame.paragraphs[0].font.size = Pt(15)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
     # Adding a text box with Key Insigts information
@@ -298,7 +304,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     paragraph = source_textbox.text_frame.add_paragraph()
     paragraph.text = llm_insight
     paragraph.font.name = "Univers Next for HSBC Light"
-    paragraph.font.size = Pt(13.8)
+    paragraph.font.size = Pt(12)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
     source_textbox.text_frame.word_wrap = True
@@ -314,3 +320,124 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     #   Save the ppt
     X.save(output_path)
     return
+
+
+if __name__ == "__main__":
+    data = [
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Walmart",
+            days="FY21",
+            dpo=-78,
+            dso=67,
+            dio=41,
+            ccc=30,
+            dpo_rank=1.0,
+            dso_rank=6.0,
+            dio_rank=1.0,
+            ccc_rank=1.0,
+            id="2d771d74-19b1-45ce-ac23-20f27bbcf15e",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Alphabet Inc.",
+            days="FY21",
+            dpo=-44,
+            dso=53,
+            dio=41,
+            ccc=50,
+            dpo_rank=5.0,
+            dso_rank=4.0,
+            dio_rank=2.0,
+            ccc_rank=2.0,
+            id="f52391c9-c75a-47cf-80b3-571771d0f025",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Amazon",
+            days="FY21",
+            dpo=-39,
+            dso=49,
+            dio=43,
+            ccc=53,
+            dpo_rank=6.0,
+            dso_rank=3.0,
+            dio_rank=3.0,
+            ccc_rank=3.0,
+            id="724fa351-1e75-4d91-b6f0-ced526165c6d",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Meta",
+            days="FY21",
+            dpo=-46,
+            dso=38,
+            dio=61,
+            ccc=53,
+            dpo_rank=4.0,
+            dso_rank=1.0,
+            dio_rank=4.0,
+            ccc_rank=4.0,
+            id="a4a600ae-360e-416d-9688-d38ab4e02bcb",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Microsoft",
+            days="FY21",
+            dpo=-54,
+            dso=41,
+            dio=68,
+            ccc=55,
+            dpo_rank=2.0,
+            dso_rank=2.0,
+            dio_rank=6.0,
+            ccc_rank=5.0,
+            id="fd877f8e-306d-4276-8cb7-88eccdd32f1f",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="JPMorgan Chase",
+            days="FY21",
+            dpo=-46,
+            dso=51,
+            dio=52,
+            ccc=57,
+            dpo_rank=None,
+            dso_rank=None,
+            dio_rank=None,
+            ccc_rank=None,
+            id="8c92e68f-9288-4fd8-b76d-ab735e244c69",
+        ),
+        SearchItem(
+            meta__score=1.0,
+            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
+            company="Apple Inc.",
+            days="FY21",
+            dpo=-46,
+            dso=55,
+            dio=63,
+            ccc=72,
+            dpo_rank=3.0,
+            dso_rank=5.0,
+            dio_rank=5.0,
+            ccc_rank=6.0,
+            id="d1b11839-c510-4e44-add3-13046f1fd565",
+        ),
+    ]
+    df = pd.DataFrame([d.model_dump() for d in data])
+    df = df.drop(columns=["days", "meta__score", "meta__reference", "id"])
+    insight = """
+    Q1: CDT N.V.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
+    Q2: CDT N.V.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
+    """
+    file_dir = "__test__/data"
+    image_paths = [f"{file_dir}/image1.png", f"{file_dir}/image2.png"]
+    output_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
+    os.makedirs(output_dir, exist_ok=True)
+    ppt_generation(df, insight, "Apple Inc.", image_paths, f"{output_dir}/ppt.pptx")
