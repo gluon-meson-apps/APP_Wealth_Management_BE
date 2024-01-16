@@ -26,9 +26,8 @@ class IntentListConfig:
 
     def _initialize_fixed_intents(self):
         fixed_intents = [
-            ("slot_filling", "追问槽位", False, "slot_filling", []),
-            ("positive", "肯定", False, "positive", []),
-            ("negative", "否认", False, "negative", []),
+            ("positive", "confirm", False, "positive", []),
+            ("negative", "denied", False, "negative", []),
         ]
 
         for intent_data in fixed_intents:

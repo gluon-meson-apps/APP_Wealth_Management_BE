@@ -33,24 +33,19 @@ class IntentCall:
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_call"
 
-    def construct_system_prompt(
-        self, chat_history: list[dict[str, str]], chat_message_preparation: ChatMessagePreparation
-    ):
+    def format_history(self, chat_history: list[dict[str, str]]):
+        chat_history_str = ""
+        for chat in chat_history:
+            i_or_you = "I" if chat["role"] == "user" else "You"
+            chat_history_str += f"## {i_or_you}:\n\n {chat['content']}\n"
+        return chat_history_str
+
+    def construct_system_prompt(self, chat_message_preparation: ChatMessagePreparation):
         intent_list_str = json.dumps(
             [{"name": intent.name, "description": intent.description} for intent in self.intent_list]
         )
 
-        chat_history_str = ""
-        for chat in chat_history:
-            i_or_you = "I" if chat["role"] == "user" else "You"
-            chat_history_str += f"{i_or_you}: {chat['content']}\n"
-
-        chat_message_preparation.add_message(
-            "system", self.template.template, intent_list=intent_list_str, chat_history=chat_history_str
-        )
-
-    def format_message(self, role, content):
-        return dict(role=role, content=content)
+        chat_message_preparation.add_message("system", self.template.template, intent_list=intent_list_str)
 
     def classify_intent(
         self, query: str, chat_history: list[dict[str, str]], examples, session_id
@@ -59,15 +54,13 @@ class IntentCall:
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
 
         chat_message_preparation = ChatMessagePreparation()
-        # self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
-        # chat_message_preparation.log(logger)
 
-        self.construct_system_prompt(chat_history, chat_message_preparation)
+        self.construct_system_prompt(chat_message_preparation)
         logger.debug(examples)
         for example in examples:
             chat_message_preparation.add_message("user", example["example"])
             chat_message_preparation.add_message("assistant", example["intent"])
-        chat_message_preparation.add_message("user", query)
+        chat_message_preparation.add_message("user", self.format_history(chat_history))
 
         # TODO: drop history if it is too long
         intent = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True).response

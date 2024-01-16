@@ -15,33 +15,18 @@ your ROLE is a chatbot, your ONLY job is to classify the user's intent and provi
 
 {{intent_list}}:
 
-# CHAT HISTORY
-
-{{chat_history}}
-
 # CHAT FLOW
 
 ```plantuml
 @startuml
 start
+while (true)
 :I send the message;
-:You classify the intent based on the context and message, and estimate the confidence of the intent you choose;
-if (the confidence is high enough[> 90%]) then (yes)
-:You reply the JSON output with intent name and the confidence;
-else(no)
-if (the confidence is not high enough[> 50% and <= 90%]) then (yes)
-:You reply the JSON output with intent name and the confidence set to 0.5;
-else(no)
-:You reply the JSON output with "unknown" intent with confidence set to 0;
-endif
-endif
+:You classify the intent based on the chat history
+:You reply the JSON output with intent name and the confidence[always set to 1.0];
+endwhile
 @enduml
 ```
-
-# EXAMPLES
-
-I: how old are you?
-YOU: { "intent": "chitchat", "confidence": 0.91 }
 
 # INSTRUCTION
 
