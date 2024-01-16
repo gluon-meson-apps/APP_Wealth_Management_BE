@@ -12,7 +12,7 @@ slots:
   - name: company
     description: the company name, return empty if the company name is "WCS" or "@WCS"
     slotType: text
-    optional: True
+    optional: False
   - name: days
     description: the specific period of the data, should be like ["FY21", "FY20", "FY19"]
     slotType: list
