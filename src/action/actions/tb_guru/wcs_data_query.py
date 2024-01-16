@@ -22,24 +22,6 @@ from utils.ppt_helper import plot_graph, ppt_generation
 
 report_filename = "file_validation_report.html"
 
-prompt = """
-## Role
-You are an assistant with name as "TB Guru", you need to answer the user's question.
-
-## User question
-{{user_input}}
-Please IGNORE my requirements for PPT and DO NOT mention anything about PPT in your reply.
-You also DO NOT need to extract data from WSC system because I will provide you WCS data as below.
-
-## WCS data
-{{wcs_data}}
-
-## Instruction
-The data needed are already extracted from WCS system and attached above. Use this data to answer user's question.
-If the WCS data is empty, then tell the user that we cannot find data, ask them to check their input question.
-Now, answer user's question and reply the result.
-"""
-
 ppt_prompt = """
 ## Reference info
 You are an assistant with name as "TB Guru".
@@ -67,10 +49,10 @@ class WcsDataQuery(Action):
     def _generate_ppt(
         self, current_company_data: list[SearchItem], all_companies_data: list[SearchItem], insight: str
     ) -> str:
-        file_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
-        os.makedirs(file_dir, exist_ok=True)
-        image_paths = [f"{file_dir}/image1.png", f"{file_dir}/image2.png"]
-        ppt_path = f"{file_dir}/ppt.pptx"
+        files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
+        os.makedirs(files_dir, exist_ok=True)
+        image_paths = [f"{files_dir}/image1.png", f"{files_dir}/image2.png"]
+        ppt_path = f"{files_dir}/ppt.pptx"
         df_current = pd.DataFrame([w.model_dump() for w in current_company_data])
         df_all = pd.DataFrame([w.model_dump() for w in all_companies_data])
         company_name = current_company_data[0].company
@@ -84,7 +66,7 @@ class WcsDataQuery(Action):
             ("files", ("tb_guru_ppt.pptx", open(ppt_path, "rb"), UploadFileContentType.PPTX)),
         ]
         links = self.unified_search.upload_file_to_minio(files)
-        shutil.rmtree(file_dir)
+        shutil.rmtree(files_dir)
         return links[0] if links else ""
 
     async def _search(
@@ -117,23 +99,31 @@ class WcsDataQuery(Action):
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "user",
-            prompt,
+            """## User question\n{{user_input}}""",
             user_input=context.conversation.current_user_input,
+        )
+        chat_message_preparation.add_message(
+            "assistant",
+            """## WCS data\n{{wcs_data}}""",
             wcs_data="\n".join([item.model_dump_json() for item in current_company_data + all_companies_data]),
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
+        result = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="insight"
+        ).response
         logger.info(f"chat result: {result}")
 
         if is_ppt_output and current_company_data and all_companies_data:
             ppt_link = self._generate_ppt(current_company_data, all_companies_data, result)
 
             chat_message_preparation = ChatMessagePreparation()
-            chat_message_preparation.add_message("user", ppt_prompt, ppt_link=ppt_link)
+            chat_message_preparation.add_message("assistant", ppt_prompt, ppt_link=ppt_link)
             chat_message_preparation.log(logger)
 
-            result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
+            result = chat_model.chat(
+                **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="ppt"
+            ).response
             logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(
