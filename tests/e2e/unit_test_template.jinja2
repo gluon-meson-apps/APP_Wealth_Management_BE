@@ -1,4 +1,5 @@
 import os
+from loguru import logger
 os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
@@ -28,6 +29,8 @@ chat_message_preparation.add_message(
     {%- endfor %}
 )
 {%- endfor %}
+
+chat_message_preparation.log(logger)
 
 result = chat_model.chat(**chat_message_preparation.to_chat_params(), **params).response
 print(result)

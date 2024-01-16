@@ -20,7 +20,7 @@ class UnitTestGenerator:
     def process_one_round_group(self, inner_df):
 
         round_count = inner_df['round_group'].iloc[0] + 1
-        test_prefix = 'test_' if inner_df['test'].iloc[0] else ''
+        test_prefix = 'unit_test_' if inner_df['test'].iloc[0] else ''
         session_name = inner_df['session_name'].iloc[0]
 
         def merge_scenario(row):

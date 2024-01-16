@@ -18,7 +18,7 @@ class LogsGenerator:
     def process_one_round_group(self, inner_df):
         over_all = inner_df.iloc[-1].to_dict()
         round_count = inner_df['round_group'].iloc[0] + 1
-        test_prefix = 'test_' if inner_df['test'].iloc[0] else ''
+        test_prefix = 'unit_test_' if inner_df['test'].iloc[0] else ''
         retry_overall = f'{test_prefix}round{round_count}_retry_overall_response'
         session_name = inner_df['session_name'].iloc[0]
         session_name = standardize_session_name(session_name)
