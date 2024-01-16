@@ -1,3 +1,5 @@
+from typing import List
+
 import chinese2digits as c2d
 import numpy as np
 import configparser
@@ -22,6 +24,7 @@ from action.base import (
     actionsHaveDefaultValue,
     AttachmentResponse,
 )
+from third_system.search_entity import SearchItem
 from third_system.unified_search import UnifiedSearch
 
 config = configparser.ConfigParser()
@@ -90,6 +93,30 @@ class OutputAdapter:
         raise NotImplementedError()
 
 
+def generate_table_html(item):
+    headers = []
+    cells = []
+    for key, value in item.dict().items():
+        if key not in ["meta__score", "meta__reference"]:
+            headers.append(key)
+            cells.append(str(value))
+    table_header_html = "".join(f"<th>{header}</th>" for header in headers)
+    table_cell_html = "".join(f"<td>{cell}</td>" for cell in cells)
+    table_html = f"<table><tr>{table_header_html}</tr><tr>{table_cell_html}</tr></table>"
+    return table_html
+
+
+def process_references(references: List[SearchItem]):
+    html = ""
+    for item in references:
+        summary = item.meta__reference.meta__source_name
+        table_html = generate_table_html(item)
+        details_html = f"<details><summary>{summary}</summary>{table_html}</details>"
+        html += details_html
+    logger.info(html)
+    return html
+
+
 class BaseOutputAdapter(OutputAdapter):
     def __init__(self, unified_search: UnifiedSearch = Depends()):
         self.unified_search = unified_search
@@ -99,6 +126,9 @@ class BaseOutputAdapter(OutputAdapter):
             logger.info(f"process attachment: {output.attachment}")
             output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
             return output
+        if output.answer.references and len(output.answer.references) > 0:
+            output.answer.content += f"\n\nReferences\n------------------\n"
+            output.answer.content += process_references(output.answer.references)
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):

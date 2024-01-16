@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from enum import unique, Enum
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from pydantic import BaseModel
 
 from action.context import ActionContext, ActionConfigContext
+from third_system.search_entity import SearchItem
 
 
 @unique
@@ -44,6 +45,7 @@ class ChatResponseAnswer(BaseModel):
     messageType: str = (ResponseMessageType.FORMAT_TEXT,)
     content: str
     intent: Optional[str] = None
+    references: Optional[List[SearchItem]] = None
 
 
 class ActionResponse(BaseModel):

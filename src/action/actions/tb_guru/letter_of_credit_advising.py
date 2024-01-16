@@ -1,10 +1,11 @@
-from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
+
 # from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
@@ -90,7 +91,14 @@ class LetterOfCreditAdvisingAction(Action):
         result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         logger.info(f"chat result: {result}")
 
+        references = []
+        for res in response:
+            references += res.items
+
         answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name
+            messageType=ResponseMessageType.FORMAT_TEXT,
+            content=result,
+            intent=context.conversation.current_intent.name,
+            references=references
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
