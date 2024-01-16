@@ -1,0 +1,3 @@
+name: unknown
+description: fallback intent for intent not belonging to any listed intent
+business: false
