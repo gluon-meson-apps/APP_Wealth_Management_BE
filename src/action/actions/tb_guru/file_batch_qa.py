@@ -1,7 +1,5 @@
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
-from io import StringIO
-import pandas as pd
 
 from action.base import (
     Action,
@@ -13,7 +11,9 @@ from action.base import (
     UploadFileContentType,
 )
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
-from third_system.search_entity import SearchParam
+
+from action.df_processor import DfProcessor
+from third_system.search_entity import SearchParam, SearchResponse
 from third_system.unified_search import UnifiedSearch
 from tracker.context import ConversationContext
 
@@ -38,6 +38,7 @@ based on the context, answer the question;
 class FileBatchAction(Action):
     def __init__(self):
         self.unified_search: UnifiedSearch = UnifiedSearch()
+        self.df_processor: DfProcessor = DfProcessor()
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
 
@@ -46,25 +47,44 @@ class FileBatchAction(Action):
 
     def get_function_with_chat_model(self, chat_model, tags, conversation):
         def get_result_from_llm(question, index):
-            response = self.unified_search.search(SearchParam(query=question, tags=tags), conversation.session_id)
-            logger.info(f"search response: {response}")
-            context_info = "\n".join([item.json() for item in response])
-
-            chat_message_preparation = ChatMessagePreparation()
-            chat_message_preparation.add_message(
-                "user",
-                prompt,
-                context_info=context_info,
-                user_input=question,
+            response: list[SearchResponse] = self.unified_search.search(
+                SearchParam(query=question, tags=tags), conversation.session_id
             )
-            chat_message_preparation.log(logger)
+            logger.info(f"search response: {response}")
+            context_info = "can't find any result"
+            source_name = ""
+            result = ""
+            if len(response) == 0:
+                return result, context_info, source_name
 
-            result = chat_model.chat(
-                **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario=index
-            ).response
-            logger.info(f"chat result: {result}")
+            first_result = response[0].items[0]
+            faq_answer_column = "meta__answers"
+            # todo: if faq score is too low should drop it.
+            if faq_answer_column in first_result.meta__reference.model_extra:
+                result = first_result.meta__reference.model_extra[faq_answer_column]
+                context_info = first_result.model_extra["text"]
+                source_name = first_result.meta__reference.meta__source_name
+            else:
+                context_info = "\n".join([item.model_dump_json() for item in response])
+                chat_message_preparation = ChatMessagePreparation()
+                chat_message_preparation.add_message(
+                    "system",
+                    prompt,
+                    context_info=context_info,
+                    user_input=question,
+                )
+                chat_message_preparation.log(logger)
 
-            return result
+                result = chat_model.chat(
+                    **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario=index
+                ).response
+                logger.info(f"chat result: {result}")
+
+                source_name = "\n".join(
+                    {item.meta__reference.meta__source_name for one_response in response for item in one_response.items}
+                )
+
+            return result, context_info, source_name
 
         return get_result_from_llm
 
@@ -74,12 +94,14 @@ class FileBatchAction(Action):
         conversation: ConversationContext = context.conversation
         tags = conversation.get_simplified_entities()
         logger.info(f"tags: {tags}")
-        file_data = StringIO(conversation.uploaded_file_contents[0].items[0].text)
+        df = self.df_processor.search_items_to_df(conversation.uploaded_file_contents[0].items)
 
-        df = pd.read_csv(file_data)
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
-        df["answer"] = df.reset_index().apply(lambda row: get_result_from_llm(row["questions"], row["index"]), axis=1)
+        df[["answers", "reference_data", "reference_name"]] = df.reset_index().apply(
+            lambda row: get_result_from_llm(row["questions"], row["index"]), axis=1, result_type="expand"
+        )
+        df = df[["questions", "answers", "reference_name", "reference_data"]]
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
