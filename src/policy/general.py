@@ -1,8 +1,13 @@
 from typing import Tuple
 
 from action.base import Action
-from action.actions.general import EndDialogueAction, SlotFillingAction, IntentConfirmAction, IntentFillingAction, \
-    SlotConfirmAction
+from action.actions.general import (
+    EndDialogueAction,
+    SlotFillingAction,
+    IntentConfirmAction,
+    IntentFillingAction,
+    SlotConfirmAction,
+)
 from action.actions.bnb import BankRelatedAction, JumpOut
 from action.repository.action_repository import ActionRepository, action_repository as default_action_repository
 from policy.base import Policy
@@ -46,7 +51,6 @@ class JumpOutPolicy(Policy):
         Policy.__init__(self, prompt_manager)
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
-
         # 没有意图
         if not IE.intent:
             return False, None
@@ -68,7 +72,8 @@ class IntentFillingPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(
             f"current status\nintent to clarify：{IE.intent}\n"
-            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}"
+        )
 
         # 没有非辅助外的意图
         if IE.intent is None:
@@ -76,8 +81,11 @@ class IntentFillingPolicy(Policy):
             return True, IntentFillingAction(prompt_manager=self.prompt_manager, form_store=self.form_store)
 
         # 有非辅助外的意图但是置信度低
-        if IE.intent.confidence < INTENT_SIG_TRH and intent_in_scope(
-                IE.intent.name) and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
+        if (
+            IE.intent.confidence < INTENT_SIG_TRH
+            and intent_in_scope(IE.intent.name)
+            and context.inquiry_times < MAX_FOLLOW_UP_TIMES
+        ):
             context.set_state("intent_confirm")
             return True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager)
         return False, None
@@ -92,7 +100,8 @@ class SlotFillingPolicy(Policy):
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(
             f"current status\nintent：{IE.intent.name}\n"
-            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}")
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in possible_slots if slot]}"
+        )
         if form := self.form_store.get_form_from_intent(IE.intent):
             missed_slots = set(form.slots) - possible_slots
             missed_slots = list(filter(lambda slot: slot.optional is not True, missed_slots))
@@ -100,9 +109,8 @@ class SlotFillingPolicy(Policy):
 
             # 追问槽位
             if missed_slots and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
-                to_filled_slot = missed_slots.pop()
-                context.set_state(f"slot_filling:{to_filled_slot.name}")
-                return True, SlotFillingAction(to_filled_slot, IE.intent, prompt_manager=self.prompt_manager)
+                context.set_state(f"slot_filling:{missed_slots}")
+                return True, SlotFillingAction(missed_slots, IE.intent, prompt_manager=self.prompt_manager)
 
             # 确认槽位
             for slot in possible_slots:
@@ -122,8 +130,12 @@ class SlotFillingPolicy(Policy):
 
 
 class AssistantPolicy(Policy):
-    def __init__(self, prompt_manager: PromptManager, form_store: FormStore,
-                 action_repository: ActionRepository = default_action_repository):
+    def __init__(
+        self,
+        prompt_manager: PromptManager,
+        form_store: FormStore,
+        action_repository: ActionRepository = default_action_repository,
+    ):
         Policy.__init__(self, prompt_manager)
         self.form_store = form_store
         self.action_repository = action_repository
@@ -132,7 +144,8 @@ class AssistantPolicy(Policy):
         potential_slots = self.get_possible_slots(intent=IE)
         logger.debug(
             f"final:\nintent：{IE.intent.name}\n"
-            f"entities：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}")
+            f"entities：{[f'{slot.name}: {slot.value}' for slot in potential_slots if slot]}"
+        )
         intent_form = self.form_store.get_form_from_intent(IE.intent)
 
         # 出现了预定义之外的意图
@@ -141,16 +154,21 @@ class AssistantPolicy(Policy):
 
         action = self.action_repository.find_by_name(intent_form.action)
         # 范围内意图但多轮追问都不能获取到必要的槽位
-        if intent_in_scope(
-                IE.intent.name) and IE.intent.confidence > INTENT_SIG_TRH and\
-                context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+        if (
+            intent_in_scope(IE.intent.name)
+            and IE.intent.confidence > INTENT_SIG_TRH
+            and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
+        ):
             if action is not None:
                 return True, action
             return True, BankRelatedAction(intent_form.action, potential_slots, IE.intent, BaseOutputAdapter())
 
         # 范围内意图但多轮追问都不能获取到必要的槽位
-        if intent_in_scope(IE.intent.name) and IE.intent.confidence <= INTENT_SIG_TRH and \
-                context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+        if (
+            intent_in_scope(IE.intent.name)
+            and IE.intent.confidence <= INTENT_SIG_TRH
+            and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
+        ):
             context.set_state("intent_confirm")
             return True, EndDialogueAction()
 

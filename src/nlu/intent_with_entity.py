@@ -36,6 +36,12 @@ class Slot(HashableBaseModel):
     def __eq__(self, other):
         return self.name == other.name
 
+    def minimal_info(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+        }
+
     @staticmethod
     def from_dict(slot_dict: dict):
         return Slot(

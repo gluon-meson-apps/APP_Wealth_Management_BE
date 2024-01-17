@@ -44,9 +44,9 @@ class SlotFillingAction(Action):
     async def run(self, context):
         logger.info("exec action slot filling")
         if isinstance(self.slots, list):
-            slot_description = " or ".join(slot.description for slot in self.slots)
+            slots = [slot.minimal_info() for slot in self.slots]
         else:
-            slot_description = self.slots.description
+            slots = self.slots.minimal_info()
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
@@ -54,7 +54,7 @@ class SlotFillingAction(Action):
         chat_message_preparation.add_message(
             "system",
             self.prompt_template.template,
-            fill_slot=slot_description,
+            fill_slots=json.dumps(slots),
             intent_name=self.intent.name,
             intent_description=self.intent.description,
             history=context.conversation.get_history().format_string(),
