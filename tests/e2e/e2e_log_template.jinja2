@@ -9,7 +9,7 @@
     {%- set response_name = 'response' ~ loop.index %}
     {%- set keys_not_to_render_automatically = ['response', 'round_name', 'round', 'user', 'imports'] %}
 {{ round_name }} = {
-    "{{ "user" }}": '{{ data["user"] }}',
+    "{{ "user" }}": """{{ data["user"] }}""",
     {{ data["response"][1] }}: """
     {{ data["response"][0] }}
 """,
