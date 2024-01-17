@@ -28,7 +28,10 @@ class E2eTestGenerator:
             Path(f"{cur_dir}/generated/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
             with open(f"{cur_dir}/generated/{session_name}/generated_e2e_test/{session_name}_e2e.py", "w") as wf:
                 wf.write(format_jinja_template(template, params_list=params_list))
-    def process(self):
-        query = "SELECT * FROM model_log where as_test_case = true and scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
+    def process(self, ignore_test_case_flag=True):
+        if ignore_test_case_flag:
+            query = "SELECT * FROM model_log where scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
+        else:
+            query = "SELECT * FROM model_log where as_test_case = true and scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
         df = pd.read_sql(query + self.get_log_id_filter, self.connection)
         df.sort_values(["created_at"]).groupby(['log_id']).apply(self.process_one_group)
