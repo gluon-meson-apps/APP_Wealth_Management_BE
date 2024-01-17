@@ -1,9 +1,8 @@
+import configparser
 from typing import List
 
 import chinese2digits as c2d
 import numpy as np
-import configparser
-
 from fastapi import Depends
 from loguru import logger
 
@@ -83,36 +82,53 @@ class OutputAdapter:
         raise NotImplementedError()
 
     def prepare_answer(
-        self,
-        slot: {},
-        intent_description: str,
-        target_slot_value: str,
-        target_slot_name: str,
-        action_name: ActionName,
+            self,
+            slot: {},
+            intent_description: str,
+            target_slot_value: str,
+            target_slot_name: str,
+            action_name: ActionName,
     ):
         raise NotImplementedError()
 
 
-def generate_table_html(item):
+def generate_table_html(summary_details: list[SearchItem]) -> str:
+    if not summary_details:
+        return ""
+
     headers = []
-    cells = []
-    for key, value in item.dict().items():
-        if key not in ["meta__score", "meta__reference"]:
-            headers.append(key)
-            cells.append(str(value))
-    table_header_html = "".join(f"<th>{header}</th>" for header in headers)
-    table_cell_html = "".join(f"<td>{cell}</td>" for cell in cells)
-    table_html = f"<table><tr>{table_header_html}</tr><tr>{table_cell_html}</tr></table>"
+    rows = []
+
+    for index, item in enumerate(summary_details):
+        rows.append([])
+        for k, v in item.model_dump().items():
+            if k not in ["meta__score", "meta__reference"]:
+                if index == 0:
+                    headers.append(k)
+                rows[index].append(str(v))
+
+    table_header_html = "<tr>" + "".join(f"<th>{header}</th>" for header in headers) + "</tr>"
+    table_cell_html = "".join(
+        "<tr>" + "".join(f"<td>{cell}</td>" for cell in cells) + "</tr>"
+        for cells in rows
+    )
+    table_html = f"<table>{table_header_html}{table_cell_html}</table>"
     return table_html
 
 
 def process_references(references: List[SearchItem]):
     html = ""
+
+    summary_detail_dict = {}
     for item in references:
         summary = item.meta__reference.meta__source_name
-        table_html = generate_table_html(item)
+        summary_detail_dict.setdefault(summary, []).append(item)
+
+    for summary in summary_detail_dict.keys():
+        table_html = generate_table_html(summary_detail_dict[summary])
         details_html = f"<details><summary>{summary}</summary>{table_html}</details>"
         html += details_html
+
     logger.info(html)
     return html
 
@@ -191,12 +207,12 @@ class BaseOutputAdapter(OutputAdapter):
         return slot
 
     def prepare_answer(
-        self,
-        slot: {},
-        intent_description: str,
-        target_slot_value: str,
-        target_slot_name: str,
-        action_name: ActionName,
+            self,
+            slot: {},
+            intent_description: str,
+            target_slot_value: str,
+            target_slot_name: str,
+            action_name: ActionName,
     ):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,

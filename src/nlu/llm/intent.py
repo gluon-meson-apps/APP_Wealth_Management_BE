@@ -70,14 +70,14 @@ def extract_examples_from_response_text(response: SearchResponse):
 
 
 def get_highest_scored_item(items: list[SearchItem]):
-    sorted_items = sorted(items, key=lambda item: item.meta__reference._distance)
+    sorted_items = sorted(items, key=lambda item: item.meta__score, reverse=True)
     return sorted_items[0]
 
 
 def extract_info(items):
     highest_scored_item = get_highest_scored_item(items)
     text = highest_scored_item.model_extra["text"]
-    intent = highest_scored_item.meta__reference.meta__source_name
+    intent = highest_scored_item.meta__reference.model_extra["meta__intent_result"]
     example = text
     score = highest_scored_item.meta__score
     return intent, example, score
