@@ -1,3 +1,5 @@
+import os
+
 import aiohttp
 from loguru import logger
 
@@ -38,11 +40,13 @@ def error_handler(exception):
     return decorator
 
 
+unified_search_url = os.environ.get('UNIFIED_SEARCH_URL', 'http://localhost:8000')
+
+
 class UnifiedSearch:
     def __init__(self):
-        self.base_url = "http://localhost:8000"
+        self.base_url = unified_search_url
 
-    @error_handler(UnifiedSearchClientException("unified search error", error_code=1001))
     def search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
         response = requests.post(
             self.base_url + "/search", json=search_param.dict(), headers={"conversation-id": conversation_id}
