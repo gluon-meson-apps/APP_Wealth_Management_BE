@@ -21,6 +21,12 @@ from utils.ppt_helper import plot_graph, ppt_generation, SlideConfig
 
 report_filename = "file_validation_report.html"
 
+user_prompt = """
+## User question
+{user_input}
+Please IGNORE my requirements for PPT and DO NOT mention anything about PPT in your reply.
+"""
+
 ppt_prompt = """
 ## Reference info
 You are an assistant with name as "TB Guru".
@@ -113,14 +119,13 @@ class WcsDataQuery(Action):
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "user",
-            """## User question\n{{user_input}}""",
+            user_prompt,
             user_input=context.conversation.current_user_input,
         )
         chat_message_preparation.add_message(
             "assistant",
             """## WCS data are extracted already\n{{wcs_data}}""",
-            wcs_data=df_all_companies_data.to_json(orient="records")
-            + df_current_company_data.to_json(orient="records"),
+            wcs_data=pd.concat([df_all_companies_data, df_current_company_data], ignore_index=True).to_string(),
         )
         chat_message_preparation.log(logger)
 
