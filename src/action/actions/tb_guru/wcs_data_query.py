@@ -15,7 +15,7 @@ from action.base import (
     ActionResponse,
     UploadFileContentType,
 )
-from third_system.search_entity import SearchParam
+from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
 from utils.ppt_helper import plot_graph, ppt_generation, SlideConfig
 
@@ -86,7 +86,7 @@ class WcsDataQuery(Action):
             return links[0] if links else ""
         return ""
 
-    async def _search(self, entity_dict, session_id) -> tuple[pd.DataFrame, pd.DataFrame]:
+    async def _search(self, entity_dict, session_id) -> tuple[list[SearchItem], list[SearchItem]]:
         query_list = [
             f"""Query WCS data with days as {entity_dict["days"]}:"""
             if "days" in entity_dict
@@ -99,11 +99,7 @@ class WcsDataQuery(Action):
         all_companies_data, current_company_data = items[0], items[1] if len(items) > 1 else []
         latest_period = all_companies_data[0].days if all_companies_data else ""
         latest_all_data = list(filter(lambda s: s.days == latest_period, all_companies_data)) if latest_period else []
-        df_current = pd.DataFrame([w.model_dump() for w in current_company_data])
-        df_all = pd.DataFrame([w.model_dump() for w in latest_all_data])
-        df_current = df_current.drop(columns=["meta__score", "meta__reference", "id"])
-        df_all = df_all.drop(columns=["meta__score", "meta__reference", "id"])
-        return df_all, df_current
+        return latest_all_data, current_company_data
 
     async def run(self, context) -> ActionResponse:
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -112,9 +108,12 @@ class WcsDataQuery(Action):
         entity_dict = context.conversation.get_simplified_entities()
         is_ppt_output = entity_dict["is_ppt_output"] if "is_ppt_output" in entity_dict else False
 
-        df_all_companies_data, df_current_company_data = await self._search(
-            entity_dict, context.conversation.session_id
-        )
+        latest_all_data, current_company_data = await self._search(entity_dict, context.conversation.session_id)
+
+        df_current_company_data = pd.DataFrame([w.model_dump() for w in current_company_data])
+        df_current_company_data = df_current_company_data.drop(columns=["meta__score", "meta__reference", "id"])
+        df_all_companies_data = pd.DataFrame([w.model_dump() for w in latest_all_data])
+        df_all_companies_data = df_all_companies_data.drop(columns=["meta__score", "meta__reference", "id"])
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -125,7 +124,7 @@ class WcsDataQuery(Action):
         chat_message_preparation.add_message(
             "assistant",
             """## WCS data are extracted already\n{{wcs_data}}""",
-            wcs_data=pd.concat([df_all_companies_data, df_current_company_data], ignore_index=True).to_string(),
+            wcs_data=pd.concat([df_current_company_data + df_all_companies_data], ignore_index=True).to_string(),
         )
         chat_message_preparation.log(logger)
 
@@ -150,6 +149,7 @@ class WcsDataQuery(Action):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
+            references=current_company_data + latest_all_data,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
