@@ -1,4 +1,5 @@
 import json
+import re
 from typing import List
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
@@ -104,7 +105,13 @@ class LLMEntityExtractor(EntityExtractor):
         logger.debug(result)
         if result == "None":
             return []
-        entities = json.loads(result)
+        match = re.search("```[jJ][sS][oO][nN]([\s\S]*?)```", result)
+        result_str = match.group(1) if match else result
+        entities = None
+        try:
+            entities = json.loads(result_str)
+        except json.JSONDecodeError:
+            logger.warning(f"cannot parse the entity result to JSON: {result_str}")
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(
