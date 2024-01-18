@@ -1,5 +1,6 @@
 import configparser
 from typing import List
+import re
 
 import chinese2digits as c2d
 import numpy as np
@@ -92,6 +93,10 @@ class OutputAdapter:
         raise NotImplementedError()
 
 
+def remove_extra_newline(string: str) -> str:
+    return re.sub("\n+", "\n", string)
+
+
 def generate_table_html(summary_details: list[SearchItem]) -> str:
     if not summary_details:
         return ""
@@ -107,8 +112,10 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
                     headers.append(k)
                 rows[index].append(str(v))
 
-    table_header_html = "<tr>" + "".join(f"<th>{header}</th>" for header in headers) + "</tr>"
-    table_cell_html = "".join("<tr>" + "".join(f"<td>{cell}</td>" for cell in cells) + "</tr>" for cells in rows)
+    table_header_html = "<tr>" + "".join(f"<th>{remove_extra_newline(header)}</th>" for header in headers) + "</tr>"
+    table_cell_html = "".join(
+        "<tr>" + "".join(f"<td>{remove_extra_newline(cell)}</td>" for cell in cells) + "</tr>" for cells in rows
+    )
     table_html = f"<table>{table_header_html}{table_cell_html}</table>"
     return table_html
 
