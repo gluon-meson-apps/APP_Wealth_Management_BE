@@ -83,7 +83,21 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     chart.legend.font.size = Pt(8)
 
 
-def create_images_slide_two(df, slide, company_name):
+def set_text_style(text_box, font_size=8, bold=False):
+    text_box.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
+    text_box.text_frame.paragraphs[0].font.size = Pt(font_size)
+    text_box.text_frame.paragraphs[0].font.bold = bold
+    text_box.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+    text_box.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
+
+
+def add_title_to_slide(slide, title):
+    title_shape = slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
+    title_shape.text = title
+    set_text_style(title_shape, 16, True)
+
+
+def create_table(df, slide, company_name):
     cols = ["dso", "dpo", "dio", "ccc"]
 
     # Calculate the rankings
@@ -174,7 +188,7 @@ def trial(tables, location, slide, company_name):
         table = slide.shapes.add_table(rows, cols, left, top, width, height).table
 
         # set the column widths
-        table.columns[0].width = Inches(1.4)
+        table.columns[0].width = Inches(1.2)
         table.columns[1].width = Inches(0.6)
         table.columns[2].width = Inches(0.6)
 
@@ -222,6 +236,7 @@ def trial(tables, location, slide, company_name):
             table.cell(rows - 1, j).fill.solid()
             table.cell(rows - 1, j).fill.fore_color.rgb = RGBColor(175, 175, 175)  # gray
             table.cell(rows - 1, j).text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)
+            table.cell(rows - 1, j).text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
         for j in range(3):
             table.cell(1, j).text = imcd[j]
@@ -230,6 +245,7 @@ def trial(tables, location, slide, company_name):
 
         # Setting the font size of the table to 12
         for cell in table.iter_cells():
+            cell.text_frame.word_wrap = False
             for paragraph in cell.text_frame.paragraphs:
                 for run in paragraph.runs:
                     run.font.size = Pt(10)  # set the font size to 12 points
@@ -238,6 +254,26 @@ def trial(tables, location, slide, company_name):
 
         # save the presentation
     return txtTables
+
+
+def create_chart_slide(slide, config: SlideConfig, title):
+    add_title_to_slide(slide, title)
+
+    create_single_chart(
+        slide,
+        chart_config=SingleChartConfig(index=0, config=config, chart_type=XL_CHART_TYPE.COLUMN_STACKED),
+    )
+    create_single_chart(slide, chart_config=SingleChartConfig(index=1, config=config, chart_type=XL_CHART_TYPE.LINE))
+
+    # Adding 1st Image with border
+    pic = slide.shapes.add_picture(config.image_path, Inches(1), Inches(4.25), width=Inches(8), height=Inches(2.5))
+    pic.line.width = Pt(1)
+    pic.line.color.rgb = RGBColor(225, 225, 225)
+
+    # Adding a text box with "Source" text
+    source_textbox = slide.shapes.add_textbox(Inches(1), Inches(6.75), Inches(2), Inches(0.5))
+    source_textbox.text = "Source: S&P Capital IQ"
+    set_text_style(source_textbox)
 
 
 # End: Functions
@@ -264,58 +300,15 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
     #   Start: First Slide
     first_slide = X.slides.add_slide(title_and_text_layout)
 
-    # Remove the "Click to add title" box <- since we changed it to a blank page so this can be removed
-    # first_slide.shapes.title.text = " "
-
-    # Add a title to the slide
-    title_shape = first_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
-    title_shape.text = "Working Capital - CCC Trend & Peer Comparison"
-    title_shape.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Bold"
-    title_shape.text_frame.paragraphs[0].font.bold = True
-    title_shape.text_frame.paragraphs[0].font.size = Pt(24)
-    title_shape.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    title_shape.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
-
     first_config, second_config = configs
 
-    create_single_chart(
-        first_slide,
-        chart_config=SingleChartConfig(index=0, config=first_config, chart_type=XL_CHART_TYPE.COLUMN_STACKED),
-    )
-    create_single_chart(
-        first_slide, chart_config=SingleChartConfig(index=1, config=first_config, chart_type=XL_CHART_TYPE.LINE)
-    )
-
-    # Adding 1st Image with border
-    pic = first_slide.shapes.add_picture(
-        first_config.image_path, Inches(1), Inches(4.25), width=Inches(8), height=Inches(2.5)
-    )
-    pic.line.width = Pt(1)
-    pic.line.color.rgb = RGBColor(225, 225, 225)
+    create_chart_slide(first_slide, first_config, "Working Capital - CCC Trend")
 
     second_slide = X.slides.add_slide(title_and_text_layout)
 
-    create_single_chart(
-        second_slide, SingleChartConfig(index=0, config=second_config, chart_type=XL_CHART_TYPE.COLUMN_STACKED)
-    )
-    create_single_chart(second_slide, SingleChartConfig(index=1, config=second_config, chart_type=XL_CHART_TYPE.LINE))
+    create_chart_slide(second_slide, second_config, "Working Capital - Peer Comparison")
 
-    # Adding 2nd Image with border
-    pic = second_slide.shapes.add_picture(
-        second_config.image_path, Inches(1), Inches(4.25), width=Inches(8), height=Inches(2.5)
-    )
-    pic.line.width = Pt(1)
-    pic.line.color.rgb = RGBColor(225, 225, 225)
-
-    # Adding a text box with "Source" text
-    source_textbox = first_slide.shapes.add_textbox(Inches(1), Inches(6.75), Inches(2), Inches(0.5))
-    source_textbox.text = "Source: S&P Capital IQ"
-    source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
-    source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
-
-    #    End: First Slide
+    #    End: First and second Slide
     ##################################################################
 
     ##################################################################
@@ -330,7 +323,7 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
     df_all = df_all.fillna("")
 
     # Putting the tables in the presentation
-    create_images_slide_two(df_all, third_slide, company_name)
+    create_table(df_all, third_slide, company_name)
 
     # Remove the "Click to add title" box <- since we changed it to a blank page so this can be remved
     # second_slide.shapes.title.text = " "
@@ -338,50 +331,37 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
     # Add a Heading to the slide
     title_shape = third_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
     title_shape.text = "Relative Working Capital Efficiency Against Peer Group"
-    title_shape.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Bold"
-    title_shape.text_frame.paragraphs[0].font.bold = True
-    title_shape.text_frame.paragraphs[0].font.size = Pt(24)
-    title_shape.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    title_shape.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
+    set_text_style(title_shape, 16, True)
 
     # Adding a text box with "Sub-Heading" text
     source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(2), Inches(0.5))
     source_textbox.text = "Working Capital Efficiency Rankings"
-    source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.bold = True
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(15)
-    source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
+    set_text_style(source_textbox, 12, True)
+
+    table_height = round((df_all.size + 2) * 0.038, 1) + 1.6
 
     # Adding a text box with "Source" text
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(2), Inches(0.5))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height), Inches(2), Inches(0.5))
     source_textbox.text = "Source: S&P Capital IQ"
-    source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
-    source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
+    set_text_style(source_textbox)
 
     # Adding a text box with "Key Insigts" text
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(4.3), Inches(2), Inches(0.5))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height + 0.5), Inches(2), Inches(0.5))
     source_textbox.text = "Key Insights"
-    source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
-    source_textbox.text_frame.paragraphs[0].font.bold = True
-    source_textbox.text_frame.paragraphs[0].font.size = Pt(15)
-    source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
+    set_text_style(source_textbox, 12, True)
+
     # Adding a text box with Key Insigts information
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.6), Inches(4.8), Inches(8), Inches(2))
-    paragraph = source_textbox.text_frame.add_paragraph()
-    paragraph.text = llm_insight
-    paragraph.font.name = "Univers Next for HSBC Light"
-    paragraph.font.size = Pt(12)
-    source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
-    source_textbox.text_frame.word_wrap = True
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.6), Inches(table_height + 1), Inches(8), Inches(2))
+    set_text_style(source_textbox)
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.TOP
+    source_textbox.text_frame.word_wrap = True
     source_textbox.text_frame.margin_left = 0
     source_textbox.text_frame.margin_top = 0
     source_textbox.text_frame.margin_bottom = 0
+    paragraph = source_textbox.text_frame.add_paragraph()
+    paragraph.text = llm_insight
+    paragraph.font.name = "Univers Next for HSBC Light"
+    paragraph.font.size = Pt(8)
 
     #   End: Second Slide
     ##################################################################
