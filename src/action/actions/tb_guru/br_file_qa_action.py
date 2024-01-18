@@ -35,7 +35,8 @@ class BrFileQAAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
 
         contents = context.conversation.uploaded_file_contents
-        file_content = "\n".join([i.text for i in contents[0].items])
+        latest_file = contents[0]
+        file_content = "\n".join([i.text for i in latest_file.items])
         br_file_content = re.sub(r"\n+", "\n", file_content)
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -55,6 +56,6 @@ class BrFileQAAction(Action):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
-            references=contents,
+            references=latest_file.items,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
