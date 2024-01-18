@@ -17,7 +17,7 @@ from action.base import (
 )
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
-from utils.ppt_helper import plot_graph, ppt_generation
+from utils.ppt_helper import plot_graph, ppt_generation, SlideConfig
 
 report_filename = "file_validation_report.html"
 
@@ -51,13 +51,26 @@ class WcsDataQuery(Action):
         if company_name and latest_days:
             files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
             os.makedirs(files_dir, exist_ok=True)
-            image_paths = [f"{files_dir}/image1.png", f"{files_dir}/image2.png"]
+            first_slide_config = SlideConfig(
+                image_path=f"{files_dir}/image1.png",
+                title=f"{company_name} – Working Capital Metrics Trend",
+                x_axis_key="days",
+                data=df_current.drop(columns=["company"]),
+            )
+            second_slide_config = SlideConfig(
+                image_path=f"{files_dir}/image2.png",
+                title=f"Peer Comparison ({latest_days})",
+                x_axis_key="company",
+                data=df_all.drop(columns=["days"]),
+            )
             ppt_path = f"{files_dir}/ppt.pptx"
-            plot_graph(df_current, f"{company_name} – Working Capital Metrics Trend", "days", image_paths[0])
-            plot_graph(df_all, f"Peer Comparison ({latest_days})", "company", image_paths[1])
-            df_all = df_all.drop(columns=["days"])
+            plot_graph(first_slide_config)
+            plot_graph(second_slide_config)
             ppt_generation(
-                df_all, llm_insight=insight, company_name=company_name, image_paths=image_paths, output_path=ppt_path
+                configs=[first_slide_config, second_slide_config],
+                company_name=company_name,
+                llm_insight=insight,
+                output_path=ppt_path,
             )
             files = [
                 ("files", ("tb_guru_ppt.pptx", open(ppt_path, "rb"), UploadFileContentType.PPTX)),

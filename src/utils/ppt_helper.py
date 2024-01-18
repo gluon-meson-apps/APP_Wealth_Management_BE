@@ -1,35 +1,86 @@
+import math
 import os
+from typing import Any
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from pptx import Presentation
-from pptx.util import Inches, Pt
+from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
+from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.enum.text import MSO_VERTICAL_ANCHOR, MSO_AUTO_SIZE
 from pptx.oxml.xmlchemy import OxmlElement
+from pptx.util import Inches, Pt
+from pydantic import BaseModel
 
 from third_system.search_entity import SearchItem, SearchItemReference
 
 
-def plot_graph(df, title, filter_col, output_name):
+class SlideConfig(BaseModel, arbitrary_types_allowed=True):
+    title: str
+    x_axis_key: str
+    data: pd.DataFrame
+    image_path: str
+
+
+class SingleChartConfig(BaseModel, arbitrary_types_allowed=True):
+    index: int
+    chart_type: Any
+    config: SlideConfig
+
+
+def plot_graph(config: SlideConfig):
     """
     function to create plot chart.
     """
     # Reset the plt
+    df = config.data
+    filter_col = config.x_axis_key
     plt.figure(figsize=(16, 7))
-    plt.bar(df[filter_col], df["dpo"], color="black")
+    plt.bar(df[config.x_axis_key], df["dpo"], color="black")
     plt.bar(df[filter_col], df["dso"], color="red")
     plt.bar(df[filter_col], df["dio"], color="grey", bottom=df["dso"])
     plt.plot(df[filter_col], df["ccc"], color="black", marker="o")
     plt.ylabel("days", fontweight="bold", fontsize=15)
-    plt.title(title)
+    plt.title(config.title)
     # plt.legend(df.columns.drop(filter_col))
     plt.legend(["ccc", "dpo", "dso", "dio"])
-    plt.savefig(output_name)
+    plt.savefig(config.image_path)
     # remove the plt
     plt.clf()
     plt.cla()
     # plt.show()
+
+
+def create_single_chart(slide, chart_config: SingleChartConfig):
+    slide_config = chart_config.config
+    chart_width = 4
+    chart_height = 3
+    series = ["dio", "dso", "dpo", "ccc"]
+    chart_data = CategoryChartData()
+    chart_data.categories = slide_config.data[slide_config.x_axis_key].tolist()
+    for s in series:
+        chart_data.add_series(s, slide_config.data[s].tolist())
+
+    x, y, cx, cy = (
+        Inches(1 + chart_width * (chart_config.index % 2)),
+        Inches(1 + chart_height * (math.floor(chart_config.index / 2) % 2)),
+        Inches(chart_width),
+        Inches(chart_height),
+    )
+    chart = slide.shapes.add_chart(chart_config.chart_type, x, y, cx, cy, chart_data).chart
+    chart.chart_title.has_text_frame = True
+    chart.chart_title.text_frame.text = slide_config.title
+    chart.chart_title.text_frame.paragraphs[0].font.size = Pt(10)
+    chart.chart_title.text_frame.paragraphs[0].font.bold = False
+
+    chart.value_axis.tick_labels.font.size = Pt(8)
+    chart.category_axis.tick_labels.font.size = Pt(8)
+
+    chart.has_legend = True
+    chart.legend.position = XL_LEGEND_POSITION.TOP
+    chart.legend.include_in_layout = True
+    chart.legend.font.size = Pt(8)
 
 
 def create_images_slide_two(df, slide, company_name):
@@ -193,7 +244,7 @@ def trial(tables, location, slide, company_name):
 #################################################################
 
 
-def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6):
+def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output_path, n=6):
     """
     Function to generate the 2 ppt slide as template
     df: the benchmark table to be compare
@@ -203,9 +254,6 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
 
     Return: it is auto saved the ppt, so need FE to pick it up
     """
-    image1 = image_paths[0]
-    image2 = image_paths[1]
-
     # initial the property
     X = Presentation()
 
@@ -221,25 +269,46 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
 
     # Add a title to the slide
     title_shape = first_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
-    title_shape.text = "Working Capital - ccc Trend & Peer Comparison"
+    title_shape.text = "Working Capital - CCC Trend & Peer Comparison"
     title_shape.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Bold"
     title_shape.text_frame.paragraphs[0].font.bold = True
     title_shape.text_frame.paragraphs[0].font.size = Pt(24)
     title_shape.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     title_shape.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
+    first_config, second_config = configs
+
+    create_single_chart(
+        first_slide,
+        chart_config=SingleChartConfig(index=0, config=first_config, chart_type=XL_CHART_TYPE.COLUMN_STACKED),
+    )
+    create_single_chart(
+        first_slide, chart_config=SingleChartConfig(index=1, config=first_config, chart_type=XL_CHART_TYPE.LINE)
+    )
+
     # Adding 1st Image with border
-    pic = first_slide.shapes.add_picture(image1, Inches(1), Inches(1), width=Inches(8), height=Inches(2.8))
+    pic = first_slide.shapes.add_picture(
+        first_config.image_path, Inches(1), Inches(4.25), width=Inches(8), height=Inches(2.5)
+    )
     pic.line.width = Pt(1)
     pic.line.color.rgb = RGBColor(225, 225, 225)
 
+    second_slide = X.slides.add_slide(title_and_text_layout)
+
+    create_single_chart(
+        second_slide, SingleChartConfig(index=0, config=second_config, chart_type=XL_CHART_TYPE.COLUMN_STACKED)
+    )
+    create_single_chart(second_slide, SingleChartConfig(index=1, config=second_config, chart_type=XL_CHART_TYPE.LINE))
+
     # Adding 2nd Image with border
-    pic = first_slide.shapes.add_picture(image2, Inches(1), Inches(3.95), width=Inches(8), height=Inches(2.8))
+    pic = second_slide.shapes.add_picture(
+        second_config.image_path, Inches(1), Inches(4.25), width=Inches(8), height=Inches(2.5)
+    )
     pic.line.width = Pt(1)
     pic.line.color.rgb = RGBColor(225, 225, 225)
 
     # Adding a text box with "Source" text
-    source_textbox = first_slide.shapes.add_textbox(Inches(0.9), Inches(6.75), Inches(2), Inches(0.5))
+    source_textbox = first_slide.shapes.add_textbox(Inches(1), Inches(6.75), Inches(2), Inches(0.5))
     source_textbox.text = "Source: S&P Capital IQ"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
@@ -250,23 +319,24 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     ##################################################################
 
     ##################################################################
-    #   Start: Second Slide
-    second_slide = X.slides.add_slide(title_and_text_layout)
+    #   Start: Third Slide
+    third_slide = X.slides.add_slide(title_and_text_layout)
 
     # Load the data from the Excel files
-    df["company"] = df["company"].str.strip()
-    df = df[df["company"] != "Peer Group (Median)"]
+    df_all = second_config.data
+    df_all["company"] = df_all["company"].str.strip()
+    df_all = df_all[df_all["company"] != "Peer Group (Median)"]
     # Fill empty cells with ""
-    df = df.fillna("")
+    df_all = df_all.fillna("")
 
     # Putting the tables in the presentation
-    create_images_slide_two(df, second_slide, company_name)
+    create_images_slide_two(df_all, third_slide, company_name)
 
     # Remove the "Click to add title" box <- since we changed it to a blank page so this can be remved
     # second_slide.shapes.title.text = " "
 
     # Add a Heading to the slide
-    title_shape = second_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
+    title_shape = third_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
     title_shape.text = "Relative Working Capital Efficiency Against Peer Group"
     title_shape.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Bold"
     title_shape.text_frame.paragraphs[0].font.bold = True
@@ -275,7 +345,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     title_shape.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
     # Adding a text box with "Sub-Heading" text
-    source_textbox = second_slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(2), Inches(0.5))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(2), Inches(0.5))
     source_textbox.text = "Working Capital Efficiency Rankings"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.bold = True
@@ -284,7 +354,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
     # Adding a text box with "Source" text
-    source_textbox = second_slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(2), Inches(0.5))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(2), Inches(0.5))
     source_textbox.text = "Source: S&P Capital IQ"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.size = Pt(10)
@@ -292,7 +362,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
     # Adding a text box with "Key Insigts" text
-    source_textbox = second_slide.shapes.add_textbox(Inches(0.5), Inches(4.3), Inches(2), Inches(0.5))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(4.3), Inches(2), Inches(0.5))
     source_textbox.text = "Key Insights"
     source_textbox.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
     source_textbox.text_frame.paragraphs[0].font.bold = True
@@ -300,7 +370,7 @@ def ppt_generation(df, llm_insight, company_name, image_paths, output_path, n=6)
     source_textbox.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
     # Adding a text box with Key Insigts information
-    source_textbox = second_slide.shapes.add_textbox(Inches(0.6), Inches(4.8), Inches(8), Inches(2))
+    source_textbox = third_slide.shapes.add_textbox(Inches(0.6), Inches(4.8), Inches(8), Inches(2))
     paragraph = source_textbox.text_frame.add_paragraph()
     paragraph.text = llm_insight
     paragraph.font.name = "Univers Next for HSBC Light"
@@ -343,7 +413,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="Alphabet Inc.",
-            days="FY21",
+            days="FY20",
             dpo=-44,
             dso=53,
             dio=41,
@@ -358,7 +428,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="Amazon",
-            days="FY21",
+            days="FY19",
             dpo=-39,
             dso=49,
             dio=43,
@@ -373,7 +443,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="Meta",
-            days="FY21",
+            days="FY18",
             dpo=-46,
             dso=38,
             dio=61,
@@ -388,7 +458,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="Microsoft",
-            days="FY21",
+            days="FY17",
             dpo=-54,
             dso=41,
             dio=68,
@@ -403,7 +473,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="JPMorgan Chase",
-            days="FY21",
+            days="FY16",
             dpo=-46,
             dso=51,
             dio=52,
@@ -418,7 +488,7 @@ if __name__ == "__main__":
             meta__score=1.0,
             meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
             company="Apple Inc.",
-            days="FY21",
+            days="FY15",
             dpo=-46,
             dso=55,
             dio=63,
@@ -430,14 +500,24 @@ if __name__ == "__main__":
             id="d1b11839-c510-4e44-add3-13046f1fd565",
         ),
     ]
-    df = pd.DataFrame([d.model_dump() for d in data])
-    df = df.drop(columns=["days", "meta__score", "meta__reference", "id"])
+    df_all = pd.DataFrame([d.model_dump() for d in data])
     insight = """
-    Q1: CDT N.V.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
-    Q2: CDT N.V.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
+    Q1: Apple Inc.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
+    Q2: Apple Inc.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
     """
-    file_dir = "__test__/data"
-    image_paths = [f"{file_dir}/image1.png", f"{file_dir}/image2.png"]
+    files_dir = "__test__/data"
     output_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
     os.makedirs(output_dir, exist_ok=True)
-    ppt_generation(df, insight, "Apple Inc.", image_paths, f"{output_dir}/ppt.pptx")
+    first_slide_config = SlideConfig(
+        image_path=f"{files_dir}/image1.png",
+        title="Apple Inc. – Working Capital Metrics Trend",
+        x_axis_key="days",
+        data=df_all.drop(columns=["company", "meta__score", "meta__reference", "id"]),
+    )
+    second_slide_config = SlideConfig(
+        image_path=f"{files_dir}/image2.png",
+        title="Peer Comparison (FY21)",
+        x_axis_key="company",
+        data=df_all.drop(columns=["days", "meta__score", "meta__reference", "id"]),
+    )
+    ppt_generation([first_slide_config, second_slide_config], "Apple Inc.", insight, f"{output_dir}/ppt.pptx")
