@@ -53,7 +53,7 @@ class FileBatchAction(Action):
             logger.info(f"search response: {response}")
             context_info = "can't find any result"
             source_name = ""
-            result = ""
+            result = "no information found, not able to answer"
             if len(response) == 0:
                 return result, context_info, source_name
 

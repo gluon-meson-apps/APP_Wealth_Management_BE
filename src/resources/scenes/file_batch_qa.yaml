@@ -15,8 +15,12 @@ Sample Reports"
     description: "the product line of the question, such as GPS/GTRF"
     slotType: text
     optional: True
+  - name: user
+    description: the user who ask the ORIGINAL question
+    slotType: text
+    optional: True
   - name: country
-    description: the country of the user
+    description: the country of the user who ask the ORIGINAL question
     slotType: text
     optional: False
 action: file_batch_qa
