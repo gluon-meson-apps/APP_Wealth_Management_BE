@@ -94,7 +94,7 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
         else:
             answer = json.dumps(
                 {
-                    "answer": result.answer.content,
+                    "answer": result.answer.get_content_with_extra_info(),
                     "session_id": session_id,
                     **(
                         dict(attachment=result.attachment.model_dump_json())
@@ -114,7 +114,7 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
             "no_model",
             full_history[:-1] if len(full_history) > 0 else [],
             full_history[-1]["content"] if len(full_history) > 0 and "content" in full_history[-1] else "",
-            score_command.model_dump(),
+            {**score_command.model_dump(), "extra_info": result.answer.extra_info},
             err_msg,
         )
 

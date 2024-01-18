@@ -46,6 +46,13 @@ class ChatResponseAnswer(BaseModel):
     content: str
     intent: Optional[str] = None
     references: Optional[List[SearchItem]] = None
+    extra_info: dict[str, str] = {}
+
+    def get_content_with_extra_info(self):
+        # output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
+        template = """\n\n{key}\n------------------\n{value}"""
+        extra_info_str = "".join([template.format(key=key, value=value) for key, value in self.extra_info.items()])
+        return self.content + extra_info_str
 
 
 class ActionResponse(BaseModel):

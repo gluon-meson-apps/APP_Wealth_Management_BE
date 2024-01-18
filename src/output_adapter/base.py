@@ -82,12 +82,12 @@ class OutputAdapter:
         raise NotImplementedError()
 
     def prepare_answer(
-            self,
-            slot: {},
-            intent_description: str,
-            target_slot_value: str,
-            target_slot_name: str,
-            action_name: ActionName,
+        self,
+        slot: {},
+        intent_description: str,
+        target_slot_value: str,
+        target_slot_name: str,
+        action_name: ActionName,
     ):
         raise NotImplementedError()
 
@@ -108,10 +108,7 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
                 rows[index].append(str(v))
 
     table_header_html = "<tr>" + "".join(f"<th>{header}</th>" for header in headers) + "</tr>"
-    table_cell_html = "".join(
-        "<tr>" + "".join(f"<td>{cell}</td>" for cell in cells) + "</tr>"
-        for cells in rows
-    )
+    table_cell_html = "".join("<tr>" + "".join(f"<td>{cell}</td>" for cell in cells) + "</tr>" for cells in rows)
     table_html = f"<table>{table_header_html}{table_cell_html}</table>"
     return table_html
 
@@ -140,11 +137,9 @@ class BaseOutputAdapter(OutputAdapter):
     def process_output(self, output: object) -> object:
         if isinstance(output, AttachmentResponse):
             logger.info(f"process attachment: {output.attachment}")
-            output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
-            return output
+            output.answer.extra_info["Attachment"] = output.attachment.url
         if output.answer.references and len(output.answer.references) > 0:
-            output.answer.content += f"\n\nReferences\n------------------\n"
-            output.answer.content += process_references(output.answer.references)
+            output.answer.extra_info["References"] = process_references(output.answer.references)
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):
@@ -207,12 +202,12 @@ class BaseOutputAdapter(OutputAdapter):
         return slot
 
     def prepare_answer(
-            self,
-            slot: {},
-            intent_description: str,
-            target_slot_value: str,
-            target_slot_name: str,
-            action_name: ActionName,
+        self,
+        slot: {},
+        intent_description: str,
+        target_slot_value: str,
+        target_slot_name: str,
+        action_name: ActionName,
     ):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,
