@@ -6,7 +6,7 @@ import requests
 {{ param_name }} = {
 {%- for key, value in params.items() %}
 {%- if value is not none %}
-  "{{ key|e }}": """{{ value|e }}""",
+  "{{ key }}": """{{ value }}""",
 {%- endif %}
 {%- endfor %}
 }
