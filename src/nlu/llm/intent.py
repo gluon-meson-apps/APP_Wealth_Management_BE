@@ -59,14 +59,13 @@ def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
 
 
 def extract_examples_from_response_text(response: SearchResponse):
-    intents_examples = []
     if response and response.total > 0:
         try:
             intent, example, score = extract_info(response.items)
-            intents_examples.append({"example": example, "intent": intent, "score": score})
+            return [{"example": example, "intent": intent, "score": score}]
         except Exception as e:
             logger.warning(str(e))
-    return intents_examples
+    return []
 
 
 def get_highest_scored_item(items: list[SearchItem]):
