@@ -162,11 +162,10 @@ class WcsDataQuery(Action):
         is_ppt_output = entity_dict["is_ppt_output"] if "is_ppt_output" in entity_dict else False
         is_data_provided = entity_dict["is_data_provided"] if "is_data_provided" in entity_dict else False
 
-        latest_all_data, current_company_data = (
-            extract_data(context, chat_model)
-            if is_data_provided
-            else await self._search_db(entity_dict, context.conversation.session_id)
-        )
+        if is_data_provided:
+            latest_all_data, current_company_data = extract_data(context, chat_model) if is_ppt_output else ([], [])
+        else:
+            latest_all_data, current_company_data = await self._search_db(entity_dict, context.conversation.session_id)
 
         df_current_company_data = pd.DataFrame([w.model_dump() for w in current_company_data])
         df_current_company_data = df_current_company_data.drop(
