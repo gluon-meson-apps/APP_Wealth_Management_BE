@@ -125,8 +125,9 @@ def process_references(references: List[SearchItem]):
 
     summary_detail_dict = {}
     for item in references:
-        summary = item.meta__reference.meta__source_name
-        summary_detail_dict.setdefault(summary, []).append(item)
+        if item.meta__reference:
+            summary = item.meta__reference.meta__source_name
+            summary_detail_dict.setdefault(summary, []).append(item)
 
     for summary in summary_detail_dict.keys():
         table_html = generate_table_html(summary_detail_dict[summary])

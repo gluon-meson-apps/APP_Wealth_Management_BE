@@ -18,12 +18,45 @@ from action.base import (
 from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
 from utils.ppt_helper import plot_graph, ppt_generation, SlideConfig
+from utils.utils import extract_json_from_code_block
 
 report_filename = "file_validation_report.html"
 
+extract_data_prompt = """
+## Role
+You are an assistant with name as "TB Guru".
+Help me extract data from user input and reply it with below JSON schema.
+
+## Schema should be like this
+{
+    "past_years_data": [{
+        "company": "company name", // STRING
+        "days": "the date for the record", // STRING
+        "dpo": "DPO", // NUMBER,
+        "dso": "DSO", // NUMBER,
+        "dio": "DIO", // NUMBER,
+        "ccc": "CCC", // NUMBER,
+    }, ...],
+    "this_year_data": [{
+        "company": "company name", // STRING
+        "days": "the date for the record", // STRING
+        "dpo": "DPO", // NUMBER,
+        "dso": "DSO", // NUMBER,
+        "dio": "DIO", // NUMBER,
+        "ccc": "CCC", // NUMBER,
+    }, ...]
+}
+
+## User question
+{{user_input}}
+
+## Instruction
+Please reply the formatted JSON data.
+"""
+
 user_prompt = """
 ## User question
-{user_input}
+{{user_input}}
 Please IGNORE my requirements for PPT and DO NOT mention anything about PPT in your reply.
 """
 
@@ -39,6 +72,26 @@ If the PPT link is empty, tell the user that we cannot generate PPT now. Please 
 ## Instruction
 now, reply your result.
 """
+
+
+def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem]]:
+    chat_message_preparation = ChatMessagePreparation()
+    chat_message_preparation.add_message(
+        "system",
+        extract_data_prompt,
+        user_input=context.conversation.current_user_input,
+    )
+    chat_message_preparation.log(logger)
+
+    result = chat_model.chat(
+        **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="data_provided"
+    ).response
+    formatted_data = extract_json_from_code_block(result)
+    current_company_data = formatted_data["past_years_data"] if "past_years_data" in formatted_data else []
+    latest_all_data = formatted_data["this_year_data"] if "this_year_data" in formatted_data else []
+    return [SearchItem(meta__score=-1, **d) for d in latest_all_data], [
+        SearchItem(meta__score=-1, **d) for d in current_company_data
+    ]
 
 
 class WcsDataQuery(Action):
@@ -86,7 +139,7 @@ class WcsDataQuery(Action):
             return links[0] if links else ""
         return ""
 
-    async def _search(self, entity_dict, session_id) -> tuple[list[SearchItem], list[SearchItem]]:
+    async def _search_db(self, entity_dict, session_id) -> tuple[list[SearchItem], list[SearchItem]]:
         query_list = [
             f"""Query WCS data with days as {entity_dict["days"]}:"""
             if "days" in entity_dict
@@ -107,13 +160,22 @@ class WcsDataQuery(Action):
 
         entity_dict = context.conversation.get_simplified_entities()
         is_ppt_output = entity_dict["is_ppt_output"] if "is_ppt_output" in entity_dict else False
+        is_data_provided = entity_dict["is_data_provided"] if "is_data_provided" in entity_dict else False
 
-        latest_all_data, current_company_data = await self._search(entity_dict, context.conversation.session_id)
+        latest_all_data, current_company_data = (
+            extract_data(context, chat_model)
+            if is_data_provided
+            else await self._search_db(entity_dict, context.conversation.session_id)
+        )
 
         df_current_company_data = pd.DataFrame([w.model_dump() for w in current_company_data])
-        df_current_company_data = df_current_company_data.drop(columns=["meta__score", "meta__reference", "id"])
+        df_current_company_data = df_current_company_data.drop(
+            columns=["meta__score", "meta__reference", "id"], errors="ignore"
+        )
         df_all_companies_data = pd.DataFrame([w.model_dump() for w in latest_all_data])
-        df_all_companies_data = df_all_companies_data.drop(columns=["meta__score", "meta__reference", "id"])
+        df_all_companies_data = df_all_companies_data.drop(
+            columns=["meta__score", "meta__reference", "id"], errors="ignore"
+        )
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -121,11 +183,12 @@ class WcsDataQuery(Action):
             user_prompt,
             user_input=context.conversation.current_user_input,
         )
-        chat_message_preparation.add_message(
-            "assistant",
-            """## WCS data are extracted already\n{{wcs_data}}""",
-            wcs_data=pd.concat([df_current_company_data + df_all_companies_data], ignore_index=True).to_string(),
-        )
+        if not is_data_provided:
+            chat_message_preparation.add_message(
+                "assistant",
+                """## WCS data are extracted already\n{{wcs_data}}""",
+                wcs_data=pd.concat([df_current_company_data + df_all_companies_data]).to_string(),
+            )
         chat_message_preparation.log(logger)
 
         result = chat_model.chat(

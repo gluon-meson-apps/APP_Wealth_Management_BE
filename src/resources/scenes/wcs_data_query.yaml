@@ -18,7 +18,11 @@ slots:
     slotType: list
     optional: True
   - name: is_ppt_output
-    description: if the user asks to generate PPT or not
+    description: user asks to generate PPT or not
+    slotType: boolean
+    optional: True
+  - name: is_data_provided
+    description: user already provided WCS data in input or not
     slotType: boolean
     optional: True
 action: wcs_data_query
