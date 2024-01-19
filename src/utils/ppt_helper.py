@@ -52,15 +52,22 @@ def plot_graph(config: SlideConfig):
     # plt.show()
 
 
+def convert_df_column_to_list(df, key):
+    return df[key].tolist() if not df.empty and key in df.columns else []
+
+
 def create_single_chart(slide, chart_config: SingleChartConfig):
     slide_config = chart_config.config
+    df = slide_config.data
     chart_width = 4
     chart_height = 3
     series = ["dio", "dso", "dpo", "ccc"]
     chart_data = CategoryChartData()
-    chart_data.categories = slide_config.data[slide_config.x_axis_key].tolist()
+    chart_data.categories = convert_df_column_to_list(df, slide_config.x_axis_key)
     for s in series:
-        chart_data.add_series(s, slide_config.data[s].tolist())
+        category_data = convert_df_column_to_list(df, s)
+        if category_data:
+            chart_data.add_series(s, category_data)
 
     x, y, cx, cy = (
         Inches(1 + chart_width * (chart_config.index % 2)),
@@ -313,57 +320,58 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
 
     ##################################################################
     #   Start: Third Slide
-    third_slide = X.slides.add_slide(title_and_text_layout)
+    df_all_companies = second_config.data
+    if not df_all_companies.empty and "company" in df_all_companies.columns:
+        third_slide = X.slides.add_slide(title_and_text_layout)
 
-    # Load the data from the Excel files
-    df_all = second_config.data
-    df_all["company"] = df_all["company"].str.strip()
-    df_all = df_all[df_all["company"] != "Peer Group (Median)"]
-    # Fill empty cells with ""
-    df_all = df_all.fillna("")
+        # Load the data from the Excel files
+        df_all_companies["company"] = df_all_companies["company"].str.strip()
+        df_all_companies = df_all_companies[df_all_companies["company"] != "Peer Group (Median)"]
+        # Fill empty cells with ""
+        df_all_companies = df_all_companies.fillna("")
 
-    # Putting the tables in the presentation
-    create_table(df_all, third_slide, company_name)
+        # Putting the tables in the presentation
+        create_table(df_all_companies, third_slide, company_name)
 
-    # Remove the "Click to add title" box <- since we changed it to a blank page so this can be remved
-    # second_slide.shapes.title.text = " "
+        # Remove the "Click to add title" box <- since we changed it to a blank page so this can be remved
+        # second_slide.shapes.title.text = " "
 
-    # Add a Heading to the slide
-    title_shape = third_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
-    title_shape.text = "Relative Working Capital Efficiency Against Peer Group"
-    set_text_style(title_shape, 16, True)
+        # Add a Heading to the slide
+        title_shape = third_slide.shapes.add_textbox(Inches(0.5), Inches(0), Inches(9), Inches(1))
+        title_shape.text = "Relative Working Capital Efficiency Against Peer Group"
+        set_text_style(title_shape, 16, True)
 
-    # Adding a text box with "Sub-Heading" text
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(2), Inches(0.5))
-    source_textbox.text = "Working Capital Efficiency Rankings"
-    set_text_style(source_textbox, 12, True)
+        # Adding a text box with "Sub-Heading" text
+        source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(2), Inches(0.5))
+        source_textbox.text = "Working Capital Efficiency Rankings"
+        set_text_style(source_textbox, 12, True)
 
-    table_height = round((df_all.size + 2) * 0.038, 1) + 1.6
+        table_height = round((df_all_companies.size + 2) * 0.038, 1) + 1.6
 
-    # Adding a text box with "Source" text
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height), Inches(2), Inches(0.5))
-    source_textbox.text = "Source: S&P Capital IQ"
-    set_text_style(source_textbox)
+        # Adding a text box with "Source" text
+        source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height), Inches(2), Inches(0.5))
+        source_textbox.text = "Source: S&P Capital IQ"
+        set_text_style(source_textbox)
 
-    # Adding a text box with "Key Insigts" text
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height + 0.5), Inches(2), Inches(0.5))
-    source_textbox.text = "Key Insights"
-    set_text_style(source_textbox, 12, True)
+        # Adding a text box with "Key Insigts" text
+        source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height + 0.5), Inches(2), Inches(0.5))
+        source_textbox.text = "Key Insights"
+        set_text_style(source_textbox, 12, True)
 
-    # Adding a text box with Key Insigts information
-    source_textbox = third_slide.shapes.add_textbox(Inches(0.6), Inches(table_height + 1), Inches(8), Inches(2))
-    set_text_style(source_textbox)
-    source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.TOP
-    source_textbox.text_frame.word_wrap = True
-    source_textbox.text_frame.margin_left = 0
-    source_textbox.text_frame.margin_top = 0
-    source_textbox.text_frame.margin_bottom = 0
-    paragraph = source_textbox.text_frame.add_paragraph()
-    paragraph.text = llm_insight
-    paragraph.font.name = "Univers Next for HSBC Light"
-    paragraph.font.size = Pt(8)
+        # Adding a text box with Key Insigts information
+        source_textbox = third_slide.shapes.add_textbox(Inches(0.6), Inches(table_height + 1), Inches(8), Inches(2))
+        set_text_style(source_textbox)
+        source_textbox.text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.TOP
+        source_textbox.text_frame.word_wrap = True
+        source_textbox.text_frame.margin_left = 0
+        source_textbox.text_frame.margin_top = 0
+        source_textbox.text_frame.margin_bottom = 0
+        paragraph = source_textbox.text_frame.add_paragraph()
+        paragraph.text = llm_insight
+        paragraph.font.name = "Univers Next for HSBC Light"
+        paragraph.font.size = Pt(8)
 
-    #   End: Second Slide
+    #   End: Third Slide
     ##################################################################
 
     ##################################################################

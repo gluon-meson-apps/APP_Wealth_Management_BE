@@ -186,7 +186,7 @@ class WcsDataQuery(Action):
             chat_message_preparation.add_message(
                 "assistant",
                 """## WCS data are extracted already\n{{wcs_data}}""",
-                wcs_data=pd.concat([df_current_company_data + df_all_companies_data]).to_string(),
+                wcs_data=pd.concat([df_current_company_data, df_all_companies_data], ignore_index=True).to_string(),
             )
         chat_message_preparation.log(logger)
 
