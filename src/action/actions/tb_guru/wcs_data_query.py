@@ -94,6 +94,11 @@ def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem
     ]
 
 
+def parse_model_to_dataframe(data):
+    df = pd.DataFrame([w.model_dump() for w in data])
+    return df.drop(columns=["meta__score", "meta__reference", "id"], errors="ignore")
+
+
 class WcsDataQuery(Action):
     def __init__(self):
         self.unified_search = UnifiedSearch()
@@ -167,14 +172,8 @@ class WcsDataQuery(Action):
         else:
             latest_all_data, current_company_data = await self._search_db(entity_dict, context.conversation.session_id)
 
-        df_current_company_data = pd.DataFrame([w.model_dump() for w in current_company_data])
-        df_current_company_data = df_current_company_data.drop(
-            columns=["meta__score", "meta__reference", "id"], errors="ignore"
-        )
-        df_all_companies_data = pd.DataFrame([w.model_dump() for w in latest_all_data])
-        df_all_companies_data = df_all_companies_data.drop(
-            columns=["meta__score", "meta__reference", "id"], errors="ignore"
-        )
+        df_current_company = parse_model_to_dataframe(current_company_data)
+        df_all_companies = parse_model_to_dataframe(latest_all_data)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -186,7 +185,7 @@ class WcsDataQuery(Action):
             chat_message_preparation.add_message(
                 "assistant",
                 """## WCS data are extracted already\n{{wcs_data}}""",
-                wcs_data=pd.concat([df_current_company_data, df_all_companies_data], ignore_index=True).to_string(),
+                wcs_data=pd.concat([df_current_company, df_all_companies], ignore_index=True).to_string(),
             )
         chat_message_preparation.log(logger)
 
@@ -195,8 +194,8 @@ class WcsDataQuery(Action):
         ).response
         logger.info(f"chat result: {result}")
 
-        if is_ppt_output and not df_current_company_data.empty and not df_all_companies_data.empty:
-            ppt_link = self._generate_ppt(df_current_company_data, df_all_companies_data, result)
+        if is_ppt_output and not df_current_company.empty and not df_all_companies.empty:
+            ppt_link = self._generate_ppt(df_current_company, df_all_companies, result)
 
             chat_message_preparation = ChatMessagePreparation()
             chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link)
