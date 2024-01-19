@@ -1,17 +1,16 @@
-import json
-import re
 from typing import List
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from loguru import logger
 
 from nlu.base import EntityExtractor
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
-from tracker.context import ConversationContext
-from gluon_meson_sdk.models.chat_model import ChatModel
-from loguru import logger
 from nlu.forms import FormStore, Form
 from nlu.intent_with_entity import Entity
 from prompt_manager.base import PromptManager
+from tracker.context import ConversationContext
+from utils.utils import extract_json_from_code_block
 
 system_template = """
 ## Role & Task
@@ -105,13 +104,7 @@ class LLMEntityExtractor(EntityExtractor):
         logger.debug(result)
         if result == "None":
             return []
-        match = re.search("```[jJ][sS][oO][nN]([\s\S]*?)```", result)
-        result_str = match.group(1) if match else result
-        entities = None
-        try:
-            entities = json.loads(result_str)
-        except json.JSONDecodeError:
-            logger.warning(f"cannot parse the entity result to JSON: {result_str}")
+        entities = extract_json_from_code_block(result)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(
