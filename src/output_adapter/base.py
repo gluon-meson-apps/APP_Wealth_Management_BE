@@ -147,7 +147,9 @@ class BaseOutputAdapter(OutputAdapter):
             logger.info(f"process attachment: {output.attachment}")
             output.answer.extra_info["Attachment"] = output.attachment.url
         if output.answer.references and len(output.answer.references) > 0:
-            output.answer.extra_info["References"] = process_references(output.answer.references)
+            output_html = process_references(output.answer.references)
+            if output_html:
+                output.answer.extra_info["References"] = output_html
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):
