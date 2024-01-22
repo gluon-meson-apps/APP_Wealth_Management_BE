@@ -92,7 +92,8 @@ class FileBatchAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
 
         conversation: ConversationContext = context.conversation
-        tags = conversation.get_simplified_entities()
+        available_tags = ["context", "product_line", "country"]
+        tags = {k: v for k, v in conversation.get_simplified_entities().items() if k in available_tags}
         logger.info(f"tags: {tags}")
         df = self.df_processor.search_items_to_df(conversation.uploaded_file_contents[0].items)
 
