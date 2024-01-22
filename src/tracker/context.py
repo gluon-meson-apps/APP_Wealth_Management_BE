@@ -34,13 +34,23 @@ class History:
         self.max_history = max_history
         self.rounds = rounds[-self.max_history :]
 
-    def add_history(self, role: str, message: str):
+    def add_history(self, role: str, message: str, file_name: str = None):
         if len(self.rounds) >= self.max_history:
             self.rounds.pop(0)
-        self.rounds.append({"role": role, "content": message})
+        self.rounds.append({"role": role, "content": message, "file_name": file_name})
 
     def format_string(self):
         return "\n".join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
+
+    @classmethod
+    def format_message_with_file_name(cls, one_round):
+        if one_round["file_name"]:
+            return f'{one_round["role"]}: {one_round["content"]} (with file name :{one_round["file_name"]})'
+        else:
+            return f'{one_round["role"]}: {one_round["content"]} '
+
+    def format_string_with_file_name(self):
+        return "\n".join([self.format_message_with_file_name(entry) for entry in self.rounds])
 
     def format_messages(self):
         return [{"role": entry["role"], "content": entry["content"]} for entry in self.rounds]
@@ -96,8 +106,8 @@ class ConversationContext:
     def get_history(self) -> History:
         return self.history
 
-    def append_user_history(self, message: str):
-        self.history.add_history("user", message)
+    def append_user_history(self, message: str, file_name: str = None):
+        self.history.add_history("user", message, file_name)
 
     def append_assistant_history(self, answer):
         response_content = prepare_response_content(answer)

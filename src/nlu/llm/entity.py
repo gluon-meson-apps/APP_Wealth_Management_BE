@@ -44,13 +44,6 @@ class LLMEntityExtractor(EntityExtractor):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "llm_entity_extractor"
 
-    def construct_system_prompt(self, conversation_context: ConversationContext, slots: str, intent):
-        return self.slot_extraction_prompt.format_jinja(
-            user_intent=intent.name,
-            chat_history=conversation_context.get_history().format_string(),
-            entity_types_and_values=slots,
-        )
-
     def construct_messages(
         self,
         user_input,
@@ -64,7 +57,7 @@ class LLMEntityExtractor(EntityExtractor):
             "system",
             self.slot_extraction_prompt.template,
             user_intent=intent.name,
-            chat_history=conversation_context.get_history().format_string(),
+            chat_history=conversation_context.get_history().format_string_with_file_name(),
             entity_types_and_values=slots,
         )
         for example in self.examples:

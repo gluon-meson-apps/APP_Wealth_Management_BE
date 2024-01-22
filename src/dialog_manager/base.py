@@ -59,15 +59,20 @@ class BaseDialogManager:
     async def handle_message(
         self, message: Any, session_id: str, files: list[UploadFile] = None, file_contents: list[SearchResponse] = None
     ) -> tuple[Any, ConversationContext]:
+        file_name = None
         if files is None:
             files = []
         if file_contents is None:
             file_contents = []
+        else:
+            items = file_contents[0].items
+            if len(items) > 0:
+                file_name = items[0].meta__reference.meta__source_name
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
-        conversation.append_user_history(message)
+        conversation.append_user_history(message, file_name)
         conversation.add_files(files)
         conversation.add_file_contents(file_contents)
 

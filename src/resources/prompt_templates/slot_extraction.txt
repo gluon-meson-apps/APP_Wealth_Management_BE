@@ -7,6 +7,7 @@ you are a helpfule assistant
 1. user want to perform a {{user_intent}} task, you need to extract the entities from the user input.
 2. you have to refer to the chat_history to extract the entities.
 3. if you can't find the entities, you should output empty string. if the entities is a number, you should output the number that user explicitly expressed.
+4. if file name is provided, you should refer to the file name to extract the entities.
 
 ## ATTENTION
 

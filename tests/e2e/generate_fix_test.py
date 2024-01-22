@@ -7,7 +7,7 @@ from tests.e2e.logs_generator import LogsGenerator
 from tests.e2e.unit_test_generator import UnitTestGenerator
 
 log_db = get_config().log_db
-db_url = f"postgresql://{log_db.USER}:{log_db.PASSWORD}@{log_db.HOST}:{log_db.PORT}/{log_db.DATABASE}"
+db_url = f"postgresql://{log_db.USER}:{urllib.parse.quote_plus(log_db.PASSWORD)}@{log_db.HOST}:{log_db.PORT}/{log_db.DATABASE}"
 connection = sqlalchemy.create_engine(url=db_url)
 
 log_id_filter = get_log_id_filter(['br qa 1'])

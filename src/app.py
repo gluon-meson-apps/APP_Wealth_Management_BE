@@ -68,15 +68,15 @@ def chat(
 
 @app.post("/score/")
 async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()):
-    file_res = (
-        await unified_search.adownload_file_from_minio(score_command.file_url) if score_command.file_url else None
-    )
-    print(file_res)
     err_msg = ""
     result = None
     conversation = None
     session_id = score_command.conversation_id
     try:
+        file_res = (
+            await unified_search.adownload_file_from_minio(score_command.file_url) if score_command.file_url else None
+        )
+        print(file_res)
         result, conversation = await dialog_manager.handle_message(
             score_command.question, session_id, file_contents=[file_res]
         )
