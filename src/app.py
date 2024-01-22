@@ -78,7 +78,7 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
         )
         print(file_res)
         result, conversation = await dialog_manager.handle_message(
-            score_command.question, session_id, file_contents=[file_res]
+            score_command.question, session_id, file_contents=[file_res] if file_res else None
         )
     except Exception as err:
         logger.info(traceback.format_exc())
