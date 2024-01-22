@@ -3,6 +3,7 @@ from typing import Union
 
 from action.actions.general import ChitChatAction
 from action.actions.tb_guru.br_file_qa_action import BrFileQAAction
+from action.actions.tb_guru.br_file_validation import BrFileValidation
 from action.actions.tb_guru.file_batch_qa import FileBatchAction
 from action.actions.tb_guru.gps_product_check import GPSProductCheckAction
 from action.actions.tb_guru.letter_of_credit_advising import LetterOfCreditAdvisingAction
@@ -45,3 +46,4 @@ action_repository.save(LetterOfCreditAdvisingAction())
 action_repository.save(FileValidation())
 action_repository.save(WcsDataQuery())
 action_repository.save(GPSProductCheckAction())
+action_repository.save(BrFileValidation())
