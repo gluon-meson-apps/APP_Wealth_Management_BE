@@ -47,7 +47,7 @@ Help me extract data from user input and reply it with below JSON schema.
     }, ...]
 }
 
-## User question
+## User input
 {{user_input}}
 
 ## Instruction
@@ -61,16 +61,19 @@ Please IGNORE my requirements for PPT and DO NOT mention anything about PPT in y
 """
 
 ppt_prompt = """
-## Reference info
+## Info
+{{info}}
+
+## Requirements
 You are an assistant with name as "TB Guru".
-We have generated a PPT for the user and the link is attached below, tell the user to download it.
-If the PPT link is empty, ask the user to check their input because you cannot generate PPT according to their input.
+You have generated a PPT for the user and the link is attached below, tell the user to download it.
+If the PPT link is empty, ask the user to check if their input question is valid.
 
 ## PPT link
 {{ppt_link}}
 
 ## Instruction
-now, reply your result.
+now, reply your result with above info.
 """
 
 
@@ -164,26 +167,28 @@ class WcsDataQuery(Action):
             )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="insight"
+        info_result = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="insight"
         ).response
-        logger.info(f"chat result: {result}")
+        logger.info(f"chat result: {info_result}")
 
+        final_result = info_result
         if is_ppt_output:
-            ppt_link = self._generate_ppt_link(df_current_company, df_all_companies, result)
+            ppt_link = self._generate_ppt_link(df_current_company, df_all_companies, info_result)
 
             chat_message_preparation = ChatMessagePreparation()
-            chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link)
+            chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link, info=info_result)
             chat_message_preparation.log(logger)
 
-            result = chat_model.chat(
-                **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="ppt"
+            final_result = chat_model.chat(
+                **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="ppt"
             ).response
-            logger.info(f"chat result: {result}")
+
+        logger.info(f"final result: {final_result}")
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content=result,
+            content=final_result,
             intent=context.conversation.current_intent.name,
             references=[] if is_data_provided else current_company_data + latest_all_data,
         )
