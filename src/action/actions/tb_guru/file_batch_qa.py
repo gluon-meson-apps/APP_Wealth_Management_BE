@@ -61,6 +61,16 @@ class FileBatchAction(Action):
             faq_answer_column = "meta__answers"
             # todo: if faq score is too low should drop it.
             if faq_answer_column in first_result.meta__reference.model_extra:
+                score_threshold = 0.82
+                if first_result.meta__score < score_threshold:
+                    question_header = "=" * 10 + "question" + "=" * 10
+                    search_result_header = "=" * 10 + "search result question" + "=" * 10
+                    logger.warning(
+                        f"score is too low: {first_result.meta__score} < {score_threshold} for: \n"
+                        f"{question_header}\n{question}\n{search_result_header}\n"
+                        f"{first_result.meta__reference.model_extra[faq_answer_column]}"
+                    )
+                    return result, context_info, source_name
                 result = first_result.meta__reference.model_extra[faq_answer_column]
                 context_info = first_result.model_extra["text"]
                 source_name = first_result.meta__reference.meta__source_name
