@@ -29,6 +29,9 @@ class SingleChartConfig(BaseModel, arbitrary_types_allowed=True):
     config: SlideConfig
 
 
+SERIES = ["dpo", "dso", "dio", "ccc"]
+
+
 def plot_graph(config: SlideConfig):
     """
     function to create plot chart.
@@ -37,14 +40,15 @@ def plot_graph(config: SlideConfig):
     df = config.data
     filter_col = config.x_axis_key
     plt.figure(figsize=(16, 7))
-    plt.bar(df[config.x_axis_key], df["dpo"], color="black")
-    plt.bar(df[filter_col], df["dso"], color="red")
-    plt.bar(df[filter_col], df["dio"], color="grey", bottom=df["dso"])
-    plt.plot(df[filter_col], df["ccc"], color="black", marker="o")
+    if not df.empty and set([filter_col] + SERIES).issubset(df.columns):
+        plt.bar(df[filter_col], df["dpo"], color="black")
+        plt.bar(df[filter_col], df["dso"], color="red")
+        plt.bar(df[filter_col], df["dio"], color="grey", bottom=df["dso"])
+        plt.plot(df[filter_col], df["ccc"], color="black", marker="o")
     plt.ylabel("days", fontweight="bold", fontsize=15)
     plt.title(config.title)
     # plt.legend(df.columns.drop(filter_col))
-    plt.legend(["ccc", "dpo", "dso", "dio"])
+    plt.legend(SERIES)
     plt.savefig(config.image_path)
     # remove the plt
     plt.clf()
@@ -61,10 +65,9 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     df = slide_config.data
     chart_width = 4
     chart_height = 3
-    series = ["dio", "dso", "dpo", "ccc"]
     chart_data = CategoryChartData()
     chart_data.categories = convert_df_column_to_list(df, slide_config.x_axis_key)
-    for s in series:
+    for s in SERIES:
         category_data = convert_df_column_to_list(df, s)
         if category_data:
             chart_data.add_series(s, category_data)
@@ -189,10 +192,10 @@ def trial(tables, location, slide, company_name):
         left = location[tmp_i][0]
         top = location[tmp_i][1]
         width = location[tmp_i][2]
-        height = location[tmp_i][3]
+        height = round(0.3 * rows, 1)
 
         # add the table to the slide
-        table = slide.shapes.add_table(rows, cols, left, top, width, height).table
+        table = slide.shapes.add_table(rows, cols, left, top, width, Inches(height)).table
 
         # set the column widths
         table.columns[0].width = Inches(1.2)
@@ -305,33 +308,36 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
 
     ##################################################################
     #   Start: First Slide
-    first_slide = X.slides.add_slide(title_and_text_layout)
-
     first_config, second_config = configs
 
-    create_chart_slide(first_slide, first_config, "Working Capital - CCC Trend")
+    if not first_config.data.empty:
+        plot_graph(first_config)
 
-    second_slide = X.slides.add_slide(title_and_text_layout)
+        first_slide = X.slides.add_slide(title_and_text_layout)
 
-    create_chart_slide(second_slide, second_config, "Working Capital - Peer Comparison")
+        create_chart_slide(first_slide, first_config, "Working Capital - CCC Trend")
 
-    #    End: First and second Slide
-    ##################################################################
+    df_all = second_config.data
 
-    ##################################################################
-    #   Start: Third Slide
-    df_all_companies = second_config.data
-    if not df_all_companies.empty and "company" in df_all_companies.columns:
+    # Start: Second slide
+    if not df_all.empty and "company" in df_all.columns:
+        plot_graph(second_config)
+
+        second_slide = X.slides.add_slide(title_and_text_layout)
+
+        create_chart_slide(second_slide, second_config, "Working Capital - Peer Comparison")
+
+        #   Start: Third Slide
         third_slide = X.slides.add_slide(title_and_text_layout)
 
         # Load the data from the Excel files
-        df_all_companies["company"] = df_all_companies["company"].str.strip()
-        df_all_companies = df_all_companies[df_all_companies["company"] != "Peer Group (Median)"]
+        df_all["company"] = df_all["company"].str.strip()
+        df_all = df_all[df_all["company"] != "Peer Group (Median)"]
         # Fill empty cells with ""
-        df_all_companies = df_all_companies.fillna("")
+        df_all = df_all.fillna("")
 
         # Putting the tables in the presentation
-        create_table(df_all_companies, third_slide, company_name)
+        create_table(df_all, third_slide, company_name)
 
         # Remove the "Click to add title" box <- since we changed it to a blank page so this can be remved
         # second_slide.shapes.title.text = " "
@@ -346,7 +352,7 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
         source_textbox.text = "Working Capital Efficiency Rankings"
         set_text_style(source_textbox, 12, True)
 
-        table_height = round((df_all_companies.size + 2) * 0.038, 1) + 1.6
+        table_height = round((df_all.shape[0] + 2) * 0.3, 1) + 1.6
 
         # Adding a text box with "Source" text
         source_textbox = third_slide.shapes.add_textbox(Inches(0.5), Inches(table_height), Inches(2), Inches(0.5))
@@ -377,7 +383,36 @@ def ppt_generation(configs: list[SlideConfig], company_name, llm_insight, output
     ##################################################################
     #   Save the ppt
     X.save(output_path)
-    return
+    ##################################################################
+
+
+def generate_ppt(df_current, df_all, insight, files_dir) -> str:
+    company_name = df_current.iloc[0]["company"] if not df_current.empty and "company" in df_current.columns else ""
+    if company_name:
+        latest_days = df_all.iloc[0]["days"] if not df_all.empty and "days" in df_all.columns else ""
+        df_all = df_all[df_all["days"] == latest_days] if latest_days else pd.DataFrame([])
+        os.makedirs(files_dir, exist_ok=True)
+        first_slide_config = SlideConfig(
+            image_path=f"{files_dir}/image1.png",
+            title=f"{company_name} – Working Capital Metrics Trend",
+            x_axis_key="days",
+            data=df_current.drop(columns=["company"], errors="ignore"),
+        )
+        second_slide_config = SlideConfig(
+            image_path=f"{files_dir}/image2.png",
+            title=f"Peer Comparison ({latest_days})",
+            x_axis_key="company",
+            data=df_all.drop(columns=["days"], errors="ignore"),
+        )
+        ppt_path = f"{files_dir}/ppt.pptx"
+        ppt_generation(
+            configs=[first_slide_config, second_slide_config],
+            company_name=company_name,
+            llm_insight=insight,
+            output_path=ppt_path,
+        )
+        return ppt_path
+    return ""
 
 
 if __name__ == "__main__":
@@ -488,24 +523,12 @@ if __name__ == "__main__":
             id="d1b11839-c510-4e44-add3-13046f1fd565",
         ),
     ]
-    df_all = pd.DataFrame([d.model_dump() for d in data])
-    insight = """
+    df_test = pd.DataFrame([d.model_dump() for d in data])
+    df_test = df_test.drop(columns=["meta__score", "meta__reference", "id"])
+    test_insight = """
     Q1: Apple Inc.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
     Q2: Apple Inc.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
     """
-    files_dir = "__test__/data"
-    output_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
-    os.makedirs(output_dir, exist_ok=True)
-    first_slide_config = SlideConfig(
-        image_path=f"{files_dir}/image1.png",
-        title="Apple Inc. – Working Capital Metrics Trend",
-        x_axis_key="days",
-        data=df_all.drop(columns=["company", "meta__score", "meta__reference", "id"]),
-    )
-    second_slide_config = SlideConfig(
-        image_path=f"{files_dir}/image2.png",
-        title="Peer Comparison (FY21)",
-        x_axis_key="company",
-        data=df_all.drop(columns=["days", "meta__score", "meta__reference", "id"]),
-    )
-    ppt_generation([first_slide_config, second_slide_config], "Apple Inc.", insight, f"{output_dir}/ppt.pptx")
+    test_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
+    os.makedirs(test_dir, exist_ok=True)
+    generate_ppt(df_test, df_test, test_insight, test_dir)

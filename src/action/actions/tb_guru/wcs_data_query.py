@@ -17,7 +17,7 @@ from action.base import (
 )
 from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
-from utils.ppt_helper import plot_graph, ppt_generation, SlideConfig
+from utils.ppt_helper import generate_ppt
 from utils.utils import extract_json_from_code_block
 
 report_filename = "file_validation_report.html"
@@ -64,7 +64,7 @@ ppt_prompt = """
 ## Reference info
 You are an assistant with name as "TB Guru".
 We have generated a PPT for the user and the link is attached below, tell the user to download it.
-If the PPT link is empty, tell the user that we cannot generate PPT now. Please ask them to try again later.
+If the PPT link is empty, ask the user to check their input because you cannot generate PPT according to their input.
 
 ## PPT link
 {{ppt_link}}
@@ -109,33 +109,10 @@ class WcsDataQuery(Action):
     def get_name(self) -> str:
         return "wcs_data_query"
 
-    def _generate_ppt(self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str) -> str:
-        company_name = df_current.iloc[0]["company"] if "company" in df_current.iloc[0] else ""
-        latest_days = df_all.iloc[0]["days"] if "days" in df_all.iloc[0] else ""
-        if company_name and latest_days:
-            files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
-            os.makedirs(files_dir, exist_ok=True)
-            first_slide_config = SlideConfig(
-                image_path=f"{files_dir}/image1.png",
-                title=f"{company_name} – Working Capital Metrics Trend",
-                x_axis_key="days",
-                data=df_current.drop(columns=["company"]),
-            )
-            second_slide_config = SlideConfig(
-                image_path=f"{files_dir}/image2.png",
-                title=f"Peer Comparison ({latest_days})",
-                x_axis_key="company",
-                data=df_all.drop(columns=["days"]),
-            )
-            ppt_path = f"{files_dir}/ppt.pptx"
-            plot_graph(first_slide_config)
-            plot_graph(second_slide_config)
-            ppt_generation(
-                configs=[first_slide_config, second_slide_config],
-                company_name=company_name,
-                llm_insight=insight,
-                output_path=ppt_path,
-            )
+    def _generate_ppt_link(self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str) -> str:
+        files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
+        ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
+        if ppt_path:
             files = [
                 ("files", ("tb_guru_ppt.pptx", open(ppt_path, "rb"), UploadFileContentType.PPTX)),
             ]
@@ -155,9 +132,7 @@ class WcsDataQuery(Action):
         search_res = [self.unified_search.search(SearchParam(query=q), session_id) for q in query_list]
         items = [s[0].items if s else [] for s in search_res]
         all_companies_data, current_company_data = items[0], items[1] if len(items) > 1 else []
-        latest_period = all_companies_data[0].days if all_companies_data else ""
-        latest_all_data = list(filter(lambda s: s.days == latest_period, all_companies_data)) if latest_period else []
-        return latest_all_data, current_company_data
+        return all_companies_data, current_company_data
 
     async def run(self, context) -> ActionResponse:
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -194,8 +169,8 @@ class WcsDataQuery(Action):
         ).response
         logger.info(f"chat result: {result}")
 
-        if is_ppt_output and not df_current_company.empty and not df_all_companies.empty:
-            ppt_link = self._generate_ppt(df_current_company, df_all_companies, result)
+        if is_ppt_output:
+            ppt_link = self._generate_ppt_link(df_current_company, df_all_companies, result)
 
             chat_message_preparation = ChatMessagePreparation()
             chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link)
