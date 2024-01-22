@@ -7,6 +7,8 @@ import re
 from jinja2 import Environment
 from loguru import logger
 
+from third_system.search_entity import SearchResponse
+
 
 def get_value_or_default_from_dict(dictionary, key, default_value=None):
     return dictionary[key] if key in dictionary else default_value
@@ -75,3 +77,13 @@ def extract_json_from_code_block(json_str: str):
     except json.JSONDecodeError:
         logger.warning(f"cannot parse the result to JSON: {result_str}")
         return None
+
+
+def get_texts_from_search_response(search_res: SearchResponse) -> str:
+    if search_res and search_res.items:
+        return "\n".join([re.sub(r"\n+", "\n", i.text) for i in search_res.items])
+    return ""
+
+
+def get_texts_from_search_response_list(search_res: list[SearchResponse]) -> str:
+    return get_texts_from_search_response(search_res[0]) if search_res else ""
