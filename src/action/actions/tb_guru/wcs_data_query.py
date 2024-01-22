@@ -210,7 +210,7 @@ class WcsDataQuery(Action):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
-            references=current_company_data + latest_all_data,
+            references=[] if is_data_provided else current_company_data + latest_all_data,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
