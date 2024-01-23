@@ -49,27 +49,30 @@ class IntentCall:
 
         chat_message_preparation.add_message("system", self.template.template, intent_list=intent_list_str)
 
-    @classmethod
-    def is_true(cls, arg):
-        ua = str(arg).upper()
-        return "TRUE" == ua
-
     def check_same_topic(self, chat_model: AbstractChatModel, history):
-        prompt = """# ROLE
+        prompt = """## ROLE
+you are a helpful chatbot
 
-you are a helpful chatbot, your ONLY job is to estimate if the user is changed to a new topic.
+## Tasks
+1. estimate if the user is changed to a new topic.
+2. if the user is changed to a new topic, reorganize use's new request combine with the history ON BEHALF OF USER.
 
-# OUTPUT FORMAT
-true/false
+## ATTENTION
+1. the summary should contains details, someone who don't know the history should be able to understand new request.
+2. DON'T MENTION the previous request in the summary.
+3. DON'T add or miss any information in the summary.
+
+
+## OUTPUT FORMAT
+{"start_new_topic": true/false, "new_request": "describe the new request ON BEHALF OF USER"}
 """
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
         chat_message_preparation.add_message("user", history)
         result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=2, jsonable=True, sub_scenario="check_same_topic"
-        ).response
-        start_new_topic = self.is_true(result)
-        return not start_new_topic
+            **chat_message_preparation.to_chat_params(), max_length=256, jsonable=True, sub_scenario="check_same_topic"
+        ).get_json_response()
+        return result["start_new_topic"], result["new_request"]
 
     def classify_intent(
         self, query: str, chat_history: list[dict[str, str]], examples, session_id, previous_intent: Intent
@@ -82,21 +85,25 @@ true/false
         self.construct_system_prompt(chat_message_preparation)
         logger.debug(examples)
 
-        if previous_intent and self.check_same_topic(chat_model, self.format_history(chat_history)):
-            return IntentClassificationResponse(intent=previous_intent.name, confidence=1.0)
+        if len(chat_history) > 1:
+            start_new_topic, new_request = self.check_same_topic(chat_model, self.format_history(chat_history))
+            if previous_intent and not start_new_topic:
+                return IntentClassificationResponse(intent=previous_intent.name, confidence=1.0)
+        else:
+            new_request = query
 
         for example in examples:
             chat_message_preparation.add_message("user", example["example"])
             chat_message_preparation.add_message("assistant", example["intent"])
 
-        chat_message_preparation.add_message("user", self.format_history(chat_history[-1:]))
+        chat_message_preparation.add_message("user", new_request)
 
         intent = chat_model.chat(
             **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="intent"
-        ).response
+        ).get_json_response()
         logger.debug(intent)
         try:
-            response = IntentClassificationResponse.parse_obj(json.loads(intent))
+            response = IntentClassificationResponse.model_validate(intent)
         except JSONDecodeError as e:
             logger.error(e)
             response = IntentClassificationResponse(intent="unknown", confidence=1.0)
