@@ -68,7 +68,7 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     for s in SERIES:
         category_data = convert_df_column_to_list(df, s)
         if category_data:
-            numeric_data = [x if isinstance(x, (int, float)) and not math.isnan(x) else 0 for x in category_data]
+            numeric_data = [x if isinstance(x, (int, float)) and not math.isnan(x) else "" for x in category_data]
             chart_data.add_series(s, numeric_data)
 
     x, y, cx, cy = (

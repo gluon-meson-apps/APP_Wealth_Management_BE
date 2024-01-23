@@ -171,7 +171,7 @@ class WcsDataQuery(Action):
         chat_message_preparation.log(logger)
 
         info_result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="insight"
+            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="insight"
         ).response
         logger.info(f"chat result: {info_result}")
 
@@ -184,7 +184,7 @@ class WcsDataQuery(Action):
             chat_message_preparation.log(logger)
 
             final_result = chat_model.chat(
-                **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="ppt"
+                **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="ppt"
             ).response
 
         logger.info(f"final result: {final_result}")
