@@ -416,21 +416,23 @@ def generate_ppt(df_current, df_all, insight, files_dir) -> str:
 
 if __name__ == "__main__":
     test_formatted_data = {
-        "past_years_data": [
-            {"company": "CDT N.V.", "days": "FY13", "dpo": -44, "dso": 51, "dio": 47, "ccc": 53},
-            {"company": "CDT N.V.", "days": "FY14", "dpo": -46, "dso": 51, "dio": 50, "ccc": 55},
-            {"company": "CDT N.V.", "days": "FY15", "dpo": -42, "dso": 50, "dio": 51, "ccc": 60},
-            {"company": "CDT N.V.", "days": "FY16", "dpo": -43, "dso": 51, "dio": 53, "ccc": 61},
-            {"company": "CDT N.V.", "days": "FY17", "dpo": -46, "dso": 54, "dio": 58, "ccc": 66},
+        "all_years_data": [
             {"company": "CDT N.V.", "days": "FY18", "dpo": -45, "dso": 53, "dio": 61, "ccc": 69},
-            {"company": "CDT N.V.", "days": "FY19", "dpo": -47, "dso": 53, "dio": 64, "ccc": None},
+            {"company": "CDT N.V.", "days": "FY19", "dpo": -47, "dso": 53, "dio": 64, "ccc": 70},
             {"company": "CDT N.V.", "days": "FY20", "dpo": -49, "dso": 56, "dio": 64, "ccc": 71},
             {"company": "CDT N.V.", "days": "FY21", "dpo": -46, "dso": 55, "dio": 63, "ccc": 72},
         ],
-        "this_year_data": [{"company": "CDT N.V.", "days": "FY21", "dpo": -46, "dso": 55, "dio": 63, "ccc": 72}],
+        "latest_year_data": [
+            {"company": "ABC Holding", "days": "FY21", "dpo": -78, "dso": 67, "dio": 41, "ccc": 30},
+            {"company": "Uni Inc.", "days": "FY21", "dpo": -44, "dso": 53, "dio": 41, "ccc": 50},
+            {"company": "DEB Company", "days": "FY21", "dpo": -39, "dso": 49, "dio": 43, "ccc": 53},
+            {"company": "CCT N.V.", "days": "FY21", "dpo": -46, "dso": 38, "dio": 61, "ccc": 53},
+            {"company": "BZL plc", "days": "FY21", "dpo": -54, "dso": 41, "dio": 68, "ccc": 55},
+            {"company": "CDT N.V.", "days": "FY21", "dpo": -46, "dso": 55, "dio": 63, "ccc": 72},
+        ],
     }
-    current_data_test = test_formatted_data["past_years_data"] if "past_years_data" in test_formatted_data else []
-    all_data_test = test_formatted_data["this_year_data"] if "this_year_data" in test_formatted_data else []
+    current_data_test = test_formatted_data["all_years_data"] if "all_years_data" in test_formatted_data else []
+    all_data_test = test_formatted_data["latest_year_data"] if "latest_year_data" in test_formatted_data else []
     df_current_test = pd.DataFrame(current_data_test).drop(
         columns=["meta__score", "meta__reference", "id"], errors="ignore"
     )

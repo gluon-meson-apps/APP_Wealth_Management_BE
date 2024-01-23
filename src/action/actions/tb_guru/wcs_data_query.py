@@ -29,7 +29,8 @@ Help me extract data from user input and reply it with below JSON schema.
 
 ## Schema should be like this
 {
-    "past_years_data": [{
+    // all years data for specific company which should be mentioned in user input
+    "all_years_data": [{
         "company": "company name", // STRING
         "days": "the date for the record", // STRING
         "dpo": "DPO", // NUMBER,
@@ -37,7 +38,8 @@ Help me extract data from user input and reply it with below JSON schema.
         "dio": "DIO", // NUMBER,
         "ccc": "CCC", // NUMBER,
     }, ...],
-    "this_year_data": [{
+    // latest year data for all companies
+    "latest_year_data": [{
         "company": "company name", // STRING
         "days": "the date for the record", // STRING
         "dpo": "DPO", // NUMBER,
@@ -90,8 +92,9 @@ def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem
         **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="data_provided"
     ).response
     formatted_data = extract_json_from_code_block(result)
-    current_company_data = formatted_data["past_years_data"] if "past_years_data" in formatted_data else []
-    latest_all_data = formatted_data["this_year_data"] if "this_year_data" in formatted_data else []
+    current_company_data = formatted_data["all_years_data"] if "all_years_data" in formatted_data else []
+    latest_all_data = formatted_data["latest_year_data"] if "latest_year_data" in formatted_data else []
+    logger.info(f"formatted data: {formatted_data}")
     return [SearchItem(meta__score=-1, **d) for d in latest_all_data], [
         SearchItem(meta__score=-1, **d) for d in current_company_data
     ]
