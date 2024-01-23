@@ -13,8 +13,6 @@ from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
 from pydantic import BaseModel
 
-from third_system.search_entity import SearchItem, SearchItemReference
-
 
 class SlideConfig(BaseModel, arbitrary_types_allowed=True):
     title: str
@@ -70,7 +68,8 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     for s in SERIES:
         category_data = convert_df_column_to_list(df, s)
         if category_data:
-            chart_data.add_series(s, category_data)
+            numeric_data = [x if isinstance(x, (int, float)) and not math.isnan(x) else 0 for x in category_data]
+            chart_data.add_series(s, numeric_data)
 
     x, y, cx, cy = (
         Inches(1 + chart_width * (chart_config.index % 2)),
@@ -416,119 +415,30 @@ def generate_ppt(df_current, df_all, insight, files_dir) -> str:
 
 
 if __name__ == "__main__":
-    data = [
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Walmart",
-            days="FY21",
-            dpo=-78,
-            dso=67,
-            dio=41,
-            ccc=30,
-            dpo_rank=1.0,
-            dso_rank=6.0,
-            dio_rank=1.0,
-            ccc_rank=1.0,
-            id="2d771d74-19b1-45ce-ac23-20f27bbcf15e",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Alphabet Inc.",
-            days="FY20",
-            dpo=-44,
-            dso=53,
-            dio=41,
-            ccc=50,
-            dpo_rank=5.0,
-            dso_rank=4.0,
-            dio_rank=2.0,
-            ccc_rank=2.0,
-            id="f52391c9-c75a-47cf-80b3-571771d0f025",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Amazon",
-            days="FY19",
-            dpo=-39,
-            dso=49,
-            dio=43,
-            ccc=53,
-            dpo_rank=6.0,
-            dso_rank=3.0,
-            dio_rank=3.0,
-            ccc_rank=3.0,
-            id="724fa351-1e75-4d91-b6f0-ced526165c6d",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Meta",
-            days="FY18",
-            dpo=-46,
-            dso=38,
-            dio=61,
-            ccc=53,
-            dpo_rank=4.0,
-            dso_rank=1.0,
-            dio_rank=4.0,
-            ccc_rank=4.0,
-            id="a4a600ae-360e-416d-9688-d38ab4e02bcb",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Microsoft",
-            days="FY17",
-            dpo=-54,
-            dso=41,
-            dio=68,
-            ccc=55,
-            dpo_rank=2.0,
-            dso_rank=2.0,
-            dio_rank=6.0,
-            ccc_rank=5.0,
-            id="fd877f8e-306d-4276-8cb7-88eccdd32f1f",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="JPMorgan Chase",
-            days="FY16",
-            dpo=-46,
-            dso=51,
-            dio=52,
-            ccc=57,
-            dpo_rank=None,
-            dso_rank=None,
-            dio_rank=None,
-            ccc_rank=None,
-            id="8c92e68f-9288-4fd8-b76d-ab735e244c69",
-        ),
-        SearchItem(
-            meta__score=1.0,
-            meta__reference=SearchItemReference(meta__source_type="csv", meta__source_name="wcs_data.csv"),
-            company="Apple Inc.",
-            days="FY15",
-            dpo=-46,
-            dso=55,
-            dio=63,
-            ccc=72,
-            dpo_rank=3.0,
-            dso_rank=5.0,
-            dio_rank=5.0,
-            ccc_rank=6.0,
-            id="d1b11839-c510-4e44-add3-13046f1fd565",
-        ),
-    ]
-    df_test = pd.DataFrame([d.model_dump() for d in data])
-    df_test = df_test.drop(columns=["meta__score", "meta__reference", "id"])
+    test_formatted_data = {
+        "past_years_data": [
+            {"company": "CDT N.V.", "days": "FY13", "dpo": -44, "dso": 51, "dio": 47, "ccc": 53},
+            {"company": "CDT N.V.", "days": "FY14", "dpo": -46, "dso": 51, "dio": 50, "ccc": 55},
+            {"company": "CDT N.V.", "days": "FY15", "dpo": -42, "dso": 50, "dio": 51, "ccc": 60},
+            {"company": "CDT N.V.", "days": "FY16", "dpo": -43, "dso": 51, "dio": 53, "ccc": 61},
+            {"company": "CDT N.V.", "days": "FY17", "dpo": -46, "dso": 54, "dio": 58, "ccc": 66},
+            {"company": "CDT N.V.", "days": "FY18", "dpo": -45, "dso": 53, "dio": 61, "ccc": 69},
+            {"company": "CDT N.V.", "days": "FY19", "dpo": -47, "dso": 53, "dio": 64, "ccc": None},
+            {"company": "CDT N.V.", "days": "FY20", "dpo": -49, "dso": 56, "dio": 64, "ccc": 71},
+            {"company": "CDT N.V.", "days": "FY21", "dpo": -46, "dso": 55, "dio": 63, "ccc": 72},
+        ],
+        "this_year_data": [{"company": "CDT N.V.", "days": "FY21", "dpo": -46, "dso": 55, "dio": 63, "ccc": 72}],
+    }
+    current_data_test = test_formatted_data["past_years_data"] if "past_years_data" in test_formatted_data else []
+    all_data_test = test_formatted_data["this_year_data"] if "this_year_data" in test_formatted_data else []
+    df_current_test = pd.DataFrame(current_data_test).drop(
+        columns=["meta__score", "meta__reference", "id"], errors="ignore"
+    )
+    df_all_test = pd.DataFrame(all_data_test).drop(columns=["meta__score", "meta__reference", "id"], errors="ignore")
     test_insight = """
     Q1: Apple Inc.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
     Q2: Apple Inc.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
     """
     test_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
     os.makedirs(test_dir, exist_ok=True)
-    generate_ppt(df_test, df_test, test_insight, test_dir)
+    generate_ppt(df_current_test, df_all_test, test_insight, test_dir)
