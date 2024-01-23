@@ -10,7 +10,6 @@ from nlu.forms import FormStore, Form
 from nlu.intent_with_entity import Entity
 from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
-from utils.utils import extract_json_from_code_block
 
 system_template = """
 ## Role & Task
@@ -92,12 +91,13 @@ class LLMEntityExtractor(EntityExtractor):
         chat_message_preparation = ChatMessagePreparation()
         self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True).response
+        entities = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True
+        ).get_json_response()
 
-        logger.debug(result)
-        if result == "None":
+        logger.debug(entities)
+        if not entities:
             return []
-        entities = extract_json_from_code_block(result)
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
         if entities:
             entity_list = list(
