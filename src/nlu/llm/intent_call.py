@@ -2,6 +2,7 @@ import json
 from json import JSONDecodeError
 from typing import List
 
+from gluon_meson_sdk.models.abstract_models.abstract_chat_model import AbstractChatModel
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 from pydantic import BaseModel
@@ -48,6 +49,28 @@ class IntentCall:
 
         chat_message_preparation.add_message("system", self.template.template, intent_list=intent_list_str)
 
+    @classmethod
+    def is_true(cls, arg):
+        ua = str(arg).upper()
+        return "TRUE" == ua
+
+    def check_same_topic(self, chat_model: AbstractChatModel, history):
+        prompt = """# ROLE
+
+you are a helpful chatbot, your ONLY job is to estimate if the user is changed to a new topic.
+
+# OUTPUT FORMAT
+true/false
+"""
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message("system", prompt)
+        chat_message_preparation.add_message("user", history)
+        result = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=2, jsonable=True, sub_scenario="check_same_topic"
+        ).response
+        start_new_topic = self.is_true(result)
+        return not start_new_topic
+
     def classify_intent(
         self, query: str, chat_history: list[dict[str, str]], examples, session_id, previous_intent: Intent
     ) -> IntentClassificationResponse:
@@ -59,19 +82,18 @@ class IntentCall:
         self.construct_system_prompt(chat_message_preparation)
         logger.debug(examples)
 
-        def format_chat_history_title(histtory):
-            return f"## chat history\n{histtory}"
+        if previous_intent and self.check_same_topic(chat_model, self.format_history(chat_history)):
+            return IntentClassificationResponse(intent=previous_intent.name, confidence=1.0)
 
         for example in examples:
-            chat_message_preparation.add_message("user", format_chat_history_title(example["example"]))
+            chat_message_preparation.add_message("user", example["example"])
             chat_message_preparation.add_message("assistant", example["intent"])
 
-        previous_intent = f"## previous intent \n{previous_intent.name}\n\n" if previous_intent else ""
-        user_input = format_chat_history_title(self.format_history(chat_history))
-        chat_message_preparation.add_message("user", previous_intent + user_input)
+        chat_message_preparation.add_message("user", self.format_history(chat_history[-1:]))
 
-        # TODO: drop history if it is too long
-        intent = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True).response
+        intent = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="intent"
+        ).response
         logger.debug(intent)
         try:
             response = IntentClassificationResponse.parse_obj(json.loads(intent))
