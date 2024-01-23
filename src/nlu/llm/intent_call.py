@@ -10,6 +10,7 @@ from llm.self_host import ChatModel
 from nlu.intent_config import IntentConfig
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
+from nlu.intent_with_entity import Intent
 from prompt_manager.base import PromptWrapper
 
 
@@ -37,7 +38,7 @@ class IntentCall:
         chat_history_str = ""
         for chat in chat_history:
             i_or_you = "I" if chat["role"] == "user" else "You"
-            chat_history_str += f"## {i_or_you}:\n\n {chat['content']}\n"
+            chat_history_str += f"{i_or_you}: {chat['content']}\n"
         return chat_history_str
 
     def construct_system_prompt(self, chat_message_preparation: ChatMessagePreparation):
@@ -48,7 +49,7 @@ class IntentCall:
         chat_message_preparation.add_message("system", self.template.template, intent_list=intent_list_str)
 
     def classify_intent(
-        self, query: str, chat_history: list[dict[str, str]], examples, session_id
+        self, query: str, chat_history: list[dict[str, str]], examples, session_id, previous_intent: Intent
     ) -> IntentClassificationResponse:
         # TODO: drop history if it is too long
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
@@ -57,10 +58,17 @@ class IntentCall:
 
         self.construct_system_prompt(chat_message_preparation)
         logger.debug(examples)
+
+        def format_chat_history_title(histtory):
+            return f"## chat history\n{histtory}"
+
         for example in examples:
-            chat_message_preparation.add_message("user", example["example"])
+            chat_message_preparation.add_message("user", format_chat_history_title(example["example"]))
             chat_message_preparation.add_message("assistant", example["intent"])
-        chat_message_preparation.add_message("user", self.format_history(chat_history))
+
+        previous_intent = f"## previous intent \n{previous_intent.name}\n\n" if previous_intent else ""
+        user_input = format_chat_history_title(self.format_history(chat_history))
+        chat_message_preparation.add_message("user", previous_intent + user_input)
 
         # TODO: drop history if it is too long
         intent = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True).response
