@@ -1,0 +1,12 @@
+name: br_extension_qa
+business: true
+description: answer BR extension related questions from user input
+examples:
+  - Hi TB guru, Could you please help me check the Australia BR supporting document requirement for New Authorised Signatory
+  - Hi TB guru, Please help me what’s the specification I need to follow on the Australia BR file letter head
+slots:
+  - name: country
+    description: the country of the user
+    slotType: text
+    optional: False
+action: br_extension_qa

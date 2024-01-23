@@ -10,6 +10,7 @@ from action.actions.tb_guru.letter_of_credit_advising import LetterOfCreditAdvis
 from action.actions.tb_guru.standard_pricing_check_action import StandardPricingCheckAction
 from action.actions.tb_guru.file_validation import FileValidation
 from action.actions.tb_guru.wcs_data_query import WcsDataQuery
+from action.actions.tb_guru.br_extenstion_qa import BRExtensionQAAction
 from action.base import Action
 from llm.self_host import ChatModel
 
@@ -47,3 +48,4 @@ action_repository.save(FileValidation())
 action_repository.save(WcsDataQuery())
 action_repository.save(GPSProductCheckAction())
 action_repository.save(BrFileValidation())
+action_repository.save(BRExtensionQAAction())
