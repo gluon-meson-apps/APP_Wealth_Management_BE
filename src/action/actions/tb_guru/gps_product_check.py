@@ -47,6 +47,13 @@ class GPSProductCheckAction(Action):
             SearchParam(query=user_input, tags={"product_line": "gps_product"}), context.conversation.session_id
         )
         logger.info(f"search response: {response}")
+        if len(response) == 0:
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content="Sorry, I can't answer your question, since there is no GPS product found.",
+                intent=context.conversation.current_intent.name,
+            )
+            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
         data = [item.json() for item in response[0].items]
         keys_to_exclude = [
             "meta__score",
