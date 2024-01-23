@@ -1,18 +1,18 @@
 from typing import Any
 
+from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
+from gluon_meson_sdk.models.chat_model import ChatModel
+from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from langchain.schema import Document
 from loguru import logger
 from pymilvus import FieldSchema, DataType
 
-from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
-from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from nlu.llm.intent_call import IntentCall
 from prompt_manager.base import PromptManager
-from third_system.search_entity import SearchResponse, SearchItem
+from third_system.search_entity import SearchResponse, SearchParam
 from third_system.unified_search import UnifiedSearch
 from tracker.context import ConversationContext
 
@@ -50,36 +50,24 @@ class IntentConfig:
 
 def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
-    response: SearchResponse = unified_search_client.search_for_intent_examples(
-        table=topic, user_input=user_input.strip()
-    )
+    response: SearchResponse = unified_search_client.vector_search(
+        search_param=SearchParam(query=user_input, size=3), table=topic
+    )[0]
 
     intents_examples = extract_examples_from_response_text(response)
     return intents_examples
 
 
-def extract_examples_from_response_text(response: SearchResponse):
-    if response and response.total > 0:
-        try:
-            intent, example, score = extract_info(response.items)
-            return [{"example": example, "intent": intent, "score": score}]
-        except Exception as e:
-            logger.warning(str(e))
-    return []
-
-
-def get_highest_scored_item(items: list[SearchItem]):
-    sorted_items = sorted(items, key=lambda item: item.meta__score, reverse=True)
-    return sorted_items[0]
-
-
-def extract_info(items):
-    highest_scored_item = get_highest_scored_item(items)
-    text = highest_scored_item.model_extra["text"]
-    intent = highest_scored_item.meta__reference.model_extra["meta__intent_result"]
+def process_one_intent_example(intent_example):
+    text = intent_example.model_extra["text"]
+    intent = intent_example.meta__reference.model_extra["meta__intent_result"]
     example = text
-    score = highest_scored_item.meta__score
-    return intent, example, score
+    score = intent_example.meta__score
+    return dict(intent=intent, example=example, score=score)
+
+
+def extract_examples_from_response_text(response: SearchResponse):
+    return [process_one_intent_example(item) for item in response.items]
 
 
 class LLMIntentClassifier(IntentClassifier):
