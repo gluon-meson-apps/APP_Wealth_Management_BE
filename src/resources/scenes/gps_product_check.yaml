@@ -2,7 +2,7 @@ name: gps_product_check
 description: according to provided products information, answer the questions from user input
 business: true
 examples:
-  - Hi TB Guru, Can you provide the payment capabilities for SG of HSBC?
+  - Hi TB Guru, Can you provide the GPS payment products for SG of HSBC?
   - Hi TB Guru, Can you provide product under Notional Pooling and Merchant Services?
   - Hi TB Guru, What products are sold onshore in Seg_MME under Notional Pooling Product sub family
 action: gps_product_check
