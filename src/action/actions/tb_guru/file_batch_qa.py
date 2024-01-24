@@ -9,6 +9,7 @@ from action.base import (
     AttachmentResponse,
     Attachment,
     UploadFileContentType,
+    GeneralResponse,
 )
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
@@ -106,13 +107,21 @@ class FileBatchAction(Action):
         tags = {k: v for k, v in conversation.get_simplified_entities().items() if k in available_tags}
         logger.info(f"tags: {tags}")
         df = self.df_processor.search_items_to_df(conversation.uploaded_file_contents[0].items)
+        questions_column_entity = conversation.get_entity_by_name("questions_column_name")
+        questions_column = questions_column_entity.value if questions_column_entity else "questions"
+        if questions_column not in df.columns:
+            return GeneralResponse.normal_failed_text_response(
+                f"No header named {questions_column} found in file please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
+                conversation.current_intent.name,
+            )
+        df = df[df[questions_column].notna()]
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
         df[["answers", "reference_data", "reference_name"]] = df.reset_index().apply(
-            lambda row: get_result_from_llm(row["questions"], row["index"]), axis=1, result_type="expand"
+            lambda row: get_result_from_llm(row[questions_column], row["index"]), axis=1, result_type="expand"
         )
-        df = df[["questions", "answers", "reference_name", "reference_data"]]
+        df = df[[questions_column, "answers", "reference_name", "reference_data"]]
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,

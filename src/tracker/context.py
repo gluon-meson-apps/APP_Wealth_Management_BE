@@ -2,7 +2,7 @@ import os
 import shutil
 import uuid
 from datetime import datetime
-from typing import List, Any
+from typing import List, Any, Optional
 from fastapi import UploadFile
 
 from action.base import ResponseMessageType
@@ -93,7 +93,7 @@ class ConversationContext:
         self.status = "start"
         # used for condition jughment
         self.state = ""
-        self.entities = []
+        self.entities: list[Entity] = []
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
         # counter for inquiry times
@@ -138,6 +138,12 @@ class ConversationContext:
             else:
                 self.entities.append(new_entity)
                 logger.info(f"Added entity {new_entity.type} for session {self.session_id}")
+
+    def get_entity_by_name(self, entity_name: str) -> Optional[Entity]:
+        for entity in self.entities:
+            if entity.type == entity_name:
+                return entity
+        return None
 
     def get_entities(self):
         return self.entities

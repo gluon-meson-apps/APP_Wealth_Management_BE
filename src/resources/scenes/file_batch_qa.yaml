@@ -24,4 +24,8 @@ Sample Reports"
     description: the country of the user who ask the ORIGINAL question
     slotType: text
     optional: False
+  - name: questions_column_name
+    description: the column name of the questions in the csv/excel file
+    slotType: text
+    optional: True
 action: file_batch_qa

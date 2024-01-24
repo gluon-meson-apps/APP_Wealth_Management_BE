@@ -68,6 +68,32 @@ class GeneralResponse(ActionResponse):
     answer: ChatResponseAnswer
     jump_out_flag: bool
 
+    @staticmethod
+    def normal_failed_text_response(content: str, intent: str):
+        return GeneralResponse(
+            code=400,
+            message="failed",
+            answer=ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content=content,
+                intent=intent,
+            ),
+            jump_out_flag=False,
+        )
+
+    @staticmethod
+    def normal_success_text_response(content: str, intent: str):
+        return GeneralResponse(
+            code=200,
+            message="success",
+            answer=ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content=content,
+                intent=intent,
+            ),
+            jump_out_flag=False,
+        )
+
 
 class Attachment(BaseModel):
     path: str
@@ -81,7 +107,7 @@ class AttachmentResponse(ActionResponse):
     message: str
     answer: ChatResponseAnswer
     attachment: Attachment
-    jump_out_flag: bool
+    jump_out_flag: bool = False
 
 
 class JumpOutResponse(ActionResponse):
