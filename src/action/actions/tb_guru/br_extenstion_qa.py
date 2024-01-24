@@ -1,5 +1,3 @@
-from typing import Union, re
-
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
@@ -29,6 +27,20 @@ Now, answer the user's question, and reply the final result.
 """
 
 
+summary_prompt = """
+## INSTRUCTION
+please summarize the user question according USER INPUT and chat history
+
+## user input
+
+{{user_input}}
+
+## chat history
+
+{{chat_history}}
+
+"""
+
 class BRExtensionQAAction(Action):
     def __init__(self):
         self.unified_search = UnifiedSearch()
@@ -43,12 +55,22 @@ class BRExtensionQAAction(Action):
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         user_input = context.conversation.current_user_input
+        history = context.conversation.get_history().format_string()
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user", summary_prompt, user_input=user_input, chat_history=history
+        )
+        chat_message_preparation.log(logger)
+
+        summary_user_input = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=512).response
+
         query = f"""## User input:
 search the BR extension
-## User input
-{user_input}
+## User question
+{summary_user_input}
 ## ATTENTION
-2. fields to be queried: {context.conversation.get_entities()}"""
+1. fields to be queried: {context.conversation.get_entities()}
+"""
         logger.info(f"search query: {query}")
 
         response = self.unified_search.search(
