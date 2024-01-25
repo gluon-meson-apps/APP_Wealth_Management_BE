@@ -101,16 +101,17 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
     if not summary_details:
         return ""
 
-    headers = []
     rows = []
+    headers = [
+        key for key in summary_details[0].model_dump().keys() if key not in ["meta__score", "meta__reference", "id"]
+    ]
 
-    for index, item in enumerate(summary_details):
-        rows.append([])
-        for k, v in item.model_dump().items():
-            if k not in ["meta__score", "meta__reference"]:
-                if index == 0:
-                    headers.append(k)
-                rows[index].append(str(v))
+    for item in summary_details:
+        header_to_value = item.model_dump()
+        row = [str(header_to_value[header]) for header in headers]
+        row += [str(header_to_value["meta__score"])]
+        rows.append(row)
+    headers += ["score"]
 
     table_header_html = "<tr>" + "".join(f"<th>{remove_extra_newline(header)}</th>" for header in headers) + "</tr>"
     table_cell_html = "".join(
