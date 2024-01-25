@@ -14,7 +14,9 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
+from action.actions.tb_guru.email_reply import EmailReplyAction
 from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
+from action.context import ActionContext
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
@@ -67,7 +69,11 @@ def chat(
 
 
 @app.post("/score/")
-async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Depends()):
+async def score(
+    score_command: ScoreCommand,
+    unified_search: UnifiedSearch = Depends(),
+    email_reply_action: EmailReplyAction = Depends(),
+):
     err_msg = ""
     result = None
     conversation = None
@@ -80,6 +86,8 @@ async def score(score_command: ScoreCommand, unified_search: UnifiedSearch = Dep
         result, conversation = await dialog_manager.handle_message(
             score_command.question, session_id, file_contents=[file_res] if file_res else None
         )
+        if score_command.from_email and result and not isinstance(result, JumpOutResponse):
+            result = await email_reply_action.run(ActionContext(conversation), result.answer)
     except Exception as err:
         logger.info(traceback.format_exc())
         err_msg = f"Error occurred: {err}"
