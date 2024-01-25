@@ -88,6 +88,7 @@ search the BR extension
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name
+            messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name,
+            references=response[0].items,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
