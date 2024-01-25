@@ -79,7 +79,7 @@ class BaseDialogManager:
         plan = self.reasoner.think(conversation)
 
         action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
-        response = self.output_adapter.process_output(action_response)
+        response = self.output_adapter.process_output(action_response, conversation)
         conversation.append_assistant_history(response.answer)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1

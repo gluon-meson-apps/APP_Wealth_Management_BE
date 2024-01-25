@@ -26,6 +26,7 @@ from action.base import (
 )
 from third_system.search_entity import SearchItem
 from third_system.unified_search import UnifiedSearch
+from tracker.context import ConversationContext
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -67,7 +68,7 @@ def get_parsed_slot_value(target_slot_name: str, slot_value: str, force_filter: 
 
 
 class OutputAdapter:
-    def process_output(self, output: object) -> object:
+    def process_output(self, output: object, conversation: ConversationContext) -> object:
         raise NotImplementedError()
 
     def get_slot_name(self, action_name: str, target_slots: []):
@@ -143,7 +144,7 @@ class BaseOutputAdapter(OutputAdapter):
     def __init__(self, unified_search: UnifiedSearch = Depends()):
         self.unified_search = unified_search
 
-    def process_output(self, output: object) -> object:
+    def process_output(self, output: object, conversation: ConversationContext) -> object:
         if isinstance(output, AttachmentResponse):
             logger.info(f"process attachment: {output.attachment}")
             output.answer.extra_info["Attachment"] = output.attachment.url
@@ -151,6 +152,10 @@ class BaseOutputAdapter(OutputAdapter):
             output_html = process_references(output.answer.references)
             if output_html:
                 output.answer.extra_info["References"] = output_html
+        output.answer.extra_info["intent"] = conversation.current_intent.name
+        output.answer.extra_info["slots"] = [
+            f"{key}: {value}\n" for key, value in conversation.get_simplified_entities().items()
+        ]
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):
