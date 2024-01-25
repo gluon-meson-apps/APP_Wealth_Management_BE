@@ -64,6 +64,9 @@ class History:
     def format_messages(self):
         return [{"role": entry["role"], "content": entry["content"]} for entry in self.rounds]
 
+    def get_latest(self):
+        return self.rounds[-1]["content"] if len(self.rounds) > 0 else ""
+
 
 class ConversationFiles:
     def __init__(self, session_id: str):
@@ -255,3 +258,4 @@ class ConversationContext:
         self.state = ""
         self.confused_intents = []
         self.history.delete_latest_conversation_history()
+        self.current_user_input = self.history.get_latest()
