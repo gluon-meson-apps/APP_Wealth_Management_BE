@@ -1,4 +1,5 @@
-from typing import Any
+import json
+from typing import Any, Optional
 
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
@@ -11,6 +12,7 @@ from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from nlu.llm.intent_call import IntentCall
+from nlu.llm.intent_choosing_confirmer import IntentChoosingConfirmer
 from prompt_manager.base import PromptManager
 from third_system.search_entity import SearchResponse, SearchParam
 from third_system.unified_search import UnifiedSearch
@@ -95,6 +97,9 @@ class LLMIntentClassifier(IntentClassifier):
             chat_model,
             model_type,
         )
+        self.intent_choosing_confirmer = IntentChoosingConfirmer(
+            prompt_manager.load(name="intent_choosing_confirm").template
+        )
 
     def train(self):
         # recreate topic
@@ -118,11 +123,36 @@ class LLMIntentClassifier(IntentClassifier):
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
-    def classify_intent(self, conversation: ConversationContext) -> Intent:
+    @classmethod
+    def get_same_intent(cls, examples) -> Optional[str]:
+        if len(examples) == 0:
+            return None
+        intents = [json.loads(example["intent"])["intent"] for example in examples]
+        if all(intent == intents[0] for intent in intents):
+            return intents[0]
+        return None
+
+    def classify_intent(self, conversation: ConversationContext) -> tuple[Optional[Intent], Optional[Intent]]:
+        if conversation.is_confused_with_intents():
+            intent = self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
+            conversation.confused_intents_resolved()
+            if intent:
+                logger.info(f"session {conversation.session_id}, intent: {intent}")
+                description = self.intent_list_config.get_intent(intent).description
+                return Intent(name=intent, confidence=1.0, description=description), None
+
         user_input = conversation.current_user_input
         intent_name_list = self.intent_list_config.get_intent_name()
         chat_history = conversation.get_history().format_messages()
         intent_examples = get_intent_examples(user_input)
+        unique_intent_in_examples = self.get_same_intent(intent_examples)
+        if unique_intent_in_examples:
+            unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
+            unique_intent_in_examples = Intent(
+                name=unique_intent_in_examples.name,
+                confidence=1.0,
+                description=unique_intent_in_examples.description,
+            )
         intent = self.intent_call.classify_intent(
             user_input, chat_history, intent_examples, conversation.session_id, conversation.current_intent
         )
@@ -130,7 +160,9 @@ class LLMIntentClassifier(IntentClassifier):
         if intent.intent in intent_name_list:
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
             description = self.intent_list_config.get_intent(intent.intent).description
-            return Intent(name=intent.intent, confidence=intent.confidence, description=description)
+            return Intent(
+                name=intent.intent, confidence=intent.confidence, description=description
+            ), unique_intent_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")
-        return None
+        return None, unique_intent_in_examples

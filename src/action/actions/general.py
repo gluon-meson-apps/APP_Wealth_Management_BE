@@ -11,6 +11,7 @@ from action.base import (
     JumpOutResponse,
     ResponseMessageType,
 )
+from action.context import ActionContext
 from llm.self_host import ChatModel
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
@@ -126,6 +127,39 @@ class IntentFillingAction(Action):
 
         response = chat_model.chat(
             **chat_message_preparation.to_chat_params(), max_length=1024, temperature=0.7
+        ).response
+        detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
+        return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
+
+
+class AskForIntentChoosingAction(Action):
+    """Intent filling action using large language models."""
+
+    def get_name(self) -> str:
+        return "intent_choosing"
+
+    def __init__(self, prompt_manager: PromptManager):
+        self.prompt_template = prompt_manager.load(name="intent_choosing")
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = "intent_choosing_action"
+
+    async def run(self, context: ActionContext):
+        logger.info(f"exec action {self.get_name()}")
+
+        filtered_intents = [intent.minimal_info() for intent in context.conversation.confused_intents]
+
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "system",
+            self.prompt_template.template,
+            history=context.conversation.get_history().format_string(),
+            intent_list=json.dumps(filtered_intents),
+        )
+        chat_message_preparation.log(logger)
+
+        response = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=128, temperature=0.2
         ).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)

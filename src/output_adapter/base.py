@@ -152,7 +152,7 @@ class BaseOutputAdapter(OutputAdapter):
             output_html = process_references(output.answer.references)
             if output_html:
                 output.answer.extra_info["References"] = output_html
-        output.answer.extra_info["intent"] = conversation.current_intent.name
+        output.answer.extra_info["intent"] = conversation.current_intent.name if conversation.current_intent else ""
         output.answer.extra_info["slots"] = "\n".join(
             [f"{key}: {value}" for key, value in conversation.get_simplified_entities().items()]
         )

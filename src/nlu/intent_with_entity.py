@@ -20,6 +20,12 @@ class Intent(HashableBaseModel):
     confidence: Optional[float] = 1
     business: Optional[bool] = False
 
+    def minimal_info(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+        }
+
 
 class Slot(HashableBaseModel):
     name: str

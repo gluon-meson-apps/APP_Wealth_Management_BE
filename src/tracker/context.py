@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import List, Any, Optional
 from fastapi import UploadFile
 
-from action.base import ResponseMessageType
 from nlu.intent_with_entity import Entity, Intent
 from collections import deque
 
@@ -15,6 +14,8 @@ from third_system.search_entity import SearchResponse
 
 
 def prepare_response_content(answer):
+    from action.base import ResponseMessageType
+
     if not answer:
         return "Jump out"
     elif answer.messageType == ResponseMessageType.FORMAT_TEXT:
@@ -38,6 +39,11 @@ class History:
         if len(self.rounds) >= self.max_history:
             self.rounds.pop(0)
         self.rounds.append({"role": role, "content": message, "file_name": file_name})
+
+    def delete_latest_conversation_history(self):
+        conversation_to_delete = 2 if len(self.rounds) > 1 else len(self.rounds)
+        for _ in range(conversation_to_delete):
+            self.rounds.pop()
 
     def format_string(self):
         return "\n".join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
@@ -102,6 +108,7 @@ class ConversationContext:
         self.current_round = 0
         self.files = ConversationFiles(self.session_id)
         self.uploaded_file_contents: list[SearchResponse] = []
+        self.confused_intents: list[Intent] = []
 
     def get_history(self) -> History:
         return self.history
@@ -224,3 +231,15 @@ class ConversationContext:
 
     def intent_restore(self):
         self.current_intent = self.intent_queue[0]
+
+    def set_confused_intents(self, intents: list[Intent]):
+        self.set_state("asking_user_for_intent_choosing")
+        self.confused_intents = intents
+
+    def is_confused_with_intents(self):
+        return self.state == "asking_user_for_intent_choosing"
+
+    def confused_intents_resolved(self):
+        self.state = ""
+        self.confused_intents = []
+        self.history.delete_latest_conversation_history()

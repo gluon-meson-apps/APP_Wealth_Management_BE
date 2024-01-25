@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 from action.base import Action
 from action.actions.general import (
@@ -7,6 +7,7 @@ from action.actions.general import (
     IntentConfirmAction,
     IntentFillingAction,
     SlotConfirmAction,
+    AskForIntentChoosingAction,
 )
 from action.actions.bnb import BankRelatedAction, JumpOut
 from action.repository.action_repository import ActionRepository, action_repository as default_action_repository
@@ -43,6 +44,16 @@ class EndDialoguePolicy(Policy):
         if context.current_intent is not None:
             if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and not intent_in_scope(context.current_intent.name):
                 return True, EndDialogueAction()
+        return False, None
+
+
+class IntentChoosingPolicy(Policy):
+    def __init__(self, prompt_manager: PromptManager):
+        Policy.__init__(self, prompt_manager)
+
+    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
+        if context.is_confused_with_intents():
+            return True, AskForIntentChoosingAction(prompt_manager=self.prompt_manager)
         return False, None
 
 

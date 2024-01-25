@@ -1,20 +1,16 @@
-from typing import List
+from typing import List, Optional
 
 from tracker.context import ConversationContext
 from nlu.intent_with_entity import IntentWithEntity, Entity, Intent
 
 
 class Nlu:
-    def extract_intents_and_entities(
-        self, conversation_context: ConversationContext
-    ) -> IntentWithEntity:
+    def extract_intents_and_entities(self, conversation_context: ConversationContext) -> IntentWithEntity:
         raise NotImplementedError()
 
 
 class BaseNlu(Nlu):
-    def extract_intents_and_entities(
-        self, conversation_context: ConversationContext
-    ) -> IntentWithEntity:
+    def extract_intents_and_entities(self, conversation_context: ConversationContext) -> IntentWithEntity:
         pass
 
 
@@ -24,5 +20,5 @@ class EntityExtractor:
 
 
 class IntentClassifier:
-    def classify_intent(self, conversation_context: ConversationContext) -> Intent:
+    def classify_intent(self, conversation_context: ConversationContext) -> tuple[Optional[Intent], Optional[Intent]]:
         raise NotImplementedError()

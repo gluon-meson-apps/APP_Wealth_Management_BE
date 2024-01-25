@@ -1,26 +1,22 @@
 import os
 from typing import Any
-from fastapi import UploadFile
 
-from action.runner import ActionRunner, SimpleActionRunner
-from action.context import ActionContext
-from nlu.llm.entity import LLMEntityExtractor
-from nlu.llm.intent import LLMIntentClassifier
-from nlu.mlm.integrated import IntegratedNLU
+from fastapi import UploadFile
 from gluon_meson_sdk.dbs.milvus.milvus_connection import MilvusConnection
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
 from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
-from third_system.search_entity import SearchResponse
-from tracker.base import BaseConversationTracker, ConversationTracker
-from output_adapter.base import BaseOutputAdapter, OutputAdapter
-from reasoner.base import Reasoner
 from loguru import logger
-from nlu.forms import FormStore
+
+from action.context import ActionContext
+from action.runner import ActionRunner, SimpleActionRunner
 from llm.self_host import ChatModel as SelfHostChatModel
-
-
+from nlu.forms import FormStore
 from nlu.intent_config import IntentListConfig
+from nlu.llm.entity import LLMEntityExtractor
+from nlu.llm.intent import LLMIntentClassifier
+from nlu.mlm.integrated import IntegratedNLU
+from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from policy.base import BasePolicyManager
 from policy.general import (
     AssistantPolicy,
@@ -28,9 +24,13 @@ from policy.general import (
     SlotFillingPolicy,
     EndDialoguePolicy,
     JumpOutPolicy,
+    IntentChoosingPolicy,
 )
 from prompt_manager.base import BasePromptManager
+from reasoner.base import Reasoner
 from reasoner.llm_reasoner import LlmReasoner
+from third_system.search_entity import SearchResponse
+from tracker.base import BaseConversationTracker, ConversationTracker
 from tracker.context import ConversationContext
 
 
@@ -146,11 +146,13 @@ class DialogManagerFactory:
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
         jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
+        intent_choosing_policy = IntentChoosingPolicy(prompt_manager)
 
         policy_manager = BasePolicyManager(
             policies=[
                 end_dialogue_policy,
                 jump_out_policy,
+                intent_choosing_policy,
                 intent_filling_policy,
                 slot_filling_policy,
                 assitant_policy,

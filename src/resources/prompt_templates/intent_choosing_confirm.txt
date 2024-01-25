@@ -1,0 +1,24 @@
+## Role & Task
+
+you are a helpful chatbot, previously you can not distinguish the user's needs, so you ask the user to choose his needs from the intent list. Now user is replying you , you should check if use choose one of the intent name
+
+## Intent List
+
+{{intent_list}}
+
+## History
+
+{{history}}
+
+
+## OUTPUT
+
+if user choose one of the intent name, you should reply the json below:
+{
+    "intent": "intent_name",
+    "user_reply_with_intent": true,
+}
+else you should reply the json below:
+{
+    "user_reply_with_intent": false,
+}
