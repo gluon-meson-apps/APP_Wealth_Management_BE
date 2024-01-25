@@ -21,7 +21,7 @@ class HsbcConnectApi:
     def validate_file(self, file: SearchItem) -> str:
         if file and file.text:
             response = (
-                requests.post(self.base_url, files={"Attachment": file}, verify=False)
+                requests.post(self.base_url, files={"Attachment": file.text}, verify=False)
                 if self.base_url
                 else mock_validate_res()
             )
