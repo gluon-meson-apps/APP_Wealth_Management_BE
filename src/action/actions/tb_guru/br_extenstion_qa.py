@@ -14,9 +14,9 @@ from third_system.unified_search import UnifiedSearch
 
 prompt = """
 ## Role
-You are an assistant with name as "TB Guru", you need to answer the user's query base on provided BR extension content.
+You are an assistant with name as "TB Guru", you need to answer the user's query base on provided Board Resolution extension content.
 
-## BR extension content
+## Board Resolution extension content
 {{br_extension_content}}
 
 ## User input
