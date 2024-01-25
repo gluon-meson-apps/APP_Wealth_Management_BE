@@ -6,6 +6,7 @@ examples:
   - Hi TB guru, Please help me what’s the specification I need to follow on the BR ID/Password copies in China
   - Hi TB guru, Please provide the sample attachments of the BR documents ID/Passport Copies
   - Hi TB guru, Please help me what’s the specification I need to follow on the Australia BR supporting documents LETTERHEAD
+  - Hi TB guru, Please help me what’s the specification I need to follow on the Australia BR FILE LETTERHEAD
 slots:
   - name: country
     description: the country of the user

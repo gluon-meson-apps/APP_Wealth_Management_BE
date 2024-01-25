@@ -86,9 +86,12 @@ search the BR extension
 
         result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
         logger.info(f"chat result: {result}")
+        references = []
+        for res in response:
+            references += res.items
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name,
-            references=response[0].items,
+            references=references,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
