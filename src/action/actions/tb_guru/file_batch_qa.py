@@ -111,7 +111,7 @@ class FileBatchAction(Action):
         questions_column = questions_column_entity.value if questions_column_entity else "questions"
         if questions_column not in df.columns:
             return GeneralResponse.normal_failed_text_response(
-                f"No header named {questions_column} found in file please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
+                f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
                 conversation.current_intent.name,
             )
         df = df[df[questions_column].notna()]

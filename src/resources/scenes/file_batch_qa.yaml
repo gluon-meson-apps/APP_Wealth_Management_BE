@@ -17,13 +17,13 @@ Sample Reports"
     slotType: text
     optional: True
   - name: user
-    description: the user who ask the ORIGINAL question
+    description: the user who ask the send the email to you or ask you question
     slotType: text
     optional: True
   - name: country
-    description: the country of the user who ask the ORIGINAL question
+    description: the country of the user or the country of the questions
     slotType: text
-    optional: False
+    optional: True
   - name: questions_column_name
     description: the column name of the questions in the csv/excel file
     slotType: text
