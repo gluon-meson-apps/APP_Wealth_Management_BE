@@ -129,6 +129,8 @@ def process_references(references: List[SearchItem]):
     for item in references:
         if item.meta__reference:
             summary = item.meta__reference.meta__source_name
+            if item.meta__reference.meta__source_sub_name:
+                summary += f"({item.meta__reference.meta__source_sub_name})"
             summary_detail_dict.setdefault(summary, []).append(item)
 
     for summary in summary_detail_dict.keys():
