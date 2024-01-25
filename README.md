@@ -40,3 +40,8 @@ intent example init
 ```bash
 poetry run python  src/nlu/llm/intent_examples.py
 ```
+
+## add HSBC_CONNECT_API_ENDPOINT in .env for HSBC
+```
+HSBC_CONNECT_API_ENDPOINT=https://hkl20146575.hc.cloud.hk.hsbc:25000/PaymentRulesValidator/Report
+```
