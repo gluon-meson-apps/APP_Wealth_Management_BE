@@ -41,6 +41,7 @@ please summarize the user question according USER INPUT and chat history
 
 """
 
+
 class BRExtensionQAAction(Action):
     def __init__(self):
         self.unified_search = UnifiedSearch()
@@ -57,12 +58,12 @@ class BRExtensionQAAction(Action):
         user_input = context.conversation.current_user_input
         history = context.conversation.get_history().format_string()
         chat_message_preparation = ChatMessagePreparation()
-        chat_message_preparation.add_message(
-            "user", summary_prompt, user_input=user_input, chat_history=history
-        )
+        chat_message_preparation.add_message("user", summary_prompt, user_input=user_input, chat_history=history)
         chat_message_preparation.log(logger)
 
-        summary_user_input = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=512).response
+        summary_user_input = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=512, sub_scenario="summary"
+        ).response
 
         query = f"""## User input:
 search the BR extension
@@ -73,18 +74,16 @@ search the BR extension
 """
         logger.info(f"search query: {query}")
 
-        response = self.unified_search.search(
-            SearchParam(query=query), context.conversation.session_id
-        )
+        response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
 
         chat_message_preparation = ChatMessagePreparation()
-        chat_message_preparation.add_message(
-            "system", prompt, user_input=user_input, br_extension_content=response
-        )
+        chat_message_preparation.add_message("system", prompt, user_input=user_input, br_extension_content=response)
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
+        result = chat_model.chat(
+            **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="final_question"
+        ).response
         logger.info(f"chat result: {result}")
         references = []
         for res in response:
