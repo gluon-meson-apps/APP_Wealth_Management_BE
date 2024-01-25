@@ -70,6 +70,7 @@ class BaseDialogManager:
                 file_name = items[0].meta__reference.meta__source_name
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
+        conversation.start_one_chat()
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
         conversation.append_user_history(message, file_name)

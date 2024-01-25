@@ -90,7 +90,8 @@ async def score(
             result = await email_reply_action.run(ActionContext(conversation), result.answer)
     except Exception as err:
         logger.info(traceback.format_exc())
-        err_msg = f"Error occurred: {err}"
+        conversation.reset_history()
+        err_msg = f"Error occurred: {err}, please try again later."
 
     def generator():
         answer = "unknown error occurred"

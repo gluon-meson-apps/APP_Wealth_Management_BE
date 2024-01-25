@@ -41,8 +41,11 @@ class History:
         self.rounds.append({"role": role, "content": message, "file_name": file_name})
 
     def delete_latest_conversation_history(self):
-        conversation_to_delete = 2 if len(self.rounds) > 1 else len(self.rounds)
-        for _ in range(conversation_to_delete):
+        round_to_delete = 2 if len(self.rounds) > 1 else len(self.rounds)
+        self.delete_n_round(round_to_delete)
+
+    def delete_n_round(self, n: int):
+        for _ in range(n):
             self.rounds.pop()
 
     def format_string(self):
@@ -109,14 +112,23 @@ class ConversationContext:
         self.files = ConversationFiles(self.session_id)
         self.uploaded_file_contents: list[SearchResponse] = []
         self.confused_intents: list[Intent] = []
+        self.appended_history_count_in_one_chat = 0
+
+    def start_one_chat(self):
+        self.appended_history_count_in_one_chat = 0
 
     def get_history(self) -> History:
         return self.history
 
+    def reset_history(self):
+        self.history.delete_n_round(self.appended_history_count_in_one_chat)
+
     def append_user_history(self, message: str, file_name: str = None):
+        self.appended_history_count_in_one_chat += 1
         self.history.add_history("user", message, file_name)
 
     def append_assistant_history(self, answer):
+        self.appended_history_count_in_one_chat += 1
         response_content = prepare_response_content(answer)
         self.history.add_history("assistant", response_content)
 
