@@ -153,9 +153,9 @@ class BaseOutputAdapter(OutputAdapter):
             if output_html:
                 output.answer.extra_info["References"] = output_html
         output.answer.extra_info["intent"] = conversation.current_intent.name
-        output.answer.extra_info["slots"] = [
-            f"{key}: {value}\n" for key, value in conversation.get_simplified_entities().items()
-        ]
+        output.answer.extra_info["slots"] = "\n".join(
+            [f"{key}: {value}" for key, value in conversation.get_simplified_entities().items()]
+        )
         return output
 
     def get_slot_name(self, action_name: str, target_slots: []):
