@@ -50,7 +50,7 @@ class ChatResponseAnswer(BaseModel):
 
     def get_content_with_extra_info(self):
         # output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
-        template = """\n{key}\n------------------\n{value}"""
+        template = """<br><h2>{key}</h2><br>{value}"""
         extra_info_str = ""
         if "Attachment" in self.extra_info:
             extra_info_str += template.format(key="Attachment", value=self.extra_info["Attachment"])
@@ -64,7 +64,7 @@ class ChatResponseAnswer(BaseModel):
         chatbot_detail_summary = ""
         if chatbot_detail:
             chatbot_detail_summary = (
-                f"\n<details><summary>Detail Info Inside Chatbot</summary>{chatbot_detail}</details>"
+                f"<br><details><summary>Detail Info Inside Chatbot</summary>{chatbot_detail}</details>"
             )
         return self.content + extra_info_str + chatbot_detail_summary
 
