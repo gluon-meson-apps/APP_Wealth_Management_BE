@@ -64,7 +64,7 @@ class ChatResponseAnswer(BaseModel):
         chatbot_detail_summary = ""
         if chatbot_detail:
             chatbot_detail_summary = (
-                f"<br><details><summary>Detail Info Inside Chatbot</summary>{chatbot_detail}</details>"
+                f"<h2>Detail Info Inside Chatbot</h2><br><details>details<summary></summary>{chatbot_detail}</details>"
             )
         return self.content + "<br>" + (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
 
