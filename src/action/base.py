@@ -61,7 +61,11 @@ class ChatResponseAnswer(BaseModel):
                 if key != "Attachment" and value
             ]
         )
-        chatbot_detail_summary = f"\n\n<details><summary>Detail Info Inside Chatbot</summary>{chatbot_detail}</details>"
+        chatbot_detail_summary = ""
+        if chatbot_detail:
+            chatbot_detail_summary = (
+                f"\n\n<details><summary>Detail Info Inside Chatbot</summary>{chatbot_detail}</details>"
+            )
         return self.content + extra_info_str + chatbot_detail_summary
 
 
