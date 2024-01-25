@@ -3,7 +3,6 @@ import os
 import aiohttp
 from loguru import logger
 
-from third_system.BusinessException import UnifiedSearchClientException
 from action.base import UploadFileContentType
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
@@ -40,7 +39,7 @@ def error_handler(exception):
     return decorator
 
 
-unified_search_url = os.environ.get('UNIFIED_SEARCH_URL', 'http://localhost:8000')
+unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
 
 
 class UnifiedSearch:
@@ -60,7 +59,7 @@ class UnifiedSearch:
         return [handle_response(response)]
 
     def upload_intents_examples(self, table, intent_examples):
-        response = requests.post(f"{self.base_url}/vector/{table}/intent_examples", json=intent_examples)
+        response = requests.post(f"{self.base_url}/vector/{table}/intent_examples?recreate=True", json=intent_examples)
 
         return handle_response(response)
 
