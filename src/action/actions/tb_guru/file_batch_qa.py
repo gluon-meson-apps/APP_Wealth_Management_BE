@@ -108,7 +108,7 @@ class FileBatchAction(Action):
         logger.info(f"tags: {tags}")
         df = self.df_processor.search_items_to_df(conversation.uploaded_file_contents[0].items)
         questions_column_entity = conversation.get_entity_by_name("questions_column_name")
-        questions_column = questions_column_entity.value if questions_column_entity else "questions"
+        questions_column = questions_column_entity.value.lower() if questions_column_entity else "questions"
         if questions_column not in df.columns:
             return GeneralResponse.normal_failed_text_response(
                 f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
