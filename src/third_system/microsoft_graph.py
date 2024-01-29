@@ -52,11 +52,11 @@ class Graph:
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?$select=sender,subject,body,hasAttachments'
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
+        data = response.json()
         if response.ok:
-            data = response.json()
             values = data["value"] if "value" in data and data["value"] else []
             return [parse_email(v) for v in values]
-        elif response.status_code == 401 and response.text == "InvalidAuthenticationToken":
+        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
             self.refresh_access_token()
             return self.get_new_emails()
         else:
@@ -66,12 +66,12 @@ class Graph:
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
+        data = response.json()
         if response.ok:
-            data = response.json()
             values = data["value"] if "value" in data and data["value"] else []
             return [v for v in values if "contentBytes" in v and v["contentBytes"]]
-        elif response.status_code == 401 and response.text == "InvalidAuthenticationToken":
+        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
             self.refresh_access_token()
-            return self.list_attachments(message_id)
+            return self.list_attachments()
         else:
             raise Exception("Getting email attachments failed")
