@@ -1,11 +1,11 @@
 import asyncio
 import time
-from base64 import b64decode
 
 import environ
 import requests
 from sqlalchemy import text
 from third_system.microsoft_graph import Graph, GraphAPIConfig
+from third_system.unified_search import UnifiedSearch
 
 
 @environ.config(prefix="EMAIL_BOT")
@@ -20,6 +20,7 @@ class EmailBotSettings:
 
     email_db = environ.group(EmailDB)
     THOUGHT_AGENT_ENDPOINT = environ.var("http://localhost:7788/score/")
+
 
 def get_config(cls):
     return environ.to_config(cls)
@@ -38,10 +39,13 @@ class EmailBot:
 
         def generate_connection_string(self, config):
             if config:
-                self.connection_string = f"postgresql+psycopg2://{config.USER}:{config.PASSWORD}@{config.HOST}/{config.DATABASE}"
+                self.connection_string = (
+                    f"postgresql+psycopg2://{config.USER}:{config.PASSWORD}@{config.HOST}/{config.DATABASE}"
+                )
 
         def connect_database(self):
             import sqlalchemy
+
             self.engine = sqlalchemy.create_engine(self.connection_string)
             self.connection = self.engine.connect()
 
@@ -55,6 +59,7 @@ class EmailBot:
         self.recent_emails = []
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
+        self.unified_search = UnifiedSearch()
 
     def periodically_call_api(self):
         self.database.connect_database()
@@ -73,16 +78,6 @@ class EmailBot:
             print(email["subject"])
             print(email["bodyPreview"])
             print("-" * 20)
-
-            if email["hasAttachments"]:
-                for attachment in email["attachments"]:
-                    full_file_name = attachment["name"]
-                    content_bytes = attachment["contentBytes"]
-                    with open(full_file_name, "wb") as f:
-                        decoded_content = b64decode(content_bytes)
-                        f.write(decoded_content)
-                    print(f"保存附件 {full_file_name} 到 {full_file_name}")
-                print("-" * 20)
         return True
 
     def receive_email(self):
@@ -93,10 +88,12 @@ class EmailBot:
         for email in email_list:
             if not self.email_received(email):
                 # Call the Graph API to download the email
+                email.file_urls = self.upload_email_attachments(email)
                 self.recent_emails.append(email)
                 self.database.connection.execute(
                     text(
-                        f"INSERT INTO emails VALUES ({email.conversation_id}, {email.id}, {email.content}, 'not_processed')")
+                        f"INSERT INTO emails VALUES ({email.conversation_id}, {email.id}, {email.content}, 'not_processed')"
+                    )
                 )
 
     def email_received(self, email):
@@ -106,26 +103,18 @@ class EmailBot:
     def process_emails(self):
         for email in self.recent_emails:
             email_id, email_content = self.extract_content(email)
-            result = self.ask_thought_agent(email_id, email_content)
+            self.ask_thought_agent(email_id, email_content)
 
             self.database.connection.execute(
                 text(f"UPDATE emails SET status = 'processed' WHERE email_id == '{email_id}'")
             )
 
     def ask_thought_agent(self, email_id, email_content):
-        payload = {
-            "question": email_content,
-            "conversation_id": email_id,
-            "user_id": "emailbot"
-        }
+        payload = {"question": email_content, "conversation_id": email_id, "user_id": "emailbot"}
         headers = {
             "Content-Type": "application/json",
         }
-        response = requests.post(
-            url=self.thought_agent_endpoint,
-            json=payload,
-            headers=headers
-        )
+        response = requests.post(url=self.thought_agent_endpoint, json=payload, headers=headers)
         return self.handle_response(response)
 
     def extract_content(self, email):
@@ -140,6 +129,13 @@ class EmailBot:
             raise Exception(response.text)
         else:
             return response.json()
+
+    def upload_email_attachments(self, email):
+        if email["hasAttachments"]:
+            attachments = self.graph.list_attachments(email["id"])
+            contents = [a["contentBytes"] for a in attachments]
+            return self.unified_search.upload_file_to_minio(contents)
+        return []
 
 
 async def main():
