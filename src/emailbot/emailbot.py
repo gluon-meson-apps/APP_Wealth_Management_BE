@@ -85,14 +85,17 @@ class EmailBot:
         email_list = ["<EMAIL_A>", "<EMAIL_B>", "<EMAIL_C>"]
         # Call the Graph API, and get the email lists
 
+        # todo: currently only use first email to test attachment
+        email_list = [self.graph.get_new_emails()[0]]
+
         for email in email_list:
             if not self.email_received(email):
                 # Call the Graph API to download the email
-                email.file_urls = self.upload_email_attachments(email)
+                email.attachment_urls = self.upload_email_attachments(email)
                 self.recent_emails.append(email)
                 self.database.connection.execute(
                     text(
-                        f"INSERT INTO emails VALUES ({email.conversation_id}, {email.id}, {email.content}, 'not_processed')"
+                        f"INSERT INTO emails VALUES ({email.conversation_id}, {email.id}, {email.body.content}, 'not_processed')"
                     )
                 )
 
@@ -102,15 +105,19 @@ class EmailBot:
 
     def process_emails(self):
         for email in self.recent_emails:
-            email_id, email_content = self.extract_content(email)
-            self.ask_thought_agent(email_id, email_content)
+            self.ask_thought_agent(email)
 
             self.database.connection.execute(
-                text(f"UPDATE emails SET status = 'processed' WHERE email_id == '{email_id}'")
+                text(f"UPDATE emails SET status = 'processed' WHERE email_id == '{email.id}'")
             )
 
-    def ask_thought_agent(self, email_id, email_content):
-        payload = {"question": email_content, "conversation_id": email_id, "user_id": "emailbot"}
+    def ask_thought_agent(self, email):
+        payload = {
+            "question": email["body"]["content"],
+            "conversation_id": email.id,
+            "user_id": "emailbot",
+            "file_urls": email.attachment_urls,
+        }
         headers = {
             "Content-Type": "application/json",
         }
@@ -131,7 +138,7 @@ class EmailBot:
             return response.json()
 
     def upload_email_attachments(self, email):
-        if email["hasAttachments"]:
+        if email.hasAttachments:
             attachments = self.graph.list_attachments(email["id"])
             contents = [a["contentBytes"] for a in attachments]
             return self.unified_search.upload_file_to_minio(contents)

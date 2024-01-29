@@ -1,13 +1,17 @@
 from pydantic import BaseModel
 
-class Attachment(BaseModel):
-    name: str
-    contentBytes: str
+
+class EmailBody(BaseModel):
+    content: str
+    contentType: str
+
 
 class Email(BaseModel):
+    id: str
+    conversation_id: str
     subject: str
     sender: str
     recipient: list[str]
-    body: str
+    body: EmailBody
     hasAttachments: bool
-    attachments: Attachment = None
+    attachment_urls: list[str]

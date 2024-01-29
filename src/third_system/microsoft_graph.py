@@ -2,6 +2,8 @@ import environ
 import msal
 import requests
 
+from emailbot.email import Email, EmailBody
+
 
 @environ.config(prefix="GRAPH_API")
 class GraphAPIConfig:
@@ -9,6 +11,11 @@ class GraphAPIConfig:
     CLIENT_SECRET = environ.var("")
     TENANT_ID = environ.var("")
     USERID = environ.var("")
+
+
+def parse_email(value: dict) -> Email:
+    body = EmailBody(**(value["body"] if "body" in value and value["body"] else {}))
+    return Email(**value, body=body)
 
 
 class Graph:
@@ -41,13 +48,14 @@ class Graph:
             print("获取访问令牌失败")
             raise Exception("Get token failed.")
 
-    def get_new_emails(self):
+    def get_new_emails(self) -> list[Email]:
         endpoint = f"https://graph.microsoft.com/v1.0/users/{self.settings.USERID}/messages?$select=sender,subject,body,hasAttachments&$expand=attachments"
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
         if response.ok:
             data = response.json()
-            return data
+            values = data["value"] if "value" in data and data["value"] else []
+            return [parse_email(v) for v in values]
         else:
             raise Exception("Getting email failed")
 
