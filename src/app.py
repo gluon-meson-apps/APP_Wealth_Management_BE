@@ -78,13 +78,16 @@ async def score(
     result = None
     conversation = None
     session_id = score_command.conversation_id
+    file_urls = []
+    if score_command.file_urls:
+        file_urls = score_command.file_urls
+    elif score_command.file_url:
+        file_urls = [score_command.file_url]
+
     try:
-        file_res = (
-            await unified_search.adownload_file_from_minio(score_command.file_url) if score_command.file_url else None
-        )
-        print(file_res)
+        file_res = [await unified_search.adownload_file_from_minio(url) for url in file_urls]
         result, conversation = await dialog_manager.handle_message(
-            score_command.question, session_id, file_contents=[file_res] if file_res else None
+            score_command.question, session_id, file_contents=file_res if file_res else None
         )
         if score_command.from_email and result and not isinstance(result, JumpOutResponse):
             result = await email_reply_action.run(ActionContext(conversation), result.answer)

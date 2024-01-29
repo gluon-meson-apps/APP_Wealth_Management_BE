@@ -8,5 +8,6 @@ class ScoreCommand(BaseModel):
     conversation_id: str
     user_id: str
     file_url: Union[str, None] = None
+    file_urls: Union[list[str], None] = None
     chat_history: Union[list[dict[str, Any]], None] = None
     from_email: Union[bool, None] = None
