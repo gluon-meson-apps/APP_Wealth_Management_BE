@@ -3,9 +3,13 @@ import time
 
 import environ
 import requests
+from dotenv import load_dotenv
 from sqlalchemy import text
-from third_system.microsoft_graph import Graph, GraphAPIConfig
+
+from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
+
+load_dotenv()
 
 
 @environ.config(prefix="EMAIL_BOT")
@@ -138,21 +142,25 @@ class EmailBot:
             return response.json()
 
     def upload_email_attachments(self, email):
-        if email.hasAttachments:
-            attachments = self.graph.list_attachments(email["id"])
-            contents = [a["contentBytes"] for a in attachments]
-            return self.unified_search.upload_file_to_minio(contents)
+        if email.has_attachments:
+            attachments = self.graph.list_attachments(email.id)
+            files = [
+                (
+                    "files",
+                    (a["name"], a["contentBytes"], a["contentType"]),
+                )
+                for a in attachments
+            ]
+            return self.unified_search.upload_file_to_minio(files)
         return []
 
 
 async def main():
     emailbot_configuration = get_config(EmailBotSettings)
-    graph_api_configuration = get_config(GraphAPIConfig)
-    graph = Graph(graph_api_configuration)
-    token = await graph.get_access_token()
-    print(token)
+    graph = Graph()
+    print(graph.access_token)
     bot = EmailBot(emailbot_configuration, graph)
-    await bot.periodically_call_api()
+    bot.periodically_call_api()
 
 
 if __name__ == "__main__":
