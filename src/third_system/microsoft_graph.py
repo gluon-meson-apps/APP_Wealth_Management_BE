@@ -1,16 +1,10 @@
-import environ
-import msal
+import os
+import urllib.parse
+
 import requests
 
-from emailbot.email import Email, EmailBody
-
-
-@environ.config(prefix="GRAPH_API")
-class GraphAPIConfig:
-    CLIENT_ID = environ.var("")
-    CLIENT_SECRET = environ.var("")
-    TENANT_ID = environ.var("")
-    USERID = environ.var("")
+from models.email_model.model import Email, EmailBody
+from utils.utils import get_value_or_default_from_dict
 
 
 def parse_email(value: dict) -> Email:
@@ -19,53 +13,65 @@ def parse_email(value: dict) -> Email:
 
 
 class Graph:
-    settings: GraphAPIConfig
-
     access_token: str
-    app_client: msal.ConfidentialClientApplication
 
-    def __init__(self, config: GraphAPIConfig):
-        self.settings = config
-        self.create_graph_app_client()
+    def __init__(self):
+        self.config = {
+            "client_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_CLIENT_ID", ""),
+            "client_secret": get_value_or_default_from_dict(os.environ, "GRAPH_API_CLIENT_SECRET", ""),
+            "tenant_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_TENANT_ID", ""),
+            "user_id": urllib.parse.quote(get_value_or_default_from_dict(os.environ, "GRAPH_API_USER_ID", "")),
+        }
         self.get_access_token()
 
-    def create_graph_app_client(self):
-        client_id = self.settings.CLIENT_ID
-        tenant_id = self.settings.TENANT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        authority = f"https://login.microsoftonline.com/{tenant_id}"
-        self.app_client = msal.ConfidentialClientApplication(
-            client_id=client_id, client_credential=client_secret, authority=authority
+    def get_access_token(self, grant_type="client_credentials"):
+        data = {
+            "grant_type": grant_type,
+            "client_id": self.config["client_id"],
+            "client_secret": self.config["client_secret"],
+            "scope": "https://graph.microsoft.com/.default",
+        }
+        if grant_type == "refresh_token":
+            data["refresh_token"] = self.config["access_token"]
+        response = requests.post(
+            f'https://login.microsoftonline.com/{self.config["tenant_id"]}/oauth2/v2.0/token',
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-
-    def get_access_token(self):
-        scopes = ["https://graph.microsoft.com/.default"]
-        result = self.app_client.acquire_token_for_client(scopes=scopes)
-        if "access_token" in result:
-            self.access_token = result["access_token"]
+        if response.ok:
+            result = response.json()
+            if "access_token" in result:
+                self.access_token = result["access_token"]
         else:
-            print("获取访问令牌失败")
-            raise Exception("Get token failed.")
+            raise Exception("Get MS graph token failed.")
+
+    def refresh_access_token(self):
+        self.get_access_token(grant_type="refresh_token")
 
     def get_new_emails(self) -> list[Email]:
-        endpoint = f"https://graph.microsoft.com/v1.0/users/{self.settings.USERID}/messages?$select=sender,subject,body,hasAttachments&$expand=attachments"
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?$select=sender,subject,body,hasAttachments'
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
         if response.ok:
             data = response.json()
             values = data["value"] if "value" in data and data["value"] else []
             return [parse_email(v) for v in values]
+        elif response.status_code == 401 and response.text == "InvalidAuthenticationToken":
+            self.refresh_access_token()
+            return self.get_new_emails()
         else:
             raise Exception("Getting email failed")
 
     def list_attachments(self, message_id):
-        endpoint = f"https://graph.microsoft.com/v1.0/users/{self.settings.USERID}/messages/{message_id}/attachments"
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
         if response.ok:
             data = response.json()
             values = data["value"] if "value" in data and data["value"] else []
             return [v for v in values if "contentBytes" in v and v["contentBytes"]]
+        elif response.status_code == 401 and response.text == "InvalidAuthenticationToken":
+            self.refresh_access_token()
+            return self.list_attachments(message_id)
         else:
             raise Exception("Getting email attachments failed")
