@@ -10,6 +10,7 @@ from sqlalchemy import text
 from models.email_model.model import Email
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
+from utils.utils import extract_json_from_text
 
 load_dotenv()
 
@@ -141,7 +142,17 @@ class EmailBot:
         if response.status_code != 200:
             raise Exception(response.text)
         else:
-            return response.json()
+            chunk = response.content
+            chunk_as_string = chunk.decode("utf-8").strip()
+            data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
+            json_result = extract_json_from_text(data_as_string)
+            answer = (
+                json_result["answer"]
+                if "answer" in json_result and json_result["answer"]
+                else "Sorry, I can't help you with that."
+            )
+
+            return answer
 
     def upload_email_attachments(self, email):
         if email.has_attachments:

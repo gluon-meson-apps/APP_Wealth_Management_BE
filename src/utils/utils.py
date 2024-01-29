@@ -69,14 +69,18 @@ def init_logger(module_name):
     return logger
 
 
+def extract_json_from_text(json_str: str):
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        logger.warning(f"cannot parse the result to JSON: {json_str}")
+        return {}
+
+
 def extract_json_from_code_block(json_str: str):
     match = re.search("```[jJ][sS][oO][nN]([\s\S]*?)```", json_str)
     result_str = match.group(1) if match else json_str
-    try:
-        return json.loads(result_str)
-    except json.JSONDecodeError:
-        logger.warning(f"cannot parse the result to JSON: {result_str}")
-        return None
+    return extract_json_from_text(result_str)
 
 
 def get_texts_from_search_response(search_res: SearchResponse) -> str:
