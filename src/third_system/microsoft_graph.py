@@ -3,13 +3,26 @@ import urllib.parse
 
 import requests
 
-from models.email_model.model import Email, EmailBody
+from models.email_model.model import Email, EmailBody, EmailSender
 from utils.utils import get_value_or_default_from_dict
 
 
 def parse_email(value: dict) -> Email:
-    body = EmailBody(**(value["body"] if "body" in value and value["body"] else {}))
-    return Email(**value, body=body)
+    body_value = value["body"] if "body" in value and value["body"] else {}
+    sender_value = value["sender"] if "sender" in value and value["sender"] else {}
+    body = EmailBody(content=body_value["content"], content_type=body_value["contentType"])
+    email_sender = EmailSender(
+        address=sender_value["emailAddress"]["address"], name=sender_value["emailAddress"]["name"]
+    )
+    return Email(
+        body=body,
+        id=value["id"],
+        conversation_id=value["conversationId"],
+        subject=value["subject"],
+        sender=email_sender,
+        has_attachments=value["hasAttachments"],
+        attachment_urls=[],
+    )
 
 
 class Graph:
@@ -49,7 +62,7 @@ class Graph:
         self.get_access_token(grant_type="refresh_token")
 
     def get_new_emails(self) -> list[Email]:
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?$select=sender,subject,body,hasAttachments'
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?$select=conversationId,sender,subject,body,hasAttachments'
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
         data = response.json()
