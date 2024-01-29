@@ -97,10 +97,8 @@ async def score(
         err_msg = f"Error occurred: {err}, please try again later."
 
     def generator():
-        answer = "unknown error occurred"
-        if result is None:
-            if err_msg:
-                answer = json.dumps({"answer": err_msg})
+        if not result:
+            answer = json.dumps({"answer": err_msg if err_msg else "unknown error occurred"})
         elif isinstance(result, JumpOutResponse):
             answer = json.dumps({"answer": "Sorry, I can't help you with that."})
         else:
