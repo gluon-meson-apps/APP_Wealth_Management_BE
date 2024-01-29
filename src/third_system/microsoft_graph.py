@@ -21,6 +21,7 @@ def parse_email(value: dict) -> Email:
         subject=value["subject"],
         sender=email_sender,
         has_attachments=value["hasAttachments"],
+        received_date_time=value["receivedDateTime"],
         attachment_urls=[],
     )
 
@@ -61,8 +62,12 @@ class Graph:
     def refresh_access_token(self):
         self.get_access_token(grant_type="refresh_token")
 
-    def get_new_emails(self) -> list[Email]:
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?$select=conversationId,sender,subject,body,hasAttachments'
+    def get_new_emails(self, received_date_time=None) -> list[Email]:
+        fields_query = "$select=id,conversationId,subject,sender,bodyPreview,hasAttachments,receivedDateTime"
+        filter_query = f"&$filter=receivedDateTime ge {received_date_time}" if received_date_time else ""
+        endpoint = (
+            f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?{fields_query}{filter_query}'
+        )
         headers = {"Authorization": "Bearer " + self.access_token}
         response = requests.get(endpoint, headers=headers)
         data = response.json()

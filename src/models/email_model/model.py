@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -19,3 +21,4 @@ class Email(BaseModel):
     body: EmailBody
     has_attachments: bool
     attachment_urls: list[str]
+    received_date_time: datetime
