@@ -63,7 +63,7 @@ class Graph:
         self.get_access_token(grant_type="refresh_token")
 
     def get_new_emails(self, received_date_time=None) -> list[Email]:
-        fields_query = "$select=id,conversationId,subject,sender,bodyPreview,hasAttachments,receivedDateTime"
+        fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
         filter_query = f"&$filter=receivedDateTime ge {received_date_time}" if received_date_time else ""
         endpoint = (
             f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?{fields_query}{filter_query}'

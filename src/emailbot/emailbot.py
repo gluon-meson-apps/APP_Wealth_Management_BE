@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import time
 
 import environ
@@ -6,6 +7,7 @@ import requests
 from dotenv import load_dotenv
 from sqlalchemy import text
 
+from models.email_model.model import Email
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
 
@@ -90,7 +92,7 @@ class EmailBot:
         # Call the Graph API, and get the email lists
 
         # todo: currently only use first email to test attachment
-        email_list = [self.graph.get_new_emails()[0]]
+        email_list = [self.graph.get_new_emails()[1]]
 
         for email in email_list:
             if not self.email_received(email):
@@ -115,9 +117,9 @@ class EmailBot:
                 text(f"UPDATE emails SET status = 'processed' WHERE email_id == '{email.id}'")
             )
 
-    def ask_thought_agent(self, email):
+    def ask_thought_agent(self, email: Email):
         payload = {
-            "question": email["body"]["content"],
+            "question": email.body.content,
             "conversation_id": email.id,
             "user_id": "emailbot",
             "file_urls": email.attachment_urls,
@@ -147,7 +149,7 @@ class EmailBot:
             files = [
                 (
                     "files",
-                    (a["name"], a["contentBytes"], a["contentType"]),
+                    (a["name"], base64.b64decode(a["contentBytes"]), a["contentType"]),
                 )
                 for a in attachments
             ]
