@@ -27,6 +27,8 @@ class UploadFileContentType(str, Enum):
     CSV = "text/csv"
     HTML = "text/html"
     TXT = "text/plain"
+    DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    DOC = "application/msword"
 
 
 class ActionResponseAnswerContent(BaseModel):
