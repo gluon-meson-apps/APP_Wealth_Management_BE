@@ -22,3 +22,9 @@ class Email(BaseModel):
     has_attachments: bool
     attachment_urls: list[str]
     received_date_time: datetime
+
+
+class EmailAttachment(BaseModel):
+    name: str
+    type: str
+    bytes: str

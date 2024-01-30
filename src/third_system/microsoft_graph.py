@@ -3,7 +3,7 @@ import urllib.parse
 
 import requests
 
-from models.email_model.model import Email, EmailBody, EmailSender
+from models.email_model.model import Email, EmailBody, EmailSender, EmailAttachment
 from utils.utils import get_value_or_default_from_dict
 
 
@@ -94,22 +94,36 @@ class Graph:
         else:
             raise Exception("Getting email attachments failed")
 
-    def send_email(self, email: Email, answer: str):
+    def send_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/sendMail'
         headers = {"Authorization": "Bearer " + self.access_token}
-        data = {
-            "message": {
-                "subject": f"[TB Guru Reply] {email.subject}",
-                "body": {"contentType": "Text", "content": answer},
-                "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
-            },
-            "saveToSentItems": "true",
+        message = {
+            "subject": f"[TB Guru Reply] {email.subject}",
+            "body": {"contentType": "Text", "content": answer},
+            "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
         }
-        response = requests.post(endpoint, headers=headers, json=data)
-        data = response.json()
+        if attachments:
+            message["attachments"] = [
+                {
+                    "@odata.type": "#microsoft.graph.fileAttachment",
+                    "name": a.name,
+                    "contentType": a.type,
+                    "contentBytes": a.bytes,
+                }
+                for a in attachments
+            ]
+        response = requests.post(
+            endpoint,
+            headers=headers,
+            json={
+                "message": message,
+                "saveToSentItems": "true",
+            },
+        )
+        message = response.json()
         if response.ok:
             return
-        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
+        elif response.status_code == 401 and message["error"]["code"] == "InvalidAuthenticationToken":
             self.refresh_access_token()
             self.send_email(email, answer)
         else:
