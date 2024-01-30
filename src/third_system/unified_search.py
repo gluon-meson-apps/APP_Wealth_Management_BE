@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 import aiohttp
 from loguru import logger
@@ -72,6 +73,13 @@ class UnifiedSearch:
         response = requests.get(url=f"{self.base_url}/file/download", params={"file_url": file_url})
 
         return handle_response(response)
+
+    def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
+        response = requests.get(url=f"{self.base_url}/file/download_raw", params={"file_url": file_url})
+        if response.status_code != 200:
+            logger.error(f"{response.status_code}: {response.text}")
+            return None
+        return response.content
 
     async def adownload_file_from_minio(self, file_url: str) -> SearchResponse:
         async with aiohttp.ClientSession() as session:
