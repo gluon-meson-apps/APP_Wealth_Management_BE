@@ -107,7 +107,7 @@ class EmailBot:
                 text(f"""
 UPDATE {self.config.DATABASE}
 SET is_processed = TRUE
-WHERE email_id = '{email.id}'
+WHERE id = '{email.id}'
 """
                      )
             )
