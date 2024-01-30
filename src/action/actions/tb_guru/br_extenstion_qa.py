@@ -70,7 +70,7 @@ search the BR extension
 ## User question
 {summary_user_input}
 ## ATTENTION
-1. fields to be queried: {context.conversation.get_entities()}
+1. fields to be queried: {context.conversation.get_simplified_entities()}
 """
         logger.info(f"search query: {query}")
 

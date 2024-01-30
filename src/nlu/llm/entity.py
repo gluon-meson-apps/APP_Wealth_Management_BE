@@ -99,6 +99,10 @@ class LLMEntityExtractor(EntityExtractor):
         if not entities:
             return []
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
+        print(f"slot_name_to_slot {slot_name_to_slot}")
+        conversation_context.current_intent_slot_names = slot_name_to_slot.keys()
+
+
         if entities:
             entity_list = list(
                 filter(

@@ -99,6 +99,7 @@ class ConversationContext:
         self.current_user_input = current_user_input
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
+        self.current_intent_slot_names = []
         self.intent_queue = deque(maxlen=3)
         self.history = History([])
         # used for logging
