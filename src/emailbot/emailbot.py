@@ -1,6 +1,5 @@
 import asyncio
 import base64
-import logging
 import time
 
 import environ
@@ -35,13 +34,13 @@ def get_config(cls):
     return environ.to_config(cls)
 
 
-def handle_response(email, response):
+def handle_response(response):
     if response.status_code != 200:
         raise Exception(response.text)
     else:
         chunk = response.content
         chunk_as_string = chunk.decode("utf-8").strip()
-        data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
+        data_as_string = chunk_as_string[len("data:"):] if chunk_as_string.startswith("data:") else ""
         json_result = extract_json_from_text(data_as_string)
         answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
         attachments = (
@@ -50,6 +49,10 @@ def handle_response(email, response):
             else []
         )
         return answer, attachments
+
+
+def format_html_content(content):
+    return content.replace("'", "&apos;")
 
 
 class EmailBot:
@@ -90,13 +93,13 @@ class EmailBot:
     '{email.sender.address}',
     '{email.sender.name}',
     '{email.body.content_type}',
-    '{email.body.content}',
+    '{format_html_content(email.body.content)}',
     {email.has_attachments},
     '\u007b{",".join([url for url in email.attachment_urls])}\u007d',
     '{email.received_date_time}',
     FALSE
 )"""
-            logging.debug(sql)
+            print(sql)
             self.connection.execute(text(sql))
 
         def set_processed_email(self, email):
@@ -152,7 +155,7 @@ WHERE email_id = '{email.id}'
             "Content-Type": "application/json",
         }
         response = requests.post(url=self.thought_agent_endpoint, json=payload, headers=headers)
-        return handle_response(email, response)
+        return handle_response(response)
 
     def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
         result = []
