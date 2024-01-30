@@ -7,13 +7,13 @@ from utils.utils import format_jinja_template
 
 
 # params_list = inner_df['params'].apply(process_one_params).tolist()
-def generate_one_unit_test(session_name, data_list, params, output, scenario, file_name):
+def generate_one_unit_test(session_name, data_list, params, output, scenario, file_name, generate_dir_name='generated'):
     session_name = standardize_session_name(session_name)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     with open(f"{cur_dir}/unit_test_template.jinja2", "r") as rf:
         template = rf.read()
-        Path(f"{cur_dir}/generated/{session_name}/generated_unit_test").mkdir(parents=True, exist_ok=True)
-        with open(f"{cur_dir}/generated/{session_name}/generated_unit_test/{file_name}_unit.py", "w") as wf:
+        Path(f"{cur_dir}/{generate_dir_name}/{session_name}/generated_unit_test").mkdir(parents=True, exist_ok=True)
+        with open(f"{cur_dir}/{generate_dir_name}/{session_name}/generated_unit_test/{file_name}_unit.py", "w") as wf:
             wf.write(format_jinja_template(
                 template,
                 data_list=data_list,

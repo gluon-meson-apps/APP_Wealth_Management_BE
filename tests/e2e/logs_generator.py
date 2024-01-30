@@ -4,9 +4,11 @@ from tests.e2e.generate_log import generate_one_log
 
 
 class LogsGenerator:
-    def __init__(self, connection, get_log_id_filter=None):
+    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter=""):
         self.connection = connection
         self.get_log_id_filter = get_log_id_filter
+        self.log_table_name = log_table_name
+        self.generate_dir_name = generate_dir_name
 
     def add_round_group_to_df(self, inner_df):
         inner_df = inner_df.sort_values(by=['created_at'])
@@ -36,7 +38,7 @@ class LogsGenerator:
             scenario = row.get('scenario')
             retry = f'{test_prefix}round{round_count}_retry_{scenario}'
             file_name = f"{test_prefix}round{round_count}_{scenario}"
-            import_ = f"from tests.e2e.generated.{session_name}.generated_unit_test import {file_name}_unit as {retry}"
+            import_ = f"from tests.e2e.{self.generate_dir_name}.{session_name}.generated_unit_test import {file_name}_unit as {retry}"
             return (scenario, row.get('output'), retry, import_)
 
         inner_df['data'] = inner_df.apply(process_one_scenario, axis=1)
@@ -52,7 +54,7 @@ class LogsGenerator:
             'round_name': test_prefix + f"round{round_count}",
             **other_scenarios_data,
             "imports": [
-                f"from tests.e2e.generated.{session_name}.generated_e2e_test import {session_name}_e2e as {retry_overall}",
+                f"from tests.e2e.{self.generate_dir_name}.{session_name}.generated_e2e_test import {session_name}_e2e as {retry_overall}",
                 *other_scenarios_imports
             ],
         }
@@ -63,7 +65,7 @@ class LogsGenerator:
         return inner_df.groupby(['round_group', 'test']).apply(self.process_one_round_group).to_list()
 
     def process(self):
-        df = pd.read_sql("SELECT * FROM model_log where 1=1" + self.get_log_id_filter, self.connection)
+        df = pd.read_sql(f"SELECT * FROM {self.log_table_name} where 1=1" + self.get_log_id_filter, self.connection)
         df['session_name'] = df['log_id'].apply(lambda x: x.split('__')[-1])
         df['test'] = df['log_id'].apply(lambda x: x.startswith('test__'))
         df = df.groupby('log_id').apply(self.add_round_group_to_df).reset_index(drop=True)
@@ -72,6 +74,6 @@ class LogsGenerator:
         def log_one_session(row):
             session_name = row.get('session_name')
             data = row.get(0)
-            generate_one_log(session_name, data)
+            generate_one_log(session_name, data, self.generate_dir_name)
 
         result.apply(log_one_session, axis=1)

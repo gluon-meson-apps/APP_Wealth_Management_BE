@@ -55,11 +55,11 @@ data_list = [
     }]
 
 # params_list = inner_df['params'].apply(process_one_params).tolist()
-def generate_one_log(session_name, data_list):
+def generate_one_log(session_name, data_list, generate_dir_name='generated'):
     session_name = standardize_session_name(session_name)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     with open(f"{cur_dir}/e2e_log_template.jinja2", "r") as rf:
         template = rf.read()
-        Path(f"{cur_dir}/generated/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
-        with open(f"{cur_dir}/generated/{session_name}/generated_e2e_test/{session_name}_log.py", "w") as wf:
+        Path(f"{cur_dir}/{generate_dir_name}/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
+        with open(f"{cur_dir}/{generate_dir_name}/{session_name}/generated_e2e_test/{session_name}_log.py", "w") as wf:
             wf.write(format_jinja_template(template, data_list=data_list))

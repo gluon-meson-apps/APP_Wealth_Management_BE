@@ -8,9 +8,11 @@ from utils.utils import format_jinja_template
 
 
 class E2eTestGenerator:
-    def __init__(self, connection, get_log_id_filter=None):
+    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter=""):
         self.connection = connection
         self.get_log_id_filter = get_log_id_filter
+        self.log_table_name = log_table_name
+        self.generate_dir_name = generate_dir_name
 
     def process_one_params(self, params):
         print(params)
@@ -25,13 +27,13 @@ class E2eTestGenerator:
         with open(f"{cur_dir}/e2e_test_template.jinja2", "r") as rf:
             template = rf.read()
             session_name = standardize_session_name(inner_df.name)
-            Path(f"{cur_dir}/generated/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
-            with open(f"{cur_dir}/generated/{session_name}/generated_e2e_test/{session_name}_e2e.py", "w") as wf:
+            Path(f"{cur_dir}/{self.generate_dir_name}/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
+            with open(f"{cur_dir}/{self.generate_dir_name}/{session_name}/generated_e2e_test/{session_name}_e2e.py", "w") as wf:
                 wf.write(format_jinja_template(template, params_list=params_list))
     def process(self, ignore_test_case_flag=True):
         if ignore_test_case_flag:
-            query = "SELECT * FROM model_log where scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
+            query = f"SELECT * FROM {self.log_table_name} where scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
         else:
-            query = "SELECT * FROM model_log where as_test_case = true and scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
+            query = f"SELECT * FROM {self.log_table_name} where as_test_case = true and scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"
         df = pd.read_sql(query + self.get_log_id_filter, self.connection)
         df.sort_values(["created_at"]).groupby(['log_id']).apply(self.process_one_group)
