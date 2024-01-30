@@ -124,6 +124,7 @@ class EmailBot:
             "conversation_id": email.id,
             "user_id": "emailbot",
             "file_urls": email.attachment_urls,
+            "from_email": True,
         }
         headers = {
             "Content-Type": "application/json",
