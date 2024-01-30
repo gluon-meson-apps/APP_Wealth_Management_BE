@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import logging
 import time
 
 import environ
@@ -54,18 +55,21 @@ def handle_response(email, response):
 class EmailBot:
     class DatabaseConnection:
         connection_string = ""
+        config: EmailBotSettings.EmailDB = None
         engine = None
         connection = None
 
         def __init__(self, email_db_config: EmailBotSettings.EmailDB):
-            config = email_db_config
+            self.config = email_db_config
 
-            self.generate_connection_string(config)
+            self.generate_connection_string()
 
-        def generate_connection_string(self, config):
-            if config:
+        def generate_connection_string(self):
+            if self.config:
                 self.connection_string = (
-                    f"postgresql+psycopg2://{config.USER}:{config.PASSWORD}@{config.HOST}/{config.DATABASE}"
+                    f"postgresql+psycopg2://"
+                    f"{self.config.USER}:{self.config.PASSWORD}"
+                    f"@{self.config.HOST}/{self.config.DATABASE}"
                 )
 
         def connect_database(self):
@@ -78,6 +82,33 @@ class EmailBot:
             if self.connection:
                 self.connection.close()
 
+        def insert_new_email_into_database(self, email: Email):
+            sql = f"""INSERT INTO {self.config.DATABASE} VALUES (
+    '{email.id}',
+    '{email.conversation_id}',
+    '{email.subject}',
+    '{email.sender.address}',
+    '{email.sender.name}',
+    '{email.body.content_type}',
+    '{email.body.content}',
+    {email.has_attachments},
+    '\u007b{",".join([url for url in email.attachment_urls])}\u007d',
+    '{email.received_date_time}',
+    FALSE
+)"""
+            logging.debug(sql)
+            self.connection.execute(text(sql))
+
+        def set_processed_email(self, email):
+            self.connection.execute(
+                text(f"""
+UPDATE {self.config.DATABASE}
+SET is_processed = TRUE
+WHERE email_id = '{email.id}'
+"""
+                     )
+            )
+
     def __init__(self, config: EmailBotSettings, graph: Graph, interval=60):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
         self.interval = interval
@@ -85,57 +116,29 @@ class EmailBot:
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
         self.unified_search = UnifiedSearch()
-
-    def periodically_call_api(self):
         self.database.connect_database()
 
+    def periodically_call_api(self):
         while True:
-            if self.check_for_newly_arriving_emails():
-                self.receive_email()
-                self.process_emails()
+            self.receive_email()
+            self.process_emails()
             time.sleep(self.interval)
 
-    def check_for_newly_arriving_emails(self):
-        # Check if there is any newly arrived email
-        data = self.graph.get_new_emails()
-        for email in data["value"]:
-            print(email["sender"]["emailAddress"]["name"])
-            print(email["subject"])
-            print(email["bodyPreview"])
-            print("-" * 20)
-        return True
-
     def receive_email(self):
-        # Pseudo variables
-        email_list = ["<EMAIL_A>", "<EMAIL_B>", "<EMAIL_C>"]
-        # Call the Graph API, and get the email lists
-
         # todo: currently only use first email to test attachment
-        email_list = [self.graph.get_new_emails()[1]]
+        email_list = [self.graph.get_new_emails()[0]]
 
         for email in email_list:
-            if not self.email_received(email):
-                # Call the Graph API to download the email
-                email.attachment_urls = self.upload_email_attachments(email)
-                self.recent_emails.append(email)
-                self.database.connection.execute(
-                    text(
-                        f"INSERT INTO emails VALUES ({email.conversation_id}, {email.id}, {email.body.content}, 'not_processed')"
-                    )
-                )
-
-    def email_received(self, email):
-        # Check if the email is already received.
-        return False
+            email.attachment_urls = self.upload_email_attachments(email)
+            self.recent_emails.append(email)
+            self.database.insert_new_email_into_database(email)
 
     def process_emails(self):
         for email in self.recent_emails:
             answer, attachments = self.ask_thought_agent(email)
             self.graph.send_email(email, answer, self.parse_attachments_in_answer(attachments))
 
-            self.database.connection.execute(
-                text(f"UPDATE emails SET status = 'processed' WHERE email_id == '{email.id}'")
-            )
+            self.database.set_processed_email(email)
 
     def ask_thought_agent(self, email: Email):
         payload = {
@@ -150,13 +153,6 @@ class EmailBot:
         }
         response = requests.post(url=self.thought_agent_endpoint, json=payload, headers=headers)
         return handle_response(email, response)
-
-    def extract_content(self, email):
-        # pseudo variables
-        email_id = "email_id"
-        email_content = "email_content"
-
-        return email_id, email_content
 
     def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
         result = []

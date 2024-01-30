@@ -1,5 +1,8 @@
+import logging
 import os
 import urllib.parse
+import uuid
+from datetime import datetime
 
 import requests
 from loguru import logger
@@ -25,6 +28,13 @@ def parse_email(value: dict) -> Email:
         received_date_time=value["receivedDateTime"],
         attachment_urls=[],
     )
+
+
+class GettingEmailFailedException(Exception):
+    def __init__(self, message: str, error_code):
+        self.message = message
+        self.error_code = error_code
+        super().__init__(self.message)
 
 
 class Graph:
@@ -70,16 +80,35 @@ class Graph:
             f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?{fields_query}{filter_query}'
         )
         headers = {"Authorization": "Bearer " + self.access_token}
-        response = requests.get(endpoint, headers=headers)
-        data = response.json()
-        if response.ok:
-            values = data["value"] if "value" in data and data["value"] else []
-            return [parse_email(v) for v in values]
-        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
-            self.refresh_access_token()
-            return self.get_new_emails()
-        else:
-            raise Exception("Getting email failed")
+        try:
+            response = requests.get(endpoint, headers=headers)
+            data = response.json()
+            if response.ok:
+                values = data["value"] if "value" in data and data["value"] else []
+                return [parse_email(v) for v in values]
+            elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
+                self.refresh_access_token()
+                return self.get_new_emails(received_date_time)
+            else:
+                raise GettingEmailFailedException(response.text, response.status_code)
+        except GettingEmailFailedException as e:
+            logging.warning(f"[{str(e.error_code)}]: {e.message}")
+            return [Email(
+                id=str(uuid.uuid4()),
+                conversation_id=str(uuid.uuid4()),
+                subject="Sample Email For Testing",
+                sender=EmailSender(
+                    address="test@example.com",
+                    name="john",
+                ),
+                body=EmailBody(
+                    content_type="text/plain",
+                    content="This is a sample email body",
+                ),
+                has_attachments=False,
+                attachment_urls=[],
+                received_date_time=datetime.utcnow()
+            )]
 
     def list_attachments(self, message_id):
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'
