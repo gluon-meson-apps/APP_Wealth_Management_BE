@@ -43,12 +43,9 @@ def handle_response(response):
         data_as_string = chunk_as_string[len("data:"):] if chunk_as_string.startswith("data:") else ""
         json_result = extract_json_from_text(data_as_string)
         answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
-        attachments = (
-            [Attachment(**a) for a in json_result["attachment"]]
-            if "attachment" in json_result and json_result["attachment"]
-            else []
-        )
-        return answer, attachments
+        attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
+        attachment = Attachment(**attachments_dict) if attachments_dict else None
+        return answer, [attachment] if attachment else []
 
 
 def format_html_content(content):
@@ -162,7 +159,7 @@ WHERE id = '{email.id}'
         for a in attachments:
             contents = self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
             if contents:
-                result.append(EmailAttachment(name=a.name, bytes=contents, type=a.content_type))
+                result.append(EmailAttachment(name=a.name, bytes=base64.b64encode(contents), type=a.content_type))
         return result
 
     def upload_email_attachments(self, email):

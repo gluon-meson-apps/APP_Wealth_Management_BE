@@ -90,7 +90,7 @@ async def score(
             score_command.question, session_id, file_contents=file_res if file_res else None
         )
         if score_command.from_email and result and not isinstance(result, JumpOutResponse):
-            result = await email_reply_action.run(ActionContext(conversation), result.answer)
+            result = await email_reply_action.run(ActionContext(conversation), result)
     except Exception as err:
         logger.info(traceback.format_exc())
         if conversation:

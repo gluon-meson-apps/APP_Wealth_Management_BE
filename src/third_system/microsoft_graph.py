@@ -129,7 +129,7 @@ class Graph:
         headers = {"Authorization": "Bearer " + self.access_token}
         message = {
             "subject": f"[TB Guru Reply] {email.subject}",
-            "body": {"contentType": "Text", "content": answer},
+            "body": {"contentType": "html", "content": answer},
             "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
         }
         if attachments:
@@ -142,6 +142,7 @@ class Graph:
                 }
                 for a in attachments
             ]
+            message["hasAttachments"] = True
         response = requests.post(
             endpoint,
             headers=headers,
@@ -159,5 +160,5 @@ class Graph:
                 self.refresh_access_token()
                 self.send_email(email, answer)
         else:
-            logger.error(f"Send email to {email.sender.address} failed.")
+            logger.error(f"Send email to {email.sender.address} failed: {response.text}")
             raise Exception("Sending email failed")

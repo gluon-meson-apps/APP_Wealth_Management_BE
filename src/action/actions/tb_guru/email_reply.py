@@ -2,7 +2,7 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ActionResponse, ChatResponseAnswer, GeneralResponse
+from action.base import Action, ActionResponse
 from action.context import ActionContext
 
 prompt = """
@@ -24,7 +24,7 @@ class EmailReplyAction(Action):
     def get_name(self) -> str:
         return "email_reply"
 
-    async def run(self, context: ActionContext, answer: ChatResponseAnswer) -> ActionResponse:
+    async def run(self, context: ActionContext, result: ActionResponse) -> ActionResponse:
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -35,12 +35,12 @@ class EmailReplyAction(Action):
         chat_message_preparation.add_message(
             "system",
             prompt,
-            email_content=answer.get_content_with_extra_info() if answer else "",
+            email_content=result.answer.get_content_with_extra_info() if result.answer else "",
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
-        logger.info(f"email result: {result}")
+        email_result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
+        logger.info(f"email result: {email_result}")
 
-        answer.content = result
-        return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+        result.answer.content = email_result
+        return result
