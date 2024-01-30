@@ -2,6 +2,7 @@ import os
 import urllib.parse
 
 import requests
+from loguru import logger
 
 from models.email_model.model import Email, EmailBody, EmailSender, EmailAttachment
 from utils.utils import get_value_or_default_from_dict
@@ -120,11 +121,14 @@ class Graph:
                 "saveToSentItems": "true",
             },
         )
-        message = response.json()
         if response.ok:
+            logger.info(f"Send email to {email.sender.address} successfully.")
             return
-        elif response.status_code == 401 and message["error"]["code"] == "InvalidAuthenticationToken":
-            self.refresh_access_token()
-            self.send_email(email, answer)
+        elif response.status_code == 401:
+            message = response.json()
+            if message["error"]["code"] == "InvalidAuthenticationToken":
+                self.refresh_access_token()
+                self.send_email(email, answer)
         else:
+            logger.error(f"Send email to {email.sender.address} failed.")
             raise Exception("Sending email failed")
