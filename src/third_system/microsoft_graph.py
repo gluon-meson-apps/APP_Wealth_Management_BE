@@ -90,6 +90,27 @@ class Graph:
             return [v for v in values if "contentBytes" in v and v["contentBytes"]]
         elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
             self.refresh_access_token()
-            return self.list_attachments()
+            return self.list_attachments(message_id)
         else:
             raise Exception("Getting email attachments failed")
+
+    def send_email(self, email: Email, answer: str):
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/sendMail'
+        headers = {"Authorization": "Bearer " + self.access_token}
+        data = {
+            "message": {
+                "subject": f"[TB Guru Reply] {email.subject}",
+                "body": {"contentType": "Text", "content": answer},
+                "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
+            },
+            "saveToSentItems": "true",
+        }
+        response = requests.post(endpoint, headers=headers, json=data)
+        data = response.json()
+        if response.ok:
+            return
+        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
+            self.refresh_access_token()
+            self.send_email(email, answer)
+        else:
+            raise Exception("Sending email failed")
