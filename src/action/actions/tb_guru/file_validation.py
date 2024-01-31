@@ -31,7 +31,7 @@ The URL to download the validation report is attached below and the validation r
 Your reply should include following 2 parts:
 1. Your reply should include the upload file info
 2. Your reply should include the report info and tell the user to download the report to check if the file valid or not.
-   please note: the report URL link should be wrapped by a HTML <a> tag with :target="_blank" attribute.
+   please note: the report URL link should be wrapped by a HTML <a> tag with target="_blank" attribute. like this <a href="$your_url" target="_blank">$file_name</a>
 
 ## User upload file info
 Upload file name: {{upload_filename}}
