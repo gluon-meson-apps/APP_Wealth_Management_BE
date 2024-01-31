@@ -1,6 +1,7 @@
 import logging
 import os
 import urllib.parse
+from typing import Union
 
 import requests
 from loguru import logger
@@ -45,6 +46,7 @@ class Graph:
             "tenant_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_TENANT_ID", ""),
             "user_id": urllib.parse.quote(get_value_or_default_from_dict(os.environ, "GRAPH_API_USER_ID", "")),
         }
+        self.inbox_folder_id, self.archive_folder_id = self.list_folders()
         self.get_access_token()
 
     def get_access_token(self, grant_type="client_credentials"):
@@ -71,27 +73,48 @@ class Graph:
     def refresh_access_token(self):
         self.get_access_token(grant_type="refresh_token")
 
-    def get_new_emails(self, received_date_time=None) -> list[Email]:
-        fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
-        filter_query = f"&$filter=receivedDateTime ge {received_date_time}" if received_date_time else ""
-        endpoint = (
-            f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages?{fields_query}{filter_query}'
-        )
+    def list_folders(self):
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/mailFolders'
         headers = {"Authorization": "Bearer " + self.access_token}
         try:
             response = requests.get(endpoint, headers=headers)
             data = response.json()
             if response.ok:
                 values = data["value"] if "value" in data and data["value"] else []
-                return [parse_email(v) for v in values]
+                inbox_folder = next(filter(values, lambda v: v.get("displayName") in ["收件箱", "Inbox"]), None)
+                archive_folder = next(filter(values, lambda v: v.get("displayName") in ["存档", "Archive"]), None)
+                return inbox_folder.get("id") if inbox_folder else "", archive_folder.get(
+                    "id"
+                ) if archive_folder else ""
             elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
                 self.refresh_access_token()
-                return self.get_new_emails(received_date_time)
+                return self.list_folders()
+            else:
+                raise EmailHandlingFailedException(response.text, "GETTING_FOLDERS_FAILED")
+        except EmailHandlingFailedException as e:
+            logging.warning(f"[{str(e.error_type)}]: {e.message}")
+            return "", ""
+
+    def get_first_inbox_message(self, received_date_time=None) -> Union[Email, None]:
+        fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
+        order_query = "$orderby=receivedDateTime asc"
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1'
+        headers = {"Authorization": "Bearer " + self.access_token}
+        try:
+            response = requests.get(endpoint, headers=headers)
+            data = response.json()
+            if response.ok:
+                values = data["value"] if "value" in data and data["value"] else []
+                first_message = next(iter(values), None)
+                return parse_email(first_message) if first_message else None
+            elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
+                self.refresh_access_token()
+                return self.get_first_inbox_message(received_date_time)
             else:
                 raise EmailHandlingFailedException(response.text, "GETTING_NEW_EMAIL_FAILED")
         except EmailHandlingFailedException as e:
             logging.warning(f"[{str(e.error_type)}]: {e.message}")
-            return []
+            return None
 
     def list_attachments(self, message_id):
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'

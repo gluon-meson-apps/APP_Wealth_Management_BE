@@ -40,7 +40,7 @@ def handle_response(response):
     else:
         chunk = response.content
         chunk_as_string = chunk.decode("utf-8").strip()
-        data_as_string = chunk_as_string[len("data:"):] if chunk_as_string.startswith("data:") else ""
+        data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
         json_result = extract_json_from_text(data_as_string)
         answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
         attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
@@ -102,12 +102,13 @@ class EmailBot:
 
         def set_processed_email(self, email):
             self.connection.execute(
-                text(f"""
+                text(
+                    f"""
 UPDATE {self.config.DATABASE}
 SET is_processed = TRUE
 WHERE id = '{email.id}'
 """
-                     )
+                )
             )
             self.connection.commit()
 
@@ -128,7 +129,7 @@ WHERE id = '{email.id}'
 
     def receive_email(self):
         # todo: currently only use first email to test attachment
-        email_list = [self.graph.get_new_emails()[0]]
+        email_list = [self.graph.get_first_inbox_message()]
 
         for email in email_list:
             email.attachment_urls = self.upload_email_attachments(email)
