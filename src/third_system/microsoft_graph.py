@@ -1,8 +1,6 @@
 import logging
 import os
 import urllib.parse
-import uuid
-from datetime import datetime
 
 import requests
 from loguru import logger
@@ -30,10 +28,10 @@ def parse_email(value: dict) -> Email:
     )
 
 
-class GettingEmailFailedException(Exception):
-    def __init__(self, message: str, error_code):
+class EmailHandlingFailedException(Exception):
+    def __init__(self, message: str, error_type: str):
         self.message = message
-        self.error_code = error_code
+        self.error_type = error_type
         super().__init__(self.message)
 
 
@@ -90,39 +88,29 @@ class Graph:
                 self.refresh_access_token()
                 return self.get_new_emails(received_date_time)
             else:
-                raise GettingEmailFailedException(response.text, response.status_code)
-        except GettingEmailFailedException as e:
-            logging.warning(f"[{str(e.error_code)}]: {e.message}")
-            return [Email(
-                id=str(uuid.uuid4()),
-                conversation_id=str(uuid.uuid4()),
-                subject="Sample Email For Testing",
-                sender=EmailSender(
-                    address="test@example.com",
-                    name="john",
-                ),
-                body=EmailBody(
-                    content_type="text/plain",
-                    content="This is a sample email body",
-                ),
-                has_attachments=False,
-                attachment_urls=[],
-                received_date_time=datetime.utcnow()
-            )]
+                raise EmailHandlingFailedException(response.text, "GETTING_NEW_EMAIL_FAILED")
+        except EmailHandlingFailedException as e:
+            logging.warning(f"[{str(e.error_type)}]: {e.message}")
+            return []
 
     def list_attachments(self, message_id):
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'
         headers = {"Authorization": "Bearer " + self.access_token}
-        response = requests.get(endpoint, headers=headers)
-        data = response.json()
-        if response.ok:
-            values = data["value"] if "value" in data and data["value"] else []
-            return [v for v in values if "contentBytes" in v and v["contentBytes"]]
-        elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
-            self.refresh_access_token()
-            return self.list_attachments(message_id)
-        else:
-            raise Exception("Getting email attachments failed")
+
+        try:
+            response = requests.get(endpoint, headers=headers)
+            data = response.json()
+            if response.ok:
+                values = data["value"] if "value" in data and data["value"] else []
+                return [v for v in values if "contentBytes" in v and v["contentBytes"]]
+            elif response.status_code == 401 and data["error"]["code"] == "InvalidAuthenticationToken":
+                self.refresh_access_token()
+                return self.list_attachments(message_id)
+            else:
+                raise EmailHandlingFailedException(response.text, "LIST_ATTACHMENTS_FAILED")
+        except EmailHandlingFailedException as e:
+            logging.warning(f"[{str(e.error_type)}]: {e.message}")
+            return []
 
     def send_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
         endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/sendMail'
@@ -143,22 +131,27 @@ class Graph:
                 for a in attachments
             ]
             message["hasAttachments"] = True
-        response = requests.post(
-            endpoint,
-            headers=headers,
-            json={
-                "message": message,
-                "saveToSentItems": "true",
-            },
-        )
-        if response.ok:
-            logger.info(f"Send email to {email.sender.address} successfully.")
+
+        try:
+            response = requests.post(
+                endpoint,
+                headers=headers,
+                json={
+                    "message": message,
+                    "saveToSentItems": "true",
+                },
+            )
+            if response.ok:
+                logger.info(f"Send email to {email.sender.address} successfully.")
+                return
+            elif response.status_code == 401:
+                message = response.json()
+                if message["error"]["code"] == "InvalidAuthenticationToken":
+                    self.refresh_access_token()
+                    self.send_email(email, answer, attachments)
+            else:
+                logger.error(f"Send email to {email.sender.address} failed.")
+                raise EmailHandlingFailedException(response.text, "SEND_EMAIL_FAILED")
+        except EmailHandlingFailedException as e:
+            logging.warning(f"[{str(e.error_type)}]: {e.message}")
             return
-        elif response.status_code == 401:
-            message = response.json()
-            if message["error"]["code"] == "InvalidAuthenticationToken":
-                self.refresh_access_token()
-                self.send_email(email, answer)
-        else:
-            logger.error(f"Send email to {email.sender.address} failed: {response.text}")
-            raise Exception("Sending email failed")

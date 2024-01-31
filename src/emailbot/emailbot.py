@@ -98,6 +98,7 @@ class EmailBot:
 )"""
             print(sql)
             self.connection.execute(text(sql))
+            self.connection.commit()
 
         def set_processed_email(self, email):
             self.connection.execute(
@@ -108,6 +109,7 @@ WHERE id = '{email.id}'
 """
                      )
             )
+            self.connection.commit()
 
     def __init__(self, config: EmailBotSettings, graph: Graph, interval=60):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
