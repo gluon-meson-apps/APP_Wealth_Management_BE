@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import time
+from typing import Optional
 
 import environ
 import requests
@@ -82,7 +83,7 @@ class EmailBot:
             if self.connection:
                 self.connection.close()
 
-        def insert_new_email_into_database(self, email: Email):
+        def insert_processed_email_into_database(self, email: Email):
             sql = f"""INSERT INTO {self.config.DATABASE} VALUES (
     '{email.id}',
     '{email.conversation_id}',
@@ -94,7 +95,7 @@ class EmailBot:
     {email.has_attachments},
     '\u007b{",".join([url for url in email.attachment_urls])}\u007d',
     '{email.received_date_time}',
-    FALSE
+    TRUE
 )"""
             print(sql)
             self.connection.execute(text(sql))
@@ -112,10 +113,10 @@ WHERE id = '{email.id}'
             )
             self.connection.commit()
 
-    def __init__(self, config: EmailBotSettings, graph: Graph, interval=60):
+    def __init__(self, config: EmailBotSettings, graph: Graph, interval=300):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
         self.interval = interval
-        self.recent_emails = []
+        self.recent_email: Optional[Email, None] = None
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
         self.unified_search = UnifiedSearch()
@@ -129,26 +130,22 @@ WHERE id = '{email.id}'
 
     def receive_email(self):
         # todo: currently only use first email to test attachment
-        email_list = [self.graph.get_first_inbox_message()]
-
-        for email in email_list:
-            email.attachment_urls = self.upload_email_attachments(email)
-            self.recent_emails.append(email)
-            self.database.insert_new_email_into_database(email)
+        self.recent_email = self.graph.get_first_inbox_message()
+        self.recent_email.attachment_urls = self.upload_email_attachments()
 
     def process_emails(self):
-        for email in self.recent_emails:
-            answer, attachments = self.ask_thought_agent(email)
-            self.graph.send_email(email, answer, self.parse_attachments_in_answer(attachments))
+        answer, attachments = self.ask_thought_agent()
+        self.graph.send_email(self.recent_email, answer, self.parse_attachments_in_answer(attachments))
 
-            self.database.set_processed_email(email)
+        self.database.insert_processed_email_into_database(self.recent_email)
+        self.recent_email = None
 
-    def ask_thought_agent(self, email: Email):
+    def ask_thought_agent(self):
         payload = {
-            "question": email.body.content,
-            "conversation_id": email.id,
+            "question": self.recent_email.body.content,
+            "conversation_id": self.recent_email.id,
             "user_id": "emailbot",
-            "file_urls": email.attachment_urls,
+            "file_urls": self.recent_email.attachment_urls,
             "from_email": True,
         }
         headers = {
@@ -165,9 +162,9 @@ WHERE id = '{email.id}'
                 result.append(EmailAttachment(name=a.name, bytes=base64.b64encode(contents), type=a.content_type))
         return result
 
-    def upload_email_attachments(self, email):
-        if email.has_attachments:
-            attachments = self.graph.list_attachments(email.id)
+    def upload_email_attachments(self):
+        if self.recent_email.has_attachments:
+            attachments = self.graph.list_attachments(self.recent_email.id)
             files = [
                 (
                     "files",
