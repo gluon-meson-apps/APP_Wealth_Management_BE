@@ -7,7 +7,7 @@ from aiohttp import ClientResponseError
 from loguru import logger
 
 from models.email_model.model import Email, EmailBody, EmailSender, EmailAttachment
-from utils.utils import get_value_or_default_from_dict, parse_json_response, async_parse_json_response
+from utils.utils import get_value_or_default_from_dict, async_parse_json_response
 
 
 def parse_email(value: dict) -> Email:
@@ -76,6 +76,7 @@ class Graph:
                     data=data,
                     headers={"Content-Type": "application/x-www-form-urlencoded"},
                 ) as response:
+                    response.raise_for_status()
                     result = await async_parse_json_response(response)
                     return result["access_token"] if "access_token" in result else ""
             except Exception as err:
@@ -85,11 +86,10 @@ class Graph:
     async def refresh_access_token(self):
         self.access_token = await self.get_access_token()
 
-    def check_token_expired(self, status_code: int, response: str) -> bool:
-        data = parse_json_response(response)
-        result = status_code == 401 and data.get("error", {}).get("code") == "InvalidAuthenticationToken"
+    async def check_token_expired(self, status_code: int) -> bool:
+        result = status_code == 401
         if result:
-            self.refresh_access_token()
+            await self.refresh_access_token()
         return result
 
     async def call_graph_api(self, endpoint: str, method: str = "GET", data: dict = None):
@@ -99,10 +99,11 @@ class Graph:
                 async with session.post(endpoint, headers=headers, json=data) if method == "POST" else session.get(
                     endpoint, headers=headers
                 ) as response:
+                    response.raise_for_status()
                     data = await async_parse_json_response(response) if response.status == 200 else {}
                     return data["value"] if "value" in data and data["value"] else []
             except ClientResponseError as http_err:
-                if self.check_token_expired(http_err.status, http_err.message):
+                if await self.check_token_expired(http_err.status):
                     raise TokenExpiredException()
                 else:
                     logger.error(f"HTTP error occurred: {http_err}")
