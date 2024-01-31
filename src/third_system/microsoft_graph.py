@@ -48,6 +48,7 @@ class Graph:
         }
         self.inbox_folder_id, self.archive_folder_id = self.list_folders()
         self.get_access_token()
+        self.user_api_endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}'
 
     def get_access_token(self, grant_type="client_credentials"):
         data = {
@@ -74,7 +75,7 @@ class Graph:
         self.get_access_token(grant_type="refresh_token")
 
     def list_folders(self):
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/mailFolders'
+        endpoint = f"{self.user_api_endpoint}/mailFolders"
         headers = {"Authorization": "Bearer " + self.access_token}
         try:
             response = requests.get(endpoint, headers=headers)
@@ -98,7 +99,9 @@ class Graph:
     def get_first_inbox_message(self, received_date_time=None) -> Union[Email, None]:
         fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
         order_query = "$orderby=receivedDateTime asc"
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1'
+        endpoint = (
+            f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1"
+        )
         headers = {"Authorization": "Bearer " + self.access_token}
         try:
             response = requests.get(endpoint, headers=headers)
@@ -117,7 +120,7 @@ class Graph:
             return None
 
     def list_attachments(self, message_id):
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/messages/{message_id}/attachments'
+        endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
         headers = {"Authorization": "Bearer " + self.access_token}
 
         try:
@@ -136,7 +139,7 @@ class Graph:
             return []
 
     def send_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
-        endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}/sendMail'
+        endpoint = f"{self.user_api_endpoint}/sendMail"
         headers = {"Authorization": "Bearer " + self.access_token}
         message = {
             "subject": f"[TB Guru Reply] {email.subject}",
@@ -175,6 +178,32 @@ class Graph:
             else:
                 logger.error(f"Send email to {email.sender.address} failed.")
                 raise EmailHandlingFailedException(response.text, "SEND_EMAIL_FAILED")
+        except EmailHandlingFailedException as e:
+            logging.warning(f"[{str(e.error_type)}]: {e.message}")
+            return
+
+    def archive_email(self, email: Email):
+        endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages/{email.id}/move"
+        headers = {"Authorization": "Bearer " + self.access_token}
+        try:
+            response = requests.post(
+                endpoint,
+                headers=headers,
+                json={
+                    "destinationId": self.archive_folder_id,
+                },
+            )
+            if response.ok:
+                logger.info("Archive email successfully.")
+                return
+            elif response.status_code == 401:
+                message = response.json()
+                if message["error"]["code"] == "InvalidAuthenticationToken":
+                    self.refresh_access_token()
+                    self.archive_email(email)
+            else:
+                logger.error("Archive email failed.")
+                raise EmailHandlingFailedException(response.text, "ARCHIVE_EMAIL_FAILED")
         except EmailHandlingFailedException as e:
             logging.warning(f"[{str(e.error_type)}]: {e.message}")
             return
