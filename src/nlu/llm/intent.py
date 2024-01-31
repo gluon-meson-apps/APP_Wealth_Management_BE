@@ -13,6 +13,7 @@ from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from nlu.llm.intent_call import IntentCall
 from nlu.llm.intent_choosing_confirmer import IntentChoosingConfirmer
+from nlu.llm.same_topic_checker import SameTopicChecker
 from prompt_manager.base import PromptManager
 from third_system.search_entity import SearchResponse, SearchParam
 from third_system.unified_search import UnifiedSearch
@@ -100,6 +101,7 @@ class LLMIntentClassifier(IntentClassifier):
         self.intent_choosing_confirmer = IntentChoosingConfirmer(
             prompt_manager.load(name="intent_choosing_confirm").template
         )
+        self.same_topic_checker = SameTopicChecker()
 
     def train(self):
         # recreate topic
@@ -123,6 +125,18 @@ class LLMIntentClassifier(IntentClassifier):
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
+    def get_intent_by_parent(self, intent, middle_intent):
+        if intent["parent_intent"] == middle_intent:
+            return intent
+        else:
+            parent_intent = intent["parent_intent"]
+            # TODO: remove this logic later
+            if not parent_intent:
+                return None
+            intent = self.intent_list_config.get_intent(parent_intent)
+            return self.get_intent_by_parent({"intent": intent.name, "parent_intent": intent.parent_intent}, middle_intent)
+
+
     @classmethod
     def get_same_intent(cls, examples) -> Optional[str]:
         if len(examples) == 0:
@@ -132,7 +146,8 @@ class LLMIntentClassifier(IntentClassifier):
             return intents[0]
         return None
 
-    def classify_intent(self, conversation: ConversationContext) -> tuple[Optional[Intent], Optional[Intent]]:
+    def classify_intent_overall(self, conversation: ConversationContext) -> Optional[Intent]:
+        # intent confuse confirm
         if conversation.is_confused_with_intents():
             intent = self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
             conversation.confused_intents_resolved()
@@ -141,10 +156,45 @@ class LLMIntentClassifier(IntentClassifier):
                 description = self.intent_list_config.get_intent(intent).description
                 return Intent(name=intent, confidence=1.0, description=description), None
 
-        user_input = conversation.current_user_input
-        intent_name_list = self.intent_list_config.get_intent_name()
+        # same topic check
         chat_history = conversation.get_history().format_messages()
+        previous_intent = conversation.current_intent
+
+        if len(chat_history) > 1:
+            start_new_topic, new_request = self.same_topic_checker.check_same_topic(chat_history, conversation.session_id)
+            if previous_intent and not start_new_topic:
+                return previous_intent
+
+        is_final_intent = False
+        current_intent = None
+        middle_layer_intent = None
+        while not is_final_intent:
+            current_intent, unique_intent_from_examples = self.classify_intent(conversation, middle_layer_intent)
+            # intent confuse check
+            if current_intent and unique_intent_from_examples and current_intent.name != unique_intent_from_examples.name:
+                conversation.set_confused_intents([current_intent, unique_intent_from_examples])
+                break
+            if current_intent and self.intent_list_config.get_intent(current_intent.name).is_parent:
+                is_final_intent = False
+                middle_layer_intent = current_intent
+            else:
+                is_final_intent = True
+        return current_intent
+
+    def classify_intent(self, conversation: ConversationContext, parent_intent: Intent = None) -> tuple[Optional[Intent], Optional[Intent]]:
+        user_input = conversation.current_user_input
+        parent_intent_name = parent_intent.name if parent_intent else None
+        intent_name_list = self.intent_list_config.get_intent_name(parent_intent_name)
         intent_examples = get_intent_examples(user_input)
+        for intent_example in intent_examples:
+            intent_result = json.loads(intent_example["intent"])
+            intent = self.get_intent_by_parent(intent_result, parent_intent_name)
+            if intent:
+                intent_result["intent"] = intent["intent"]
+                intent_example["intent"] = json.dumps(intent_result)
+            else:
+                # todo: remove this logic later
+                intent_examples.remove(intent_example)
         unique_intent_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_in_examples:
             unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
@@ -154,7 +204,7 @@ class LLMIntentClassifier(IntentClassifier):
                 description=unique_intent_in_examples.description,
             )
         intent = self.intent_call.classify_intent(
-            user_input, chat_history, intent_examples, conversation.session_id, conversation.current_intent
+            user_input, intent_examples, conversation.session_id
         )
 
         if intent.intent in intent_name_list:

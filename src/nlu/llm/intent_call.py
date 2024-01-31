@@ -75,7 +75,7 @@ you are a helpful chatbot
         return result["start_new_topic"], result["new_request"]
 
     def classify_intent(
-        self, query: str, chat_history: list[dict[str, str]], examples, session_id, previous_intent: Intent
+        self, query: str, examples, session_id
     ) -> IntentClassificationResponse:
         # TODO: drop history if it is too long
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
@@ -85,18 +85,11 @@ you are a helpful chatbot
         self.construct_system_prompt(chat_message_preparation)
         logger.debug(examples)
 
-        if len(chat_history) > 1:
-            start_new_topic, new_request = self.check_same_topic(chat_model, self.format_history(chat_history))
-            if previous_intent and not start_new_topic:
-                return IntentClassificationResponse(intent=previous_intent.name, confidence=1.0)
-        else:
-            new_request = query
-
         for example in examples:
             chat_message_preparation.add_message("user", example["example"])
             chat_message_preparation.add_message("assistant", example["intent"])
 
-        chat_message_preparation.add_message("user", new_request)
+        chat_message_preparation.add_message("user", query)
         chat_message_preparation.log(logger)
 
         intent = chat_model.chat(

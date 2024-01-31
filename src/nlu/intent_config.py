@@ -2,15 +2,19 @@ import os
 
 import yaml
 
+from nlu.intent_with_entity import Intent
+
 
 class IntentConfig:
-    def __init__(self, name, description, business, action, slots, examples=None):
+    def __init__(self, name, description, business, action, slots, examples=None, is_parent=False, parent_intent=None):
         self.name = name
         self.description = description
         self.action = action
         self.slots = slots
         self.business = business
         self.examples = examples or []
+        self.is_parent = is_parent or False
+        self.parent_intent = parent_intent
 
     def minial_info(self):
         return {
@@ -38,9 +42,9 @@ class IntentListConfig:
     def get_intent_list(self) -> list[IntentConfig]:
         return self.intents
 
-    def get_intent_name(self):
+    def get_intent_name(self, parent_intent: str = None):
         # read resources/intent.yaml file and get intent list
-        return [intent.name for intent in self.intents if intent.name != "unknown"]
+        return [intent.name for intent in self.intents if intent.name != "unknown" and intent.parent_intent == parent_intent]
 
     def get_intent(self, intent_name):
         return next((intent for intent in self.intents if intent.name == intent_name), None)
@@ -56,7 +60,7 @@ class IntentListConfig:
         ]
 
     @classmethod
-    def from_scenes(cls, folder_path):
+    def from_scenes(cls, folder_path, parent_intent=None):
         intents = []
         files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
 
@@ -65,13 +69,19 @@ class IntentListConfig:
 
             with open(file_path, "r", encoding="utf-8") as file:
                 data = yaml.safe_load(file)
+            intent_name = data.get("name")
 
+            if data.get("is_parent"):
+                children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", intent_name)
+                intents.extend(children_intents.intents)
             intent = IntentConfig(
-                name=data.get("name"),
+                name=intent_name,
                 description=data.get("description"),
                 business=data.get("business"),
                 action=data.get("action"),
                 slots=data.get("slots"),
+                is_parent=data.get("is_parent"),
+                parent_intent=parent_intent
             )
             intents.append(intent)
 
