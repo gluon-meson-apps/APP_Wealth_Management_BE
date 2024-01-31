@@ -83,6 +83,22 @@ def extract_json_from_code_block(json_str: str):
     return extract_json_from_text(result_str)
 
 
+async def async_parse_json_response(response):
+    try:
+        return await response.json()
+    except json.JSONDecodeError:
+        logger.warning(f"cannot parse the result to JSON: {await response.text}")
+        return {}
+
+
+def parse_json_response(response):
+    try:
+        return response.json()
+    except json.JSONDecodeError:
+        logger.warning(f"cannot parse the result to JSON: {response.text}")
+        return {}
+
+
 def get_texts_from_search_response(search_res: SearchResponse) -> str:
     if search_res and search_res.items:
         return "\n".join([re.sub(r"\n+", "\n", i.text) for i in search_res.items])
