@@ -6,13 +6,17 @@ def main():
     {%- set response_name = 'response' ~ loop.index %}
     {{ param_name }} = {
     {%- for key, value in params.items() %}
-    {%- if value is not none %}
+    {%- if key == 'chat_history' %}
+      "{{ key }}": {{ value }},
+    {%- else %}
+        {%- if value is not none %}
       "{{ key }}": """{{ value }}""",
+        {%- endif %}
     {%- endif %}
     {%- endfor %}
     }
 
-    {{ response_name }} = requests.post("http://localhost:7788/score", json={{ param_name }})
+    {{ response_name }} = requests.post("http://{{ thought_agent_host }}:7788/score", json={{ param_name }})
     print({{ param_name }}['question'])
     print({{ response_name }}.text)
     {% endfor %}

@@ -1,0 +1,17 @@
+import pytest
+from tests.e2e.template_test_from_log import template_test_for_one_case
+
+{%- for import in imports %}
+{{ import }}
+{%- endfor %}
+
+{%- for log_name in log_names %}
+
+@pytest.mark.parametrize("test_case", [
+("e2e"),
+("intent_call_intent"),
+("entity_extractor"),
+])
+def test_{{ log_name }}(test_case):
+    template_test_for_one_case({{ log_name }}.main(), test_case)
+{%- endfor %}

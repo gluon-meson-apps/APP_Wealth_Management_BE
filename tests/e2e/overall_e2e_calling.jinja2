@@ -1,0 +1,12 @@
+{%- for import in imports %}
+{{ import }}
+{%- endfor %}
+
+def main():
+    {%- for func_call in func_calls %}
+    print("start {{ func_call }}")
+    {{ func_call }}
+    {%- endfor %}
+
+if __name__ == "__main__":
+    main()

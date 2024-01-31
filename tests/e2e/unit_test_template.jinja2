@@ -1,3 +1,4 @@
+previous_output = """{{ output }}"""
 def main():
     import os
     from loguru import logger
@@ -36,7 +37,6 @@ def main():
     result = chat_model.chat(**chat_message_preparation.to_chat_params(), **params).response
     print(result)
 
-    previous_output = """{{ output }}"""
     return result
 
 if __name__ == '__main__':

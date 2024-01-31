@@ -8,28 +8,31 @@ from utils.utils import format_jinja_template
 
 
 class E2eTestGenerator:
-    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter=""):
+    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter="", thought_agent_host="localhost"):
         self.connection = connection
         self.get_log_id_filter = get_log_id_filter
         self.log_table_name = log_table_name
         self.generate_dir_name = generate_dir_name
+        self.thought_agent_host = thought_agent_host
 
-    def process_one_params(self, params):
-        print(params)
-        if params is None:
-            return {}
-        params["conversation_id"] = f'test__e2e_test__{params["conversation_id"]}'
-        return params
+    def process_one_params_with_session_name(self, session_name):
+        def process_one_params(params):
+            print(params)
+            if params is None:
+                return {}
+            params["conversation_id"] = f'test__e2e_test___{session_name}'
+            return params
+        return process_one_params
 
     def process_one_group(self, inner_df):
-        params_list = inner_df['params'].apply(self.process_one_params).tolist()
+        session_name = standardize_session_name(inner_df.name)
+        params_list = inner_df['params'].apply(self.process_one_params_with_session_name(session_name)).tolist()
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         with open(f"{cur_dir}/e2e_test_template.jinja2", "r") as rf:
             template = rf.read()
-            session_name = standardize_session_name(inner_df.name)
             Path(f"{cur_dir}/{self.generate_dir_name}/{session_name}/generated_e2e_test").mkdir(parents=True, exist_ok=True)
             with open(f"{cur_dir}/{self.generate_dir_name}/{session_name}/generated_e2e_test/{session_name}_e2e.py", "w") as wf:
-                wf.write(format_jinja_template(template, params_list=params_list))
+                wf.write(format_jinja_template(template, params_list=params_list, thought_agent_host=self.thought_agent_host))
     def process(self, ignore_test_case_flag=True):
         if ignore_test_case_flag:
             query = f"SELECT * FROM {self.log_table_name} where scenario = 'overall' and not(log_id like 'test__e2e_test__%%')"

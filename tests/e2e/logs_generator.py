@@ -66,7 +66,7 @@ class LogsGenerator:
 
     def process(self):
         df = pd.read_sql(f"SELECT * FROM {self.log_table_name} where 1=1" + self.get_log_id_filter, self.connection)
-        df['session_name'] = df['log_id'].apply(lambda x: x.split('__')[-1])
+        df['session_name'] = df['log_id'].apply(lambda x: x.split('___')[-1])
         df['test'] = df['log_id'].apply(lambda x: x.startswith('test__'))
         df = df.groupby('log_id').apply(self.add_round_group_to_df).reset_index(drop=True)
         result = df.groupby(['session_name']).apply(self.process_one_group).reset_index()
