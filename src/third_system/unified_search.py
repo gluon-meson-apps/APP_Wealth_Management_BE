@@ -74,12 +74,15 @@ class UnifiedSearch:
 
         return handle_response(response)
 
-    def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
-        response = requests.get(url=f"{self.base_url}/file/download_raw", params={"file_url": file_url})
-        if response.status_code != 200:
-            logger.error(f"{response.status_code}: {response.text}")
-            return None
-        return response.content
+    async def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
+                    resp.raise_for_status()
+                    return await resp.content.read()
+            except Exception as err:
+                logger.error(f"Error download {file_url}:", err)
+                return None
 
     async def adownload_file_from_minio(self, file_url: str) -> SearchResponse:
         async with aiohttp.ClientSession() as session:
@@ -89,6 +92,11 @@ class UnifiedSearch:
     def upload_file_to_minio(self, files) -> list[str]:
         response = requests.post(url=f"{self.base_url}/file", files=files)
         return response.json()
+
+    async def aupload_file_to_minio(self, files) -> list[str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.base_url}/file", files=files) as response:
+                return await response.json()
 
 
 if __name__ == "__main__":

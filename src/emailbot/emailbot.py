@@ -1,11 +1,11 @@
 import asyncio
 import base64
 import time
-from typing import Optional
 
+import aiohttp
 import environ
-import requests
 from dotenv import load_dotenv
+from loguru import logger
 from sqlalchemy import text
 
 from action.base import Attachment
@@ -35,18 +35,14 @@ def get_config(cls):
     return environ.to_config(cls)
 
 
-def handle_response(response):
-    if response.status_code != 200:
-        raise Exception(response.text)
-    else:
-        chunk = response.content
-        chunk_as_string = chunk.decode("utf-8").strip()
-        data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
-        json_result = extract_json_from_text(data_as_string)
-        answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
-        attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
-        attachment = Attachment(**attachments_dict) if attachments_dict else None
-        return answer, [attachment] if attachment else []
+def handle_response(chunk):
+    chunk_as_string = chunk.decode("utf-8").strip()
+    data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
+    json_result = extract_json_from_text(data_as_string)
+    answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
+    attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
+    attachment = Attachment(**attachments_dict) if attachments_dict else None
+    return answer, [attachment] if attachment else []
 
 
 def format_html_content(content):
@@ -116,55 +112,59 @@ WHERE id = '{email.id}'
     def __init__(self, config: EmailBotSettings, graph: Graph, interval=300):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
         self.interval = interval
-        self.recent_email: Optional[Email, None] = None
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
         self.unified_search = UnifiedSearch()
         self.database.connect_database()
 
-    def periodically_call_api(self):
+    async def periodically_call_api(self):
         while True:
-            self.receive_email()
-            self.process_emails()
+            new_email = await self.receive_email()
+            await self.process_emails(new_email)
             time.sleep(self.interval)
 
-    def receive_email(self):
-        # todo: currently only use first email to test attachment
-        self.recent_email = self.graph.get_first_inbox_message()
-        self.recent_email.attachment_urls = self.upload_email_attachments()
+    async def receive_email(self):
+        new_email = await self.graph.get_first_inbox_message()
+        if new_email:
+            new_email.attachment_urls = await self.upload_email_attachments(new_email)
 
-    def process_emails(self):
-        answer, attachments = self.ask_thought_agent()
-        self.graph.send_email(self.recent_email, answer, self.parse_attachments_in_answer(attachments))
+    async def process_emails(self, new_email):
+        if new_email:
+            answer, attachments = await self.ask_thought_agent(new_email)
+            await self.graph.send_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
+            self.database.set_processed_email(new_email)
 
-        self.database.insert_processed_email_into_database(self.recent_email)
-        self.recent_email = None
-
-    def ask_thought_agent(self):
+    async def ask_thought_agent(self, email: Email):
         payload = {
-            "question": self.recent_email.body.content,
-            "conversation_id": self.recent_email.id,
+            "question": email.body.content,
+            "conversation_id": email.id,
             "user_id": "emailbot",
-            "file_urls": self.recent_email.attachment_urls,
+            "file_urls": email.attachment_urls,
             "from_email": True,
         }
         headers = {
             "Content-Type": "application/json",
         }
-        response = requests.post(url=self.thought_agent_endpoint, json=payload, headers=headers)
-        return handle_response(response)
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(self.thought_agent_endpoint, headers=headers, json=payload) as resp:
+                    resp.raise_for_status()
+                    return handle_response(await resp.content.read())
+            except Exception as err:
+                logger.error("Error with thought agent:", err)
+                return None
 
-    def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
+    async def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
         result = []
         for a in attachments:
-            contents = self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
+            contents = await self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
             if contents:
                 result.append(EmailAttachment(name=a.name, bytes=base64.b64encode(contents), type=a.content_type))
         return result
 
-    def upload_email_attachments(self):
-        if self.recent_email.has_attachments:
-            attachments = self.graph.list_attachments(self.recent_email.id)
+    async def upload_email_attachments(self, email):
+        if email.has_attachments:
+            attachments = await self.graph.list_attachments(email.id)
             files = [
                 (
                     "files",
@@ -172,16 +172,15 @@ WHERE id = '{email.id}'
                 )
                 for a in attachments
             ]
-            return self.unified_search.upload_file_to_minio(files)
+            return await self.unified_search.aupload_file_to_minio(files)
         return []
 
 
 async def main():
     emailbot_configuration = get_config(EmailBotSettings)
     graph = Graph()
-    print(graph.access_token)
     bot = EmailBot(emailbot_configuration, graph)
-    bot.periodically_call_api()
+    await bot.periodically_call_api()
 
 
 if __name__ == "__main__":
