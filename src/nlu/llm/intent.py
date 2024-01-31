@@ -174,7 +174,7 @@ class LLMIntentClassifier(IntentClassifier):
             if current_intent and unique_intent_from_examples and current_intent.name != unique_intent_from_examples.name:
                 conversation.set_confused_intents([current_intent, unique_intent_from_examples])
                 break
-            if current_intent and self.intent_list_config.get_intent(current_intent.name).is_parent:
+            if current_intent and self.intent_list_config.get_intent(current_intent.name).has_children:
                 is_final_intent = False
                 middle_layer_intent = current_intent
             else:

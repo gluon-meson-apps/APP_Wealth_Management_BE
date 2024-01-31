@@ -22,7 +22,7 @@ def retrieve_intent_examples_from_intent_yaml(folder_path, parent_intent=None):
         with open(file_path, "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
         intent_name = data.get("name")
-        if data.get("is_parent"):
+        if data.get("has_children"):
             examples = retrieve_intent_examples_from_intent_yaml(f"{folder_path}/{intent_name}", intent_name)
             intent_examples.extend(examples)
 

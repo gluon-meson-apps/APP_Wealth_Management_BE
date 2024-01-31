@@ -6,14 +6,14 @@ from nlu.intent_with_entity import Intent
 
 
 class IntentConfig:
-    def __init__(self, name, description, business, action, slots, examples=None, is_parent=False, parent_intent=None):
+    def __init__(self, name, description, business, action, slots, examples=None, has_children=False, parent_intent=None):
         self.name = name
         self.description = description
         self.action = action
         self.slots = slots
         self.business = business
         self.examples = examples or []
-        self.is_parent = is_parent or False
+        self.has_children = has_children or False
         self.parent_intent = parent_intent
 
     def minial_info(self):
@@ -71,7 +71,7 @@ class IntentListConfig:
                 data = yaml.safe_load(file)
             intent_name = data.get("name")
 
-            if data.get("is_parent"):
+            if data.get("has_children"):
                 children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", intent_name)
                 intents.extend(children_intents.intents)
             intent = IntentConfig(
@@ -80,7 +80,7 @@ class IntentListConfig:
                 business=data.get("business"),
                 action=data.get("action"),
                 slots=data.get("slots"),
-                is_parent=data.get("is_parent"),
+                has_children=data.get("has_children"),
                 parent_intent=parent_intent
             )
             intents.append(intent)
