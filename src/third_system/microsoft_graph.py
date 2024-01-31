@@ -46,9 +46,9 @@ class Graph:
             "tenant_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_TENANT_ID", ""),
             "user_id": urllib.parse.quote(get_value_or_default_from_dict(os.environ, "GRAPH_API_USER_ID", "")),
         }
-        self.inbox_folder_id, self.archive_folder_id = self.list_folders()
-        self.get_access_token()
         self.user_api_endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}'
+        self.get_access_token()
+        self.inbox_folder_id, self.archive_folder_id = self.list_folders()
 
     def get_access_token(self, grant_type="client_credentials"):
         data = {
@@ -82,8 +82,8 @@ class Graph:
             data = response.json()
             if response.ok:
                 values = data["value"] if "value" in data and data["value"] else []
-                inbox_folder = next(filter(values, lambda v: v.get("displayName") in ["收件箱", "Inbox"]), None)
-                archive_folder = next(filter(values, lambda v: v.get("displayName") in ["存档", "Archive"]), None)
+                inbox_folder = next(filter(lambda v: v.get("displayName") in ["收件箱", "Inbox"], values), None)
+                archive_folder = next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], values), None)
                 return inbox_folder.get("id") if inbox_folder else "", archive_folder.get(
                     "id"
                 ) if archive_folder else ""
