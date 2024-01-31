@@ -68,6 +68,12 @@ def chat(
     return {"response": result, "session_id": conversation.session_id}
 
 
+async def generate_answer_with_len_limited(answer, **kwargs):
+    # chunk with 500
+    for i in range(0, len(answer), 1000):
+        yield {"data": json.dumps({"answer": answer[i : i + 1000], **kwargs})}
+
+
 @app.post("/score/")
 async def score(
     score_command: ScoreCommand,
@@ -97,25 +103,24 @@ async def score(
             conversation.reset_history()
         err_msg = f"Error occurred: {err}, please try again later."
 
-    def generator():
+    async def generator():
         if not result:
-            answer = json.dumps({"answer": err_msg if err_msg else "unknown error occurred"})
+            answer = {"answer": err_msg if err_msg else "unknown error occurred"}
         elif isinstance(result, JumpOutResponse):
-            answer = json.dumps({"answer": "Sorry, I can't help you with that."})
+            answer = {"answer": "Sorry, I can't help you with that."}
         else:
-            answer = json.dumps(
-                {
-                    "answer": result.answer.get_content_with_extra_info(),
-                    "session_id": session_id,
-                    **(
-                        dict(attachment=result.attachment.model_dump_json())
-                        if isinstance(result, AttachmentResponse)
-                        else {}
-                    ),
-                }
-            )
+            answer = {
+                "answer": result.answer.get_content_with_extra_info(),
+                "session_id": session_id,
+                **(
+                    dict(attachment=result.attachment.model_dump_json())
+                    if isinstance(result, AttachmentResponse)
+                    else {}
+                ),
+            }
 
-        yield {"data": answer}
+        async for answer in generate_answer_with_len_limited(**answer):
+            yield answer
         full_history = []
         if conversation is not None:
             full_history = conversation.history.format_messages()
