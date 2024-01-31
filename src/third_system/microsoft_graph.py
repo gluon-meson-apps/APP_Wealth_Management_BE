@@ -169,6 +169,7 @@ class Graph:
             )
             if response.ok:
                 logger.info(f"Send email to {email.sender.address} successfully.")
+                self.archive_email(email)
                 return
             elif response.status_code == 401:
                 message = response.json()
