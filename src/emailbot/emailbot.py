@@ -178,7 +178,7 @@ WHERE id = '{email.id}'
 
 async def main():
     emailbot_configuration = get_config(EmailBotSettings)
-    graph = Graph()
+    graph = await Graph()
     bot = EmailBot(emailbot_configuration, graph)
     await bot.periodically_call_api()
 
