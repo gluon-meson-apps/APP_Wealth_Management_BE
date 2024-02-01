@@ -65,7 +65,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 @app.post("/chat/")
 def chat(
-    user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
+        user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
 ):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
@@ -76,14 +76,14 @@ def chat(
 async def generate_answer_with_len_limited(answer, **kwargs):
     # chunk with 500
     for i in range(0, len(answer), 1000):
-        yield {"data": json.dumps({"answer": answer[i : i + 1000], **kwargs})}
+        yield {"data": json.dumps({"answer": answer[i: i + 1000], **kwargs})}
 
 
 @app.post("/score/")
 async def score(
-    score_command: ScoreCommand,
-    unified_search: UnifiedSearch = Depends(),
-    email_reply_action: EmailReplyAction = Depends(),
+        score_command: ScoreCommand,
+        unified_search: UnifiedSearch = Depends(),
+        email_reply_action: EmailReplyAction = Depends(),
 ):
     err_msg = ""
     result = None
@@ -96,7 +96,7 @@ async def score(
         file_urls = [score_command.file_url]
 
     try:
-        file_res = [await unified_search.adownload_file_from_minio(url) for url in file_urls]
+        file_res = [await unified_search.download_file_from_minio(url) for url in file_urls]
         result, conversation = await dialog_manager.handle_message(
             score_command.question, session_id, file_contents=file_res if file_res else None
         )
@@ -146,12 +146,14 @@ async def score(
 async def healthcheck():
     return {"status": "alive"}
 
+
 async def start_emailbot():
     logger.info("Starting emailbot")
     emailbot_configuration = get_config(EmailBotSettings)
     graph = await Graph()
     bot = EmailBot(emailbot_configuration, graph)
     await bot.periodically_call_api()
+
 
 def run_child_process():
     loop = asyncio.new_event_loop()
@@ -161,6 +163,7 @@ def run_child_process():
         loop.run_until_complete(start_emailbot())
     except asyncio.CancelledError:
         pass
+
 
 def main():
     if os.getenv("START_EMAILBOT").lower() == "true":

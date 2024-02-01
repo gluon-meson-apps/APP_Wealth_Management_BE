@@ -70,11 +70,6 @@ class UnifiedSearch:
 
         return handle_response(response)
 
-    def download_file_from_minio(self, file_url: str) -> SearchResponse:
-        response = requests.get(url=f"{self.base_url}/file/download", params={"file_url": file_url})
-
-        return handle_response(response)
-
     async def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
         async with aiohttp.ClientSession() as session:
             try:
@@ -85,7 +80,7 @@ class UnifiedSearch:
                 logger.error(f"Error download {file_url}:", err)
                 return None
 
-    async def adownload_file_from_minio(self, file_url: str) -> SearchResponse:
+    async def download_file_from_minio(self, file_url: str) -> SearchResponse:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
                 return await handle_aio_response(resp)
