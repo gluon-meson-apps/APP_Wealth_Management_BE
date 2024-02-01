@@ -132,15 +132,22 @@ class LLMIntentClassifier(IntentClassifier):
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
     @classmethod
-    def get_mapped_intent_of_current_layer(cls, intent_example, parent_intent_of_current_layer):
-        if intent_example["parent_intent"] == parent_intent_of_current_layer:
-            return json.loads(intent_example["intent"])["intent"]
-        else:
-            example_parent_intent = intent_example["parent_intent"]
-            if parent_intent_of_current_layer:
-                return example_parent_intent[(len(parent_intent_of_current_layer) + 1) :].split(".")[0]
-            else:
-                return example_parent_intent.split(".")[0]
+    def get_mapped_intent_of_current_layer(cls, intent_example, parent_intent_of_current_layer) -> str:
+        name_of_intent_example = json.loads(intent_example["intent"])["intent"]
+        full_name_of_intent_example = (
+            intent_example["parent_intent"] + "." + name_of_intent_example
+            if intent_example["parent_intent"]
+            else name_of_intent_example
+        )
+
+        def padding_root(name):
+            return "root." + name if name else "root"
+
+        parent_intent_of_current_layer = padding_root(parent_intent_of_current_layer)
+        full_name_of_intent_example = padding_root(full_name_of_intent_example)
+
+        parent_end_position_in_full_name = len(parent_intent_of_current_layer + ".")
+        return full_name_of_intent_example[parent_end_position_in_full_name:].split(".")[0]
 
     @classmethod
     def get_same_intent(cls, examples) -> Optional[str]:
