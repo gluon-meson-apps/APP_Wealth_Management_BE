@@ -208,6 +208,7 @@ class LLMIntentClassifier(IntentClassifier):
                 name=unique_intent_name_in_examples.name,
                 confidence=1.0,
                 description=unique_intent_name_in_examples.description,
+                full_name_of_parent_intent=unique_intent_name_in_examples.full_name_of_parent_intent,
             )
         intent = self.intent_call.classify_intent(
             user_input, intent_examples, conversation.session_id, parent_intent_name_of_current_layer
@@ -222,7 +223,7 @@ class LLMIntentClassifier(IntentClassifier):
                 name=intent.intent,
                 confidence=intent.confidence,
                 description=intent_config.description,
-                parent_intent=intent_config.parent_intent,
+                full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
             ), unique_intent_name_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")

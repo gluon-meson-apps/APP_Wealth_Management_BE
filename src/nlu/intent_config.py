@@ -5,7 +5,15 @@ import yaml
 
 class IntentConfig:
     def __init__(
-        self, name, description, business, action, slots, examples=None, has_children=False, parent_intent=None
+        self,
+        name,
+        description,
+        business,
+        action,
+        slots,
+        examples=None,
+        has_children=False,
+        full_name_of_parent_intent=None,
     ):
         self.name = name
         self.description = description
@@ -14,7 +22,10 @@ class IntentConfig:
         self.business = business
         self.examples = examples or []
         self.has_children = has_children or False
-        self.parent_intent = parent_intent
+        self.full_name_of_parent_intent: str = full_name_of_parent_intent
+
+    def get_full_intent_name(self) -> str:
+        return f"{self.full_name_of_parent_intent}.{self.name}" if self.full_name_of_parent_intent else self.name
 
     def minial_info(self):
         return {
@@ -45,16 +56,20 @@ class IntentListConfig:
     def get_intent_name_list_by_their_parent_intent(self, parent_intent: str = None):
         # read resources/intent.yaml file and get intent list
         return [
-            intent.name for intent in self.intents if intent.name != "unknown" and intent.parent_intent == parent_intent
+            intent.name
+            for intent in self.intents
+            if intent.name != "unknown" and intent.full_name_of_parent_intent == parent_intent
         ]
 
-    def get_children_intents(self, intent: IntentConfig):
+    def get_children_intents(self, current_intent: IntentConfig):
         children_intents = []
-        if intent.has_children:
-            full_intent_name = f"{intent.parent_intent}.{intent.name}." if intent.parent_intent else f"{intent.name}."
-            for intent_tmep in self.intents:
-                if intent_tmep.parent_intent and intent_tmep.parent_intent.startswith(full_intent_name):
-                    children_intents.append(intent_tmep)
+        if current_intent.has_children:
+            full_name_of_current_intent = current_intent.get_full_intent_name()
+            for intent in self.intents:
+                if intent.full_name_of_parent_intent and intent.full_name_of_parent_intent.startswith(
+                    full_name_of_current_intent
+                ):
+                    children_intents.append(intent)
         return children_intents
 
     def get_intent(self, intent_name):
@@ -71,7 +86,7 @@ class IntentListConfig:
         ]
 
     @classmethod
-    def from_scenes(cls, folder_path, parent_intent=None):
+    def from_scenes(cls, folder_path, parent_intent_full_name: str = None):
         intents = []
         files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
 
@@ -83,8 +98,8 @@ class IntentListConfig:
             intent_name = data.get("name")
 
             if data.get("has_children"):
-                full_parent = f"{parent_intent}.{intent_name}" if parent_intent else intent_name
-                children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", full_parent)
+                full_name = f"{parent_intent_full_name}.{intent_name}" if parent_intent_full_name else intent_name
+                children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", full_name)
                 intents.extend(children_intents.intents)
             intent = IntentConfig(
                 name=intent_name,
@@ -93,7 +108,7 @@ class IntentListConfig:
                 action=data.get("action"),
                 slots=data.get("slots"),
                 has_children=data.get("has_children"),
-                parent_intent=parent_intent,
+                full_name_of_parent_intent=parent_intent_full_name,
             )
             intents.append(intent)
 

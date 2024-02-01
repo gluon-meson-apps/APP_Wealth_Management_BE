@@ -1,13 +1,12 @@
 import json
 from json import JSONDecodeError
-from typing import List
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 from pydantic import BaseModel
 
 from llm.self_host import ChatModel
-from nlu.intent_config import IntentConfig, IntentListConfig
+from nlu.intent_config import IntentListConfig
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
 from prompt_manager.base import PromptWrapper
@@ -33,10 +32,12 @@ class IntentCall:
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_call"
 
-    def construct_system_prompt(self, chat_message_preparation: ChatMessagePreparation, parent_intent_name: str = None):
+    def construct_system_prompt(
+        self, chat_message_preparation: ChatMessagePreparation, full_name_of_parent_intent: str = None
+    ):
         intent_list = []
         for intent in self.intent_list_config.intents:
-            if intent.parent_intent == parent_intent_name:
+            if intent.full_name_of_parent_intent == full_name_of_parent_intent:
                 descriptions = [intent.description]
                 children_intents = self.intent_list_config.get_children_intents(intent)
                 descriptions.extend([intent.description for intent in children_intents])
@@ -45,14 +46,14 @@ class IntentCall:
         chat_message_preparation.add_message("system", self.template.template, intent_list=json.dumps(intent_list))
 
     def classify_intent(
-        self, query: str, examples, session_id, parent_intent_name: str = None
+        self, query: str, examples, session_id, full_name_of_parent_intent: str = None
     ) -> IntentClassificationResponse:
         # TODO: drop history if it is too long
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
 
         chat_message_preparation = ChatMessagePreparation()
 
-        self.construct_system_prompt(chat_message_preparation, parent_intent_name)
+        self.construct_system_prompt(chat_message_preparation, full_name_of_parent_intent)
         logger.debug(examples)
 
         for example in examples:
@@ -63,7 +64,10 @@ class IntentCall:
         chat_message_preparation.log(logger)
 
         intent = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario=parent_intent_name
+            **chat_message_preparation.to_chat_params(),
+            max_length=64,
+            jsonable=True,
+            sub_scenario=full_name_of_parent_intent,
         ).get_json_response()
         logger.debug(intent)
         try:
