@@ -131,16 +131,16 @@ class LLMIntentClassifier(IntentClassifier):
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
-    def get_intent_by_parent(self, intent_example, parent_intent):
-        if intent_example["parent_intent"] == parent_intent:
+    @classmethod
+    def get_mapped_intent_of_current_layer(cls, intent_example, parent_intent_of_current_layer):
+        if intent_example["parent_intent"] == parent_intent_of_current_layer:
             return json.loads(intent_example["intent"])["intent"]
         else:
             example_parent_intent = intent_example["parent_intent"]
-            if parent_intent:
-                return example_parent_intent[:(len(parent_intent)+1)].split(".")[0]
+            if parent_intent_of_current_layer:
+                return example_parent_intent[(len(parent_intent_of_current_layer)+1):].split(".")[0]
             else:
                 return example_parent_intent.split(".")[0]
-
 
     @classmethod
     def get_same_intent(cls, examples) -> Optional[str]:
@@ -188,14 +188,14 @@ class LLMIntentClassifier(IntentClassifier):
 
     def classify_intent(self, conversation: ConversationContext, parent_intent: Intent = None) -> tuple[Optional[Intent], Optional[Intent]]:
         user_input = conversation.current_user_input
-        parent_intent_name = None
+        parent_intent_of_current_layer = None
         if parent_intent:
-            parent_intent_name = f"{parent_intent.parent_intent}.{parent_intent.name}" if parent_intent.parent_intent else parent_intent.name
-        intent_name_list = self.intent_list_config.get_intent_name(parent_intent_name)
-        intent_examples = get_intent_examples(user_input, parent_intent_name)
+            parent_intent_of_current_layer = f"{parent_intent.parent_intent}.{parent_intent.name}" if parent_intent.parent_intent else parent_intent.name
+        intent_name_list = self.intent_list_config.get_intent_name(parent_intent_of_current_layer)
+        intent_examples = get_intent_examples(user_input, parent_intent_of_current_layer)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
-            intent_name = self.get_intent_by_parent(intent_example, parent_intent_name)
+            intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_of_current_layer)
             intent_result["intent"] = intent_name
             intent_example["intent"] = json.dumps(intent_result)
         unique_intent_in_examples = self.get_same_intent(intent_examples)
@@ -207,7 +207,7 @@ class LLMIntentClassifier(IntentClassifier):
                 description=unique_intent_in_examples.description,
             )
         intent = self.intent_call.classify_intent(
-            user_input, intent_examples, conversation.session_id, parent_intent_name
+            user_input, intent_examples, conversation.session_id, parent_intent_of_current_layer
         )
 
         if intent.intent in intent_name_list:
