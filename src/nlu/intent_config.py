@@ -2,8 +2,11 @@ import os
 
 import yaml
 
+
 class IntentConfig:
-    def __init__(self, name, description, business, action, slots, examples=None, has_children=False, parent_intent=None):
+    def __init__(
+        self, name, description, business, action, slots, examples=None, has_children=False, parent_intent=None
+    ):
         self.name = name
         self.description = description
         self.action = action
@@ -39,9 +42,11 @@ class IntentListConfig:
     def get_intent_list(self) -> list[IntentConfig]:
         return self.intents
 
-    def get_intent_name(self, parent_intent: str = None):
+    def get_intent_name_list_by_their_parent_intent(self, parent_intent: str = None):
         # read resources/intent.yaml file and get intent list
-        return [intent.name for intent in self.intents if intent.name != "unknown" and intent.parent_intent == parent_intent]
+        return [
+            intent.name for intent in self.intents if intent.name != "unknown" and intent.parent_intent == parent_intent
+        ]
 
     def get_children_intents(self, intent: IntentConfig):
         children_intents = []
@@ -88,7 +93,7 @@ class IntentListConfig:
                 action=data.get("action"),
                 slots=data.get("slots"),
                 has_children=data.get("has_children"),
-                parent_intent=parent_intent
+                parent_intent=parent_intent,
             )
             intents.append(intent)
 

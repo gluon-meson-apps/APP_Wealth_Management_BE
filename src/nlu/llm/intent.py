@@ -51,11 +51,11 @@ class IntentConfig:
         self.slots = slots
 
 
-def get_intent_examples(user_input: str, parent_intent: str = None) -> list[dict[str, Any]]:
+def get_intent_examples(user_input: str, parent_intent_name: str = None) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
     filters = []
-    if parent_intent:
-        search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent}%"])
+    if parent_intent_name:
+        search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent_name}%"])
         filters.append(search_filter)
 
     response: SearchResponse = unified_search_client.vector_search(
@@ -138,7 +138,7 @@ class LLMIntentClassifier(IntentClassifier):
         else:
             example_parent_intent = intent_example["parent_intent"]
             if parent_intent_of_current_layer:
-                return example_parent_intent[(len(parent_intent_of_current_layer)+1):].split(".")[0]
+                return example_parent_intent[(len(parent_intent_of_current_layer) + 1) :].split(".")[0]
             else:
                 return example_parent_intent.split(".")[0]
 
@@ -159,64 +159,71 @@ class LLMIntentClassifier(IntentClassifier):
             if intent:
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
                 description = self.intent_list_config.get_intent(intent).description
-                return Intent(name=intent, confidence=1.0, description=description), None
+                current_intent = Intent(name=intent, confidence=1.0, description=description)
+                return self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
         chat_history = conversation.get_history().format_messages()
         previous_intent = conversation.current_intent
 
         if len(chat_history) > 1:
-            start_new_topic, new_request = self.same_topic_checker.check_same_topic(chat_history, conversation.session_id)
+            start_new_topic, new_request = self.same_topic_checker.check_same_topic(
+                chat_history, conversation.session_id
+            )
             if previous_intent and not start_new_topic:
                 return previous_intent
 
-        is_final_intent = False
-        current_intent = None
-        middle_layer_intent = None
-        while not is_final_intent:
-            current_intent, unique_intent_from_examples = self.classify_intent(conversation, middle_layer_intent)
-            # intent confuse check
-            if current_intent and unique_intent_from_examples and current_intent.name != unique_intent_from_examples.name:
+        return self.classify_intent_until_leaf_or_confused(conversation, None)
+
+    def classify_intent_until_leaf_or_confused(
+        self, conversation: ConversationContext, start_intent: Optional[Intent]
+    ) -> Optional[Intent]:
+        current_intent = start_intent
+        while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
+            current_intent, unique_intent_from_examples = self.classify_intent(conversation, current_intent)
+            if (
+                current_intent
+                and unique_intent_from_examples
+                and current_intent.name != unique_intent_from_examples.name
+            ):
                 conversation.set_confused_intents([current_intent, unique_intent_from_examples])
                 break
-            if current_intent and self.intent_list_config.get_intent(current_intent.name).has_children:
-                is_final_intent = False
-                middle_layer_intent = current_intent
-            else:
-                is_final_intent = True
         return current_intent
 
-    def classify_intent(self, conversation: ConversationContext, parent_intent: Intent = None) -> tuple[Optional[Intent], Optional[Intent]]:
+    def classify_intent(
+        self, conversation: ConversationContext, parent_intent: Intent = None
+    ) -> tuple[Optional[Intent], Optional[Intent]]:
         user_input = conversation.current_user_input
-        parent_intent_of_current_layer = None
-        if parent_intent:
-            parent_intent_of_current_layer = f"{parent_intent.parent_intent}.{parent_intent.name}" if parent_intent.parent_intent else parent_intent.name
-        intent_name_list = self.intent_list_config.get_intent_name(parent_intent_of_current_layer)
-        intent_examples = get_intent_examples(user_input, parent_intent_of_current_layer)
+        parent_intent_name_of_current_layer: str = parent_intent.get_full_intent_name() if parent_intent else None
+        intent_examples = get_intent_examples(user_input, parent_intent_name_of_current_layer)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
-            intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_of_current_layer)
+            intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_name_of_current_layer)
             intent_result["intent"] = intent_name
             intent_example["intent"] = json.dumps(intent_result)
-        unique_intent_in_examples = self.get_same_intent(intent_examples)
-        if unique_intent_in_examples:
-            unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
-            unique_intent_in_examples = Intent(
-                name=unique_intent_in_examples.name,
+        unique_intent_name_in_examples = self.get_same_intent(intent_examples)
+        if unique_intent_name_in_examples:
+            unique_intent_name_in_examples = self.intent_list_config.get_intent(unique_intent_name_in_examples)
+            unique_intent_name_in_examples = Intent(
+                name=unique_intent_name_in_examples.name,
                 confidence=1.0,
-                description=unique_intent_in_examples.description,
+                description=unique_intent_name_in_examples.description,
             )
         intent = self.intent_call.classify_intent(
-            user_input, intent_examples, conversation.session_id, parent_intent_of_current_layer
+            user_input, intent_examples, conversation.session_id, parent_intent_name_of_current_layer
         )
 
-        if intent.intent in intent_name_list:
+        if intent.intent in self.intent_list_config.get_intent_name_list_by_their_parent_intent(
+            parent_intent_name_of_current_layer
+        ):
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
             intent_config = self.intent_list_config.get_intent(intent.intent)
             return Intent(
-                name=intent.intent, confidence=intent.confidence, description=intent_config.description,
-                parent_intent=intent_config.parent_intent
-            ), unique_intent_in_examples
+                name=intent.intent,
+                confidence=intent.confidence,
+                description=intent_config.description,
+                parent_intent=intent_config.parent_intent,
+            ), unique_intent_name_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")
-        return None, unique_intent_in_examples
+        return None, unique_intent_name_in_examples

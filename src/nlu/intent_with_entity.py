@@ -19,7 +19,10 @@ class Intent(HashableBaseModel):
     description: Optional[str]
     confidence: Optional[float] = 1
     business: Optional[bool] = False
-    parent_intent: Optional[str]
+    parent_intent: Optional[str] = None
+
+    def get_full_intent_name(self) -> str:
+        return f"{self.parent_intent}.{self.name}" if self.parent_intent else self.name
 
     def minimal_info(self):
         return {
