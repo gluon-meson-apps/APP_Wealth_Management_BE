@@ -93,7 +93,7 @@ class LLMIntentClassifier(IntentClassifier):
         self.prompt_manager = prompt_manager
         self.system_template_without_example = prompt_manager.load(name="intent_classification")
         self.intent_call = IntentCall(
-            intent_list_config.get_intent_list(),
+            intent_list_config,
             prompt_manager.load(name="intent_classification_v2"),
             chat_model,
             model_type,
@@ -188,6 +188,7 @@ class LLMIntentClassifier(IntentClassifier):
         intent_examples = get_intent_examples(user_input)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
+            print(f"hhhhhh {intent_result}")
             intent = self.get_intent_by_parent(intent_result, parent_intent_name)
             if intent:
                 intent_result["intent"] = intent["intent"]
@@ -195,6 +196,7 @@ class LLMIntentClassifier(IntentClassifier):
             else:
                 # todo: remove this logic later
                 intent_examples.remove(intent_example)
+        print(f"hhhh {intent_examples}")
         unique_intent_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_in_examples:
             unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
@@ -204,7 +206,7 @@ class LLMIntentClassifier(IntentClassifier):
                 description=unique_intent_in_examples.description,
             )
         intent = self.intent_call.classify_intent(
-            user_input, intent_examples, conversation.session_id
+            user_input, intent_examples, conversation.session_id, parent_intent_name
         )
 
         if intent.intent in intent_name_list:

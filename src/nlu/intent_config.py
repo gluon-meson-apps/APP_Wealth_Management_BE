@@ -2,9 +2,6 @@ import os
 
 import yaml
 
-from nlu.intent_with_entity import Intent
-
-
 class IntentConfig:
     def __init__(self, name, description, business, action, slots, examples=None, has_children=False, parent_intent=None):
         self.name = name
@@ -45,6 +42,15 @@ class IntentListConfig:
     def get_intent_name(self, parent_intent: str = None):
         # read resources/intent.yaml file and get intent list
         return [intent.name for intent in self.intents if intent.name != "unknown" and intent.parent_intent == parent_intent]
+
+    def get_children_intents(self, intent: IntentConfig):
+        children_intents = []
+        if intent.has_children:
+            for intent_tmep in self.intents:
+                if intent_tmep.parent_intent == intent.name:
+                    children_intents.append(intent_tmep)
+                    children_intents.extend(self.get_children_intents(intent_tmep))
+        return children_intents
 
     def get_intent(self, intent_name):
         return next((intent for intent in self.intents if intent.name == intent_name), None)
