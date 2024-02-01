@@ -103,6 +103,10 @@ class FileBatchAction(Action):
         logger.info(f"exec action: {self.get_name()} ")
 
         conversation: ConversationContext = context.conversation
+        if len(conversation.uploaded_file_contents) == 0:
+            return GeneralResponse.normal_failed_text_response(
+                "No file uploaded, please upload a file and try again.", conversation.current_intent.name
+            )
         available_tags = ["context", "product_line", "country"]
         tags = {k: v for k, v in conversation.get_simplified_entities().items() if k in available_tags}
         logger.info(f"tags: {tags}")
