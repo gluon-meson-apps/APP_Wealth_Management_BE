@@ -1,3 +1,6 @@
+import asyncio
+
+import pandas as pd
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
@@ -48,15 +51,15 @@ class FileBatchAction(Action):
         return "file_batch_qa"
 
     def get_function_with_chat_model(self, chat_model, tags, conversation):
-        def get_result_from_llm(question, index):
-            response: list[SearchResponse] = self.unified_search.search(
+        async def get_result_from_llm(question, index):
+            response: list[SearchResponse] = await self.unified_search.async_search(
                 SearchParam(query=question, tags=tags), conversation.session_id
             )
             logger.info(f"search response: {response}")
             context_info = "can't find any result"
             source_name = ""
             result = "no information found, not able to answer"
-            if len(response) == 0:
+            if not response or not response[0].items:
                 return result, context_info, source_name
 
             first_result = response[0].items[0]
@@ -96,7 +99,7 @@ class FileBatchAction(Action):
                     {item.meta__reference.meta__source_name for one_response in response for item in one_response.items}
                 )
 
-            return result, context_info, source_name
+            return index, result, context_info, source_name
 
         return get_result_from_llm
 
@@ -123,9 +126,12 @@ class FileBatchAction(Action):
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
-        df[["answers", "reference_data", "reference_name"]] = df.reset_index().apply(
-            lambda row: get_result_from_llm(row[questions_column], row["index"]), axis=1, result_type="expand"
-        )
+        tasks = [
+            get_result_from_llm(row[questions_column], index) for index, row in enumerate(df.to_dict(orient="records"))
+        ]
+        search_res = await asyncio.gather(*tasks)
+        search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name"])
+        df = df.drop("answers", axis=1).merge(search_df, left_index=True, right_index=True, how="left").reset_index()
         df = df[[questions_column, "answers", "reference_name", "reference_data"]]
 
         answer = ChatResponseAnswer(
