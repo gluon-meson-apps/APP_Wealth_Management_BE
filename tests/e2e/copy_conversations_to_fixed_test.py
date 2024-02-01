@@ -64,24 +64,23 @@ on model_log.log_id = golden_test_set.log_id;
     def copy_conversations(self, excel_path):
 
         self.create_table_if_not_exists(self.connection)
-        # use sqlalchemy engine to create table
-
 
         df = pd.read_excel(excel_path)
         def process_name(name):
             name = re.sub('[^\w_]', '_', name)
             name = re.sub('_+', '_', name).lower()
+            if name.startswith('_'):
+                name = name[1:]
+            if name.endswith('_'):
+                name = name[:-1]
             return name
         def concat_use_cases_situation(row):
             return f"sit_{process_name(row.get('Use Cases'))}__{process_name(row.get('situation'))}"
 
         deduplicated_df = df.drop_duplicates(subset=['conversation_id'])
 
-        readable_ids = deduplicated_df[['conversation_id', 'Use Cases', 'situation']].apply(concat_use_cases_situation, axis=1).to_list()
-        # df[['conversation_id', 'Use Cases', 'situation']]
-        readable_ids_string = ",".join([f"'{item}'" for item in readable_ids])
-        conversation_ids_string = ",".join([f"'{item}'" for item in df['conversation_id'].drop_duplicates().to_list()])
-        # exists_conversation_ids_query = f"SELECT * FROM model_log_golden_test_set where log_id in ({ids_string})"
+        conversation_ids_string = ",".join([f"'{item}'" for item in df['conversation_id'].drop_duplicates().to_list()
+                                            if item])
 
         conversation_select_query = f"""
         SELECT model_log.* FROM model_log
@@ -99,9 +98,6 @@ on model_log.log_id = golden_test_set.log_id;
         conversation_to_be_inserted_join_df['log_id'] = conversation_to_be_inserted_join_df.apply(concat_use_cases_situation, axis=1)
         conversation_to_be_inserted_join_df = conversation_to_be_inserted_join_df[conversation_to_be_inserted.columns].drop(columns=['id'])
         self.save_df_to_db(conversation_to_be_inserted_join_df)
-        # convert all dict to json
-        # conversation_to_be_inserted_join_df = self.dump_all_json_columns(conversation_to_be_inserted_join_df)
-        # conversation_to_be_inserted_join_df.to_sql('model_log_golden_test_set', self.connection, if_exists='append', index=False)
 
     def dump_all_json_columns(self, df):
         df['input'] = self.dump_json_column(df, 'input')
@@ -117,5 +113,5 @@ on model_log.log_id = golden_test_set.log_id;
 if __name__ == "__main__":
     copy_boy = ConversationCopyBoy()
     copy_boy.copy_conversations("./TB Guru testing cases.xlsx")
-    copy_boy.delete_test_cases()
+    # copy_boy.delete_test_cases()
     # copy_boy.copy_test_conversations_from_model_log()
