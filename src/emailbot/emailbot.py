@@ -1,10 +1,14 @@
 import asyncio
 import base64
+import json
 import time
+from typing import Generator
 
 import aiohttp
 import environ
 from dotenv import load_dotenv
+from gluon_meson_sdk.client.sse_client import AsyncSSEClient
+from gluon_meson_sdk.models.chat_model import AioResponseCapture
 from loguru import logger
 from sqlalchemy import text
 
@@ -35,10 +39,7 @@ def get_config(cls):
     return environ.to_config(cls)
 
 
-def handle_response(chunk):
-    chunk_as_string = chunk.decode("utf-8").strip()
-    data_as_string = chunk_as_string[len("data:") :] if chunk_as_string.startswith("data:") else ""
-    json_result = extract_json_from_text(data_as_string)
+def handle_response(json_result):
     answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
     attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
     attachment = Attachment(**attachments_dict) if attachments_dict else None
@@ -135,7 +136,32 @@ WHERE id = '{email.id}'
             await self.graph.send_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
             self.database.set_processed_email(new_email)
 
-    async def ask_thought_agent(self, email: Email):
+    async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[EmailAttachment], None]:
+        streaming_returned = False
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(
+                    self.thought_agent_endpoint,
+                    json=payload,
+                    headers={
+                        "Content-Type": "application/json",
+                    },
+                ) as resp:
+                    response = resp.content.iter_chunks()
+                    response_capture = AioResponseCapture(response)
+                    client = AsyncSSEClient(response_capture)
+                    async for event in client.events():
+                        streaming_returned = True
+                        yield handle_response(extract_json_from_text(event.data))
+            except Exception as err:
+                logger.error("Error with thought agent:", err)
+                yield "", []
+
+        if not streaming_returned and response_capture.collected_response:
+            response_json = json.loads(response_capture.collected_response)
+            yield handle_response(response_json)
+
+    async def ask_thought_agent(self, email: Email) -> (str, list[EmailAttachment]):
         payload = {
             "question": email.body.content,
             "conversation_id": email.id,
@@ -143,17 +169,13 @@ WHERE id = '{email.id}'
             "file_urls": email.attachment_urls,
             "from_email": True,
         }
-        headers = {
-            "Content-Type": "application/json",
-        }
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.post(self.thought_agent_endpoint, headers=headers, json=payload) as resp:
-                    resp.raise_for_status()
-                    return handle_response(await resp.content.read())
-            except Exception as err:
-                logger.error("Error with thought agent:", err)
-                return None, []
+        answers = ""
+        attachments = []
+        async for i_answer, i_attachments in self._ask_thought_agent(payload):
+            answers += i_answer
+            attachments += i_attachments
+
+        return answers, attachments
 
     async def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
         result = []
