@@ -126,7 +126,7 @@ class Graph:
             f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1"
         )
         data = await self.call_graph_api(endpoint)
-        first_message = next(iter(data), None)
+        first_message = next(iter(data), None) if data else None
         return parse_email(first_message) if first_message else None
 
     async def list_attachments(self, message_id):

@@ -127,6 +127,7 @@ WHERE id = '{email.id}'
         new_email = await self.graph.get_first_inbox_message()
         if new_email:
             new_email.attachment_urls = await self.upload_email_attachments(new_email)
+        return new_email
 
     async def process_emails(self, new_email):
         if new_email:
@@ -147,12 +148,12 @@ WHERE id = '{email.id}'
         }
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(self.thought_agent_endpoint, headers=headers, json=payload) as resp:
+                async with session.post(self.thought_agent_endpoint, headers=headers, json=payload) as resp:
                     resp.raise_for_status()
                     return handle_response(await resp.content.read())
             except Exception as err:
                 logger.error("Error with thought agent:", err)
-                return None
+                return None, []
 
     async def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
         result = []
