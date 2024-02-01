@@ -11,7 +11,7 @@ from action.base import (
     AttachmentResponse,
     Attachment,
     UploadFileContentType,
-    UploadFile,
+    UploadStorageFile,
 )
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchResponse, SearchItem
@@ -69,7 +69,7 @@ class FileValidation(Action):
         return "file_validation"
 
     async def _upload_file(self, res: str) -> str:
-        files = [UploadFile(file_name=report_filename, file_path=res, content_type=UploadFileContentType.HTML)]
+        files = [UploadStorageFile(filename=report_filename, file_path=res, content_type=UploadFileContentType.HTML)]
         links = await self.unified_search.upload_file_to_minio(files)
         if links and links[0]:
             return links[0]

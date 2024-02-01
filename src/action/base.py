@@ -32,7 +32,7 @@ class UploadFileContentType(str, Enum):
     XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-class UploadFile(BaseModel):
+class UploadStorageFile(BaseModel):
     filename: str
     file_path: Union[str, None] = None
     contents: Union[bytes, str, None] = None

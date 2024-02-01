@@ -6,7 +6,7 @@ from typing import Union
 import aiohttp
 from loguru import logger
 
-from action.base import UploadFileContentType, UploadFile
+from action.base import UploadFileContentType, UploadStorageFile
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
 
@@ -108,7 +108,7 @@ class UnifiedSearch:
             async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
                 return await handle_aio_response(resp)
 
-    async def upload_file_to_minio(self, files: list[UploadFile]) -> list[str]:
+    async def upload_file_to_minio(self, files: list[UploadStorageFile]) -> list[str]:
         data = aiohttp.FormData()
         for f in files:
             if (f.file_path and os.path.exists(f.file_path)) or f.contents:
@@ -125,7 +125,7 @@ class UnifiedSearch:
 
 async def main():
     files = [
-        UploadFile(
+        UploadStorageFile(
             filename="test.txt",
             file_path="../resources/prompt_templates/slot_confirm.txt",
             content_type=UploadFileContentType.TXT,
