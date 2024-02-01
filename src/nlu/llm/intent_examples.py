@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import uuid
@@ -48,27 +49,24 @@ def generate_tmp_example_file(intent_examples):
     return file_name, file_path
 
 
-def vectorize_examples(intent_examples):
+async def vectorize_examples(intent_examples):
     unified_search_client = UnifiedSearch()
 
-    response = unified_search_client.upload_intents_examples(
-        table=topic,
-        intent_examples=intent_examples
-    )
+    response = await unified_search_client.upload_intents_examples(table=topic, intent_examples=intent_examples)
 
     return response
 
 
-def main():
+async def main():
     intent_examples = retrieve_intent_examples_from_intent_yaml(intent_yaml_file_folder)
 
     if len(intent_examples) == 0:
         print("No examples")
         return
 
-    responses = vectorize_examples(intent_examples)
+    responses = await vectorize_examples(intent_examples)
     print(responses)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

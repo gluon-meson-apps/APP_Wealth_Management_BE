@@ -60,15 +60,17 @@ class UnifiedSearch:
         print(response.json())
         return [handle_response(response)]
 
-    def upload_intents_examples(self, table, intent_examples):
-        response = requests.post(f"{self.base_url}/vector/{table}/intent_examples?recreate=True", json=intent_examples)
+    async def upload_intents_examples(self, table, intent_examples):
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{self.base_url}/vector/{table}/intent_examples?recreate=True", json=intent_examples
+            ) as response:
+                return await handle_aio_response(response)
 
-        return handle_response(response)
-
-    def search_for_intent_examples(self, table, user_input):
-        response = requests.post(url=f"{self.base_url}/vector/{table}/search", json={"query": user_input})
-
-        return handle_response(response)
+    async def search_for_intent_examples(self, table, user_input):
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.base_url}/vector/{table}/search", json={"query": user_input}) as response:
+                return await handle_aio_response(response)
 
     async def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
         async with aiohttp.ClientSession() as session:
