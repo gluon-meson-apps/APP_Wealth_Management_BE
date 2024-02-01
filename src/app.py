@@ -1,6 +1,7 @@
 import configparser
 import json
 import os
+import subprocess
 import traceback
 from typing import Optional
 from urllib.request import Request
@@ -141,8 +142,14 @@ async def score(
 async def healthcheck():
     return {"status": "alive"}
 
+def start_emailbot():
+    script_path = f"{os.getcwd()}/src/emailbot/emailbot.py"
+    command = f"export PYTHONPATH={os.getcwd()}/src; python {script_path}"
+    return subprocess.Popen(command, shell=True)
 
 def main():
+    start_emailbot()
+
     if os.getenv("LOCAL_MODE") == "1":
         run(
             "app:app",
