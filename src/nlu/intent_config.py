@@ -24,6 +24,13 @@ class IntentConfig:
         self.has_children = has_children or False
         self.full_name_of_parent_intent: str = full_name_of_parent_intent
 
+    def is_ancestor_of(self, other_intent: "IntentConfig"):
+        if other_intent.full_name_of_parent_intent and other_intent.full_name_of_parent_intent.startswith(
+            self.get_full_intent_name()
+        ):
+            return True
+        return False
+
     def get_full_intent_name(self) -> str:
         return f"{self.full_name_of_parent_intent}.{self.name}" if self.full_name_of_parent_intent else self.name
 
@@ -64,12 +71,7 @@ class IntentListConfig:
     def get_children_intents(self, current_intent: IntentConfig):
         children_intents = []
         if current_intent.has_children:
-            full_name_of_current_intent = current_intent.get_full_intent_name()
-            for intent in self.intents:
-                if intent.full_name_of_parent_intent and intent.full_name_of_parent_intent.startswith(
-                    full_name_of_current_intent
-                ):
-                    children_intents.append(intent)
+            children_intents = [intent for intent in self.intents if current_intent.is_ancestor_of(intent)]
         return children_intents
 
     def get_intent(self, intent_name):
