@@ -49,14 +49,7 @@ class UnifiedSearch:
     def __init__(self):
         self.base_url = unified_search_url
 
-    def search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
-        response = requests.post(
-            self.base_url + "/search", json=search_param.model_dump(), headers={"conversation-id": conversation_id}
-        )
-        print(response.json())
-        return [SearchResponse.model_validate(item) for item in response.json()]
-
-    async def async_search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
+    async def search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(

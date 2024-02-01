@@ -52,7 +52,7 @@ class FileBatchAction(Action):
 
     def get_function_with_chat_model(self, chat_model, tags, conversation):
         async def get_result_from_llm(question, index):
-            response: list[SearchResponse] = await self.unified_search.async_search(
+            response: list[SearchResponse] = await self.unified_search.search(
                 SearchParam(query=question, tags=tags), conversation.session_id
             )
             logger.info(f"search response: {response}")

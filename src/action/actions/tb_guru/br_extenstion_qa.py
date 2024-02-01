@@ -74,7 +74,7 @@ search the BR extension
 """
         logger.info(f"search query: {query}")
 
-        response = await self.unified_search.async_search(SearchParam(query=query), context.conversation.session_id)
+        response = await self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
 
         chat_message_preparation = ChatMessagePreparation()

@@ -43,7 +43,7 @@ class GPSProductCheckAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         user_input = context.conversation.current_user_input
 
-        response = await self.unified_search.async_search(
+        response = await self.unified_search.search(
             SearchParam(query=user_input, tags={"product_line": "gps_product"}), context.conversation.session_id
         )
         logger.info(f"search response: {response}")
