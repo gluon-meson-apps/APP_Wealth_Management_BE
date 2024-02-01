@@ -53,7 +53,9 @@ class Graph:
             "tenant_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_TENANT_ID", ""),
             "user_id": urllib.parse.quote(get_value_or_default_from_dict(os.environ, "GRAPH_API_USER_ID", "")),
         }
-        self.user_api_endpoint = f'https://graph.microsoft.com/v1.0/users/{self.config["user_id"]}'
+        self.login_endpoint = get_value_or_default_from_dict(os.environ, "GRAPH_API_LOGIN_ENDPOINT", "")
+        self.mail_endpoint = get_value_or_default_from_dict(os.environ, "GRAPH_API_MAIL_ENDPOINT", "")
+        self.user_api_endpoint = f'{self.mail_endpoint}/v1.0/users/{self.config["user_id"]}'
 
     def __await__(self):
         return self._init_tokens__().__await__()
@@ -73,9 +75,9 @@ class Graph:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(
-                        f'https://login.microsoftonline.com/{self.config["tenant_id"]}/oauth2/v2.0/token',
-                        data=data,
-                        headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    f'{self.login_endpoint}/{self.config["tenant_id"]}/oauth2/v2.0/token',
+                    data=data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
                 ) as response:
                     response.raise_for_status()
                     result = await async_parse_json_response(response)
@@ -93,7 +95,7 @@ class Graph:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(endpoint, headers=headers, json=data) if method == "POST" else session.get(
-                        endpoint, headers=headers
+                    endpoint, headers=headers
                 ) as response:
                     response.raise_for_status()
                     data = await async_parse_json_response(response) if response.status == 200 else {}
@@ -112,8 +114,9 @@ class Graph:
     async def list_folders(self):
         data = await self.call_graph_api(f"{self.user_api_endpoint}/mailFolders")
         inbox_folder = next(filter(lambda v: v.get("displayName") in ["收件箱", "Inbox"], data), None) if data else None
-        archive_folder = next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], data),
-                              None) if data else None
+        archive_folder = (
+            next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], data), None) if data else None
+        )
         return inbox_folder.get("id") if inbox_folder else "", archive_folder.get("id") if archive_folder else ""
 
     async def get_first_inbox_message(self) -> Union[Email, None]:
