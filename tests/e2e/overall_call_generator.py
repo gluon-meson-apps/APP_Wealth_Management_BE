@@ -59,7 +59,7 @@ class TestCollector:
         self.calling_folder = calling_folder
 
         self.files = glob.glob(f"{self.current_file_dir}/{self.test_folder}/**/*.py", recursive=True)
-        self.test_files = [TestFile(f) for f in self.files]
+        self.test_files = [TestFile(f) for f in sorted(self.files)]
     def get_all_e2e_tests(self):
         return [f for f in self.test_files if f.test_type == TestType.E2E]
 
