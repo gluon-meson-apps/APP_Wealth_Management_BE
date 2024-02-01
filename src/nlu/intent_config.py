@@ -46,10 +46,10 @@ class IntentListConfig:
     def get_children_intents(self, intent: IntentConfig):
         children_intents = []
         if intent.has_children:
+            full_intent_name = f"{intent.parent_intent}.{intent.name}." if intent.parent_intent else f"{intent.name}."
             for intent_tmep in self.intents:
-                if intent_tmep.parent_intent == intent.name:
+                if intent_tmep.parent_intent and intent_tmep.parent_intent.startswith(full_intent_name):
                     children_intents.append(intent_tmep)
-                    children_intents.extend(self.get_children_intents(intent_tmep))
         return children_intents
 
     def get_intent(self, intent_name):
@@ -78,7 +78,8 @@ class IntentListConfig:
             intent_name = data.get("name")
 
             if data.get("has_children"):
-                children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", intent_name)
+                full_parent = f"{parent_intent}.{intent_name}" if parent_intent else intent_name
+                children_intents = cls.from_scenes(f"{folder_path}/{intent_name}", full_parent)
                 intents.extend(children_intents.intents)
             intent = IntentConfig(
                 name=intent_name,

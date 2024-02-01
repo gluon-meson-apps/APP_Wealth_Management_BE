@@ -55,7 +55,7 @@ def get_intent_examples(user_input: str, parent_intent: str = None) -> list[dict
     unified_search_client = UnifiedSearch()
     filters = []
     if parent_intent:
-        search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=parent_intent)
+        search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent}%"])
         filters.append(search_filter)
 
     response: SearchResponse = unified_search_client.vector_search(
@@ -69,9 +69,10 @@ def get_intent_examples(user_input: str, parent_intent: str = None) -> list[dict
 def process_one_intent_example(intent_example):
     text = intent_example.model_extra["text"]
     intent = intent_example.meta__reference.model_extra["meta__intent_result"]
+    parent_intent = intent_example.meta__reference.model_extra["meta__full_parent_intent"]
     example = text
     score = intent_example.meta__score
-    return dict(intent=intent, example=example, score=score)
+    return dict(intent=intent, parent_intent=parent_intent, example=example, score=score)
 
 
 def extract_examples_from_response_text(response: SearchResponse):
@@ -130,16 +131,15 @@ class LLMIntentClassifier(IntentClassifier):
                 docs.append(doc)
         self.milvus_for_langchain.add_documents(topic, docs, embedding_type=self.embedding_type)
 
-    def get_intent_by_parent(self, intent, middle_intent):
-        if intent["parent_intent"] == middle_intent:
-            return intent
+    def get_intent_by_parent(self, intent_example, parent_intent):
+        if intent_example["parent_intent"] == parent_intent:
+            return json.loads(intent_example["intent"])["intent"]
         else:
-            parent_intent = intent["parent_intent"]
-            # TODO: remove this logic later
-            if not parent_intent:
-                return None
-            intent = self.intent_list_config.get_intent(parent_intent)
-            return self.get_intent_by_parent({"intent": intent.name, "parent_intent": intent.parent_intent}, middle_intent)
+            example_parent_intent = intent_example["parent_intent"]
+            if parent_intent:
+                return example_parent_intent[:(len(parent_intent)+1)].split(".")[0]
+            else:
+                return example_parent_intent.split(".")[0]
 
 
     @classmethod
@@ -188,18 +188,16 @@ class LLMIntentClassifier(IntentClassifier):
 
     def classify_intent(self, conversation: ConversationContext, parent_intent: Intent = None) -> tuple[Optional[Intent], Optional[Intent]]:
         user_input = conversation.current_user_input
-        parent_intent_name = parent_intent.name if parent_intent else None
+        parent_intent_name = None
+        if parent_intent:
+            parent_intent_name = f"{parent_intent.parent_intent}.{parent_intent.name}" if parent_intent.parent_intent else parent_intent.name
         intent_name_list = self.intent_list_config.get_intent_name(parent_intent_name)
-        intent_examples = get_intent_examples(user_input)
+        intent_examples = get_intent_examples(user_input, parent_intent_name)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
-            intent = self.get_intent_by_parent(intent_result, parent_intent_name)
-            if intent:
-                intent_result["intent"] = intent["intent"]
-                intent_example["intent"] = json.dumps(intent_result)
-            else:
-                # todo: remove this logic later
-                intent_examples.remove(intent_example)
+            intent_name = self.get_intent_by_parent(intent_example, parent_intent_name)
+            intent_result["intent"] = intent_name
+            intent_example["intent"] = json.dumps(intent_result)
         unique_intent_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_in_examples:
             unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
@@ -214,9 +212,10 @@ class LLMIntentClassifier(IntentClassifier):
 
         if intent.intent in intent_name_list:
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
-            description = self.intent_list_config.get_intent(intent.intent).description
+            intent_config = self.intent_list_config.get_intent(intent.intent)
             return Intent(
-                name=intent.intent, confidence=intent.confidence, description=description
+                name=intent.intent, confidence=intent.confidence, description=intent_config.description,
+                parent_intent=intent_config.parent_intent
             ), unique_intent_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")

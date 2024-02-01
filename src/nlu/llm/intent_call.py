@@ -36,7 +36,7 @@ class IntentCall:
     def construct_system_prompt(self, chat_message_preparation: ChatMessagePreparation, parent_intent_name: str = None):
         intent_list = []
         for intent in self.intent_list_config.intents:
-            if intent.name == parent_intent_name:
+            if intent.parent_intent == parent_intent_name:
                 descriptions = [intent.description]
                 children_intents = self.intent_list_config.get_children_intents(intent)
                 descriptions.extend([intent.description for intent in children_intents])
