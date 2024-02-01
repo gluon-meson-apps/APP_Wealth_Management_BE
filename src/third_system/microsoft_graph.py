@@ -5,6 +5,7 @@ from typing import Union
 import aiohttp
 from aiohttp import ClientResponseError
 from loguru import logger
+from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 from models.email_model.model import Email, EmailBody, EmailSender, EmailAttachment
 from utils.utils import get_value_or_default_from_dict, async_parse_json_response
@@ -72,9 +73,9 @@ class Graph:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(
-                    f'https://login.microsoftonline.com/{self.config["tenant_id"]}/oauth2/v2.0/token',
-                    data=data,
-                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                        f'https://login.microsoftonline.com/{self.config["tenant_id"]}/oauth2/v2.0/token',
+                        data=data,
+                        headers={"Content-Type": "application/x-www-form-urlencoded"},
                 ) as response:
                     response.raise_for_status()
                     result = await async_parse_json_response(response)
@@ -86,24 +87,20 @@ class Graph:
     async def refresh_access_token(self):
         self.access_token = await self.get_access_token()
 
-    async def check_token_expired(self, status_code: int) -> bool:
-        result = status_code == 401
-        if result:
-            await self.refresh_access_token()
-        return result
-
+    @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
     async def call_graph_api(self, endpoint: str, method: str = "GET", data: dict = None):
         headers = {"Authorization": "Bearer " + self.access_token}
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(endpoint, headers=headers, json=data) if method == "POST" else session.get(
-                    endpoint, headers=headers
+                        endpoint, headers=headers
                 ) as response:
                     response.raise_for_status()
                     data = await async_parse_json_response(response) if response.status == 200 else {}
                     return data["value"] if "value" in data and data["value"] else []
             except ClientResponseError as http_err:
-                if await self.check_token_expired(http_err.status):
+                if http_err.status == 401:
+                    await self.refresh_access_token()
                     raise TokenExpiredException()
                 else:
                     logger.error(f"HTTP error occurred: {http_err}")
@@ -113,76 +110,64 @@ class Graph:
                 raise EmailHandlingFailedException(str(err), "CALL_API_FAILED")
 
     async def list_folders(self):
-        try:
-            data = await self.call_graph_api(f"{self.user_api_endpoint}/mailFolders")
-            inbox_folder = next(filter(lambda v: v.get("displayName") in ["收件箱", "Inbox"], data), None)
-            archive_folder = next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], data), None)
-            return inbox_folder.get("id") if inbox_folder else "", archive_folder.get("id") if archive_folder else ""
-        except TokenExpiredException:
-            return await self.list_folders()
+        data = await self.call_graph_api(f"{self.user_api_endpoint}/mailFolders")
+        inbox_folder = next(filter(lambda v: v.get("displayName") in ["收件箱", "Inbox"], data), None) if data else None
+        archive_folder = next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], data),
+                              None) if data else None
+        return inbox_folder.get("id") if inbox_folder else "", archive_folder.get("id") if archive_folder else ""
 
     async def get_first_inbox_message(self) -> Union[Email, None]:
-        try:
-            fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
-            order_query = "$orderby=receivedDateTime asc"
-            endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1"
-            data = await self.call_graph_api(endpoint)
-            first_message = next(iter(data), None)
-            return parse_email(first_message) if first_message else None
-        except TokenExpiredException:
-            return await self.get_first_inbox_message()
+        fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
+        order_query = "$orderby=receivedDateTime asc"
+        endpoint = (
+            f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1"
+        )
+        data = await self.call_graph_api(endpoint)
+        first_message = next(iter(data), None)
+        return parse_email(first_message) if first_message else None
 
     async def list_attachments(self, message_id):
-        try:
-            endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
-            data = await self.call_graph_api(endpoint)
-            return [v for v in data if "contentBytes" in v and v["contentBytes"]]
-        except TokenExpiredException:
-            return await self.list_attachments(message_id)
+        endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
+        data = await self.call_graph_api(endpoint)
+        return [v for v in data if "contentBytes" in v and v["contentBytes"]]
 
     async def send_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
-        try:
-            endpoint = f"{self.user_api_endpoint}/sendMail"
-            message = {
-                "subject": f"[TB Guru Reply] {email.subject}",
-                "body": {"contentType": "html", "content": answer},
-                "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
-            }
-            if attachments:
-                message["attachments"] = [
-                    {
-                        "@odata.type": "#microsoft.graph.fileAttachment",
-                        "name": a.name,
-                        "contentType": a.type,
-                        "contentBytes": a.bytes,
-                    }
-                    for a in attachments
-                ]
-                message["hasAttachments"] = True
+        endpoint = f"{self.user_api_endpoint}/sendMail"
+        message = {
+            "subject": f"[TB Guru Reply] {email.subject}",
+            "body": {"contentType": "html", "content": answer},
+            "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
+        }
+        if attachments:
+            message["attachments"] = [
+                {
+                    "@odata.type": "#microsoft.graph.fileAttachment",
+                    "name": a.name,
+                    "contentType": a.type,
+                    "contentBytes": a.bytes,
+                }
+                for a in attachments
+            ]
+            message["hasAttachments"] = True
 
-            await self.call_graph_api(
-                endpoint,
-                method="POST",
-                data={
-                    "message": message,
-                    "saveToSentItems": "true",
-                },
-            )
-            logger.info(f"Send email to {email.sender.address} successfully.")
-            await self.archive_email(email)
-        except TokenExpiredException:
-            await self.send_email(email, answer, attachments)
+        await self.call_graph_api(
+            endpoint,
+            method="POST",
+            data={
+                "message": message,
+                "saveToSentItems": "true",
+            },
+        )
+        logger.info(f"Send email to {email.sender.address} successfully.")
+        await self.archive_email(email)
 
     async def archive_email(self, email: Email):
-        try:
-            endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages/{email.id}/move"
-            await self.call_graph_api(
-                endpoint,
-                method="POST",
-                data={
-                    "destinationId": self.archive_folder_id,
-                },
-            )
-            logger.info("Archive email successfully.")
-        except TokenExpiredException:
-            await self.archive_email(email)
+        endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages/{email.id}/move"
+        await self.call_graph_api(
+            endpoint,
+            method="POST",
+            data={
+                "destinationId": self.archive_folder_id,
+            },
+        )
+        logger.info("Archive email successfully.")
