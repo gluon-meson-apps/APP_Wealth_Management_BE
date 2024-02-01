@@ -15,7 +15,7 @@ from nlu.llm.intent_call import IntentCall
 from nlu.llm.intent_choosing_confirmer import IntentChoosingConfirmer
 from nlu.llm.same_topic_checker import SameTopicChecker
 from prompt_manager.base import PromptManager
-from third_system.search_entity import SearchResponse, SearchParam
+from third_system.search_entity import SearchResponse, SearchParam, SearchParamFilter
 from third_system.unified_search import UnifiedSearch
 from tracker.context import ConversationContext
 
@@ -51,10 +51,15 @@ class IntentConfig:
         self.slots = slots
 
 
-def get_intent_examples(user_input: str) -> list[dict[str, Any]]:
+def get_intent_examples(user_input: str, parent_intent: str = None) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
+    filters = []
+    if parent_intent:
+        search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=parent_intent)
+        filters.append(search_filter)
+
     response: SearchResponse = unified_search_client.vector_search(
-        search_param=SearchParam(query=user_input, size=3), table=topic
+        search_param=SearchParam(query=user_input, filters=filters, size=3), table=topic
     )[0]
 
     intents_examples = extract_examples_from_response_text(response)
@@ -188,7 +193,6 @@ class LLMIntentClassifier(IntentClassifier):
         intent_examples = get_intent_examples(user_input)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
-            print(f"hhhhhh {intent_result}")
             intent = self.get_intent_by_parent(intent_result, parent_intent_name)
             if intent:
                 intent_result["intent"] = intent["intent"]
@@ -196,7 +200,6 @@ class LLMIntentClassifier(IntentClassifier):
             else:
                 # todo: remove this logic later
                 intent_examples.remove(intent_example)
-        print(f"hhhh {intent_examples}")
         unique_intent_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_in_examples:
             unique_intent_in_examples = self.intent_list_config.get_intent(unique_intent_in_examples)
