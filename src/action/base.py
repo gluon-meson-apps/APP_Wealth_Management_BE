@@ -29,6 +29,14 @@ class UploadFileContentType(str, Enum):
     TXT = "text/plain"
     DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     DOC = "application/msword"
+    XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class UploadFile(BaseModel):
+    filename: str
+    file_path: Union[str, None] = None
+    contents: Union[bytes, str, None] = None
+    content_type: Union[str, None] = None
 
 
 class ActionResponseAnswerContent(BaseModel):

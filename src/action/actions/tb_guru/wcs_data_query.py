@@ -15,6 +15,7 @@ from action.base import (
     GeneralResponse,
     ActionResponse,
     UploadFileContentType,
+    UploadFile,
 )
 from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
@@ -121,7 +122,7 @@ class WcsDataQuery(Action):
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
             files = [
-                ("files", ("tb_guru_ppt.pptx", open(ppt_path, "rb"), UploadFileContentType.PPTX)),
+                UploadFile(file_name="tb_guru_ppt.pptx", file_path=ppt_path, content_type=UploadFileContentType.PPTX)
             ]
             links = await self.unified_search.upload_file_to_minio(files)
             shutil.rmtree(files_dir)

@@ -10,6 +10,7 @@ from action.base import (
     Attachment,
     UploadFileContentType,
     GeneralResponse,
+    UploadFile,
 )
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
@@ -137,9 +138,7 @@ class FileBatchAction(Action):
         file_path = f"/tmp/{file_name}"
         content_type = UploadFileContentType.CSV
         df.to_csv(file_path, index=False)
-        files = [
-            ("files", (file_name, open(file_path), content_type)),
-        ]
+        files = [UploadFile(file_name=file_name, file_path=file_path, content_type=content_type)]
         urls = await self.unified_search.upload_file_to_minio(files)
         attachment = Attachment(path=file_path, name=file_name, content_type=content_type, url=urls[0])
 

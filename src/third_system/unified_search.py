@@ -1,11 +1,12 @@
 import asyncio
+import mimetypes
 import os
 from typing import Union
 
 import aiohttp
 from loguru import logger
 
-from action.base import UploadFileContentType
+from action.base import UploadFileContentType, UploadFile
 from third_system.search_entity import SearchParam, SearchResponse
 import requests
 
@@ -107,28 +108,39 @@ class UnifiedSearch:
             async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
                 return await handle_aio_response(resp)
 
-    async def upload_file_to_minio(self, files) -> list[str]:
+    async def upload_file_to_minio(self, files: list[UploadFile]) -> list[str]:
+        data = aiohttp.FormData()
+        for f in files:
+            if (f.file_path and os.path.exists(f.file_path)) or f.contents:
+                data.add_field(
+                    "files",
+                    f.contents if f.contents else open(f.file_path, "rb"),
+                    filename=f.filename,
+                    content_type=f.content_type if f.content_type else mimetypes.guess_type(f.filename)[0],
+                )
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.base_url}/file", files=files) as response:
+            async with session.post(f"{self.base_url}/file", data=data) as response:
                 return await response.json()
 
 
+async def main():
+    files = [
+        UploadFile(
+            filename="test.txt",
+            file_path="../resources/prompt_templates/slot_confirm.txt",
+            content_type=UploadFileContentType.TXT,
+        ),
+    ]
+    result = await UnifiedSearch().upload_file_to_minio(files)
+    print(result)
+
+    UnifiedSearch().search(
+        SearchParam(
+            query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client.",
+        ),
+        conversation_id="test",
+    )
+
+
 if __name__ == "__main__":
-
-    async def testing():
-        files = [
-            (
-                "files",
-                ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), UploadFileContentType.TXT),
-            ),
-        ]
-        result = await UnifiedSearch().upload_file_to_minio(files)
-        print(result)
-
-        UnifiedSearch().search(
-            SearchParam(
-                query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client."
-            )
-        )
-
-    asyncio.run(testing())
+    asyncio.run(main())

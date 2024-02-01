@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from sqlalchemy import text
 
-from action.base import Attachment
+from action.base import Attachment, UploadFile
 from models.email_model.model import Email, EmailAttachment
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
@@ -167,9 +167,8 @@ WHERE id = '{email.id}'
         if email.has_attachments:
             attachments = await self.graph.list_attachments(email.id)
             files = [
-                (
-                    "files",
-                    (a["name"], base64.b64decode(a["contentBytes"]), a["contentType"]),
+                UploadFile(
+                    filename=a["name"], contents=base64.b64decode(a["contentBytes"]), content_type=a["contentType"]
                 )
                 for a in attachments
             ]
