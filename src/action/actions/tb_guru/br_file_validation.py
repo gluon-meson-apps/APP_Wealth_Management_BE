@@ -53,7 +53,9 @@ class BrFileValidation(Action):
         user_input = context.conversation.current_user_input
         contents = context.conversation.uploaded_file_contents
 
-        search_res = self.unified_search.vector_search(SearchParam(query=user_input, size=2), "training_doc")
+        search_res = await self.unified_search.async_vector_search(
+            SearchParam(query=user_input, size=2), "training_doc"
+        )
         training_doc = get_texts_from_search_response_list(search_res)
 
         br_file_contents = get_texts_from_search_response_list(contents) if training_doc else ""

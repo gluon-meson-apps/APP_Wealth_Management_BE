@@ -60,6 +60,11 @@ class UnifiedSearch:
         print(response.json())
         return [handle_response(response)]
 
+    async def async_vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.base_url}/vector/{table}/search/", json=search_param.dict()) as response:
+                return [await handle_aio_response(response)]
+
     async def upload_intents_examples(self, table, intent_examples):
         async with aiohttp.ClientSession() as session:
             async with session.post(
