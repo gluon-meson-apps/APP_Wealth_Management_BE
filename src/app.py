@@ -1,13 +1,16 @@
+import asyncio
 import configparser
 import json
+import multiprocessing
 import os
-import subprocess
 import traceback
 from typing import Optional
 from urllib.request import Request
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
+
+from emailbot.emailbot import get_config, EmailBot, EmailBotSettings
 from gluon_meson_sdk.models.longging.pg_log_service import PGModelLogService
 from loguru import logger
 from sse_starlette import EventSourceResponse
@@ -21,6 +24,7 @@ from action.context import ActionContext
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
+from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
 
 config = configparser.ConfigParser()
@@ -142,13 +146,24 @@ async def score(
 async def healthcheck():
     return {"status": "alive"}
 
-def start_emailbot():
-    script_path = f"{os.getcwd()}/src/emailbot/emailbot.py"
-    command = f"export PYTHONPATH={os.getcwd()}/src; python {script_path}"
-    return subprocess.Popen(command, shell=True)
+async def start_emailbot():
+    emailbot_configuration = get_config(EmailBotSettings)
+    graph = await Graph()
+    bot = EmailBot(emailbot_configuration, graph)
+    await bot.periodically_call_api()
+
+def run_child_process():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        loop.run_until_complete(start_emailbot())
+    except asyncio.CancelledError:
+        pass
 
 def main():
-    start_emailbot()
+    child_process = multiprocessing.Process(target=run_child_process)
+    child_process.start()
 
     if os.getenv("LOCAL_MODE") == "1":
         run(
