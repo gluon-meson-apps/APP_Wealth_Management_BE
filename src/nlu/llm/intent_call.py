@@ -63,7 +63,7 @@ class IntentCall:
         chat_message_preparation.log(logger)
 
         intent = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="intent"
+            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario=parent_intent_name
         ).get_json_response()
         logger.debug(intent)
         try:
