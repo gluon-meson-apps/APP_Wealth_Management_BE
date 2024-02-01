@@ -147,6 +147,7 @@ async def healthcheck():
     return {"status": "alive"}
 
 async def start_emailbot():
+    logger.info("Starting emailbot")
     emailbot_configuration = get_config(EmailBotSettings)
     graph = await Graph()
     bot = EmailBot(emailbot_configuration, graph)
@@ -162,8 +163,9 @@ def run_child_process():
         pass
 
 def main():
-    child_process = multiprocessing.Process(target=run_child_process)
-    child_process.start()
+    if os.getenv("START_EMAILBOT").lower() == "true":
+        child_process = multiprocessing.Process(target=run_child_process)
+        child_process.start()
 
     if os.getenv("LOCAL_MODE") == "1":
         run(
