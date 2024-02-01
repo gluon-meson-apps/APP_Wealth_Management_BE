@@ -143,10 +143,16 @@ class LLMIntentClassifier(IntentClassifier):
         def padding_root(name):
             return "root." + name if name else "root"
 
+        # root.a.b.c
         parent_intent_of_current_layer = padding_root(parent_intent_of_current_layer)
+
+        # root.a.b.c.d.e
         full_name_of_intent_example = padding_root(full_name_of_intent_example)
 
+        # root.a.b.c.
         parent_end_position_in_full_name = len(parent_intent_of_current_layer + ".")
+
+        # root.a.b.c.[d].e
         return full_name_of_intent_example[parent_end_position_in_full_name:].split(".")[0]
 
     @classmethod
