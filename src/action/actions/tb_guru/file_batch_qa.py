@@ -140,7 +140,7 @@ class FileBatchAction(Action):
         files = [
             ("files", (file_name, open(file_path), content_type)),
         ]
-        urls = self.unified_search.upload_file_to_minio(files)
+        urls = await self.unified_search.upload_file_to_minio(files)
         attachment = Attachment(path=file_path, name=file_name, content_type=content_type, url=urls[0])
 
         return AttachmentResponse(

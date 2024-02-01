@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import Union
 
@@ -89,27 +90,28 @@ class UnifiedSearch:
             async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
                 return await handle_aio_response(resp)
 
-    def upload_file_to_minio(self, files) -> list[str]:
-        response = requests.post(url=f"{self.base_url}/file", files=files)
-        return response.json()
-
-    async def aupload_file_to_minio(self, files) -> list[str]:
+    async def upload_file_to_minio(self, files) -> list[str]:
         async with aiohttp.ClientSession() as session:
             async with session.post(f"{self.base_url}/file", files=files) as response:
                 return await response.json()
 
 
 if __name__ == "__main__":
-    files = [
-        (
-            "files",
-            ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), UploadFileContentType.TXT),
-        ),
-    ]
-    print(UnifiedSearch().upload_file_to_minio(files))
 
-    UnifiedSearch().search(
-        SearchParam(
-            query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client."
+    async def testing():
+        files = [
+            (
+                "files",
+                ("test.txt", open("../resources/prompt_templates/slot_confirm.txt", "rb"), UploadFileContentType.TXT),
+            ),
+        ]
+        result = await UnifiedSearch().upload_file_to_minio(files)
+        print(result)
+
+        UnifiedSearch().search(
+            SearchParam(
+                query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client."
+            )
         )
-    )
+
+    asyncio.run(testing())

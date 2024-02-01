@@ -67,10 +67,10 @@ class FileValidation(Action):
     def get_name(self) -> str:
         return "file_validation"
 
-    def _upload_file(self, res: str) -> str:
+    async def _upload_file(self, res: str) -> str:
         file = (report_filename, res, UploadFileContentType.HTML)
         files = [("files", file)]
-        links = self.unified_search.upload_file_to_minio(files)
+        links = await self.unified_search.upload_file_to_minio(files)
         if links and links[0]:
             return links[0]
         raise Exception("Upload file failed.")
@@ -82,7 +82,7 @@ class FileValidation(Action):
         first_file: SearchItem = get_first_file(context)
 
         res = self.hsbc_connect_api.validate_file(first_file)
-        download_link = self._upload_file(res)
+        download_link = await self._upload_file(res)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(

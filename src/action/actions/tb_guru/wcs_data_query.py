@@ -115,14 +115,14 @@ class WcsDataQuery(Action):
     def get_name(self) -> str:
         return "wcs_data_query"
 
-    def _generate_ppt_link(self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str) -> str:
+    async def _generate_ppt_link(self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str) -> str:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
             files = [
                 ("files", ("tb_guru_ppt.pptx", open(ppt_path, "rb"), UploadFileContentType.PPTX)),
             ]
-            links = self.unified_search.upload_file_to_minio(files)
+            links = await self.unified_search.upload_file_to_minio(files)
             shutil.rmtree(files_dir)
             return links[0] if links else ""
         return ""
@@ -177,7 +177,7 @@ class WcsDataQuery(Action):
 
         final_result = info_result
         if is_ppt_output:
-            ppt_link = self._generate_ppt_link(df_current_company, df_all_companies, info_result)
+            ppt_link = await self._generate_ppt_link(df_current_company, df_all_companies, info_result)
 
             chat_message_preparation = ChatMessagePreparation()
             chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link, info=info_result)
