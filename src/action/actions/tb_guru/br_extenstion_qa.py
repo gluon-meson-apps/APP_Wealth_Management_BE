@@ -74,7 +74,7 @@ search the BR extension
 """
         logger.info(f"search query: {query}")
 
-        response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
+        response = await self.unified_search.async_search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
 
         chat_message_preparation = ChatMessagePreparation()
@@ -90,7 +90,9 @@ search the BR extension
             references += res.items
 
         answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name,
+            messageType=ResponseMessageType.FORMAT_TEXT,
+            content=result,
+            intent=context.conversation.current_intent.name,
             references=references,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)

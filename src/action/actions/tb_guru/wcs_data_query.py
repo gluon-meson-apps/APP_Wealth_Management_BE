@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 import uuid
@@ -135,7 +136,8 @@ class WcsDataQuery(Action):
         ]
         if "company" in entity_dict:
             query_list.append(f"""Query WCS data with company {entity_dict["company"]}:""")
-        search_res = [self.unified_search.search(SearchParam(query=q), session_id) for q in query_list]
+        tasks = [self.unified_search.async_search(SearchParam(query=q), session_id) for q in query_list]
+        search_res = await asyncio.gather(*tasks)
         items = [s[0].items if s else [] for s in search_res]
         all_companies_data, current_company_data = items[0], items[1] if len(items) > 1 else []
         return all_companies_data, current_company_data

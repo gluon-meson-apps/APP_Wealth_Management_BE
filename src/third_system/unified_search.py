@@ -50,10 +50,25 @@ class UnifiedSearch:
 
     def search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
         response = requests.post(
-            self.base_url + "/search", json=search_param.dict(), headers={"conversation-id": conversation_id}
+            self.base_url + "/search", json=search_param.model_dump(), headers={"conversation-id": conversation_id}
         )
         print(response.json())
-        return [SearchResponse.parse_obj(item) for item in response.json()]
+        return [SearchResponse.model_validate(item) for item in response.json()]
+
+    async def async_search(self, search_param: SearchParam, conversation_id) -> list[SearchResponse]:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(
+                    f"{self.base_url}/search",
+                    json=search_param.model_dump(),
+                    headers={"conversation-id": conversation_id},
+                ) as response:
+                    response.raise_for_status()
+                    result = await response.json()
+                    return [SearchResponse.model_validate(item) for item in result]
+            except Exception as err:
+                logger.error(f"Error search {search_param}:", err)
+                return []
 
     def vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
         response = requests.post(f"{self.base_url}/vector/{table}/search/", json=search_param.dict())

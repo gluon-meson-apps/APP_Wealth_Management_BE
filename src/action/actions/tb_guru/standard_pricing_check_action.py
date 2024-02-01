@@ -84,7 +84,7 @@ class StandardPricingCheckAction(Action):
         logger.info(f"query: {query}")
 
         # todo: process multi round case
-        response = self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
+        response = await self.unified_search.async_search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
         all_products = "\n".join([item.json() for item in response])
         product_info = [
