@@ -12,7 +12,7 @@ intent_yaml_file_folder = get_resources("scenes")
 unified_search_base_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
 
 
-def retrieve_intent_examples_from_intent_yaml(folder_path):
+def retrieve_intent_examples_from_intent_yaml(folder_path, full_parent_intent=None):
     files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
 
     intent_examples = []
@@ -21,13 +21,19 @@ def retrieve_intent_examples_from_intent_yaml(folder_path):
 
         with open(file_path, "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
+        intent_name = data.get("name")
+        if data.get("has_children"):
+            full_parent = f"{full_parent_intent}.{intent_name}" if full_parent_intent else intent_name
+            examples = retrieve_intent_examples_from_intent_yaml(f"{folder_path}/{intent_name}", full_parent)
+            intent_examples.extend(examples)
 
         if "examples" in data:
             for example in data["examples"]:
                 intent_examples.append(
                     {
                         "intent": data["name"],
-                        "example": example
+                        "example": example,
+                        "full_parent_intent": full_parent_intent,
                     }
                 )
 

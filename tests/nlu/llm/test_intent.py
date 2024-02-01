@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from intent import get_intent_examples
+from nlu.llm.intent import get_intent_examples
 from unified_search_client.unified_search_client import UnifiedSearchClient
 
 

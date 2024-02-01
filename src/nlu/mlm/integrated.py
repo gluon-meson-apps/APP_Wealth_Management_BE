@@ -21,9 +21,8 @@ class IntegratedNLU(Nlu):
     def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
         conversation.set_status("analyzing user's intent")
 
-        current_intent, unique_intent_from_examples = self.intent_classifier.classify_intent(conversation)
-        if current_intent and unique_intent_from_examples and current_intent.name != unique_intent_from_examples.name:
-            conversation.set_confused_intents([current_intent, unique_intent_from_examples])
+        current_intent = self.intent_classifier.classify_intent_overall(conversation)
+        if current_intent and conversation.is_confused_with_intents():
             return IntentWithEntity(intent=current_intent, entities=[], action="")
 
         if current_intent is None:
