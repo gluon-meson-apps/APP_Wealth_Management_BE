@@ -81,7 +81,7 @@ class EmailBot:
                 self.connection.close()
 
         def insert_processed_email_into_database(self, email: Email):
-            sql = f"""INSERT INTO {self.config.DATABASE} VALUES (
+            sql = f"""INSERT INTO emails VALUES (
     '{email.id}',
     '{email.conversation_id}',
     '{email.subject}',
@@ -102,7 +102,7 @@ class EmailBot:
             self.connection.execute(
                 text(
                     f"""
-UPDATE {self.config.DATABASE}
+UPDATE emails
 SET is_processed = TRUE
 WHERE id = '{email.id}'
 """
