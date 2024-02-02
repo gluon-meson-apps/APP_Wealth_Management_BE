@@ -4,7 +4,6 @@ from typing import Union
 
 import aiohttp
 from aiohttp import ClientResponseError
-from bs4 import BeautifulSoup
 from loguru import logger
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
@@ -14,9 +13,8 @@ from utils.utils import get_value_or_default_from_dict, async_parse_json_respons
 
 def parse_email(value: dict) -> Email:
     body_value = value["body"] if "body" in value and value["body"] else {}
-    soup = BeautifulSoup(body_value["content"], "html.parser")
     sender_value = value["sender"] if "sender" in value and value["sender"] else {}
-    body = EmailBody(content=soup.get_text(), content_type=body_value["contentType"])
+    body = EmailBody(content=body_value["content"], content_type=body_value["contentType"])
     email_sender = EmailSender(
         address=sender_value["emailAddress"]["address"], name=sender_value["emailAddress"]["name"]
     )
@@ -93,7 +91,7 @@ class Graph:
 
     @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
     async def call_graph_api(self, endpoint: str, method: str = "GET", data: dict = None):
-        headers = {"Authorization": "Bearer " + self.access_token}
+        headers = {"Authorization": "Bearer " + self.access_token, "Prefer": 'outlook.body-content-type="text"'}
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(endpoint, headers=headers, json=data) if method == "POST" else session.get(
