@@ -81,7 +81,7 @@ class FileValidation(Action):
 
         first_file: SearchItem = get_first_file(context)
 
-        res = self.hsbc_connect_api.validate_file(first_file)
+        res = await self.hsbc_connect_api.validate_file(first_file)
         download_link = await self._upload_file(res)
 
         chat_message_preparation = ChatMessagePreparation()

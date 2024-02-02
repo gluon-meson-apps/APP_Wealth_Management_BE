@@ -1,6 +1,8 @@
 import os
 
+import aiohttp
 import requests
+from loguru import logger
 
 from third_system.search_entity import SearchItem
 
@@ -18,13 +20,19 @@ class HsbcConnectApi:
     def __init__(self):
         self.base_url = os.getenv("HSBC_CONNECT_API_ENDPOINT")
 
-    def validate_file(self, file: SearchItem) -> str:
+    async def _call_hsbc_connect_api(self, file: SearchItem) -> str:
+        data = aiohttp.FormData()
+        data.add_field("Attachment", file.text)
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(self.base_url, data=data) as response:
+                    response.raise_for_status()
+                    return await response.text()
+            except Exception as err:
+                logger.error("Error to validate file by HSBC api:", err)
+                raise err
+
+    async def validate_file(self, file: SearchItem) -> str:
         if file and file.text:
-            response = (
-                requests.post(self.base_url, files={"Attachment": file.text}, verify=False)
-                if self.base_url
-                else mock_validate_res()
-            )
-            if response.status_code == 200:
-                return response.text
+            return await self._call_hsbc_connect_api(file) if self.base_url else mock_validate_res().text
         raise FileNotFoundError("No file valid.")
