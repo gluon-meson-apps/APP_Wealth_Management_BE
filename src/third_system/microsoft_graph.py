@@ -140,7 +140,7 @@ class Graph:
         endpoint = f"{self.user_api_endpoint}/sendMail"
         message = {
             "subject": f"[TB Guru Reply] {email.subject}",
-            "body": {"contentType": "html", "content": answer},
+            "body": {"contentType": "html", "content": answer.replace("\n", "<br>")},
             "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
         }
         if attachments:
