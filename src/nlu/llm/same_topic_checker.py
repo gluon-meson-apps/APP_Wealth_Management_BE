@@ -3,13 +3,14 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 
 
 class SameTopicChecker:
-    def __init__(
-            self
-    ):
+    def __init__(self):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "same_topic_check"
 
-    def format_history(self, chat_history: list[dict[str, str]], ):
+    def format_history(
+        self,
+        chat_history: list[dict[str, str]],
+    ):
         chat_history_str = ""
         for chat in chat_history:
             i_or_you = "I" if chat["role"] == "user" else "You"
@@ -36,7 +37,7 @@ you are a helpful chatbot
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
-        chat_message_preparation.add_message("user", history)
+        chat_message_preparation.add_message("user", self.format_history(history))
         result = chat_model.chat(
             **chat_message_preparation.to_chat_params(), max_length=256, jsonable=True, sub_scenario="check_same_topic"
         ).get_json_response()
