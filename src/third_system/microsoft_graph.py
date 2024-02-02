@@ -4,6 +4,7 @@ from typing import Union
 
 import aiohttp
 from aiohttp import ClientResponseError
+from bs4 import BeautifulSoup
 from loguru import logger
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
@@ -13,8 +14,9 @@ from utils.utils import get_value_or_default_from_dict, async_parse_json_respons
 
 def parse_email(value: dict) -> Email:
     body_value = value["body"] if "body" in value and value["body"] else {}
+    soup = BeautifulSoup(body_value["content"], "html.parser")
     sender_value = value["sender"] if "sender" in value and value["sender"] else {}
-    body = EmailBody(content=body_value["content"], content_type=body_value["contentType"])
+    body = EmailBody(content=soup.get_text(), content_type=body_value["contentType"])
     email_sender = EmailSender(
         address=sender_value["emailAddress"]["address"], name=sender_value["emailAddress"]["name"]
     )
