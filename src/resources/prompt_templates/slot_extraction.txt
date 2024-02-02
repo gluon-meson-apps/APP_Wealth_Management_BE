@@ -11,14 +11,13 @@ you are a helpful assistant
 
 ## ATTENTION
 
-1. your result should be a json string, like this:
+your result should be a json string, like this:
 
 {
-    "entity1": "value of entity1",
+    "entity1": "value of entity1", // the key MUST listed in Entities info
     "entity2": "value of entity2",
     ...
 }
-2. DON'T make up entity not listed below.
 
 ## Entities info
 
