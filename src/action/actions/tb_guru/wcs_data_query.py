@@ -104,6 +104,7 @@ def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem
 
 def parse_model_to_dataframe(data):
     df = pd.DataFrame([w.model_dump() for w in data])
+    df = df.sort_values(by="days", ascending=False) if "days" in df.columns else df
     return df.drop(columns=["meta__score", "meta__reference", "id"], errors="ignore")
 
 
@@ -171,7 +172,9 @@ class WcsDataQuery(Action):
             chat_message_preparation.add_message(
                 "assistant",
                 """## WCS data are extracted already\n{{wcs_data}}""",
-                wcs_data=pd.concat([df_current_company, df_all_companies], ignore_index=True).to_string(),
+                wcs_data=pd.concat([df_current_company, df_all_companies], ignore_index=True)
+                .drop_duplicates()
+                .to_string(),
             )
         chat_message_preparation.log(logger)
 
