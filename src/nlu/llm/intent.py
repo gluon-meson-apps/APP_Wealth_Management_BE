@@ -194,6 +194,7 @@ class LLMIntentClassifier(IntentClassifier):
         current_intent = start_intent
         while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
             current_intent, unique_intent_from_examples = self.classify_intent(conversation, current_intent)
+            # intent confuse check
             if (
                 current_intent
                 and unique_intent_from_examples
