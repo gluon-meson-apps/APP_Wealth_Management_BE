@@ -4,45 +4,26 @@ import os
 from typing import Union
 
 import aiohttp
+import requests
 from loguru import logger
 
 from action.base import UploadFileContentType, UploadStorageFile
 from third_system.search_entity import SearchParam, SearchResponse
-import requests
-
-
-def handle_response(response) -> SearchResponse:
-    if response.status_code != 200:
-        logger.error(f"{response.status_code}: {response.text}")
-        return []
-    print(response.json())
-    return SearchResponse.model_validate(response.json())
-
-
-async def handle_aio_response(response) -> SearchResponse:
-    if response.status != 200:
-        logger.error(f"{response.status}: {await response.text}")
-        return []
-    print(await response.json())
-    return SearchResponse.model_validate(await response.json())
-
-
-def error_handler(exception):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            try:
-                result = func(*args, **kwargs)
-                return result
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                raise exception
-
-        return wrapper
-
-    return decorator
-
 
 unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
+
+
+async def call_search_api(method: str, endpoint: str, payload: dict) -> SearchResponse:
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(endpoint, post=payload) if method == "POST" else session.get(
+                endpoint, params=payload
+            ) as response:
+                response.raise_for_status()
+                return SearchResponse.model_validate(await response.json())
+        except Exception as err:
+            logger.error(f"Error fetch url {endpoint}:", err)
+            return SearchResponse()
 
 
 class UnifiedSearch:
@@ -65,26 +46,24 @@ class UnifiedSearch:
                 return []
 
     def vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
-        response = requests.post(f"{self.base_url}/vector/{table}/search/", json=search_param.dict())
-        print(response.json())
-        return [handle_response(response)]
+        try:
+            response = requests.post(f"{self.base_url}/vector/{table}/search/", json=search_param.model_dump())
+            response.raise_for_status()
+            result = response.json()
+            return [SearchResponse.model_validate(result)]
+        except Exception as err:
+            logger.error(f"Error search {search_param}:", err)
+            return []
 
     async def async_vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.base_url}/vector/{table}/search/", json=search_param.dict()) as response:
-                return [await handle_aio_response(response)]
+        result = await call_search_api("POST", f"{self.base_url}/vector/{table}/search/", search_param.model_dump())
+        return [result] if result.items else []
 
     async def upload_intents_examples(self, table, intent_examples):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{self.base_url}/vector/{table}/intent_examples?recreate=True", json=intent_examples
-            ) as response:
-                return await handle_aio_response(response)
+        return await call_search_api("POST", f"{self.base_url}/vector/{table}/intent_examples", intent_examples)
 
     async def search_for_intent_examples(self, table, user_input):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.base_url}/vector/{table}/search", json={"query": user_input}) as response:
-                return await handle_aio_response(response)
+        return await call_search_api("POST", f"{self.base_url}/vector/{table}/search", {"query": user_input})
 
     async def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
         async with aiohttp.ClientSession() as session:
@@ -97,9 +76,7 @@ class UnifiedSearch:
                 return None
 
     async def download_file_from_minio(self, file_url: str) -> SearchResponse:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self.base_url}/file/download", params={"file_url": file_url}) as resp:
-                return await handle_aio_response(resp)
+        return await call_search_api("GET", f"{self.base_url}/file/download", {"file_url": file_url})
 
     async def upload_file_to_minio(self, files: list[UploadStorageFile]) -> list[str]:
         data = aiohttp.FormData()
@@ -127,12 +104,13 @@ async def main():
     result = await UnifiedSearch().upload_file_to_minio(files)
     print(result)
 
-    UnifiedSearch().search(
+    search_result = await UnifiedSearch().search(
         SearchParam(
-            query="Hi TB Guru, please help me to cross check the standard pricing of ACH payment in Singapore and see if I can offer a unit rate of SGD 0.01 to the client.",
+            query="Hi TB Guru, Please help me to extract Apple company data from the @WCS system, and share some data insight with me.",
         ),
         conversation_id="test",
     )
+    print(search_result)
 
 
 if __name__ == "__main__":

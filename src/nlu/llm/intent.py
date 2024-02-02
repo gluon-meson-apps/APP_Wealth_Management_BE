@@ -58,9 +58,10 @@ def get_intent_examples(user_input: str, parent_intent_name: str = None) -> list
         search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent_name}%"])
         filters.append(search_filter)
 
-    response: SearchResponse = unified_search_client.vector_search(
+    response_list = unified_search_client.vector_search(
         search_param=SearchParam(query=user_input, filters=filters, size=3), table=topic
-    )[0]
+    )
+    response: SearchResponse = response_list[0] if response_list else SearchResponse()
 
     intents_examples = extract_examples_from_response_text(response)
     return intents_examples
