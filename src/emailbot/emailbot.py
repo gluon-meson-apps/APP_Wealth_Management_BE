@@ -195,7 +195,7 @@ WHERE id = '{email.id}'
                 )
                 for a in attachments
             ]
-            return await self.unified_search.aupload_file_to_minio(files)
+            return self.unified_search.upload_file_to_minio(files)
         return []
 
 
