@@ -2,8 +2,9 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ActionResponse
-from action.context import ActionContext
+from action.base import ActionResponse
+from output_adapter.base import OutputAdapter
+from tracker.context import ConversationContext
 
 prompt = """## Role
 you are a helpful assistant, your job is to rewrite the Email Content to act like the email is written by the `#sender`(placeholder) and sent to the `#receiver`(placeholder).
@@ -42,21 +43,23 @@ Best Regards,
 TB Guru"""
 
 
-class EmailReplyAction(Action):
+class EmailOutputAdapter(OutputAdapter):
     def __init__(self):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        self.scenario_model = self.get_name() + "_output_adapter"
 
     def get_name(self) -> str:
         return "email_reply"
 
-    async def run(self, context: ActionContext, result: ActionResponse) -> ActionResponse:
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+    def process_output(self, result: object, conversation: ConversationContext) -> object:
+        if not conversation.check_is_email_request() or not isinstance(result, ActionResponse):
+            return result
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "system",
             draft_email_request_prompt,
-            history=context.conversation.get_history().format_string(),
+            history=conversation.get_history().format_string(),
         )
         chat_message_preparation.log(logger)
         json_response = chat_model.chat(
@@ -87,5 +90,5 @@ class EmailReplyAction(Action):
 
         logger.info(f"email result: {email_result}")
 
-        result.answer.content = email_result + result.answer.get_content_with_extra_info()
+        result.answer.content = email_result + result.answer.get_extra_info()
         return result

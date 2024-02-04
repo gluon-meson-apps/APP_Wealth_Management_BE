@@ -6,7 +6,7 @@ def main():
     {%- set response_name = 'response' ~ loop.index %}
     {{ param_name }} = {
     {%- for key, value in params.items() %}
-    {%- if key == 'chat_history' %}
+    {%- if key in ('chat_history', 'file_urls') %}
       "{{ key }}": {{ value }},
     {%- else %}
         {%- if value is not none %}

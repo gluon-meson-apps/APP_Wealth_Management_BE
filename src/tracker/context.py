@@ -48,8 +48,12 @@ class History:
         for _ in range(n):
             self.rounds.pop()
 
-    def format_string(self):
-        return "\n".join([f'{entry["role"]}: {entry["content"]}' for entry in self.rounds])
+    def format_string(self, rename: dict = None):
+        if not rename:
+            rename = {}
+        return "\n".join(
+            [f'### {rename.get(entry["role"],entry["role"])}:\n {entry["content"]}' for entry in self.rounds]
+        )
 
     @classmethod
     def format_message_with_file_name(cls, one_round):
@@ -96,6 +100,7 @@ class ConversationContext:
         session_id: str,
         current_user_intent: Intent = None,
     ):
+        self.is_email_request = False
         self.current_user_input = current_user_input
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
@@ -260,3 +265,9 @@ class ConversationContext:
         self.confused_intents = []
         self.history.delete_latest_conversation_history()
         self.current_user_input = self.history.get_latest()
+
+    def check_is_email_request(self):
+        return self.is_email_request
+
+    def set_email_request(self, is_email_request):
+        self.is_email_request = is_email_request
