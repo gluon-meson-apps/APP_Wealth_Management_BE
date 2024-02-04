@@ -66,7 +66,7 @@ class StandardPricingCheckAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         entities_without_unit_rate = format_entities_for_search(context.conversation, ["offered unit price"])
-        history = context.conversation.get_history().format_string()
+        history = context.conversation.get_history().format_string({"user": "human"})
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("user", summary_prompt_template, chat_history=history)

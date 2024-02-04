@@ -17,6 +17,7 @@ from nlu.llm.entity import LLMEntityExtractor
 from nlu.llm.intent import LLMIntentClassifier
 from nlu.mlm.integrated import IntegratedNLU
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
+from output_adapter.email_output_adapter import EmailOutputAdapter
 from policy.base import BasePolicyManager
 from policy.general import (
     AssistantPolicy,
@@ -40,11 +41,11 @@ class BaseDialogManager:
         conversation_tracker: ConversationTracker,
         reasoner: Reasoner,
         action_runner: ActionRunner,
-        output_adapter: OutputAdapter,
+        output_adapters: list[OutputAdapter],
     ):
         self.conversation_tracker = conversation_tracker
         self.action_runner = action_runner
-        self.output_adapter = output_adapter
+        self.output_adapters = output_adapters
         self.reasoner = reasoner
 
     def greet(self, user_id: str) -> Any:
@@ -57,7 +58,12 @@ class BaseDialogManager:
         return response
 
     async def handle_message(
-        self, message: Any, session_id: str, files: list[UploadFile] = None, file_contents: list[SearchResponse] = None
+        self,
+        message: Any,
+        session_id: str,
+        files: list[UploadFile] = None,
+        file_contents: list[SearchResponse] = None,
+        is_email_request=False,
     ) -> tuple[Any, ConversationContext]:
         file_name = None
         if files is None:
@@ -76,11 +82,14 @@ class BaseDialogManager:
         conversation.append_user_history(message, file_name)
         conversation.add_files(files)
         conversation.add_file_contents(file_contents)
+        conversation.set_email_request(is_email_request)
 
         plan = self.reasoner.think(conversation)
 
         action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
-        response = self.output_adapter.process_output(action_response, conversation)
+        for output_adapter in self.output_adapters:
+            action_response = output_adapter.process_output(action_response, conversation)
+        response = action_response
         conversation.append_assistant_history(response.answer)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
@@ -109,7 +118,7 @@ class DialogManagerFactory:
             BaseConversationTracker(),
             reasoner,
             SimpleActionRunner(),
-            BaseOutputAdapter(),
+            [BaseOutputAdapter(), EmailOutputAdapter()],
         )
 
     @classmethod

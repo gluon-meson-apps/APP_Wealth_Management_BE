@@ -20,7 +20,6 @@ from uvicorn import run
 
 from action.actions.tb_guru.email_reply import EmailReplyAction
 from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
-from action.context import ActionContext
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from promptflow.command import ScoreCommand
 from router import api_router
@@ -98,10 +97,11 @@ async def score(
     try:
         file_res = [await unified_search.adownload_file_from_minio(url) for url in file_urls]
         result, conversation = await dialog_manager.handle_message(
-            score_command.question, session_id, file_contents=file_res if file_res else None
+            score_command.question,
+            session_id,
+            file_contents=file_res if file_res else None,
+            is_email_request=score_command.from_email,
         )
-        if score_command.from_email and result and not isinstance(result, JumpOutResponse):
-            result = await email_reply_action.run(ActionContext(conversation), result)
     except Exception as err:
         logger.info(traceback.format_exc())
         if conversation:
@@ -146,12 +146,14 @@ async def score(
 async def healthcheck():
     return {"status": "alive"}
 
+
 async def start_emailbot():
     logger.info("Starting emailbot")
     emailbot_configuration = get_config(EmailBotSettings)
     graph = await Graph()
     bot = EmailBot(emailbot_configuration, graph)
     await bot.periodically_call_api()
+
 
 def run_child_process():
     loop = asyncio.new_event_loop()
@@ -161,6 +163,7 @@ def run_child_process():
         loop.run_until_complete(start_emailbot())
     except asyncio.CancelledError:
         pass
+
 
 def main():
     if os.getenv("START_EMAILBOT").lower() == "true":
