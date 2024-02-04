@@ -90,8 +90,10 @@ class Graph:
         self.access_token = await self.get_access_token()
 
     @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
-    async def call_graph_api(self, endpoint: str, method: str = "GET", data: dict = None):
-        headers = {"Authorization": "Bearer " + self.access_token, "Prefer": 'outlook.body-content-type="text"'}
+    async def call_graph_api(self, endpoint: str, method: str = "GET", data: dict = None, **kwargs):
+        headers = {"Authorization": "Bearer " + self.access_token}
+        extra_headers = kwargs.get("extra_headers", {})
+        headers.update(extra_headers)
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(endpoint, headers=headers, json=data) if method == "POST" else session.get(
@@ -125,7 +127,7 @@ class Graph:
         endpoint = (
             f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages?{fields_query}&{order_query}&$top=1"
         )
-        data = await self.call_graph_api(endpoint)
+        data = await self.call_graph_api(endpoint, extra_headers={"Prefer": 'outlook.body-content-type="text"'})
         first_message = next(iter(data), None) if data else None
         return parse_email(first_message) if first_message else None
 
@@ -158,10 +160,10 @@ class Graph:
             method="POST",
             data={
                 "message": message,
-                "saveToSentItems": "true",
             },
+            extra_headers={"Content-Type": "application/json"},
         )
-        logger.info(f"Send email to {email.sender.address} successfully.")
+        logger.info(f"Reply email to {email.sender.address} successfully.")
         await self.archive_email(email)
 
     async def archive_email(self, email: Email):
