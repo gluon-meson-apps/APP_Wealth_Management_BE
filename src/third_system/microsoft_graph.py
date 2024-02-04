@@ -134,8 +134,8 @@ class Graph:
         data = await self.call_graph_api(endpoint)
         return [v for v in data if "contentBytes" in v and v["contentBytes"]]
 
-    async def send_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
-        endpoint = f"{self.user_api_endpoint}/sendMail"
+    async def reply_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
+        endpoint = f"{self.user_api_endpoint}/messages/{email.id}/reply"
         message = {
             "subject": f"[TB Guru Reply] {email.subject}",
             "body": {"contentType": "html", "content": answer.replace("\n", "<br>")},
