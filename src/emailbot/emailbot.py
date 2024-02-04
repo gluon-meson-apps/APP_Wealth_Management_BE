@@ -129,7 +129,7 @@ WHERE id = '{email.id}'
     async def process_emails(self, new_email):
         if new_email:
             answer, attachments = await self.ask_thought_agent(new_email)
-            await self.graph.send_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
+            await self.graph.reply_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
             self.database.insert_processed_email_into_database(new_email)
 
     async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[EmailAttachment], None]:
@@ -137,11 +137,11 @@ WHERE id = '{email.id}'
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(
-                        self.thought_agent_endpoint,
-                        json=payload,
-                        headers={
-                            "Content-Type": "application/json",
-                        },
+                    self.thought_agent_endpoint,
+                    json=payload,
+                    headers={
+                        "Content-Type": "application/json",
+                    },
                 ) as resp:
                     response = resp.content.iter_chunks()
                     response_capture = AioResponseCapture(response)
