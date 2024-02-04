@@ -19,7 +19,7 @@ def template_test_for_one_case(logs, test_case):
             unit_test_key = "unit_test_" + key
             if 'e2e' in key and test_case == "e2e":
                 assert expected_item[key] == actual_item[key]
-            elif 'intent_call' in key and test_case == "intent_call_intent":
+            elif 'intent_call' in key and 'check_same_topic' not in key and test_case == "intent_call_intent":
                 if unit_test_key not in actual_item:
                     unit_test_key = unit_test_key.replace('intent_call_intent', 'intent_call')
                 expected_intent = extract_json_from_code_block(expected_item[key])['intent']
