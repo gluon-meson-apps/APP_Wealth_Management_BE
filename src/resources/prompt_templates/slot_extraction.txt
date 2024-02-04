@@ -1,6 +1,6 @@
 ## Role
 
-you are a helpfule assistant
+you are a helpful assistant
 
 ## Task
 
