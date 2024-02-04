@@ -44,7 +44,7 @@ new_email_prompt = """
 
 Write an Email to answer user's question based on above info.
 Tell the user we cannot answer his/her question if the email info is empty.
-You NEED to use placeholder `Dear ***receiver of email***` as receiver of email, and use placeholder `***sender of email***` as sender of email.
+The result should only CONTAIN the content of the email, not the email subject.
 """
 
 convert_email_prompt = """
