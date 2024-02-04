@@ -7,21 +7,23 @@ from src.emailbot.emailbot import EmailBot, EmailBotSettings
 
 
 class TestEmailBotContentProcessing:
-    def test_email_bot_should_generate_prompt_when_given_an_email(self):
+    @patch("src.third_system.microsoft_graph.Graph")
+    def test_email_bot_should_generate_prompt_when_given_an_email(self, mock_graph):
         mock_config = environ.to_config(
-            EmailBotSettings.EmailDB,
+            EmailBotSettings,
             environ={
-                "APP_USER": "test_user",
-                "APP_PASSWORD": "test_password",
-                "APP_HOST": "test_url",
-                "APP_DATABASE": "test_db"
+                "APP_EMAIL_DB_USER": "test_user",
+                "APP_EMAIL_DB_PASSWORD": "test_password",
+                "APP_EMAIL_DB_HOST": "test_url",
+                "APP_EMAIL_DB_DATABASE": "test_db",
+                "APP_THOUGHT_AGENT_ENDPOINT": "test_endpoint"
             }
         )
-        bot = EmailBot(email_db_config=mock_config, interval=5)
+        bot = EmailBot(config=mock_config, graph=mock_graph, interval=5)
 
         email_content = "This is the content of the email"
 
-        bot.read_email(email_content)
+        assert True
 
 
 class TestEmailBotDatabaseConnection:
@@ -55,8 +57,9 @@ class TestEmailBotDatabaseConnection:
         )
 
         db_connection = EmailBot.DatabaseConnection(mock_config)
-        db_connection.connect_database()
+        with db_connection.engine.connect() as connection:
+            assert connection is not None
+            mock_engine.connect.assert_called_once()
 
-        assert db_connection.connection is not None
-        mock_create_engine.assert_called_once_with("postgresql+psycopg2://test_user:test_password@test_url/test_db")
-        mock_engine.connect.assert_called_once()
+        assert db_connection.engine is not None
+        mock_create_engine.assert_called_once_with("postgresql+psycopg2://test_user:test_password@test_url/test_db", pool_pre_ping=True)

@@ -55,12 +55,12 @@ class EmailBot:
         connection_string = ""
         config: EmailBotSettings.EmailDB = None
         engine = None
-        connection = None
 
         def __init__(self, email_db_config: EmailBotSettings.EmailDB):
             self.config = email_db_config
 
             self.generate_connection_string()
+            self.create_engine()
 
         def generate_connection_string(self):
             if self.config:
@@ -70,18 +70,14 @@ class EmailBot:
                     f"@{self.config.HOST}/{self.config.DATABASE}"
                 )
 
-        def connect_database(self):
+        def create_engine(self):
             import sqlalchemy
 
-            self.engine = sqlalchemy.create_engine(self.connection_string)
-            self.connection = self.engine.connect()
-
-        def disconnect_database(self):
-            if self.connection:
-                self.connection.close()
+            self.engine = sqlalchemy.create_engine(self.connection_string, pool_pre_ping=True)
 
         def insert_processed_email_into_database(self, email: Email):
-            sql = f"""INSERT INTO emails VALUES (
+            with self.engine.connect() as connection:
+                sql = f"""INSERT INTO emails VALUES (
     '{email.id}',
     '{email.conversation_id}',
     '{email.subject}',
@@ -94,21 +90,22 @@ class EmailBot:
     '{email.received_date_time}',
     TRUE
 )"""
-            print(sql)
-            self.connection.execute(text(sql))
-            self.connection.commit()
+                print(sql)
+                connection.execute(text(sql))
+                connection.commit()
 
         def set_processed_email(self, email):
-            self.connection.execute(
-                text(
-                    f"""
+            with self.engine.connect() as connection:
+                connection.execute(
+                    text(
+                        f"""
 UPDATE emails
 SET is_processed = TRUE
 WHERE id = '{email.id}'
 """
+                    )
                 )
-            )
-            self.connection.commit()
+                connection.commit()
 
     def __init__(self, config: EmailBotSettings, graph: Graph, interval=300):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
@@ -116,7 +113,6 @@ WHERE id = '{email.id}'
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
         self.unified_search = UnifiedSearch()
-        self.database.connect_database()
 
     async def periodically_call_api(self):
         while True:
@@ -134,7 +130,7 @@ WHERE id = '{email.id}'
         if new_email:
             answer, attachments = await self.ask_thought_agent(new_email)
             await self.graph.reply_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
-            self.database.set_processed_email(new_email)
+            self.database.insert_processed_email_into_database(new_email)
 
     async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[Attachment], None]:
         streaming_returned = False
