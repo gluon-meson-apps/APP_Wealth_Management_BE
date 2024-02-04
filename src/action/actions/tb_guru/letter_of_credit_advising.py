@@ -9,8 +9,7 @@ from third_system.unified_search import UnifiedSearch
 # from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
-you are a chatbot, you need to check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC Singapore
-
+you are a chatbot, according to all banks info, retrieve all the RMA status(INCLUDE column names) and all bank info(INCLUDE column names)
 ## steps
 
 1. check whether the issuing bank is in the counterparty bank list
@@ -21,13 +20,7 @@ the $bank cannot be found in the Counterparty Bank file, and that they should do
 
 3. if the issuing bank is in the counterparty bank list
 
-4. check the issuing bank has RMA arrangement
-
-5. if user is asking about RMA, then just reply the result
-
-6. if user is asking about the HSBC is able to accept a letter of credit from that issuing bank , then you need to
-check whether the bank's counterparty type is FIG Client or HSBC Group or Network Bank. if not, then reply
-we are not able to accept a letter of credit from the $bank
+4. retrieve all the RMA status(INCLUDE column names) and all bank info(INCLUDE column names)
 
 
 ## all banks info
@@ -63,7 +56,7 @@ class LetterOfCreditAdvisingAction(Action):
 
         query = (
             "search the counterparty bank"
-            + f"\n #extra infos: fields to be queried: {context.conversation.get_entities()} "
+            + f"\n #extra infos: fields to be queried: {context.conversation.get_simplified_entities()} "
         )
         logger.info(f"search query: {query}")
 

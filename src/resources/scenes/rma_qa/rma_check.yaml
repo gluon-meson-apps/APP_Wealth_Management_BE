@@ -8,16 +8,16 @@ slots:
     description: the entity name of the LC bank other than HSBC Singapore
     slotType: text
     optional: True
-  - name: country
+  - name: country of bank
     description: the full country name of the bank to be checked, for example United States, China, Germany
     slotType: text
     optional: True
-  - name: country code
+  - name: country code of bank
     description: the country abbreviation code of the bank's country, which is 2 or 3 character. for example VNM, CHN, US
     slotType: text
     optional: True
-  - name: swift
-    description: Business Identifier Code of the Counterparty Bank, which is 8~11 characters
+  - name: country for rma check
+    description: the full country name which used to check RMA
     slotType: text
     optional: True
 action: letter_of_credit_advising
