@@ -86,6 +86,9 @@ async def score(
     unified_search: UnifiedSearch = Depends(),
     email_reply_action: EmailReplyAction = Depends(),
 ):
+    """
+    This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score
+    """
     err_msg = ""
     result = None
     conversation = None
