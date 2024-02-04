@@ -1,6 +1,6 @@
 name: rma_checking
 business: true
-description: check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC Singapore
+description: check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
 slots:
@@ -16,7 +16,7 @@ slots:
     description: the country abbreviation code of the bank's country, which is 2 or 3 character. for example VNM, CHN, US
     slotType: text
     optional: True
-  - name: country for rma check
+  - name: country of rma
     description: the full country name which used to check RMA
     slotType: text
     optional: True

@@ -5,11 +5,10 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
-
-# from utils.action_helper import format_entities_for_search
+from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
-you are a chatbot, according to all banks info, retrieve all the RMA status(INCLUDE column names) and all bank info(INCLUDE column names)
+you are a helpful assistant, based on provided all banks info, retrieve EVERY bank's RMA status and bank info
 ## steps
 
 1. check whether the issuing bank is in the counterparty bank list
@@ -20,20 +19,19 @@ the $bank cannot be found in the Counterparty Bank file, and that they should do
 
 3. if the issuing bank is in the counterparty bank list
 
-4. retrieve all the RMA status(INCLUDE column names) and all bank info(INCLUDE column names)
+4. retrieve EVERY founded bank's RMA status of country {{country_of_rma}} and bank info(INCLUDE column names) one by one,
+every counterparty bank has different cbid
 
+## ATTENTION
+if all banks has more than one item, should retrieve RMA status of country {{country_of_rma}} and bank info for every cbid
 
 ## all banks info
 
 {{all_banks}}
 
-## bank to be check info\n
+## issuing bank
 
 {{bank_info}}
-
-## user input
-
-{{user_input}}
 
 ## INSTRUCT
 
@@ -53,29 +51,28 @@ class LetterOfCreditAdvisingAction(Action):
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        entity_dict = context.conversation.get_simplified_entities()
 
+        bank_info = format_entities_for_search(context.conversation, ["country of rma"])
         query = (
-            "search the counterparty bank"
-            + f"\n #extra infos: fields to be queried: {context.conversation.get_simplified_entities()} "
+                "search the counterparty bank"
+                + f"\n #extra infos: fields to be queried: {bank_info} "
         )
         logger.info(f"search query: {query}")
 
         response = await self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
-        all_banks = "\n".join([item.json() for item in response])
+        all_banks = []
+        for item in response:
+            all_banks.extend(item.items)
+        all_banks_str = "\n".join([bank.model_dump_json() for bank in all_banks])
 
         chat_message_preparation = ChatMessagePreparation()
-        bank_info = [
-            dict(
-                field=entity.type,
-                value=entity.value,
-            )
-            for entity in context.conversation.get_entities()
-        ]
         chat_message_preparation.add_message(
             "user",
             prompt,
-            all_banks=all_banks,
+            country_of_rma=entity_dict["country of rma"],
+            all_banks=all_banks_str,
             bank_info=bank_info,
             user_input=context.conversation.current_user_input,
         )
