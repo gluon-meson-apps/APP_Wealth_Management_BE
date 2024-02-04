@@ -136,7 +136,7 @@ WHERE id = '{email.id}'
             await self.graph.reply_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
             self.database.set_processed_email(new_email)
 
-    async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[EmailAttachment], None]:
+    async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[Attachment], None]:
         streaming_returned = False
         async with aiohttp.ClientSession() as session:
             try:
@@ -161,7 +161,7 @@ WHERE id = '{email.id}'
             response_json = json.loads(response_capture.collected_response)
             yield handle_response(response_json)
 
-    async def ask_thought_agent(self, email: Email) -> (str, list[EmailAttachment]):
+    async def ask_thought_agent(self, email: Email) -> (str, list[Attachment]):
         payload = {
             "question": email.body.content,
             "conversation_id": email.id,

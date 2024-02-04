@@ -1,3 +1,4 @@
+import asyncio
 import os
 import urllib.parse
 from typing import Union
@@ -100,8 +101,8 @@ class Graph:
                     endpoint, headers=headers
                 ) as response:
                     response.raise_for_status()
-                    data = await async_parse_json_response(response) if response.status == 200 else {}
-                    return data["value"] if "value" in data and data["value"] else []
+                    data = await async_parse_json_response(response) if response.status in [200, 201] else {}
+                    return data["value"] if "value" in data and data["value"] else data
             except ClientResponseError as http_err:
                 if http_err.status == 401:
                     await self.refresh_access_token()
@@ -136,35 +137,49 @@ class Graph:
         data = await self.call_graph_api(endpoint)
         return [v for v in data if "contentBytes" in v and v["contentBytes"]]
 
-    async def reply_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
-        endpoint = f"{self.user_api_endpoint}/messages/{email.id}/reply"
-        message = {
-            "subject": f"[TB Guru Reply] {email.subject}",
-            "body": {"contentType": "html", "content": answer.replace("\n", "<br>")},
-            "toRecipients": [{"emailAddress": {"address": email.sender.address}}],
-        }
+    async def upload_email_attachments(self, email_id: str, attachments: list[EmailAttachment] = None):
+        endpoint = f"{self.user_api_endpoint}/messages/{email_id}/attachments"
         if attachments:
-            message["attachments"] = [
-                {
-                    "@odata.type": "#microsoft.graph.fileAttachment",
-                    "name": a.name,
-                    "contentType": a.type,
-                    "contentBytes": a.bytes,
-                }
+            tasks = [
+                self.call_graph_api(
+                    endpoint,
+                    method="POST",
+                    data={
+                        "@odata.type": "#microsoft.graph.fileAttachment",
+                        "name": a.name,
+                        "contentBytes": a.bytes,
+                        "contentType": a.type,
+                    },
+                    extra_headers={"Content-Type": "application/json"},
+                )
                 for a in attachments
             ]
-            message["hasAttachments"] = True
+            await asyncio.gather(*tasks)
+            logger.info(f"Upload email attachments for {email_id} successfully.")
+        else:
+            logger.info(f"No attachments to upload for {email_id}.")
 
-        await self.call_graph_api(
-            endpoint,
+    async def reply_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
+        draft_email = await self.call_graph_api(
+            f"{self.user_api_endpoint}/messages/{email.id}/createReply",
             method="POST",
             data={
-                "message": message,
+                "comment": answer.replace("\n", "<br>"),
             },
             extra_headers={"Content-Type": "application/json"},
         )
-        logger.info(f"Reply email to {email.sender.address} successfully.")
-        await self.archive_email(email)
+        draft_email_id = draft_email["id"] if draft_email and "id" in draft_email else ""
+        if draft_email_id:
+            await self.upload_email_attachments(draft_email_id, attachments)
+            await self.call_graph_api(
+                endpoint=f"{self.user_api_endpoint}/messages/{draft_email_id}/send",
+                method="POST",
+            )
+            logger.info(f"Reply email to {email.sender.address} successfully.")
+            await self.archive_email(email)
+        else:
+            logger.error(f"Reply email to {email.sender.address} failed.")
+            raise EmailHandlingFailedException("Reply email failed.", "REPLY_EMAIL_FAILED")
 
     async def archive_email(self, email: Email):
         endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages/{email.id}/move"
