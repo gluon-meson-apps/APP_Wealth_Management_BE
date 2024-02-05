@@ -22,11 +22,11 @@ from policy.base import BasePolicyManager
 from policy.general import (
     AssistantPolicy,
     IntentFillingPolicy,
-    SlotFillingPolicy,
     EndDialoguePolicy,
     JumpOutPolicy,
     IntentChoosingPolicy,
 )
+from policy.slot_filling_policy import SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.base import Reasoner
 from reasoner.llm_reasoner import LlmReasoner
