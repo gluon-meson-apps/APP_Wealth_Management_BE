@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional
 
 from action.actions.general import EndDialogueAction
 from action.base import Action
@@ -8,12 +8,18 @@ from nlu.intent_with_entity import IntentWithEntity
 from prompt_manager.base import PromptManager
 
 
+class PolicyResponse:
+    def __init__(self, handled: bool, action: Optional[Action]):
+        self.handled = handled
+        self.action = action
+
+
 class Policy:
     def __init__(self, prompt_manager: PromptManager):
         self.prompt_manager = prompt_manager
 
-    def handle(self, intent: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
-        return NotImplementedError
+    def handle(self, intent: IntentWithEntity, context: ConversationContext) -> PolicyResponse:
+        raise NotImplementedError
 
     @staticmethod
     def get_possible_slots(intent: IntentWithEntity):
@@ -57,8 +63,8 @@ class BasePolicyManager(PolicyManager):
         conversation.set_status("decision_making")
         if intent is not None:
             for policy in self.policies:
-                handled, action = policy.handle(intent, conversation)
-                if handled:
-                    return action
+                policy_response = policy.handle(intent, conversation)
+                if policy_response.handled:
+                    return policy_response.action
 
         return EndDialogueAction()
