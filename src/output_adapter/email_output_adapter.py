@@ -90,5 +90,5 @@ class EmailOutputAdapter(OutputAdapter):
 
         logger.info(f"email result: {email_result}")
 
-        result.answer.content = email_result + result.answer.get_extra_info()
+        result.answer.content = email_result
         return result

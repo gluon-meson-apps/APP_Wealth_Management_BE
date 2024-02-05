@@ -9,8 +9,6 @@ from urllib.request import Request
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
-
-from emailbot.emailbot import get_config, EmailBot, EmailBotSettings
 from gluon_meson_sdk.models.longging.pg_log_service import PGModelLogService
 from loguru import logger
 from sse_starlette import EventSourceResponse
@@ -18,9 +16,9 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
-from action.actions.tb_guru.email_reply import EmailReplyAction
 from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
+from emailbot.emailbot import get_config, EmailBot, EmailBotSettings
 from promptflow.command import ScoreCommand
 from router import api_router
 from third_system.microsoft_graph import Graph
@@ -83,7 +81,6 @@ async def generate_answer_with_len_limited(answer, **kwargs):
 async def score(
     score_command: ScoreCommand,
     unified_search: UnifiedSearch = Depends(),
-    email_reply_action: EmailReplyAction = Depends(),
 ):
     """
     This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score
@@ -119,7 +116,7 @@ async def score(
             answer = {"answer": "Sorry, I can't help you with that."}
         else:
             answer = {
-                "answer": result.answer.get_content_with_extra_info(),
+                "answer": result.answer.get_content_with_extra_info(from_email=score_command.from_email),
                 "session_id": session_id,
                 **(
                     dict(attachment=result.attachment.model_dump_json())

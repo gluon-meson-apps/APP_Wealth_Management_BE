@@ -58,9 +58,9 @@ class ChatResponseAnswer(BaseModel):
     references: Optional[List[SearchItem]] = None
     extra_info: dict[str, str] = {}
 
-    def get_content_with_extra_info(self):
+    def get_content_with_extra_info(self, from_email: bool = False):
         # output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
-        extra_info = self.get_extra_info()
+        extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
         return self.content + "<br>" + extra_info
 
     def get_extra_info(self):
@@ -78,6 +78,24 @@ class ChatResponseAnswer(BaseModel):
         chatbot_detail_summary = ""
         if chatbot_detail:
             chatbot_detail_summary = f"<br><br><h2>Detail Info Inside Chatbot</h2><br><details><summary>details</summary>{chatbot_detail}</details>"
+        extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
+        return extra_info
+
+    def get_email_extra_info(self):
+        template = """<h3>{key}</h3>{value}<br>"""
+        extra_info_str = ""
+        if "Attachment" in self.extra_info:
+            extra_info_str += template.format(key="Attachment", value=self.extra_info["Attachment"])
+        chatbot_detail = "".join(
+            [
+                template.format(key=key, value=value)
+                for key, value in self.extra_info.items()
+                if key != "Attachment" and value
+            ]
+        )
+        chatbot_detail_summary = ""
+        if chatbot_detail:
+            chatbot_detail_summary = f"<h2>Detail Info Inside Chatbot</h2>{chatbot_detail}<br>"
         extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
         return extra_info
 
