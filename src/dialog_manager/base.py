@@ -84,7 +84,7 @@ class BaseDialogManager:
         conversation.add_file_contents(file_contents)
         conversation.set_email_request(is_email_request)
 
-        plan = self.reasoner.think(conversation)
+        plan = await self.reasoner.think(conversation)
 
         action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
         for output_adapter in self.output_adapters:

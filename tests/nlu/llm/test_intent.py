@@ -5,7 +5,7 @@ from unified_search_client.unified_search_client import UnifiedSearchClient
 
 
 class TestIntents:
-    def test_get_intent_examples_should_generate_the_list_of_examples(self, mocker):
+    async def test_get_intent_examples_should_generate_the_list_of_examples(self, mocker):
         mocker.patch.object(UnifiedSearchClient, "send_request")
 
         mock_response = MagicMock()
@@ -15,12 +15,10 @@ class TestIntents:
         UnifiedSearchClient.send_request.return_value = mock_response
 
         user_input = "What is your name?"
-        result = get_intent_examples(user_input)
+        result = await get_intent_examples(user_input)
         expected_result = [{
             "example": "this is an example",
             "intent": "others",
             "score": 109.81185150146484
         }]
         assert result == expected_result
-
-

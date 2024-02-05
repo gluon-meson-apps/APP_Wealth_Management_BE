@@ -51,14 +51,14 @@ class IntentConfig:
         self.slots = slots
 
 
-def get_intent_examples(user_input: str, parent_intent_name: str = None) -> list[dict[str, Any]]:
+async def get_intent_examples(user_input: str, parent_intent_name: str = None) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
     filters = []
     if parent_intent_name:
         search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent_name}%"])
         filters.append(search_filter)
 
-    response_list = unified_search_client.vector_search(
+    response_list = await unified_search_client.async_vector_search(
         search_param=SearchParam(query=user_input, filters=filters, size=3), table=topic
     )
     response: SearchResponse = response_list[0] if response_list else SearchResponse()
@@ -165,7 +165,7 @@ class LLMIntentClassifier(IntentClassifier):
             return intents[0]
         return None
 
-    def classify_intent_overall(self, conversation: ConversationContext) -> Optional[Intent]:
+    async def classify_intent_overall(self, conversation: ConversationContext) -> Optional[Intent]:
         # intent confuse confirm
         if conversation.is_confused_with_intents():
             intent = self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
@@ -174,7 +174,7 @@ class LLMIntentClassifier(IntentClassifier):
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
                 description = self.intent_list_config.get_intent(intent).description
                 current_intent = Intent(name=intent, confidence=1.0, description=description)
-                return self.classify_intent_until_leaf_or_confused(conversation, current_intent)
+                return await self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
         chat_history = conversation.get_history().format_messages()
@@ -187,14 +187,14 @@ class LLMIntentClassifier(IntentClassifier):
             if previous_intent and not start_new_topic:
                 return previous_intent
 
-        return self.classify_intent_until_leaf_or_confused(conversation, None)
+        return await self.classify_intent_until_leaf_or_confused(conversation, None)
 
-    def classify_intent_until_leaf_or_confused(
+    async def classify_intent_until_leaf_or_confused(
         self, conversation: ConversationContext, start_intent: Optional[Intent]
     ) -> Optional[Intent]:
         current_intent = start_intent
         while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
-            current_intent, unique_intent_from_examples = self.classify_intent(conversation, current_intent)
+            current_intent, unique_intent_from_examples = await self.classify_intent(conversation, current_intent)
             # intent confuse check
             if (
                 current_intent
@@ -205,12 +205,12 @@ class LLMIntentClassifier(IntentClassifier):
                 break
         return current_intent
 
-    def classify_intent(
+    async def classify_intent(
         self, conversation: ConversationContext, parent_intent: Intent = None
     ) -> tuple[Optional[Intent], Optional[Intent]]:
         user_input = conversation.current_user_input
         parent_intent_name_of_current_layer: str = parent_intent.get_full_intent_name() if parent_intent else None
-        intent_examples = get_intent_examples(user_input, parent_intent_name_of_current_layer)
+        intent_examples = await get_intent_examples(user_input, parent_intent_name_of_current_layer)
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
             intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_name_of_current_layer)
