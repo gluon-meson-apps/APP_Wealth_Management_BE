@@ -15,7 +15,7 @@ unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000
 async def call_search_api(method: str, endpoint: str, payload: dict) -> SearchResponse:
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.post(endpoint, post=payload) if method == "POST" else session.get(
+            async with session.post(endpoint, json=payload) if method == "POST" else session.get(
                 endpoint, params=payload
             ) as response:
                 response.raise_for_status()
