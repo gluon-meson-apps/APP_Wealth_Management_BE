@@ -10,7 +10,6 @@ from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioM
 prompt = """"## Role
 you are a helpful assistant, you need to check LC acceptable for every counterparty bank with different CBID
 ## LC acceptable check
-
 1. check whether the issuing bank is in the counterparty bank list, if not, then return we are not able to accept a letter of credit from the $bank
 
 2. check whether the issuing bank's {{country_of_rma}} RMA status is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or Network Bank.
@@ -21,17 +20,20 @@ if not, then return we are not able to accept a letter of credit from the $bank,
 2 if one bank has more than one RMA column, should do the check for every RMA column
 
 ## steps
-1. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
-2. return LC acceptable check result
-3. return EVERY bank's {{country_of_rma}} RMA status(INCLUDE column names) and ALL bank info(exclude RMA columns)
+1. if the counterparty bank list is empty, then reply we are not able to accept a letter of credit from the $bank 
+2. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
+3. return EVERY bank's {{country_of_rma}} RMA status(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
 
-## all banks info
+## counterparty bank list
 
 {{all_banks}}
 
 ## issuing bank
 
 {{bank_info}}
+
+## User input
+{{user_input}}
 
 ## INSTRUCT
 
@@ -53,7 +55,7 @@ class LCAcceptableAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank"])
+        bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank", "country of rma"])
         query = (
                 "search the counterparty bank"
                 + f"\n #extra infos: fields to be queried: {bank_info} "

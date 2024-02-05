@@ -17,7 +17,7 @@ slots:
     slotType: text
     optional: True
   - name: country of HSBC bank
-    description: the full country name which used to LC acceptable
+    description: the full country name or bank and country which used to LC acceptable，for example Hang Seng - Hong Kong,Hang Seng - China
     slotType: text
     optional: True
 action: rma_lc_acceptable
