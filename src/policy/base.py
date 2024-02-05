@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from action.actions.general import EndDialogueAction
 from action.base import Action
@@ -12,18 +12,12 @@ class Policy:
     def __init__(self, prompt_manager: PromptManager):
         self.prompt_manager = prompt_manager
 
-    def handle(
-        self, intent: IntentWithEntity, context: ConversationContext
-    ) -> Tuple[bool, Action]:
+    def handle(self, intent: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
         return NotImplementedError
 
     @staticmethod
     def get_possible_slots(intent: IntentWithEntity):
-        return {
-            entity.possible_slot
-            for entity in intent.entities
-            if Policy.is_not_empty(entity)
-        }
+        return {entity.possible_slot for entity in intent.entities if Policy.is_not_empty(entity)}
 
     @staticmethod
     def is_not_empty(entity):
@@ -31,9 +25,7 @@ class Policy:
 
 
 class PolicyManager:
-    def get_greet_action(
-        self, conversation: ConversationContext, model_type: str
-    ) -> Action:
+    def get_greet_action(self, conversation: ConversationContext, model_type: str) -> Action:
         pass
 
     def get_action(

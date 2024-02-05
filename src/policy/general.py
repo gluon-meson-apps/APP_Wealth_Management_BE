@@ -59,7 +59,7 @@ class JumpOutPolicy(Policy):
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         Policy.__init__(self, prompt_manager)
 
-    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
+    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
         # 没有意图
         if not IE.intent:
             return False, None
@@ -77,7 +77,7 @@ class IntentFillingPolicy(Policy):
         Policy.__init__(self, prompt_manager)
         self.form_store = form_store
 
-    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
+    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
         possible_slots = self.get_possible_slots(intent=IE)
         logger.debug(
             f"current status\nintent to clarify：{IE.intent}\n"
@@ -111,7 +111,7 @@ class AssistantPolicy(Policy):
         self.form_store = form_store
         self.action_repository = action_repository
 
-    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Action]:
+    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> Tuple[bool, Optional[Action]]:
         potential_slots = self.get_possible_slots(intent=IE)
         logger.debug(
             f"final:\nintent：{IE.intent.name}\n"
