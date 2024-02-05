@@ -90,11 +90,16 @@ class ChatResponseAnswer(BaseModel):
 
     def get_email_extra_info(self):
         template = """<strong>{key}</strong><br>{value}<br>"""
-        extra_info_str = (
-            f'<h4>Attachment</h4>{self.extra_info["Attachment"]}' if "Attachment" in self.extra_info else ""
+        attachment_str = (
+            template.format(key="Attachment", value=self.extra_info["Attachment"])
+            if "Attachment" in self.extra_info
+            else ""
         )
+        extra_info_str = f"<br>{attachment_str}" if attachment_str else ""
         chatbot_detail = self.get_chatbot_details(template)
-        chatbot_detail_summary = f"<h4>Detail Info Inside Chatbot</h4>{chatbot_detail}<br>" if chatbot_detail else ""
+        chatbot_detail_summary = (
+            f"<br><strong>Detail Info Inside Chatbot</strong><br>{chatbot_detail}<br>" if chatbot_detail else ""
+        )
         extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
         return extra_info
 
