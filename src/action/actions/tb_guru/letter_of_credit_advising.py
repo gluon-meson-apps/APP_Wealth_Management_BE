@@ -53,10 +53,10 @@ class LetterOfCreditAdvisingAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(context.conversation, ["country of rma"])
+        bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank", "country of rma"])
         query = (
-                "search the counterparty bank"
-                + f"\n #extra infos: fields to be queried: {bank_info} "
+                    "search the counterparty bank"
+                    + f"\n #extra infos: fields to be queried: {bank_info} "
         )
         logger.info(f"search query: {query}")
 
@@ -65,6 +65,14 @@ class LetterOfCreditAdvisingAction(Action):
         all_banks = []
         for item in response:
             all_banks.extend(item.items)
+
+        if len(all_banks) == 0:
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content=f"the bank {bank_info} cannot be found in the Counterparty Bank file, and that they should do further checks.",
+                intent=context.conversation.current_intent.name,
+            )
+            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
         all_banks_str = "\n".join([bank.model_dump_json() for bank in all_banks])
 
         chat_message_preparation = ChatMessagePreparation()

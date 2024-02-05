@@ -22,7 +22,7 @@ if not, then return we are not able to accept a letter of credit from the $bank,
 ## steps
 1. if the counterparty bank list is empty, then reply we are not able to accept a letter of credit from the $bank 
 2. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
-3. return EVERY bank's {{country_of_rma}} RMA status(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
+3. return EVERY bank's {{country_of_rma}} RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
 
 ## counterparty bank list
 
@@ -37,7 +37,7 @@ if not, then return we are not able to accept a letter of credit from the $bank,
 
 ## INSTRUCT
 
-now, answer the question step by step, and reply the final result
+now, answer the question step by step, and reply every step result
 """
 
 
@@ -67,8 +67,15 @@ class LCAcceptableAction(Action):
         all_banks = []
         for item in response:
             all_banks.extend(item.items)
-        all_banks_str = "\n".join([bank.model_dump_json() for bank in all_banks])
+        if len(all_banks) == 0:
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content=f"the bank {bank_info} cannot be found in the Counterparty Bank file, and that they should do further checks.",
+                intent=context.conversation.current_intent.name,
+            )
+            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
 
+        all_banks_str = "\n".join([bank.model_dump_json() for bank in all_banks])
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "user",
