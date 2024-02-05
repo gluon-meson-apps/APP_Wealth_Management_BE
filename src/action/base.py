@@ -63,39 +63,38 @@ class ChatResponseAnswer(BaseModel):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
         return self.content + "<br>" + extra_info
 
-    def get_extra_info(self):
-        template = """<br><h2>{key}</h2><br>{value}<br>"""
-        extra_info_str = ""
-        if "Attachment" in self.extra_info:
-            extra_info_str += template.format(key="Attachment", value=self.extra_info["Attachment"])
-        chatbot_detail = "".join(
+    def get_chatbot_details(self, template: str):
+        return "".join(
             [
-                template.format(key=key, value=value)
+                template.format(key=key.capitalize(), value=value)
                 for key, value in self.extra_info.items()
-                if key != "Attachment" and value
+                if key and key != "Attachment" and value
             ]
         )
-        chatbot_detail_summary = ""
-        if chatbot_detail:
-            chatbot_detail_summary = f"<br><br><h2>Detail Info Inside Chatbot</h2><br><details><summary>details</summary>{chatbot_detail}</details>"
+
+    def get_extra_info(self):
+        template = """<br><h2>{key}</h2><br>{value}<br>"""
+        extra_info_str = (
+            template.format(key="Attachment", value=self.extra_info["Attachment"])
+            if "Attachment" in self.extra_info
+            else ""
+        )
+        chatbot_detail = self.get_chatbot_details(template)
+        chatbot_detail_summary = (
+            f"<br><br><h2>Detail Info Inside Chatbot</h2><br><details><summary>details</summary>{chatbot_detail}</details>"
+            if chatbot_detail
+            else ""
+        )
         extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
         return extra_info
 
     def get_email_extra_info(self):
-        template = """<h3>{key}</h3>{value}<br>"""
-        extra_info_str = ""
-        if "Attachment" in self.extra_info:
-            extra_info_str += template.format(key="Attachment", value=self.extra_info["Attachment"])
-        chatbot_detail = "".join(
-            [
-                template.format(key=key, value=value)
-                for key, value in self.extra_info.items()
-                if key != "Attachment" and value
-            ]
+        template = """<strong>{key}</strong><br>{value}<br>"""
+        extra_info_str = (
+            f'<h4>Attachment</h4>{self.extra_info["Attachment"]}' if "Attachment" in self.extra_info else ""
         )
-        chatbot_detail_summary = ""
-        if chatbot_detail:
-            chatbot_detail_summary = f"<h2>Detail Info Inside Chatbot</h2>{chatbot_detail}<br>"
+        chatbot_detail = self.get_chatbot_details(template)
+        chatbot_detail_summary = f"<h4>Detail Info Inside Chatbot</h4>{chatbot_detail}<br>" if chatbot_detail else ""
         extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
         return extra_info
 
