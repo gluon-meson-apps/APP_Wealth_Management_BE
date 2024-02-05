@@ -41,4 +41,6 @@ you are a helpful chatbot
         result = chat_model.chat(
             **chat_message_preparation.to_chat_params(), max_length=256, jsonable=True, sub_scenario="check_same_topic"
         ).get_json_response()
-        return result["start_new_topic"], result["new_request"]
+        return result["start_new_topic"] if "start_new_topic" in result else False, result[
+            "new_request"
+        ] if "new_request" in result else ""
