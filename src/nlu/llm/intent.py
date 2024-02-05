@@ -58,7 +58,7 @@ async def get_intent_examples(user_input: str, parent_intent_name: str = None) -
         search_filter = SearchParamFilter(field="meta__full_parent_intent", op="like", value=[f"{parent_intent_name}%"])
         filters.append(search_filter)
 
-    response_list = await unified_search_client.async_vector_search(
+    response_list = await unified_search_client.vector_search(
         search_param=SearchParam(query=user_input, filters=filters, size=3), table=topic
     )
     response: SearchResponse = response_list[0] if response_list else SearchResponse()

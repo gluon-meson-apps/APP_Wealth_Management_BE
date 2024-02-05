@@ -4,7 +4,6 @@ import os
 from typing import Union
 
 import aiohttp
-import requests
 from loguru import logger
 
 from action.base import UploadFileContentType, UploadStorageFile
@@ -45,17 +44,7 @@ class UnifiedSearch:
                 logger.error(f"Error search {search_param}:", err)
                 return []
 
-    def vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
-        try:
-            response = requests.post(f"{self.base_url}/vector/{table}/search/", json=search_param.model_dump())
-            response.raise_for_status()
-            result = response.json()
-            return [SearchResponse.model_validate(result)]
-        except Exception as err:
-            logger.error(f"Error search {search_param}:", err)
-            return []
-
-    async def async_vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
+    async def vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
         result = await call_search_api("POST", f"{self.base_url}/vector/{table}/search/", search_param.model_dump())
         return [result] if result.items else []
 
