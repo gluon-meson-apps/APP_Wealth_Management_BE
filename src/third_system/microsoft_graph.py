@@ -47,7 +47,7 @@ class TokenExpiredException(Exception):
 
 class Graph:
     def __init__(self):
-        self.access_token = ""
+        self.access_token = get_value_or_default_from_dict(os.environ, "GRAPH_API_ACCESS_TOKEN", "")
         self.config = {
             "client_id": get_value_or_default_from_dict(os.environ, "GRAPH_API_CLIENT_ID", ""),
             "client_secret": get_value_or_default_from_dict(os.environ, "GRAPH_API_CLIENT_SECRET", ""),
@@ -56,13 +56,18 @@ class Graph:
         }
         self.login_endpoint = get_value_or_default_from_dict(os.environ, "GRAPH_API_LOGIN_ENDPOINT", "")
         self.mail_endpoint = get_value_or_default_from_dict(os.environ, "GRAPH_API_MAIL_ENDPOINT", "")
-        self.user_api_endpoint = f'{self.mail_endpoint}/v1.0/users/{self.config["user_id"]}'
+        self.user_api_endpoint = (
+            f'{self.mail_endpoint}/v1.0/users/{self.config["user_id"]}'
+            if not self.access_token
+            else f"{self.mail_endpoint}/v1.0/me"
+        )
 
     def __await__(self):
         return self._init_tokens__().__await__()
 
     async def _init_tokens__(self):
-        self.access_token = await self.get_access_token()
+        if not self.access_token:
+            self.access_token = await self.get_access_token()
         self.inbox_folder_id, self.archive_folder_id = await self.list_folders()
         return self
 
