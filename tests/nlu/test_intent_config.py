@@ -1,7 +1,7 @@
-import unittest
-import yaml
-from src.nlu.llm.intent import IntentListConfig, IntentConfig
 import os
+import unittest
+
+from src.nlu.llm.intent import IntentListConfig
 
 
 class TestIntentListConfig(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestIntentListConfig(unittest.TestCase):
         pwd = os.getcwd()
         file_path = os.path.join(pwd, 'resources')
         intent_list_config = IntentListConfig.from_scenes(file_path)
-        
+
         self.assertIsInstance(intent_list_config, IntentListConfig)
 
         # Check that intent_config has the correct number of intents

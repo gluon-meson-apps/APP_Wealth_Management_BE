@@ -44,13 +44,6 @@ system_template_without_example = """
 topic = "hsbc_topic_for_intent"
 
 
-class IntentConfig:
-    def __init__(self, name, examples, slots):
-        self.name = name
-        self.examples = examples
-        self.slots = slots
-
-
 async def get_intent_examples(user_input: str, parent_intent_name: str = None) -> list[dict[str, Any]]:
     unified_search_client = UnifiedSearch()
     filters = []
