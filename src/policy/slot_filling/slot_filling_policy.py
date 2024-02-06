@@ -26,10 +26,10 @@ class SlotFillingPolicy(Policy):
             checker = SlotChecker(form, [slot.name for slot in possible_slots])
             if checker.slot_is_missing() and context.inquiry_times < MAX_FOLLOW_UP_TIMES:
                 missed_slots = checker.get_missed_slots()
-                context.set_state(f"slot_filling:{missed_slots}")
+                context.set_state(f"slot_filling: {missed_slots}")
                 logger.debug(f"Slots to be filled： {[slot.name for slot in missed_slots[0] if slot]}")
                 return PolicyResponse(
-                    True, SlotFillingAction(missed_slots[0], IE.intent, prompt_manager=self.prompt_manager)
+                    True, SlotFillingAction(missed_slots, IE.intent, prompt_manager=self.prompt_manager)
                 )
 
             # ask for slot confirmation

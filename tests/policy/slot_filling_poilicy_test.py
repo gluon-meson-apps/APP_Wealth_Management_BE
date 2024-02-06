@@ -1,5 +1,6 @@
 import pytest
 
+from action.actions.general import SlotFillingAction
 from nlu.forms import FormStore
 from nlu.intent_config import IntentConfig, IntentListConfig
 from nlu.intent_with_entity import IntentWithEntity
@@ -108,24 +109,26 @@ class FakePromptManager:
         return "test"
 
 
-@pytest.mark.parametrize("expected_handle, expected_action, form_intent_slots, identified_slot_names", [
-    (False, None, [("test", False)], ["test"]),
-    (False, None, [("test", True)], ["test"]),
-    (False, None, [("test", True)], []),
-    (True, "slot_filling", [("test", True), ("test2", False)], ["test"]),
-    (True, "slot_filling", [("test", True), ("test2", False)], []),
-    (True, "slot_filling", [("test", False)], []),
-    (False, None, [], []),
-    (False, None, [], ["any"]),
+@pytest.mark.parametrize("expected_handle, expected_action, form_intent_slots, identified_slot_names, missing_slots", [
+    (False, None, [("test", False)], ["test"], []),
+    (False, None, [("test", True)], ["test"], []),
+    (False, None, [("test", True)], [], []),
+    (True, "slot_filling", [("test", True), ("test2", False)], ["test"], [["test2"]]),
+    (True, "slot_filling", [("test", True), ("test2", False)], [], [["test2"]]),
+    (True, "slot_filling", [("test", False)], [], [["test"]]),
+    (False, None, [], [], []),
+    (False, None, [], ["any"], []),
 ])
 def test_return_slot_filling_action_when_mandatory_slot_is_missing_and_no_expression(
-        expected_handle, expected_action, form_intent_slots, identified_slot_names, conversation_context):
+        expected_handle, expected_action, form_intent_slots, identified_slot_names, conversation_context, missing_slots):
     slot_filling_policy = SlotFillingPolicy(
         FakePromptManager(),
         FormStore(IntentListConfig([create_intent_config_with_multiple_slot_name_optional_tuples(form_intent_slots)])))
     response = slot_filling_policy.handle(create_intent_with_entity_by_slot_names(identified_slot_names), conversation_context)
     assert response.handled is expected_handle
+    action: SlotFillingAction = response.action
     if expected_action is None:
-        assert response.action is None
+        assert action is None
     else:
-        assert response.action.get_name() == expected_action
+        assert action.get_name() == expected_action
+        assert action.get_slot_names() == missing_slots

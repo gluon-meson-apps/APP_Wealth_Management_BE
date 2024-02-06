@@ -1,5 +1,5 @@
 import json
-from typing import List, Union, Sequence
+from typing import Union, Sequence
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
@@ -35,12 +35,18 @@ class SlotFillingAction(Action):
     def get_name(self) -> str:
         return "slot_filling"
 
-    def __init__(self, slots: Union[List[Slot], Slot, Sequence[Slot]], intent: Intent, prompt_manager: PromptManager):
+    def __init__(self, slots: Union[Sequence[Sequence[Slot]]], intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name="slot_filling")
         self.intent = intent
         self.slots = slots
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "slot_filling_action"
+
+    def get_slot_names(self):
+        result = []
+        for slots in self.slots:
+            result.append([s.name for s in slots])
+        return result
 
     async def run(self, context):
         logger.info("exec action slot filling")
