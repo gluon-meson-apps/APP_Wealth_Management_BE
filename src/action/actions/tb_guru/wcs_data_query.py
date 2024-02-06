@@ -2,6 +2,7 @@ import asyncio
 import os
 import shutil
 import uuid
+from typing import Union
 
 import pandas as pd
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
@@ -12,17 +13,19 @@ from action.base import (
     Action,
     ChatResponseAnswer,
     ResponseMessageType,
-    GeneralResponse,
     ActionResponse,
     UploadFileContentType,
     UploadStorageFile,
+    AttachmentResponse,
+    Attachment,
+    GeneralResponse,
 )
 from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
 from utils.ppt_helper import generate_ppt
 from utils.utils import extract_json_from_code_block
 
-report_filename = "file_validation_report.html"
+ppt_filename = "tb_guru_ppt.pptx"
 
 extract_data_prompt = """
 ## Role
@@ -118,7 +121,9 @@ class WcsDataQuery(Action):
     def get_name(self) -> str:
         return "wcs_data_query"
 
-    async def _generate_ppt_link(self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str) -> str:
+    async def _generate_ppt_link(
+        self, df_current: pd.DataFrame, df_all: pd.DataFrame, insight: str
+    ) -> Union[Attachment, None]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
@@ -129,8 +134,12 @@ class WcsDataQuery(Action):
             ]
             links = await self.unified_search.upload_file_to_minio(files)
             shutil.rmtree(files_dir)
-            return links[0] if links else ""
-        return ""
+            return (
+                Attachment(name=ppt_filename, content_type=UploadFileContentType.PPTX, path=ppt_path, url=links[0])
+                if links
+                else None
+            )
+        return None
 
     async def _search_db(self, entity_dict, session_id) -> tuple[list[SearchItem], list[SearchItem]]:
         query_list = [
@@ -184,11 +193,12 @@ class WcsDataQuery(Action):
         logger.info(f"chat result: {info_result}")
 
         final_result = info_result
+        ppt_attachment = None
         if is_ppt_output:
-            ppt_link = await self._generate_ppt_link(df_current_company, df_all_companies, info_result)
+            ppt_attachment = await self._generate_ppt_link(df_current_company, df_all_companies, info_result)
 
             chat_message_preparation = ChatMessagePreparation()
-            chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_link, info=info_result)
+            chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_attachment, info=info_result)
             chat_message_preparation.log(logger)
 
             final_result = chat_model.chat(
@@ -203,6 +213,10 @@ class WcsDataQuery(Action):
             intent=context.conversation.current_intent.name,
             references=[] if is_data_provided else current_company_data + latest_all_data,
         )
+        if ppt_attachment:
+            return AttachmentResponse(
+                code=200, message="success", answer=answer, jump_out_flag=False, attachment=ppt_attachment
+            )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
 
