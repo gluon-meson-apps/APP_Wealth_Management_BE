@@ -1,7 +1,7 @@
 previous_output = """{{ output }}"""
 
 scenario = "{{ scenario }}"
-use_case = "{{ session_name }}"
+use_case = "{{ use_case }}"
 
 def main():
     import os
@@ -39,7 +39,7 @@ def main():
     chat_message_preparation.log(logger)
     chat_params = chat_message_preparation.to_chat_params()
 
-    result = chat_model.chat(**chat_params(), **params).response
+    result = chat_model.chat(**chat_params, **params).response
     print(result)
 
     from tests.utils.record_testing_details import record_testing_details
