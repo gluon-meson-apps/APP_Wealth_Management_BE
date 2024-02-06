@@ -1,3 +1,5 @@
+import json
+
 from loguru import logger
 from action.base import Action, ActionResponse, ChatResponseAnswer, ResponseMessageType, GeneralResponse
 from third_system.search_entity import SearchParam
@@ -10,9 +12,7 @@ from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioM
 prompt = """"## Role
 you are a helpful assistant, you need to check LC acceptable for every counterparty bank with different CBID
 ## LC acceptable check
-1. check whether the issuing bank is in the counterparty bank list, if not, then return we are not able to accept a letter of credit from the $bank
-
-2. check whether the issuing bank's {{country_of_rma}} RMA status is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or Network Bank.
+1. check whether the issuing bank's {{country_of_rma}} RMA status is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or Network Bank.
 if not, then return we are not able to accept a letter of credit from the $bank, if yes, then return we are able to accept a letter of credit from the $bank
 
 ## ATTENTION
@@ -36,7 +36,7 @@ if not, then return we are not able to accept a letter of credit from the $bank,
 
 ## INSTRUCT
 
-now, answer the question step by step, and reply every step result
+now, answer the question step by step, and reply step result and the final result
 """
 
 
@@ -67,9 +67,10 @@ class LCAcceptableAction(Action):
         for item in response:
             all_banks.extend(item.items)
         if len(all_banks) == 0:
+            bank_name = ' '.join(json.loads(bank_info).values())
             answer = ChatResponseAnswer(
                 messageType=ResponseMessageType.FORMAT_TEXT,
-                content=f"the bank {bank_info} cannot be found in the Counterparty Bank file, and that they should do further checks.",
+                content=f"the bank '{bank_name}' cannot be found in the Counterparty Bank file, please do further checks.",
                 intent=context.conversation.current_intent.name,
             )
             return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)

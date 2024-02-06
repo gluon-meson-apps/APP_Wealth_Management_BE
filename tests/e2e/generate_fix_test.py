@@ -21,4 +21,4 @@ def generate_fix_test(log_ids: list[str]):
 
 
 if __name__ == "__main__":
-    generate_fix_test(['e971b840-c481-44d4-bcbc-3f31d48226fc'])
+    generate_fix_test(['rma_checking_6'])

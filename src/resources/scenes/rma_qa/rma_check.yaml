@@ -1,6 +1,6 @@
 name: rma_checking
 business: true
-description: check whether the issuing bank is in the counterparty bank list, and whether there is RMA with HSBC
+description: check RMA for the bank
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
 slots:
