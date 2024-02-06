@@ -165,7 +165,7 @@ class LLMIntentClassifier(IntentClassifier):
             return intents[0]
         return None
 
-    async def classify_intent_overall(self, conversation: ConversationContext) -> Optional[Intent]:
+    async def classify_intent(self, conversation: ConversationContext) -> Optional[Intent]:
         # intent confuse confirm
         if conversation.is_confused_with_intents():
             intent = self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
@@ -194,7 +194,7 @@ class LLMIntentClassifier(IntentClassifier):
     ) -> Optional[Intent]:
         current_intent = start_intent
         while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
-            current_intent, unique_intent_from_examples = await self.classify_intent(conversation, current_intent)
+            current_intent, unique_intent_from_examples = await self.classify_single_layer_intent(conversation, current_intent)
             # intent confuse check
             if (
                 current_intent
@@ -205,7 +205,7 @@ class LLMIntentClassifier(IntentClassifier):
                 break
         return current_intent
 
-    async def classify_intent(
+    async def classify_single_layer_intent(
         self, conversation: ConversationContext, parent_intent: Intent = None
     ) -> tuple[Optional[Intent], Optional[Intent]]:
         user_input = conversation.current_user_input
