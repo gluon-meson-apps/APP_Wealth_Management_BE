@@ -26,7 +26,7 @@ from policy.general import (
     JumpOutPolicy,
     IntentChoosingPolicy,
 )
-from policy.slot_filling_policy import SlotFillingPolicy
+from policy.slot_filling.slot_filling_policy import SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.base import Reasoner
 from reasoner.llm_reasoner import LlmReasoner

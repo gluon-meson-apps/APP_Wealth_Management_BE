@@ -3,7 +3,7 @@ import pytest
 from nlu.forms import FormStore
 from nlu.intent_config import IntentConfig, IntentListConfig
 from nlu.intent_with_entity import IntentWithEntity
-from policy.slot_filling_policy import SlotFillingPolicy
+from policy.slot_filling.slot_filling_policy import SlotFillingPolicy
 from tracker.context import ConversationContext
 
 
