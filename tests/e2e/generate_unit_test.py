@@ -19,7 +19,8 @@ def generate_one_unit_test(session_name, data_list, params, output, scenario, fi
                 data_list=data_list,
                 params=params,
                 output=output,
-                scenario=scenario
+                scenario=scenario,
+                use_case=session_name,
             ))
 
 
