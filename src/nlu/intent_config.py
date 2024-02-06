@@ -14,6 +14,7 @@ class IntentConfig:
         examples=None,
         has_children=False,
         full_name_of_parent_intent=None,
+        slot_expression=None,
     ):
         self.name = name
         self.description = description
@@ -23,6 +24,7 @@ class IntentConfig:
         self.examples = examples or []
         self.has_children = has_children or False
         self.full_name_of_parent_intent: str = full_name_of_parent_intent
+        self.slot_expression = slot_expression
 
     def is_ancestor_of(self, other_intent: "IntentConfig"):
         if other_intent.full_name_of_parent_intent and other_intent.full_name_of_parent_intent.startswith(
