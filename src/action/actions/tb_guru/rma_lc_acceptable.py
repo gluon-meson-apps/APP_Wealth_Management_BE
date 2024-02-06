@@ -20,9 +20,8 @@ if not, then return we are not able to accept a letter of credit from the $bank,
 2 if one bank has more than one RMA column, should do the check for every RMA column
 
 ## steps
-1. if the counterparty bank list is empty, then reply we are not able to accept a letter of credit from the $bank 
-2. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
-3. return EVERY bank's {{country_of_rma}} RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
+1. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
+2. return EVERY bank's {{country_of_rma}} RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
 
 ## counterparty bank list
 
