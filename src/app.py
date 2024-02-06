@@ -130,7 +130,7 @@ async def score(
         full_history = []
         if conversation is not None:
             full_history = conversation.history.format_messages()
-        PGModelLogService().log(
+        await PGModelLogService().async_log(
             session_id,
             "overall",
             "no_model",

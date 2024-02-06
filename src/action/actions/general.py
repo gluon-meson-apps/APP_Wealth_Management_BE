@@ -62,7 +62,7 @@ class SlotFillingAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        response = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=256).response
+        response = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=256)).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -93,7 +93,7 @@ class IntentConfirmAction(Action):
         chat_message_preparation.log(logger)
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
-        response = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=128).response
+        response = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=128)).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -125,8 +125,8 @@ class IntentFillingAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        response = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=1024, temperature=0.7
+        response = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, temperature=0.7)
         ).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
@@ -158,8 +158,8 @@ class AskForIntentChoosingAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        response = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=128, temperature=0.2
+        response = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=128, temperature=0.2)
         ).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
@@ -194,7 +194,7 @@ class SlotConfirmAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        response = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=512).response
+        response = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=512)).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
@@ -221,7 +221,7 @@ class ChitChatAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=1024).response
+        result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024)).response
 
         answer = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=result)
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)

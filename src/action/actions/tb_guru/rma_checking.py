@@ -45,10 +45,7 @@ class RMACheckingAction(Action):
         entity_dict = context.conversation.get_simplified_entities()
 
         bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank", "country of rma"])
-        query = (
-                    "search the counterparty bank"
-                    + f"\n #extra infos: fields to be queried: {bank_info} "
-        )
+        query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
         response = await self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
@@ -58,7 +55,7 @@ class RMACheckingAction(Action):
             all_banks.extend(item.items)
 
         if len(all_banks) == 0:
-            bank_name = ' '.join(json.loads(bank_info).values())
+            bank_name = " ".join(json.loads(bank_info).values())
             answer = ChatResponseAnswer(
                 messageType=ResponseMessageType.FORMAT_TEXT,
                 content=f"the bank '{bank_name}' cannot be found in the Counterparty Bank file, please do further checks.",
@@ -78,7 +75,7 @@ class RMACheckingAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
+        result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
         logger.info(f"chat result: {result}")
 
         references = []

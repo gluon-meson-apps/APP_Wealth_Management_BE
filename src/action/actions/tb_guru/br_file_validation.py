@@ -70,10 +70,12 @@ class BrFileValidation(Action):
         else:
             chat_message_preparation.add_message("system", no_data_prompt, user_input=user_input)
         chat_message_preparation.log(logger)
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(),
-            max_length=1024,
-            sub_scenario="validation" if br_file_contents else "no_data",
+        result = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(),
+                max_length=1024,
+                sub_scenario="validation" if br_file_contents else "no_data",
+            )
         ).response
         logger.info(f"chat result: {result}")
 

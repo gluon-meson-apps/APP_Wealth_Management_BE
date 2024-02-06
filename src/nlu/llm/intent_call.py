@@ -45,7 +45,7 @@ class IntentCall:
 
         chat_message_preparation.add_message("system", self.template.template, intent_list=json.dumps(intent_list))
 
-    def classify_intent(
+    async def classify_intent(
         self, query: str, examples, session_id, full_name_of_parent_intent: str = None
     ) -> IntentClassificationResponse:
         # TODO: drop history if it is too long
@@ -63,11 +63,13 @@ class IntentCall:
         chat_message_preparation.add_message("user", query)
         chat_message_preparation.log(logger)
 
-        intent = chat_model.chat(
-            **chat_message_preparation.to_chat_params(),
-            max_length=64,
-            jsonable=True,
-            sub_scenario=full_name_of_parent_intent,
+        intent = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(),
+                max_length=64,
+                jsonable=True,
+                sub_scenario=full_name_of_parent_intent,
+            )
         ).get_json_response()
         logger.debug(intent)
         try:

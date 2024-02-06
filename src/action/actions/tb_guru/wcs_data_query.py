@@ -23,7 +23,6 @@ from action.base import (
 from third_system.search_entity import SearchParam, SearchItem
 from third_system.unified_search import UnifiedSearch
 from utils.ppt_helper import generate_ppt
-from utils.utils import extract_json_from_code_block
 
 ppt_filename = "tb_guru_ppt.pptx"
 
@@ -84,7 +83,7 @@ now, reply your result with above info.
 """
 
 
-def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem]]:
+async def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem]]:
     chat_message_preparation = ChatMessagePreparation()
     chat_message_preparation.add_message(
         "system",
@@ -93,10 +92,11 @@ def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem
     )
     chat_message_preparation.log(logger)
 
-    result = chat_model.chat(
-        **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="data_provided"
-    ).response
-    formatted_data = extract_json_from_code_block(result)
+    formatted_data = (
+        await chat_model.achat(
+            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="data_provided"
+        )
+    ).get_json_response()
     current_company_data = formatted_data["all_years_data"] if "all_years_data" in formatted_data else []
     latest_all_data = formatted_data["latest_year_data"] if "latest_year_data" in formatted_data else []
     logger.info(f"formatted data: {formatted_data}")
@@ -164,7 +164,9 @@ class WcsDataQuery(Action):
         is_data_provided = entity_dict["is_data_provided"] if "is_data_provided" in entity_dict else False
 
         if is_data_provided:
-            latest_all_data, current_company_data = extract_data(context, chat_model) if is_ppt_output else ([], [])
+            latest_all_data, current_company_data = (
+                await extract_data(context, chat_model) if is_ppt_output else ([], [])
+            )
         else:
             latest_all_data, current_company_data = await self._search_db(entity_dict, context.conversation.session_id)
 
@@ -187,8 +189,8 @@ class WcsDataQuery(Action):
             )
         chat_message_preparation.log(logger)
 
-        info_result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="insight"
+        info_result = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="insight")
         ).response
         logger.info(f"chat result: {info_result}")
 
@@ -201,8 +203,8 @@ class WcsDataQuery(Action):
             chat_message_preparation.add_message("system", ppt_prompt, ppt_link=ppt_attachment, info=info_result)
             chat_message_preparation.log(logger)
 
-            final_result = chat_model.chat(
-                **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="ppt"
+            final_result = (
+                await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="ppt")
             ).response
 
         logger.info(f"final result: {final_result}")

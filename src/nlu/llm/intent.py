@@ -168,7 +168,7 @@ class LLMIntentClassifier(IntentClassifier):
     async def classify_intent(self, conversation: ConversationContext) -> Optional[Intent]:
         # intent confuse confirm
         if conversation.is_confused_with_intents():
-            intent = self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
+            intent = await self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
             conversation.confused_intents_resolved()
             if intent:
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
@@ -181,7 +181,7 @@ class LLMIntentClassifier(IntentClassifier):
         previous_intent = conversation.current_intent
 
         if len(chat_history) > 1:
-            start_new_topic, new_request = self.same_topic_checker.check_same_topic(
+            start_new_topic, new_request = await self.same_topic_checker.check_same_topic(
                 chat_history, conversation.session_id
             )
             if previous_intent and not start_new_topic:
@@ -194,7 +194,9 @@ class LLMIntentClassifier(IntentClassifier):
     ) -> Optional[Intent]:
         current_intent = start_intent
         while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
-            current_intent, unique_intent_from_examples = await self.classify_single_layer_intent(conversation, current_intent)
+            current_intent, unique_intent_from_examples = await self.classify_single_layer_intent(
+                conversation, current_intent
+            )
             # intent confuse check
             if (
                 current_intent
@@ -225,7 +227,7 @@ class LLMIntentClassifier(IntentClassifier):
                 description=unique_intent_name_in_examples.description,
                 full_name_of_parent_intent=unique_intent_name_in_examples.full_name_of_parent_intent,
             )
-        intent = self.intent_call.classify_intent(
+        intent = await self.intent_call.classify_intent(
             user_input, intent_examples, conversation.session_id, parent_intent_name_of_current_layer
         )
 

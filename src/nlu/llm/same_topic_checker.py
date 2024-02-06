@@ -17,7 +17,7 @@ class SameTopicChecker:
             chat_history_str += f"{i_or_you}: {chat['content']}\n"
         return chat_history_str
 
-    def check_same_topic(self, history, session_id):
+    async def check_same_topic(self, history, session_id):
         prompt = """## ROLE
 you are a helpful chatbot
 
@@ -38,8 +38,13 @@ you are a helpful chatbot
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
         chat_message_preparation.add_message("user", self.format_history(history))
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=256, jsonable=True, sub_scenario="check_same_topic"
+        result = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(),
+                max_length=256,
+                jsonable=True,
+                sub_scenario="check_same_topic",
+            )
         ).get_json_response()
         return result["start_new_topic"] if "start_new_topic" in result else False, result[
             "new_request"

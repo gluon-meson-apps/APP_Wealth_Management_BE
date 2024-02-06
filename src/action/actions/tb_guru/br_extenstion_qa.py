@@ -11,7 +11,6 @@ from action.base import (
 from third_system.search_entity import SearchParam
 from third_system.unified_search import UnifiedSearch
 
-
 prompt = """
 ## Role
 You are an assistant with name as "TB Guru", you need to answer the user's query base on provided Board Resolution extension content.
@@ -25,7 +24,6 @@ You are an assistant with name as "TB Guru", you need to answer the user's query
 ## INSTRUCTION
 Now, answer the user's question, and reply the final result.
 """
-
 
 summary_prompt = """
 ## INSTRUCTION
@@ -61,8 +59,8 @@ class BRExtensionQAAction(Action):
         chat_message_preparation.add_message("user", summary_prompt, user_input=user_input, chat_history=history)
         chat_message_preparation.log(logger)
 
-        summary_user_input = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=512, sub_scenario="summary"
+        summary_user_input = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=512, sub_scenario="summary")
         ).response
 
         query = f"""## User input:
@@ -81,8 +79,10 @@ search the BR extension
         chat_message_preparation.add_message("system", prompt, user_input=user_input, br_extension_content=response)
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="final_question"
+        result = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario="final_question"
+            )
         ).response
         logger.info(f"chat result: {result}")
         references = []

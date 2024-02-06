@@ -77,7 +77,7 @@ class LLMEntityExtractor(EntityExtractor):
         ]
         return examples
 
-    def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
+    async def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
         form = self.form_store.get_form_from_intent(intent)
@@ -93,8 +93,8 @@ class LLMEntityExtractor(EntityExtractor):
             return []
         self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
-        entities = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True
+        entities = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True)
         ).get_json_response()
 
         logger.debug(entities)

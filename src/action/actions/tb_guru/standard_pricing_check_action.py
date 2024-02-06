@@ -72,8 +72,8 @@ class StandardPricingCheckAction(Action):
         chat_message_preparation.add_message("user", summary_prompt_template, chat_history=history)
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="summary"
+        result = (
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="summary")
         ).response
         query = f"""## User input:
 {result}
@@ -102,8 +102,7 @@ class StandardPricingCheckAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
-        # result = self.chat_model.chat(final_prompt, model_type=self.model_type, max_length=1024)
+        result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

@@ -48,12 +48,12 @@ class BaseDialogManager:
         self.output_adapters = output_adapters
         self.reasoner = reasoner
 
-    def greet(self, user_id: str) -> Any:
+    async def greet(self, user_id: str) -> Any:
         conversation = self.conversation_tracker.load_conversation(user_id)
 
         action = self.reasoner.greet(conversation)
         action_response = self.action_runner.run(action, ActionContext(conversation))
-        response = self.output_adapter.process_output(action_response)
+        response = await self.output_adapter.process_output(action_response)
         self.conversation_tracker.save_conversation(user_id, conversation)
         return response
 
@@ -88,7 +88,7 @@ class BaseDialogManager:
 
         action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
         for output_adapter in self.output_adapters:
-            action_response = output_adapter.process_output(action_response, conversation)
+            action_response = await output_adapter.process_output(action_response, conversation)
         response = action_response
         conversation.append_assistant_history(response.answer)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)

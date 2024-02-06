@@ -20,7 +20,7 @@ class IntentChoosingConfirmer:
         self.scenario_model = "intent_choosing_confirm"
         self.intent_choosing_template = intent_choosing_template
 
-    def confirm(self, conversation: ConversationContext, session_id: str) -> Optional[str]:
+    async def confirm(self, conversation: ConversationContext, session_id: str) -> Optional[str]:
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
 
         chat_message_preparation = ChatMessagePreparation()
@@ -33,8 +33,10 @@ class IntentChoosingConfirmer:
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="intent"
+        result = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="intent"
+            )
         ).get_json_response()
 
         if result["user_reply_with_intent"]:

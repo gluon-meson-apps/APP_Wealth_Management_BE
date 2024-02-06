@@ -36,7 +36,7 @@ class IntegratedNLU(Nlu):
         logger.info(f"Current intent: {conversation.current_intent}")
 
         logger.info("extracting utterance's slots")
-        current_entities = self.entity_extractor.extract_entity(conversation)
+        current_entities = await self.entity_extractor.extract_entity(conversation)
         # Retain entities
         existing_entities = conversation.get_entities()
         merged_entities = self.merge_entities(

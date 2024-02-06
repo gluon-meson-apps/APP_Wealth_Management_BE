@@ -49,7 +49,7 @@ class BrFileQAAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
+        result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
         logger.info(f"chat result: {result}")
 
         answer = ChatResponseAnswer(

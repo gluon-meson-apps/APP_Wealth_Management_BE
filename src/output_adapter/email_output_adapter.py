@@ -51,7 +51,7 @@ class EmailOutputAdapter(OutputAdapter):
     def get_name(self) -> str:
         return "email_reply"
 
-    def process_output(self, result: object, conversation: ConversationContext) -> object:
+    async def process_output(self, result: object, conversation: ConversationContext) -> object:
         if not conversation.check_is_email_request() or not isinstance(result, ActionResponse):
             return result
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
@@ -62,8 +62,13 @@ class EmailOutputAdapter(OutputAdapter):
             history=conversation.get_history().format_string(),
         )
         chat_message_preparation.log(logger)
-        json_response = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=64, jsonable=True, sub_scenario="draft_email_check"
+        json_response = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(),
+                max_length=64,
+                jsonable=True,
+                sub_scenario="draft_email_check",
+            )
         ).get_json_response()
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -73,8 +78,10 @@ class EmailOutputAdapter(OutputAdapter):
         )
         chat_message_preparation.log(logger)
 
-        email_result = chat_model.chat(
-            **chat_message_preparation.to_chat_params(), max_length=4096, sub_scenario="rewrite_email_content"
+        email_result = (
+            await chat_model.achat(
+                **chat_message_preparation.to_chat_params(), max_length=4096, sub_scenario="rewrite_email_content"
+            )
         ).response
         draft_email_response = draft_email_response_template
 

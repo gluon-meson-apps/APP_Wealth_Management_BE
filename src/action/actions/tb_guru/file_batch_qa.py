@@ -90,8 +90,10 @@ class FileBatchAction(Action):
                 )
                 chat_message_preparation.log(logger)
 
-                result = chat_model.chat(
-                    **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario=index
+                result = (
+                    await chat_model.achat(
+                        **chat_message_preparation.to_chat_params(), max_length=2048, sub_scenario=index
+                    )
                 ).response
                 logger.info(f"chat result: {result}")
 

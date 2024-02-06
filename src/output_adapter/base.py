@@ -68,7 +68,7 @@ def get_parsed_slot_value(target_slot_name: str, slot_value: str, force_filter: 
 
 
 class OutputAdapter:
-    def process_output(self, output: object, conversation: ConversationContext) -> object:
+    async def process_output(self, output: object, conversation: ConversationContext) -> object:
         raise NotImplementedError()
 
     def get_slot_name(self, action_name: str, target_slots: []):
@@ -146,7 +146,7 @@ class BaseOutputAdapter(OutputAdapter):
     def __init__(self, unified_search: UnifiedSearch = Depends()):
         self.unified_search = unified_search
 
-    def process_output(self, output: object, conversation: ConversationContext) -> object:
+    async def process_output(self, output: object, conversation: ConversationContext) -> object:
         if isinstance(output, AttachmentResponse):
             logger.info(f"process attachment: {output.attachment}")
             output.answer.extra_info["Attachment"] = output.attachment.url
