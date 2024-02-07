@@ -101,7 +101,7 @@ class FileBatchAction(Action):
                     {item.meta__reference.meta__source_name for one_response in response for item in one_response.items}
                 )
 
-            return index, result, context_info, source_name
+            return result, context_info, source_name
 
         return get_result_from_llm
 
@@ -133,7 +133,7 @@ class FileBatchAction(Action):
         ]
         search_res = await asyncio.gather(*tasks)
         search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name"])
-        df = df.drop("answers", axis=1).merge(search_df, left_index=True, right_index=True, how="left").reset_index()
+        df = df[[questions_column]].merge(search_df, left_index=True, right_index=True, how="left").reset_index()
         df = df[[questions_column, "answers", "reference_name", "reference_data"]]
 
         answer = ChatResponseAnswer(
