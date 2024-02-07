@@ -13,20 +13,18 @@ from utils.utils import get_value_or_default_from_dict, async_parse_json_respons
 
 
 def parse_email(value: dict) -> Email:
-    body_value = value["body"] if "body" in value and value["body"] else {}
-    sender_value = value["sender"] if "sender" in value and value["sender"] else {}
-    body = EmailBody(content=body_value["content"], content_type=body_value["contentType"])
-    email_sender = EmailSender(
-        address=sender_value["emailAddress"]["address"], name=sender_value["emailAddress"]["name"]
-    )
+    body_value = value.get("body", {})
+    sender_value = value.get("sender", {}).get("emailAddress", {})
+    body = EmailBody(content=body_value.get("content"), content_type=body_value.get("contentType"))
+    email_sender = EmailSender(address=sender_value.get("address"), name=sender_value.get("name"))
     return Email(
         body=body,
-        id=value["id"],
-        conversation_id=value["conversationId"],
-        subject=value["subject"],
+        id=value.get("id"),
+        conversation_id=value.get("conversationId"),
+        subject=value.get("subject"),
         sender=email_sender,
-        has_attachments=value["hasAttachments"],
-        received_date_time=value["receivedDateTime"],
+        has_attachments=value.get("hasAttachments"),
+        received_date_time=value.get("receivedDateTime"),
         attachment_urls=[],
     )
 
@@ -135,7 +133,15 @@ class Graph:
         )
         data = await self.call_graph_api(endpoint, extra_headers={"Prefer": 'outlook.body-content-type="text"'})
         first_message = next(iter(data), None) if data else None
-        return parse_email(first_message) if first_message else None
+        if first_message:
+            parsed_email = parse_email(first_message)
+            if parsed_email.body.content:
+                return parsed_email
+            else:
+                logger.info(f"Email {parsed_email.subject} has no content, archiving it.")
+                await self.archive_email(parsed_email)
+                return None
+        return None
 
     async def list_attachments(self, message_id):
         endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
