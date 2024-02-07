@@ -20,5 +20,5 @@ slots:
     description: the full country name or bank and country which used to check RMA, for example Hang Seng - Hong Kong,Hang Seng - China
     slotType: text
     optional: True
-action: letter_of_credit_advising
+action: rma_checking
 
