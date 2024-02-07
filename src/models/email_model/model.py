@@ -26,5 +26,5 @@ class Email(BaseModel):
 
 class EmailAttachment(BaseModel):
     name: str
-    type: str
+    content_type: str
     bytes: str

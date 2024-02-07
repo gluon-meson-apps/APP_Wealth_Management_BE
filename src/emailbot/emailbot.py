@@ -129,7 +129,8 @@ WHERE id = '{email.id}'
     async def process_emails(self, new_email):
         if new_email:
             answer, attachments = await self.ask_thought_agent(new_email)
-            await self.graph.reply_email(new_email, answer, await self.parse_attachments_in_answer(attachments))
+            email_attachments = await self.parse_attachments_in_answer(attachments)
+            await self.graph.reply_email(new_email, answer, email_attachments)
             self.database.insert_processed_email_into_database(new_email)
 
     async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[Attachment], None]:
@@ -178,7 +179,9 @@ WHERE id = '{email.id}'
         for a in attachments:
             contents = await self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
             if contents:
-                result.append(EmailAttachment(name=a.name, bytes=contents, type=a.content_type))
+                result.append(
+                    EmailAttachment(name=a.name, bytes=base64.b64encode(contents), content_type=a.content_type)
+                )
         return result
 
     async def upload_email_attachments(self, email):

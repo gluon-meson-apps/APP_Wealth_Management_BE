@@ -105,7 +105,7 @@ class Graph:
                 ) as response:
                     response.raise_for_status()
                     data = await async_parse_json_response(response) if response.status in [200, 201] else {}
-                    return data["value"] if "value" in data and data["value"] else data
+                    return data["value"] if data and "value" in data else data
             except ClientResponseError as http_err:
                 if http_err.status == 401:
                     await self.refresh_access_token()
@@ -159,7 +159,7 @@ class Graph:
                         "@odata.type": "#microsoft.graph.fileAttachment",
                         "name": a.name,
                         "contentBytes": a.bytes,
-                        "contentType": a.type,
+                        "contentType": a.content_type,
                     },
                     extra_headers={"Content-Type": "application/json"},
                 )

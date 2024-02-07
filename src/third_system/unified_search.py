@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import mimetypes
 import os
 from typing import Union
@@ -59,7 +60,7 @@ class UnifiedSearch:
             try:
                 async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
                     resp.raise_for_status()
-                    return await resp.content.read()
+                    return base64.b64decode(await resp.text())
             except Exception as err:
                 logger.error(f"Error download {file_url}:", err)
                 return None
