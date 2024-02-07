@@ -124,7 +124,7 @@ class FileBatchAction(Action):
                 f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
                 conversation.current_intent.name,
             )
-        df = df[df[questions_column].notna()]
+        df = df[df[questions_column].notna()].reset_index()
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
