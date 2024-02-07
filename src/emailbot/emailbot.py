@@ -178,7 +178,7 @@ WHERE id = '{email.id}'
         for a in attachments:
             contents = await self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
             if contents:
-                result.append(EmailAttachment(name=a.name, bytes=base64.b64encode(contents), type=a.content_type))
+                result.append(EmailAttachment(name=a.name, bytes=contents, type=a.content_type))
         return result
 
     async def upload_email_attachments(self, email):
