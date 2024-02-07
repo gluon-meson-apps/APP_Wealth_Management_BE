@@ -69,7 +69,7 @@ class FileValidation(Action):
         return "file_validation"
 
     async def _upload_file(self, res: str) -> str:
-        files = [UploadStorageFile(filename=report_filename, file_path=res, content_type=UploadFileContentType.HTML)]
+        files = [UploadStorageFile(filename=report_filename, contents=res, content_type=UploadFileContentType.HTML)]
         links = await self.unified_search.upload_file_to_minio(files)
         if links and links[0]:
             return links[0]
