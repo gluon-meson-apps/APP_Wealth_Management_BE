@@ -14,12 +14,16 @@ you are a helpful assistant
 your result should be a json string, like this:
 
 {
-    "entity1": "value of entity1", // the key MUST listed in Entities info
-    "entity2": "value of entity2",
+    "entity name1": "value of entity1",  // the ENTITY NAME MUST listed in Entities info
+    "entity name2": "value of entity2",
     ...
 }
 
-## Entities info
+## Recipient
+
+your output will be sent to the next model in the pipeline. so you are VERY IMPORTANT. if you can't find the entities EXHAUSTIVELY, the next model will not work properly.
+
+## Entities info (formatted as entity_name: entity_description)
 
 {{entity_types_and_values}}
 

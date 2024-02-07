@@ -271,3 +271,6 @@ class ConversationContext:
 
     def set_email_request(self, is_email_request):
         self.is_email_request = is_email_request
+
+    def get_file_name(self):
+        return self.history.rounds[-1]["file_name"]
