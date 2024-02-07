@@ -20,5 +20,7 @@ class EntityExtractor:
 
 
 class IntentClassifier:
-    def classify_intent(self, conversation_context: ConversationContext) -> tuple[Optional[Intent], Optional[Intent]]:
+    async def classify_intent(
+        self, conversation_context: ConversationContext
+    ) -> tuple[Optional[Intent], Optional[Intent]]:
         raise NotImplementedError()

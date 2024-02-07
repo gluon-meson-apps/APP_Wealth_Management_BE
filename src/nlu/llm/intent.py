@@ -190,6 +190,8 @@ class LLMIntentClassifier(IntentClassifier):
             current_intent, unique_intent_from_examples = await self.classify_single_layer_intent(
                 conversation, current_intent
             )
+            if current_intent is None:
+                break
             # intent confuse check
             if (
                 current_intent
