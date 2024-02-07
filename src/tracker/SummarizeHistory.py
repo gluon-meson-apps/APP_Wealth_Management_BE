@@ -1,3 +1,5 @@
+from typing import List
+
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
@@ -15,7 +17,7 @@ class SummarizeHistory:
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "summarize_history"
 
-    async def summarize(self, history: str, session_id: str):
+    async def summarize(self, history: List[dict], session_id: str):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt, history=history)
