@@ -1,3 +1,4 @@
+import mimetypes
 import os
 
 import aiohttp
@@ -22,7 +23,12 @@ class HsbcConnectApi:
 
     async def _call_hsbc_connect_api(self, file: SearchItem) -> str:
         data = aiohttp.FormData()
-        data.add_field("Attachment", file.text)
+        data.add_field(
+            "Attachment",
+            file.text,
+            filename=file.meta__reference.meta__source_name,
+            content_type=mimetypes.guess_type(file.meta__reference.meta__source_type)[0],
+        )
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.post(self.base_url, data=data) as response:
