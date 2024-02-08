@@ -43,8 +43,6 @@ async def main():
     result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), **params)).response
     print(result)
 
-    from tests.utils.record_testing_details import record_testing_details
-    record_testing_details(use_case, scenario, chat_params["text"], params, result)
     return result
 
 if __name__ == '__main__':
