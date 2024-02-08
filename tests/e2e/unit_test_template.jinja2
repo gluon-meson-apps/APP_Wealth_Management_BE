@@ -40,10 +40,10 @@ async def main():
     chat_message_preparation.log(logger)
     chat_params = chat_message_preparation.to_chat_params()
 
-    result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), **params)).response
+    result = (await chat_model.chat(**chat_params, **params)).response
     print(result)
 
-    return result
+    return use_case, scenario, chat_params["text"], params, result, ""
 
 if __name__ == '__main__':
     asyncio.run(main())
