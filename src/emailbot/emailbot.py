@@ -65,7 +65,7 @@ class EmailBot:
         def generate_connection_string(self):
             if self.config:
                 self.connection_string = (
-                    f"postgresql+psycopg2://"
+                    f"postgresql+psycopg://"
                     f"{self.config.USER}:{self.config.PASSWORD}"
                     f"@{self.config.HOST}/{self.config.DATABASE}"
                 )
