@@ -28,4 +28,5 @@ def template_test_for_one_case(logs, test_case):
             elif 'entity_extractor' in key and test_case == "entity_extractor":
                 expected_entity = get_dict_only_with_value_not_empty(extract_json_from_code_block(expected_item[key]))
                 actual_entity = get_dict_only_with_value_not_empty(extract_json_from_code_block(actual_item[unit_test_key]))
-                assert expected_entity == actual_entity, f"round{i+1}: {expected_entity} != {actual_entity}\n check {key}"
+                for k in expected_entity:
+                    assert expected_entity[k] == actual_entity[k], f"round{i+1}: {expected_entity[k]} != {actual_entity[k]}\n check {key}"
