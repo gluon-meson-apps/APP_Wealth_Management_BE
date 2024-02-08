@@ -31,7 +31,7 @@ class HsbcConnectApi:
         )
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(self.base_url, data=data) as response:
+                async with session.post(self.base_url, data=data, ssl=False) as response:
                     response.raise_for_status()
                     return await response.text()
             except Exception as err:
