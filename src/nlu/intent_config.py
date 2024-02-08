@@ -113,6 +113,7 @@ class IntentListConfig:
                 slots=data.get("slots"),
                 has_children=data.get("has_children"),
                 full_name_of_parent_intent=parent_intent_full_name,
+                slot_expression=data.get("slot_expression"),
             )
             intents.append(intent)
 
