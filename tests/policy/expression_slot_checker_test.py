@@ -10,7 +10,7 @@ from policy.slot_filling.expression_slot_checker import ExpressionSlotSequenceCh
     "test_name, expression, slot_names, expected",
     [
         # one layer
-        ("one layer exact match", "a and b and c", ["a", "b", "c"], True),
+        ("one layer exact match", "'a' and 'b' and 'c'", ["a", "b", "c"], True),
         ("one layer match or any", "a or b or c", ["a"], True),
         ("one layer match or any2", "a or b or c", ["b"], True),
         ("one layer match or any3", "a or b or c", ["c"], True),

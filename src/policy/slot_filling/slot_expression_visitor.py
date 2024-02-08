@@ -34,6 +34,10 @@ class SlotExpressionVisitor(ast.NodeVisitor):
             raise ValueError(f"Unknown op: {op}")
         return flat_slot_conditions
 
+    def visit_Str(self, node):
+        self.new_items[-1].append([[node.s]])
+        self.generic_visit(node)
+
     def visit_Name(self, node):
         self.new_items[-1].append([[node.id]])
         self.generic_visit(node)
