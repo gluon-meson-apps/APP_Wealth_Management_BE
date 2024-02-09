@@ -1,3 +1,5 @@
+import json
+
 previous_output = """{{ output }}"""
 import asyncio
 
@@ -43,7 +45,7 @@ async def main():
     result = (await chat_model.chat(**chat_params, **params)).response
     print(result)
 
-    return use_case, scenario, chat_params["text"], params, result, ""
+    return use_case, scenario, chat_params["text"], json.dumps(params), result, ""
 
 if __name__ == '__main__':
     asyncio.run(main())
