@@ -31,6 +31,7 @@ from prompt_manager.base import BasePromptManager
 from reasoner.base import Reasoner
 from reasoner.llm_reasoner import LlmReasoner
 from third_system.search_entity import SearchResponse
+from tracker.HistorySummarizer import HistorySummarizer
 from tracker.base import BaseConversationTracker, ConversationTracker
 from tracker.context import ConversationContext
 
@@ -42,11 +43,13 @@ class BaseDialogManager:
         reasoner: Reasoner,
         action_runner: ActionRunner,
         output_adapters: list[OutputAdapter],
+        history_summarizer: HistorySummarizer,
     ):
         self.conversation_tracker = conversation_tracker
         self.action_runner = action_runner
         self.output_adapters = output_adapters
         self.reasoner = reasoner
+        self.history_summarizer = history_summarizer
 
     async def greet(self, user_id: str) -> Any:
         conversation = self.conversation_tracker.load_conversation(user_id)
@@ -91,6 +94,7 @@ class BaseDialogManager:
             action_response = await output_adapter.process_output(action_response, conversation)
         response = action_response
         conversation.append_assistant_history(response.answer)
+        await self.history_summarizer.summarize_history(conversation)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         return response, conversation
@@ -119,6 +123,7 @@ class DialogManagerFactory:
             reasoner,
             SimpleActionRunner(),
             [BaseOutputAdapter(), EmailOutputAdapter()],
+            HistorySummarizer()
         )
 
     @classmethod

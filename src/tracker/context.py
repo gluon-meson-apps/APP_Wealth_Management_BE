@@ -49,9 +49,11 @@ class History:
             self.rounds.pop()
 
     def flag_history_summarized(self, n: int):
-        # todo: flag history already summarized
-        self.rounds.pop()
-
+        if n <= 0:
+            return
+        last_n_history = self.rounds[-n:]
+        last_n_summarized_history = [{**history, 'summarized': True} for history in last_n_history]
+        self.rounds = self.rounds[:-n] + last_n_summarized_history
 
     def format_string(self, rename: dict = None):
         if not rename:
@@ -112,7 +114,7 @@ class ConversationContext:
         self.current_intent_slot_names = []
         self.intent_queue = deque(maxlen=3)
         self.history = History([])
-        self.summarized_history = None
+        self.summarized_history_context = None
         # used for logging
         self.status = "start"
         # used for condition jughment
@@ -136,7 +138,7 @@ class ConversationContext:
         return self.history
 
     def get_unsummarized_history(self) -> list[dict]:
-        return [history for history in self.history.rounds if history.get('summarized') != True]
+        return [history for history in self.history.rounds if history.get('summarized') is not True]
 
     def reset_history(self):
         self.history.delete_n_round(self.appended_history_count_in_one_chat)
