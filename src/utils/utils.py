@@ -103,7 +103,3 @@ def get_texts_from_search_response(search_res: SearchResponse) -> str:
     if search_res and search_res.items:
         return "\n".join([re.sub(r"\n+", "\n", i.text) for i in search_res.items])
     return ""
-
-
-def get_texts_from_search_response_list(search_res: list[SearchResponse]) -> str:
-    return get_texts_from_search_response(search_res[0]) if search_res else ""

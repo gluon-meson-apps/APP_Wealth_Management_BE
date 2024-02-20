@@ -1,6 +1,7 @@
 import asyncio
 import mimetypes
 import os
+import re
 from typing import Union
 
 import aiohttp
@@ -63,6 +64,17 @@ class UnifiedSearch:
             except Exception as err:
                 logger.error(f"Error download {file_url}:", err)
                 return None
+
+    async def fetch_file_name_from_minio(self, file_url: str) -> str:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
+                    resp.raise_for_status()
+                    file_name = re.findall("filename=(.+)", resp.headers.get("Content-Disposition", ""))
+                    return file_name[0] if file_name else ""
+            except Exception as err:
+                logger.error(f"Error fetch file name for {file_url}:", err)
+                return ""
 
     async def download_file_from_minio(self, file_url: str) -> SearchResponse:
         return await call_search_api("GET", f"{self.base_url}/file/download", {"file_url": file_url})

@@ -31,7 +31,6 @@ from policy.slot_filling.slot_filling_policy import SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.base import Reasoner
 from reasoner.llm_reasoner import LlmReasoner
-from third_system.search_entity import SearchResponse
 from tracker.HistorySummarizer import HistorySummarizer
 from tracker.base import BaseConversationTracker, ConversationTracker
 from tracker.context import ConversationContext
@@ -65,27 +64,23 @@ class BaseDialogManager:
         self,
         message: Any,
         session_id: str,
+        first_file_name: str = None,
         files: list[UploadFile] = None,
-        file_contents: list[SearchResponse] = None,
+        file_urls: list[str] = None,
         is_email_request=False,
     ) -> tuple[Any, ConversationContext]:
-        file_name = None
         if files is None:
             files = []
-        if file_contents is None:
-            file_contents = []
-        else:
-            items = file_contents[0].items
-            if len(items) > 0:
-                file_name = items[0].meta__reference.meta__source_name
+        if file_urls is None:
+            file_urls = []
         self.conversation_tracker.clear_inactive_conversations()
         conversation = self.conversation_tracker.load_conversation(session_id)
         conversation.start_one_chat()
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
-        conversation.append_user_history(message, file_name)
+        conversation.append_user_history(message, first_file_name)
         conversation.add_files(files)
-        conversation.add_file_contents(file_contents)
+        conversation.add_file_urls(file_urls)
         conversation.set_email_request(is_email_request)
 
         plan = await self.reasoner.think(conversation)

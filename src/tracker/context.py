@@ -10,8 +10,6 @@ from collections import deque
 
 from loguru import logger
 
-from third_system.search_entity import SearchResponse
-
 
 def prepare_response_content(answer):
     from action.base import ResponseMessageType
@@ -52,14 +50,14 @@ class History:
         if n <= 0:
             return
         last_n_history = self.rounds[-n:]
-        last_n_summarized_history = [{**history, 'summarized': True} for history in last_n_history]
+        last_n_summarized_history = [{**history, "summarized": True} for history in last_n_history]
         self.rounds = self.rounds[:-n] + last_n_summarized_history
 
     def format_string(self, rename: dict = None):
         if not rename:
             rename = {}
         return "\n".join(
-            [f'### {rename.get(entry["role"],entry["role"])}:\n {entry["content"]}' for entry in self.rounds]
+            [f'### {rename.get(entry["role"], entry["role"])}:\n {entry["content"]}' for entry in self.rounds]
         )
 
     @classmethod
@@ -127,7 +125,7 @@ class ConversationContext:
         self.has_update = False
         self.current_round = 0
         self.files = ConversationFiles(self.session_id)
-        self.uploaded_file_contents: list[SearchResponse] = []
+        self.uploaded_file_urls: list[str] = []
         self.confused_intents: list[Intent] = []
         self.appended_history_count_in_one_chat = 0
 
@@ -138,7 +136,7 @@ class ConversationContext:
         return self.history
 
     def get_unsummarized_history(self) -> list[dict]:
-        return [history for history in self.history.rounds if history.get('summarized') is not True]
+        return [history for history in self.history.rounds if history.get("summarized") is not True]
 
     def reset_history(self):
         self.history.delete_n_round(self.appended_history_count_in_one_chat)
@@ -155,8 +153,8 @@ class ConversationContext:
     def add_files(self, files: list[UploadFile]):
         self.files.add_files(files)
 
-    def add_file_contents(self, contents: list[SearchResponse]):
-        self.uploaded_file_contents.extend(contents)
+    def add_file_urls(self, urls: list[str]):
+        self.uploaded_file_urls.extend(urls)
 
     def delete_files(self):
         self.files.delete_files()

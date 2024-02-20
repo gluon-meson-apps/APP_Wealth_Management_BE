@@ -1,11 +1,11 @@
 import re
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from action.context import ActionContext
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from third_system.unified_search import UnifiedSearch
 
 prompt = """## Role
@@ -34,8 +34,13 @@ class BrFileQAAction(Action):
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        contents = context.conversation.uploaded_file_contents
-        latest_file = contents[0]
+        if len(context.conversation.uploaded_file_urls) == 0:
+            return GeneralResponse.normal_failed_text_response(
+                "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
+            )
+
+        latest_file = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
+
         file_content = "\n".join([i.text for i in latest_file.items])
         br_file_content = re.sub(r"\n+", "\n", file_content)
 

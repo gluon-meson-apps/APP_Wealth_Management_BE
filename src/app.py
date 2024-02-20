@@ -96,11 +96,14 @@ async def score(
         file_urls = [score_command.file_url]
 
     try:
-        file_res = [await unified_search.download_file_from_minio(url) for url in file_urls]
+        first_file_name = (
+            await unified_search.fetch_file_name_from_minio(file_urls[0]) if file_urls and file_urls[0] else None
+        )
         result, conversation = await dialog_manager.handle_message(
             score_command.question,
             session_id,
-            file_contents=file_res if file_res else None,
+            first_file_name=first_file_name,
+            file_urls=file_urls,
             is_email_request=score_command.from_email,
         )
     except Exception as err:
