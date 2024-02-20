@@ -5,7 +5,6 @@ from action.actions.general import (
     AskForIntentChoosingAction,
 )
 from action.actions.bnb import BankRelatedAction, JumpOut
-from action.actions.intent_available_checking import IntentAvailableCheckingAction
 from action.repository.action_repository import ActionRepository, action_repository as default_action_repository
 from policy.base import Policy, PolicyResponse
 from tracker.context import ConversationContext
@@ -97,16 +96,6 @@ class IntentFillingPolicy(Policy):
         ):
             context.set_state("intent_confirm")
             return PolicyResponse(True, IntentConfirmAction(IE.intent, prompt_manager=self.prompt_manager))
-        return PolicyResponse(False, None)
-
-
-class IntentAvailableCheckingPolicy(Policy):
-    def __init__(self, prompt_manager: PromptManager):
-        Policy.__init__(self, prompt_manager)
-
-    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> PolicyResponse:
-        if IE.intent.disabled:
-            return PolicyResponse(True, IntentAvailableCheckingAction(IE.intent))
         return PolicyResponse(False, None)
 
 
