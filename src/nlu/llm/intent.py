@@ -166,7 +166,8 @@ class LLMIntentClassifier(IntentClassifier):
             if intent:
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
                 description = self.intent_list_config.get_intent(intent).description
-                current_intent = Intent(name=intent, confidence=1.0, description=description)
+                disabled = self.intent_list_config.get_intent(intent).disabled
+                current_intent = Intent(name=intent, confidence=1.0, description=description, disabled=disabled)
                 return await self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
@@ -221,6 +222,7 @@ class LLMIntentClassifier(IntentClassifier):
                 confidence=1.0,
                 description=unique_intent_name_in_examples.description,
                 full_name_of_parent_intent=unique_intent_name_in_examples.full_name_of_parent_intent,
+                disabled=unique_intent_name_in_examples.disabled,
             )
         intent = await self.intent_call.classify_intent(
             user_input, intent_examples, conversation.session_id, parent_intent_name_of_current_layer
@@ -236,6 +238,7 @@ class LLMIntentClassifier(IntentClassifier):
                 confidence=intent.confidence,
                 description=intent_config.description,
                 full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
+                disabled=intent_config.disabled,
             ), unique_intent_name_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")
