@@ -1,5 +1,5 @@
 name: chitchat
 description: chitchat with bot
-business: false
+business: true
 slots: []
 action: chitchat
