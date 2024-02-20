@@ -160,7 +160,7 @@ class DialogManagerFactory:
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
-        intent_available_checking_policy = IntentAvailableCheckingPolicy(prompt_manager, form_store)
+        intent_available_checking_policy = IntentAvailableCheckingPolicy(prompt_manager)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
         jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
         intent_choosing_policy = IntentChoosingPolicy(prompt_manager)
