@@ -51,6 +51,7 @@ class MLMIntentClassifier(IntentClassifier):
             confidence=confidence,
             description=intent.description if intent else "",
             business=intent.business,
+            enable=intent.enable,
         )
 
     def get_from_cache(self, conversation):

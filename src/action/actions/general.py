@@ -116,7 +116,7 @@ class IntentFillingAction(Action):
 
     async def run(self, context):
         logger.info("exec action intent_filling")
-        filtered_intents = [intent.minial_info() for intent in self.intents if intent.business]
+        filtered_intents = [intent.minial_info() for intent in self.intents if intent.business or not intent.disabled]
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()

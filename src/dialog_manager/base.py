@@ -25,6 +25,7 @@ from policy.general import (
     EndDialoguePolicy,
     JumpOutPolicy,
     IntentChoosingPolicy,
+    IntentAvailableCheckingPolicy,
 )
 from policy.slot_filling.slot_filling_policy import SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
@@ -123,7 +124,7 @@ class DialogManagerFactory:
             reasoner,
             SimpleActionRunner(),
             [BaseOutputAdapter(), EmailOutputAdapter()],
-            HistorySummarizer()
+            HistorySummarizer(),
         )
 
     @classmethod
@@ -159,6 +160,7 @@ class DialogManagerFactory:
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
         assitant_policy = AssistantPolicy(prompt_manager, form_store)
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
+        intent_available_checking_policy = IntentAvailableCheckingPolicy(prompt_manager, form_store)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
         jump_out_policy = JumpOutPolicy(prompt_manager, form_store)
         intent_choosing_policy = IntentChoosingPolicy(prompt_manager)
@@ -169,6 +171,7 @@ class DialogManagerFactory:
                 jump_out_policy,
                 intent_choosing_policy,
                 intent_filling_policy,
+                intent_available_checking_policy,
                 slot_filling_policy,
                 assitant_policy,
             ],

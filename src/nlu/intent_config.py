@@ -11,6 +11,7 @@ class IntentConfig:
         business,
         action,
         slots,
+        disabled,
         examples=None,
         has_children=False,
         full_name_of_parent_intent=None,
@@ -21,6 +22,7 @@ class IntentConfig:
         self.action = action
         self.slots = slots
         self.business = business
+        self.disabled = disabled
         self.examples = examples or []
         self.has_children = has_children or False
         self.full_name_of_parent_intent: str = full_name_of_parent_intent
@@ -50,13 +52,13 @@ class IntentListConfig:
 
     def _initialize_fixed_intents(self):
         fixed_intents = [
-            ("positive", "confirm", False, "positive", []),
-            ("negative", "denied", False, "negative", []),
+            ("positive", "confirm", False, "positive", [], False),
+            ("negative", "denied", False, "negative", [], False),
         ]
 
         for intent_data in fixed_intents:
-            name, description, business, action, slots = intent_data
-            intent = IntentConfig(name, description, business, action, slots)
+            name, description, business, action, slots, disabled = intent_data
+            intent = IntentConfig(name, description, business, action, slots, disabled)
             self.intents.append(intent)
 
     def get_intent_list(self) -> list[IntentConfig]:
@@ -111,6 +113,7 @@ class IntentListConfig:
                 business=data.get("business"),
                 action=data.get("action"),
                 slots=data.get("slots"),
+                disabled=data.get("disabled", False),
                 has_children=data.get("has_children"),
                 full_name_of_parent_intent=parent_intent_full_name,
                 slot_expression=data.get("slot_expression"),

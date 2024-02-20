@@ -99,6 +99,18 @@ class IntentFillingPolicy(Policy):
         return PolicyResponse(False, None)
 
 
+class IntentAvailableCheckingPolicy(Policy):
+    def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
+        Policy.__init__(self, prompt_manager)
+        self.form_store = form_store
+
+    def handle(self, IE: IntentWithEntity, context: ConversationContext) -> PolicyResponse:
+        if IE.intent.disabled:
+            # todo
+            return PolicyResponse(True, None)
+        return PolicyResponse(False, None)
+
+
 class AssistantPolicy(Policy):
     def __init__(
         self,
