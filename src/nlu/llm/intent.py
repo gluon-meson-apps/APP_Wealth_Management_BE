@@ -218,8 +218,8 @@ class LLMIntentClassifier(IntentClassifier):
         unique_intent_name_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_name_in_examples:
             unique_intent_name_in_examples = self.intent_list_config.get_intent(unique_intent_name_in_examples)
-            unique_intent_name_in_examples = Intent.from_intent_config_and_classification_response(
-                unique_intent_name_in_examples
+            unique_intent_name_in_examples = Intent.from_intent_config(
+                unique_intent_name_in_examples.name, 1.0, unique_intent_name_in_examples
             )
 
         intent = await self.intent_call.classify_intent(
@@ -231,8 +231,8 @@ class LLMIntentClassifier(IntentClassifier):
         ):
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
             intent_config = self.intent_list_config.get_intent(intent.intent)
-            return Intent.from_intent_config_and_classification_response(
-                intent_config, intent
+            return Intent.from_intent_config(
+                intent.intent, intent.confidence, intent_config
             ), unique_intent_name_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")

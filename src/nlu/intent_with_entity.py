@@ -2,7 +2,6 @@ from enum import Enum
 from typing import List, Optional, Union
 
 from nlu.intent_config import IntentConfig
-from nlu.llm.intent_call import IntentClassificationResponse
 from util import HashableBaseModel
 
 
@@ -34,21 +33,9 @@ class Intent(HashableBaseModel):
         }
 
     @staticmethod
-    def from_intent_config_and_classification_response(
-        intent_config: IntentConfig,
-        intent_classification_response: Optional[IntentClassificationResponse] = None,
-        confidence: Optional[float] = 1.0,
-    ):
-        if intent_classification_response:
-            return Intent(
-                name=intent_classification_response.intent,
-                confidence=intent_classification_response.confidence,
-                description=intent_config.description,
-                full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
-                disabled=intent_config.disabled,
-            )
+    def from_intent_config(intent_name: str, confidence: float, intent_config: IntentConfig):
         return Intent(
-            name=intent_config.name,
+            name=intent_name,
             confidence=confidence,
             description=intent_config.description,
             full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
