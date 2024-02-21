@@ -1,5 +1,3 @@
-from typing import Union
-
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
@@ -12,9 +10,10 @@ from action.base import (
     Attachment,
     UploadFileContentType,
     UploadStorageFile,
+    GeneralResponse,
 )
 from third_system.hsbc_connect_api import HsbcConnectApi
-from third_system.search_entity import SearchResponse, SearchItem
+from third_system.search_entity import SearchItem
 from third_system.unified_search import UnifiedSearch
 
 report_filename = "file_validation_report.html"
@@ -51,13 +50,6 @@ Now, answer the user's question, and reply the final result.
 """
 
 
-def get_first_file(context) -> Union[SearchItem, None]:
-    if context.conversation.uploaded_file_contents:
-        file_response: SearchResponse = context.conversation.uploaded_file_contents[0]
-        return file_response.items[0] if file_response.items else None
-    return None
-
-
 class FileValidation(Action):
     def __init__(self):
         self.unified_search = UnifiedSearch()
@@ -76,10 +68,17 @@ class FileValidation(Action):
         raise Exception("Upload file failed.")
 
     async def run(self, context):
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         logger.info(f"exec action: {self.get_name()} ")
 
-        first_file: SearchItem = get_first_file(context)
+        if len(context.conversation.uploaded_file_urls) == 0:
+            return GeneralResponse.normal_failed_text_response(
+                "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
+            )
+
+        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+
+        first_file_res = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
+        first_file: SearchItem = first_file_res.items[0] if first_file_res.items else None
 
         res = await self.hsbc_connect_api.validate_file(first_file)
         download_link = await self._upload_file(res)
