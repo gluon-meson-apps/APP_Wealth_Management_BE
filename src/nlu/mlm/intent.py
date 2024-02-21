@@ -43,16 +43,8 @@ class MLMIntentClassifier(IntentClassifier):
 
     def get_intent_without_cache(self, conversation: ConversationContext) -> Intent:
         intent = self.intent_model.predict(conversation.current_user_input)
-        name = intent.intent
-        confidence = intent.confidence
-        intent = self.intent_list_config.get_intent(name)
-        return Intent(
-            name=name,
-            confidence=confidence,
-            description=intent.description if intent else "",
-            business=intent.business,
-            disabled=intent.disabled,
-        )
+        intent_config = self.intent_list_config.get_intent(intent.intent)
+        return Intent.from_intent_config_and_classification_response(intent_config, intent)
 
     def get_from_cache(self, conversation):
         try:

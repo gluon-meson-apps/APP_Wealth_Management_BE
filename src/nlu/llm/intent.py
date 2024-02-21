@@ -214,16 +214,14 @@ class LLMIntentClassifier(IntentClassifier):
             intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_name_of_current_layer)
             intent_result["intent"] = intent_name
             intent_example["intent"] = json.dumps(intent_result)
+
         unique_intent_name_in_examples = self.get_same_intent(intent_examples)
         if unique_intent_name_in_examples:
             unique_intent_name_in_examples = self.intent_list_config.get_intent(unique_intent_name_in_examples)
-            unique_intent_name_in_examples = Intent(
-                name=unique_intent_name_in_examples.name,
-                confidence=1.0,
-                description=unique_intent_name_in_examples.description,
-                full_name_of_parent_intent=unique_intent_name_in_examples.full_name_of_parent_intent,
-                disabled=unique_intent_name_in_examples.disabled,
+            unique_intent_name_in_examples = Intent.from_intent_config_and_classification_response(
+                unique_intent_name_in_examples
             )
+
         intent = await self.intent_call.classify_intent(
             user_input, intent_examples, conversation.session_id, parent_intent_name_of_current_layer
         )
@@ -233,12 +231,8 @@ class LLMIntentClassifier(IntentClassifier):
         ):
             logger.info(f"session {conversation.session_id}, intent: {intent.intent}")
             intent_config = self.intent_list_config.get_intent(intent.intent)
-            return Intent(
-                name=intent.intent,
-                confidence=intent.confidence,
-                description=intent_config.description,
-                full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
-                disabled=intent_config.disabled,
+            return Intent.from_intent_config_and_classification_response(
+                intent_config, intent
             ), unique_intent_name_in_examples
 
         logger.info(f"intent: {intent.intent} is not predefined")
