@@ -25,7 +25,6 @@ class HistorySummarizer:
 
     async def summarize_history(self, conversation: ConversationContext):
         history = conversation.get_unsummarized_history()
-        # TODO: count history or count token
         if len(history) >= summarize_history_count:
             if conversation.summarized_history_context:
                 history.insert(0, {"role": "system", "content": conversation.summarized_history_context})

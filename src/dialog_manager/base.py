@@ -34,6 +34,7 @@ from reasoner.llm_reasoner import LlmReasoner
 from tracker.HistorySummarizer import HistorySummarizer
 from tracker.base import BaseConversationTracker, ConversationTracker
 from tracker.context import ConversationContext
+summarize_history_feature_toggle = (os.getenv('SUMMARIZE_HISTORY_FEATURE_TOGGLE', 'False') == 'True')
 
 
 class BaseDialogManager:
@@ -90,7 +91,8 @@ class BaseDialogManager:
             action_response = await output_adapter.process_output(action_response, conversation)
         response = action_response
         conversation.append_assistant_history(response.answer)
-        await self.history_summarizer.summarize_history(conversation)
+        if summarize_history_feature_toggle is True:
+            await self.history_summarizer.summarize_history(conversation)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         return response, conversation
