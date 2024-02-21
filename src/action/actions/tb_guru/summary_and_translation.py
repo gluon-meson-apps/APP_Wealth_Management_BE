@@ -13,18 +13,24 @@ MAX_FILE_TOKEN_SIZE = 64 * 1024
 direct_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
 
-## user input
+## User input
 {{user_input}}
+
+## Attention
+If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
 loop_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
 
-## user input
+## User input
 {{user_input}}
 
-## part to be processed
+## Contents to be processed
 {{file_contents}}
+
+## Attention
+If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
 
