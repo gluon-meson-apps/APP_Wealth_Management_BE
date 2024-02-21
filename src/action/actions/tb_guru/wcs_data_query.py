@@ -97,8 +97,12 @@ async def extract_data(context, chat_model) -> tuple[list[SearchItem], list[Sear
             **chat_message_preparation.to_chat_params(), max_length=1024, sub_scenario="data_provided"
         )
     ).get_json_response()
-    current_company_data = formatted_data["all_years_data"] if "all_years_data" in formatted_data else []
-    latest_all_data = formatted_data["latest_year_data"] if "latest_year_data" in formatted_data else []
+    current_company_data = (
+        formatted_data["all_years_data"] if formatted_data and "all_years_data" in formatted_data else []
+    )
+    latest_all_data = (
+        formatted_data["latest_year_data"] if formatted_data and "latest_year_data" in formatted_data else []
+    )
     logger.info(f"formatted data: {formatted_data}")
     return [SearchItem(meta__score=-1, **d) for d in latest_all_data], [
         SearchItem(meta__score=-1, **d) for d in current_company_data
