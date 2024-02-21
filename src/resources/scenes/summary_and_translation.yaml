@@ -7,13 +7,4 @@ examples:
   - Hi TB Guru, Please help me translate the email chain to Chinese.
   - Hi TB Guru, Please help me translate the following contents to Chinese.
   - Hi TB Guru, Please help me summarize the email chain with Chinese.
-#slots:
-#  - name: is_translation_needed
-#    description: if the user asks to translate the contents to a specific language
-#    slotType: boolean
-#    optional: False
-#  - name: is_summary_needed
-#    description: if the user asks to summarize the contents
-#    slotType: boolean
-#    optional: False
 action: summary_and_translation
