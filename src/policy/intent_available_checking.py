@@ -11,5 +11,5 @@ class IntentAvailableCheckingPolicy(Policy):
 
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> PolicyResponse:
         if IE.intent.disabled:
-            return PolicyResponse(True, IntentAvailableCheckingAction(IE.intent))
+            return PolicyResponse(True, IntentAvailableCheckingAction())
         return PolicyResponse(False, None)

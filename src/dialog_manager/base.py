@@ -19,14 +19,8 @@ from nlu.mlm.integrated import IntegratedNLU
 from output_adapter.base import BaseOutputAdapter, OutputAdapter
 from output_adapter.email_output_adapter import EmailOutputAdapter
 from policy.base import BasePolicyManager
-from policy.general import (
-    AssistantPolicy,
-    IntentFillingPolicy,
-    EndDialoguePolicy,
-    JumpOutPolicy,
-    IntentChoosingPolicy,
-    IntentAvailableCheckingPolicy,
-)
+from policy.general import AssistantPolicy, IntentFillingPolicy, EndDialoguePolicy, JumpOutPolicy, IntentChoosingPolicy
+from policy.intent_available_checking import IntentAvailableCheckingPolicy
 from policy.slot_filling.slot_filling_policy import SlotFillingPolicy
 from prompt_manager.base import BasePromptManager
 from reasoner.base import Reasoner
@@ -34,7 +28,8 @@ from reasoner.llm_reasoner import LlmReasoner
 from tracker.HistorySummarizer import HistorySummarizer
 from tracker.base import BaseConversationTracker, ConversationTracker
 from tracker.context import ConversationContext
-summarize_history_feature_toggle = (os.getenv('SUMMARIZE_HISTORY_FEATURE_TOGGLE', 'False') == 'True')
+
+summarize_history_feature_toggle = os.getenv("SUMMARIZE_HISTORY_FEATURE_TOGGLE", "False") == "True"
 
 
 class BaseDialogManager:
