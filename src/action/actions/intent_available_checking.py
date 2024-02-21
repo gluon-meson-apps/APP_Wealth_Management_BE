@@ -12,11 +12,11 @@ from action.base import (
 from action.context import ActionContext
 
 prompt = """## Role
-you are a chatbot, you need tell user the current use case is suspended
+you are a chatbot, you need tell user the current feature is suspended
 
-## disabled use case
+## disabled feature
 
-{{use_case}}
+{{disabled_feature}}
 
 ## user input
 
@@ -24,7 +24,7 @@ you are a chatbot, you need tell user the current use case is suspended
 
 ## INSTRUCT
 
-based on the disabled use case, tell user the specific use case is suspended;
+based on the disabled feature, tell user the specific feature is suspended;
 
 """
 
@@ -45,7 +45,7 @@ class IntentAvailableCheckingAction(Action):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
-            "user", prompt, use_case=current_intent, user_input=context.conversation.current_user_input
+            "user", prompt, disabled_feature=current_intent, user_input=context.conversation.current_user_input
         )
         chat_message_preparation.log(logger)
 
