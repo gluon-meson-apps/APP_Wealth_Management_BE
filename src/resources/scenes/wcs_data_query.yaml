@@ -1,6 +1,7 @@
 name: wcs_data_query
 description: query data from WCS system
 business: true
+disabled: false
 examples:
   - Hi TB Guru, Please help me to extract Apple company data from the @WCS system, and share some data insight with me.
     Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
