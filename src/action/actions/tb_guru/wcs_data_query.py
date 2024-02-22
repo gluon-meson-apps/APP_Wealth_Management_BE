@@ -13,7 +13,6 @@ from action.base import (
     ResponseMessageType,
     ActionResponse,
     UploadFileContentType,
-    UploadStorageFile,
     AttachmentResponse,
     Attachment,
     GeneralResponse,
@@ -127,11 +126,7 @@ class WcsDataQuery(TBGuruAction):
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
-            files = [
-                UploadStorageFile(
-                    filename="tb_guru_ppt.pptx", file_path=ppt_path, content_type=UploadFileContentType.PPTX
-                )
-            ]
+            files = [Attachment(name="tb_guru_ppt.pptx", path=ppt_path, content_type=UploadFileContentType.PPTX)]
             links = await self.unified_search.upload_file_to_minio(files)
             shutil.rmtree(files_dir)
             return (

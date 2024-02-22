@@ -7,7 +7,6 @@ from action.base import (
     AttachmentResponse,
     Attachment,
     UploadFileContentType,
-    UploadStorageFile,
     GeneralResponse,
     TBGuruAction,
 )
@@ -57,7 +56,7 @@ class FileValidation(TBGuruAction):
         return "file_validation"
 
     async def _upload_file(self, res: str) -> str:
-        files = [UploadStorageFile(filename=report_filename, contents=res, content_type=UploadFileContentType.HTML)]
+        files = [Attachment(name=report_filename, contents=res, content_type=UploadFileContentType.HTML, path="")]
         links = await self.unified_search.upload_file_to_minio(files)
         if links and links[0]:
             return links[0]

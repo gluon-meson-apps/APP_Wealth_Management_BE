@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import os
 import urllib.parse
 from typing import Union
@@ -8,7 +9,8 @@ from aiohttp import ClientResponseError
 from loguru import logger
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
-from models.email_model.model import Email, EmailBody, EmailSender, EmailAttachment
+from action.base import Attachment
+from models.email_model.model import Email, EmailBody, EmailSender
 from utils.utils import get_value_or_default_from_dict, async_parse_json_response
 
 
@@ -143,12 +145,18 @@ class Graph:
                 return None
         return None
 
-    async def list_attachments(self, message_id):
+    async def list_attachments(self, message_id) -> list[Attachment]:
         endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
         data = await self.call_graph_api(endpoint)
-        return [v for v in data if "contentBytes" in v and v["contentBytes"]]
+        return [
+            Attachment(
+                name=a["name"], path="", contents=base64.b64decode(a["contentBytes"]), content_type=a["contentType"]
+            )
+            for a in data
+            if a and a.get("contentBytes")
+        ]
 
-    async def upload_email_attachments(self, email_id: str, attachments: list[EmailAttachment] = None):
+    async def upload_email_attachments(self, email_id: str, attachments: list[Attachment] = None):
         endpoint = f"{self.user_api_endpoint}/messages/{email_id}/attachments"
         if attachments:
             tasks = [
@@ -158,7 +166,7 @@ class Graph:
                     data={
                         "@odata.type": "#microsoft.graph.fileAttachment",
                         "name": a.name,
-                        "contentBytes": a.bytes,
+                        "contentBytes": base64.b64encode(a.contents),
                         "contentType": a.content_type,
                     },
                     extra_headers={"Content-Type": "application/json"},
@@ -170,7 +178,7 @@ class Graph:
         else:
             logger.info(f"No attachments to upload for {email_id}.")
 
-    async def reply_email(self, email: Email, answer: str, attachments: list[EmailAttachment] = None):
+    async def reply_email(self, email: Email, answer: str, attachments: list[Attachment] = None):
         draft_email = await self.call_graph_api(
             f"{self.user_api_endpoint}/messages/{email.id}/createReply",
             method="POST",

@@ -1,5 +1,4 @@
 import asyncio
-import base64
 import json
 import time
 from typing import Generator
@@ -12,8 +11,8 @@ from gluon_meson_sdk.models.chat_model import AioResponseCapture
 from loguru import logger
 from sqlalchemy import text
 
-from action.base import Attachment, UploadStorageFile
-from models.email_model.model import Email, EmailAttachment
+from action.base import Attachment
+from models.email_model.model import Email
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
 from utils.utils import extract_json_from_text
@@ -174,26 +173,15 @@ WHERE id = '{email.id}'
 
         return answers, attachments
 
-    async def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[EmailAttachment]:
-        result = []
-        for a in attachments:
-            contents = await self.unified_search.download_raw_file_from_minio(a.url) if a.url else None
-            if contents:
-                result.append(
-                    EmailAttachment(name=a.name, bytes=base64.b64encode(contents), content_type=a.content_type)
-                )
-        return result
+    async def parse_attachments_in_answer(self, attachments: list[Attachment]) -> list[Attachment]:
+        tasks = [self.unified_search.download_raw_file_from_minio(a.url) for a in attachments if a.url]
+        result = await asyncio.gather(*tasks)
+        return [r for r in result if r]
 
     async def upload_email_attachments(self, email):
         if email.has_attachments:
             attachments = await self.graph.list_attachments(email.id)
-            files = [
-                UploadStorageFile(
-                    filename=a["name"], contents=base64.b64decode(a["contentBytes"]), content_type=a["contentType"]
-                )
-                for a in attachments
-            ]
-            return await self.unified_search.upload_file_to_minio(files)
+            return await self.unified_search.upload_file_to_minio(attachments)
         return []
 
 

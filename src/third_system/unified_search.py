@@ -7,7 +7,7 @@ from typing import Union
 import aiohttp
 from loguru import logger
 
-from action.base import UploadFileContentType, UploadStorageFile
+from action.base import UploadFileContentType, Attachment
 from third_system.search_entity import SearchParam, SearchResponse
 
 unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
@@ -55,31 +55,28 @@ class UnifiedSearch:
     async def search_for_intent_examples(self, table, user_input):
         return await call_search_api("POST", f"{self.base_url}/vector/{table}/search", {"query": user_input})
 
-    async def download_raw_file_from_minio(self, file_url: str) -> Union[bytes, None]:
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
-                    resp.raise_for_status()
-                    return await resp.content.read()
-            except Exception as err:
-                logger.error(f"Error download {file_url}:", err)
-                return None
-
-    async def fetch_file_name_from_minio(self, file_url: str) -> str:
+    async def download_raw_file_from_minio(self, file_url: str) -> Union[Attachment, None]:
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
                     resp.raise_for_status()
                     file_name = re.findall("filename=(.+)", resp.headers.get("Content-Disposition", ""))
-                    return file_name[0] if file_name else ""
+                    content = await resp.content.read()
+                    return Attachment(
+                        path="",
+                        url=file_url,
+                        name=file_name[0] if file_name else "",
+                        contents=content,
+                        content_type=resp.headers.get("Content-Type", ""),
+                    )
             except Exception as err:
-                logger.error(f"Error fetch file name for {file_url}:", err)
-                return ""
+                logger.error(f"Error download {file_url}:", err)
+                return None
 
     async def download_file_from_minio(self, file_url: str) -> SearchResponse:
         return await call_search_api("GET", f"{self.base_url}/file/download", {"file_url": file_url})
 
-    async def upload_file_to_minio(self, files: list[UploadStorageFile]) -> list[str]:
+    async def upload_file_to_minio(self, files: list[Attachment]) -> list[str]:
         data = aiohttp.FormData()
         for f in files:
             if (f.file_path and os.path.exists(f.file_path)) or f.contents:
@@ -96,9 +93,9 @@ class UnifiedSearch:
 
 async def main():
     files = [
-        UploadStorageFile(
-            filename="test.txt",
-            file_path="../resources/prompt_templates/slot_confirm.txt",
+        Attachment(
+            name="test.txt",
+            path="../resources/prompt_templates/slot_confirm.txt",
             content_type=UploadFileContentType.TXT,
         ),
     ]

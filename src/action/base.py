@@ -35,13 +35,6 @@ class UploadFileContentType(str, Enum):
     XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-class UploadStorageFile(BaseModel):
-    filename: str
-    file_path: Union[str, None] = None
-    contents: Union[bytes, str, None] = None
-    content_type: Union[str, None] = None
-
-
 class ActionResponseAnswerContent(BaseModel):
     businessId: str
     operateType: str
@@ -151,6 +144,7 @@ class Attachment(BaseModel):
     path: str
     name: str
     content_type: str
+    contents: Union[bytes, str, None] = None
     url: Union[str, None] = None
 
 
