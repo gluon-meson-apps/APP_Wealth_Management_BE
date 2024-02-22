@@ -38,11 +38,11 @@ def get_config(cls):
     return environ.to_config(cls)
 
 
-def handle_response(json_result):
+def handle_response(json_result) -> (str, list[Attachment]):
     answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
-    attachments_dict = extract_json_from_text(json_result["attachment"]) if "attachment" in json_result else None
-    attachment = Attachment(**attachments_dict) if attachments_dict else None
-    return answer, [attachment] if attachment else []
+    attachments_list = extract_json_from_text(json_result["attachments"]) if "attachments" in json_result else None
+    attachments = [Attachment(**a) for a in attachments_list if a] if attachments_list else []
+    return answer, attachments
 
 
 def format_html_content(content):

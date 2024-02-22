@@ -103,5 +103,5 @@ class FileValidation(TBGuruAction):
         )
         attachment = Attachment(path=download_link, name=report_filename, content_type="text/html", url=download_link)
         return AttachmentResponse(
-            code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachment
+            code=200, message="success", answer=answer, jump_out_flag=False, attachment=[attachment]
         )

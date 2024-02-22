@@ -122,7 +122,7 @@ async def score(
                 "answer": result.answer.get_content_with_extra_info(from_email=score_command.from_email),
                 "session_id": session_id,
                 **(
-                    dict(attachment=result.attachment.model_dump_json())
+                    dict(attachments=[a.model_dump_json() for a in result.attachments])
                     if isinstance(result, AttachmentResponse)
                     else {}
                 ),

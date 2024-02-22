@@ -52,7 +52,6 @@ class ChatResponseAnswer(BaseModel):
     extra_info: dict[str, str] = {}
 
     def get_content_with_extra_info(self, from_email: bool = False):
-        # output.answer.content += f"\n\nAttachment\n------------------\n{output.attachment.url}"
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
         return self.content + "<br>" + extra_info
 
@@ -65,13 +64,15 @@ class ChatResponseAnswer(BaseModel):
             ]
         )
 
+    def format_attachments_output(self, template) -> str:
+        if "Attachments" in self.extra_info:
+            attachment_list = "<br>".join(self.extra_info["Attachments"])
+            return template.format(key="Attachments", value=attachment_list)
+        return ""
+
     def get_extra_info(self):
         template = """<br><h2>{key}</h2><br>{value}<br>"""
-        extra_info_str = (
-            template.format(key="Attachment", value=self.extra_info["Attachment"])
-            if "Attachment" in self.extra_info
-            else ""
-        )
+        extra_info_str = self.format_attachments_output(template)
         chatbot_detail = self.get_chatbot_details(template)
         chatbot_detail_summary = (
             f"<br><br><h2>Detail Info Inside Chatbot</h2><br><details><summary>details</summary>{chatbot_detail}</details>"
@@ -83,11 +84,7 @@ class ChatResponseAnswer(BaseModel):
 
     def get_email_extra_info(self):
         template = """<strong>{key}</strong><br>{value}<br>"""
-        attachment_str = (
-            template.format(key="Attachment", value=self.extra_info["Attachment"])
-            if "Attachment" in self.extra_info
-            else ""
-        )
+        attachment_str = self.format_attachments_output(template)
         extra_info_str = f"<br>{attachment_str}" if attachment_str else ""
         chatbot_detail = self.get_chatbot_details(template)
         chatbot_detail_summary = (
@@ -146,14 +143,6 @@ class Attachment(BaseModel):
 
 
 class AttachmentResponse(ActionResponse):
-    code: int
-    message: str
-    answer: ChatResponseAnswer
-    attachment: Attachment
-    jump_out_flag: bool = False
-
-
-class MultipleAttachmentsResponse(ActionResponse):
     code: int
     message: str
     answer: ChatResponseAnswer

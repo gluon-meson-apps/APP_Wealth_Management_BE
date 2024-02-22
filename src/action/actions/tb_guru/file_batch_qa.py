@@ -147,5 +147,5 @@ class FileBatchAction(TBGuruAction):
         attachment.url = urls[0]
 
         return AttachmentResponse(
-            code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachment
+            code=200, message="success", answer=answer, jump_out_flag=False, attachments=[attachment]
         )

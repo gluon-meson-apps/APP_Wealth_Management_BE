@@ -209,7 +209,7 @@ class WcsDataQuery(TBGuruAction):
         )
         if ppt_attachment:
             return AttachmentResponse(
-                code=200, message="success", answer=answer, jump_out_flag=False, attachment=ppt_attachment
+                code=200, message="success", answer=answer, jump_out_flag=False, attachment=[ppt_attachment]
             )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 

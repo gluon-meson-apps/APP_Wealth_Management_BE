@@ -157,7 +157,7 @@ class SummarizeAndTranslate(TBGuruAction):
                 intent=context.conversation.current_intent.name,
             )
             return AttachmentResponse(
-                code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachments[0]
+                code=200, message="success", answer=answer, jump_out_flag=False, attachments=attachments
             )
 
         answer = ChatResponseAnswer(
