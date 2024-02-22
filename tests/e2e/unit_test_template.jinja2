@@ -1,18 +1,18 @@
 import json
 
-previous_output = """{{ output }}"""
 import asyncio
 
 scenario = "{{ scenario }}"
 use_case = "{{ use_case }}"
+params = {
+{%- for key, value in params.items() %}
+    "{{ key }}": {{ value }},
+{%- endfor %}
+}
 
-async def main():
-    import os
+def construct_chat_message():
     from loguru import logger
-    os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
     from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-    from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
-
     {% for data in data_list %}
         {%- for key, value in data["kwargs"].items() %}
     {{ key }}="""{{ value }}"""
@@ -20,32 +20,51 @@ async def main():
 
     {% endfor %}
 
-    scenario_model_registry = DefaultScenarioModelRegistryCenter()
-    chat_model = scenario_model_registry.get_model('{{ scenario }}')
-    params = {
-    {%- for key, value in params.items() %}
-        "{{ key }}": {{ value }},
-    {%- endfor %}
-    }
     chat_message_preparation = ChatMessagePreparation()
     {%- for data in data_list %}
-    {%- set template_name = 'template' ~ loop.index %}
+        {%- set template_name = 'template' ~ loop.index %}
     chat_message_preparation.add_message(
         '{{ data['role'] }}',
         """{{ data["template"] }}""",
         {%- for key, value in data["kwargs"].items() %}
-        {{ key }}={{ key }},
+            {{ key }}={{ key }},
         {%- endfor %}
-    )
+        )
     {%- endfor %}
 
     chat_message_preparation.log(logger)
     chat_params = chat_message_preparation.to_chat_params()
+    return chat_params
 
-    result = (await chat_model.chat(**chat_params, **params)).response
+
+
+async def main():
+    import os
+    os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
+    from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+
+
+    scenario_model_registry = DefaultScenarioModelRegistryCenter()
+    chat_model = scenario_model_registry.get_model('{{ scenario }}')
+
+    chat_params = construct_chat_message()
+
+    result = (await chat_model.achat(**chat_params, **params)).response
     print(result)
 
     return use_case, scenario, chat_params["text"], json.dumps(params), result, ""
+
+
+expected = """{{ expected }}"""
+previous_output = """{{ output }}"""
+
+def get_params():
+    from tests.e2e.template_test_from_log import check_json_result
+    chat_params = construct_chat_message()
+    result = ""
+    if params['jsonable']:
+        result = check_json_result(expected, previous_output)
+    return use_case, scenario, chat_params["text"], json.dumps(params), previous_output, result
 
 if __name__ == '__main__':
     asyncio.run(main())

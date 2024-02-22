@@ -7,7 +7,10 @@ from utils.utils import format_jinja_template
 
 
 # params_list = inner_df['params'].apply(process_one_params).tolist()
-def generate_one_unit_test(session_name, data_list, params, output, scenario, file_name, generate_dir_name='generated'):
+def generate_one_unit_test(session_name, data_list, params, output, scenario, file_name, generate_dir_name='generated',
+                           expected_output=None):
+    if expected_output is None:
+        expected_output = ""
     session_name = standardize_session_name(session_name)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     with open(f"{cur_dir}/unit_test_template.jinja2", "r") as rf:
@@ -21,6 +24,7 @@ def generate_one_unit_test(session_name, data_list, params, output, scenario, fi
                 output=output,
                 scenario=scenario,
                 use_case=session_name,
+                expected=expected_output,
             ))
 
 

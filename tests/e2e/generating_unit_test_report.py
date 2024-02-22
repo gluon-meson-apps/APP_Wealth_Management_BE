@@ -37,10 +37,10 @@ def execute_test(file_path):
     try:
         module_name = get_module_name(file_path, package)
         module = importlib.import_module(module_name)
-        if hasattr(module, "main") and callable(module.main):
-            return asyncio.run(module.main())
+        if hasattr(module, "get_params") and callable(module.get_params):
+            return module.get_params()
         else:
-            raise Exception(f"The module {module_name} does not have a main function or it's not callable")
+            raise Exception(f"The module {module_name} does not have a get_params function or it's not callable")
     except Exception as e:
         print(str(e))
         raise Exception(str(e))
