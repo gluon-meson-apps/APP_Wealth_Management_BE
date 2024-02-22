@@ -66,17 +66,17 @@ class FileValidation(TBGuruAction):
     async def run(self, context):
         logger.info(f"exec action: {self.get_name()} ")
 
-        if len(context.conversation.uploaded_file_urls) == 0:
+        first_file = await self.download_first_file(context)
+        if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
             )
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
-        first_file_res = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
-        first_file: SearchItem = first_file_res.items[0] if first_file_res.items else None
+        first_contents: SearchItem = first_file.items[0] if first_file.items else None
 
-        res = await self.hsbc_connect_api.validate_file(first_file)
+        res = await self.hsbc_connect_api.validate_file(first_contents)
         download_link = await self._upload_file(res)
 
         chat_message_preparation = ChatMessagePreparation()

@@ -103,16 +103,17 @@ class FileBatchAction(TBGuruAction):
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        conversation: ConversationContext = context.conversation
-        if len(conversation.uploaded_file_urls) == 0:
+        first_file = await self.download_first_file(context)
+        if not first_file:
             return GeneralResponse.normal_failed_text_response(
-                "No file uploaded, please upload a file and try again.", conversation.current_intent.name
+                "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
             )
+
+        conversation: ConversationContext = context.conversation
         available_tags = ["context", "product_line", "country"]
         tags = {k: v for k, v in conversation.get_simplified_entities().items() if k in available_tags}
         logger.info(f"tags: {tags}")
-        file_contents = await self.unified_search.download_file_from_minio(conversation.uploaded_file_urls[0])
-        df = self.df_processor.search_items_to_df(file_contents.items)
+        df = self.df_processor.search_items_to_df(first_file.items)
         questions_column_entity = conversation.get_entity_by_name("questions_column_name")
         questions_column = questions_column_entity.value.lower() if questions_column_entity else "questions"
         if questions_column not in df.columns:

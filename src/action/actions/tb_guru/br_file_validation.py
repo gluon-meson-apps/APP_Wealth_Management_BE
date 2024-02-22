@@ -45,7 +45,8 @@ class BrFileValidation(TBGuruAction):
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        if len(context.conversation.uploaded_file_urls) == 0:
+        first_file = await self.download_first_file(context)
+        if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
             )
@@ -53,12 +54,11 @@ class BrFileValidation(TBGuruAction):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         user_input = context.conversation.current_user_input
-        contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
 
         search_res = await self.unified_search.vector_search(SearchParam(query=user_input, size=2), "training_doc")
         training_doc = get_texts_from_search_response(search_res[0]) if search_res else ""
 
-        br_file_contents = get_texts_from_search_response(contents) if training_doc else ""
+        br_file_contents = get_texts_from_search_response(first_file) if training_doc else ""
 
         chat_message_preparation = ChatMessagePreparation()
         if training_doc:

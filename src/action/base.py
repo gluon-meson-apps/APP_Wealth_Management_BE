@@ -264,6 +264,10 @@ class DynamicAction(Action, ABC):
         pass
 
 
+def decode_bytes(contents: Union[bytes, None]) -> str:
+    return contents.decode("utf-8") if contents else ""
+
+
 class TBGuruAction(Action, ABC):
     def __init__(self) -> None:
         self.unified_search = UnifiedSearch()
@@ -276,9 +280,15 @@ class TBGuruAction(Action, ABC):
         contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
         return contents
 
+    async def download_first_raw_file(self, context: ActionContext) -> str:
+        if len(context.conversation.uploaded_file_urls) == 0:
+            return ""
+        contents = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
+        return decode_bytes(contents)
+
     async def download_raw_files(self, context: ActionContext) -> list[str]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return []
         tasks = [self.unified_search.download_file_from_minio(url) for url in context.conversation.uploaded_file_urls]
         files_res = await asyncio.gather(*tasks)
-        return [f.decode("utf-8") if f else "" for f in files_res]
+        return list(map(decode_bytes, files_res))

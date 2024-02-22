@@ -87,12 +87,7 @@ class SummarizeAndTranslate(TBGuruAction):
                 jump_out_flag=False,
             )
 
-        file_bytes = (
-            await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
-            if len(context.conversation.uploaded_file_urls) > 0
-            else None
-        )
-        file_contents = file_bytes.decode("utf-8") if file_bytes else ""
+        file_contents = await self.download_first_raw_file(context)
         file_token_size = len(self.enc.encode(file_contents)) if file_contents else 0
 
         logger.info(f"file token size: {file_token_size}")

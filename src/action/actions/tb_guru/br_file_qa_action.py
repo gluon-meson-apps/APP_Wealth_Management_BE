@@ -30,14 +30,13 @@ class BrFileQAAction(TBGuruAction):
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        if len(context.conversation.uploaded_file_urls) == 0:
+        first_file = await self.download_first_file(context)
+        if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
             )
 
-        latest_file = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
-
-        file_content = "\n".join([i.text for i in latest_file.items])
+        file_content = "\n".join([i.text for i in first_file.items])
         br_file_content = re.sub(r"\n+", "\n", file_content)
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -57,6 +56,6 @@ class BrFileQAAction(TBGuruAction):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
-            references=latest_file.items,
+            references=first_file.items,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
