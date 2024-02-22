@@ -49,7 +49,7 @@ class ChatResponseAnswer(BaseModel):
     content: str
     intent: Optional[str] = None
     references: Optional[List[SearchItem]] = None
-    extra_info: dict[str, str] = {}
+    extra_info: dict[str, Union[list[str], str]] = {}
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
@@ -60,7 +60,7 @@ class ChatResponseAnswer(BaseModel):
             [
                 template.format(key=key.capitalize(), value=value)
                 for key, value in self.extra_info.items()
-                if key and key != "Attachment" and value
+                if key and key != "Attachments" and value
             ]
         )
 
