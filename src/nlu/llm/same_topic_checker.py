@@ -43,7 +43,6 @@ you are a helpful chatbot
                 **chat_message_preparation.to_chat_params(),
                 max_length=256,
                 jsonable=True,
-                sub_scenario="check_same_topic",
             )
         ).get_json_response()
         if result:
