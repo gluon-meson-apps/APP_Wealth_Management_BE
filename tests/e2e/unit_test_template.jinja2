@@ -21,11 +21,17 @@ def construct_chat_message():
     {% endfor %}
 
     chat_message_preparation = ChatMessagePreparation()
+    first_prompt = """{{ data_list[0]["template"] }}"""
+
     {%- for data in data_list %}
         {%- set template_name = 'template' ~ loop.index %}
     chat_message_preparation.add_message(
         '{{ data['role'] }}',
+        {%- if loop.index != 1 %}
         """{{ data["template"] }}""",
+        {%- else %}
+        first_prompt,
+        {%- endif %}
         {%- for key, value in data["kwargs"].items() %}
             {{ key }}={{ key }},
         {%- endfor %}
@@ -34,7 +40,7 @@ def construct_chat_message():
 
     chat_message_preparation.log(logger)
     chat_params = chat_message_preparation.to_chat_params()
-    return chat_params
+    return chat_params, first_prompt
 
 
 
@@ -47,7 +53,7 @@ async def main():
     scenario_model_registry = DefaultScenarioModelRegistryCenter()
     chat_model = scenario_model_registry.get_model('{{ scenario }}')
 
-    chat_params = construct_chat_message()
+    chat_params, _ = construct_chat_message()
 
     result = (await chat_model.achat(**chat_params, **params)).response
     print(result)
@@ -60,11 +66,11 @@ previous_output = """{{ output }}"""
 
 def get_params():
     from tests.e2e.template_test_from_log import check_json_result
-    chat_params = construct_chat_message()
+    chat_params, prompt_template = construct_chat_message()
     result = ""
     if params['jsonable']:
-        result = check_json_result(expected, previous_output)
-    return use_case, scenario, chat_params["text"], json.dumps(params), previous_output, result
+        result = 'pass' if check_json_result(expected, previous_output) else 'fail'
+    return use_case, scenario, prompt_template, chat_params["text"], json.dumps(params), previous_output, result
 
 if __name__ == '__main__':
     asyncio.run(main())

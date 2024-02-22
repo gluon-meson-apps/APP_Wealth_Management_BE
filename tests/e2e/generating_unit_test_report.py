@@ -23,7 +23,7 @@ def cli(ctx, path):
 
 
 def form_the_dataframe(results: list[tuple]) -> pd.DataFrame:
-    columns = ["use_case", "scenario", "prompt", "params", "llm_result", "test_result"]
+    columns = ["use_case", "scenario", "prompt_template", "prompt", "params", "llm_result", "test_result"]
     return pd.DataFrame(data=results, columns=columns)
 
 
