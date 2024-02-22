@@ -1,8 +1,21 @@
+import os
+import shutil
+import uuid
+
 import tiktoken
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
-from action.base import ActionResponse, GeneralResponse, ResponseMessageType, ChatResponseAnswer, TBGuruAction
+from action.base import (
+    ActionResponse,
+    GeneralResponse,
+    ResponseMessageType,
+    ChatResponseAnswer,
+    TBGuruAction,
+    MultipleAttachmentsResponse,
+    UploadFileContentType,
+    Attachment,
+)
 from action.context import ActionContext
 
 MAX_OUTPUT_TOKEN_SiZE = 4096
@@ -56,9 +69,24 @@ class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
         self.enc = tiktoken.encoding_for_model("gpt-4")
+        self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/txt")
 
     def get_name(self) -> str:
         return "summary_and_translation"
+
+    async def save_answer_to_file(self, origin_file_name, answer) -> list[Attachment]:
+        files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
+        os.makedirs(files_dir, exist_ok=True)
+        file_name = f"{origin_file_name.split('.')[0]}.txt"
+        file_path = f"{files_dir}/{file_name}"
+        with open(file_path, "w") as f:
+            f.write(answer)
+        files = [Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)]
+        links = await self.unified_search.upload_file_to_minio(files)
+        shutil.rmtree(files_dir)
+        for index, f in enumerate(files):
+            f.url = links[index] if links else ""
+        return files
 
     async def loop_ask(self, user_input, file_contents, chat_model):
         processed_data = ""
@@ -87,8 +115,9 @@ class SummarizeAndTranslate(TBGuruAction):
                 jump_out_flag=False,
             )
 
-        file_contents = await self.download_first_raw_file(context)
-        file_token_size = len(self.enc.encode(file_contents)) if file_contents else 0
+        file = await self.download_first_raw_file(context)
+        file_contents = file.contents if file else ""
+        file_token_size = len(self.enc.encode(file.contents)) if file else 0
 
         logger.info(f"file token size: {file_token_size}")
 
@@ -120,10 +149,20 @@ class SummarizeAndTranslate(TBGuruAction):
             logger.info(f"result token size: {len(self.enc.encode(result))}")
             logger.info(f"final loop result: {result}")
 
+        if file_token_size > 0:
+            attachments = await self.save_answer_to_file(file.name, result)
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content="Please check attachments for all the replies.",
+                intent=context.conversation.current_intent.name,
+            )
+            return MultipleAttachmentsResponse(
+                code=200, message="success", answer=answer, jump_out_flag=False, attachments=attachments
+            )
+
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
         )
-
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)

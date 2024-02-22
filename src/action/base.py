@@ -156,6 +156,14 @@ class AttachmentResponse(ActionResponse):
     jump_out_flag: bool = False
 
 
+class MultipleAttachmentsResponse(ActionResponse):
+    code: int
+    message: str
+    answer: ChatResponseAnswer
+    attachments: list[Attachment]
+    jump_out_flag: bool = False
+
+
 class JumpOutResponse(ActionResponse):
     code: int
     message: str
@@ -274,11 +282,12 @@ class TBGuruAction(Action, ABC):
         contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
         return contents
 
-    async def download_first_raw_file(self, context: ActionContext) -> str:
+    async def download_first_raw_file(self, context: ActionContext) -> Union[Attachment, None]:
         if len(context.conversation.uploaded_file_urls) == 0:
-            return ""
-        contents = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
-        return decode_bytes(contents)
+            return None
+        file = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
+        file.contents = decode_bytes(file.contents) if file.contents else ""
+        return file
 
     async def download_raw_files(self, context: ActionContext) -> list[str]:
         if len(context.conversation.uploaded_file_urls) == 0:
