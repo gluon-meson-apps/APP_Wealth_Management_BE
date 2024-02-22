@@ -79,11 +79,11 @@ class UnifiedSearch:
     async def upload_file_to_minio(self, files: list[Attachment]) -> list[str]:
         data = aiohttp.FormData()
         for f in files:
-            if (f.file_path and os.path.exists(f.file_path)) or f.contents:
+            if (f.path and os.path.exists(f.path)) or f.contents:
                 data.add_field(
                     "files",
-                    f.contents if f.contents else open(f.file_path, "rb"),
-                    filename=f.filename,
+                    f.contents if f.contents else open(f.path, "rb"),
+                    filename=f.name,
                     content_type=f.content_type if f.content_type else mimetypes.guess_type(f.filename)[0],
                 )
         async with aiohttp.ClientSession() as session:

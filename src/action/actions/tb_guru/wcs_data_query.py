@@ -126,14 +126,11 @@ class WcsDataQuery(TBGuruAction):
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
-            files = [Attachment(name="tb_guru_ppt.pptx", path=ppt_path, content_type=UploadFileContentType.PPTX)]
-            links = await self.unified_search.upload_file_to_minio(files)
+            attachment = Attachment(name="tb_guru_ppt.pptx", path=ppt_path, content_type=UploadFileContentType.PPTX)
+            links = await self.unified_search.upload_file_to_minio([attachment])
             shutil.rmtree(files_dir)
-            return (
-                Attachment(name=ppt_filename, content_type=UploadFileContentType.PPTX, path=ppt_path, url=links[0])
-                if links
-                else None
-            )
+            attachment.url = links[0] if links else ""
+            return attachment
         return None
 
     async def _search_db(self, entity_dict, session_id) -> tuple[list[SearchItem], list[SearchItem]]:
