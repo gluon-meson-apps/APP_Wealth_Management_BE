@@ -8,8 +8,8 @@ from action.base import (
     Attachment,
     UploadFileContentType,
     GeneralResponse,
-    TBGuruAction,
 )
+from action.actions.tb_guru.base import TBGuruAction
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchItem
 

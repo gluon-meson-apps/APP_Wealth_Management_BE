@@ -4,7 +4,8 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from loguru import logger
 from tabulate import tabulate
 
-from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam
 
 prompt = """## Role

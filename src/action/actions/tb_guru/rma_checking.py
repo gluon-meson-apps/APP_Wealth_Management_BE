@@ -3,7 +3,8 @@ import json
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
-from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam
 from utils.action_helper import format_entities_for_search
 

@@ -11,11 +11,11 @@ from action.base import (
     GeneralResponse,
     ResponseMessageType,
     ChatResponseAnswer,
-    TBGuruAction,
     MultipleAttachmentsResponse,
     UploadFileContentType,
     Attachment,
 )
+from action.actions.tb_guru.base import TBGuruAction
 from action.context import ActionContext
 
 MAX_OUTPUT_TOKEN_SiZE = 4096

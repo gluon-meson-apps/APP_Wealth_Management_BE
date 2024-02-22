@@ -16,8 +16,8 @@ from action.base import (
     AttachmentResponse,
     Attachment,
     GeneralResponse,
-    TBGuruAction,
 )
+from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam, SearchItem
 from utils.ppt_helper import generate_ppt
 

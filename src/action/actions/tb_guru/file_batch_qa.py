@@ -12,8 +12,8 @@ from action.base import (
     Attachment,
     UploadFileContentType,
     GeneralResponse,
-    TBGuruAction,
 )
+from action.actions.tb_guru.base import TBGuruAction
 from action.df_processor import DfProcessor
 from third_system.search_entity import SearchParam, SearchResponse
 from tracker.context import ConversationContext

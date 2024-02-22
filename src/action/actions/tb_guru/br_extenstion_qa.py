@@ -5,8 +5,8 @@ from action.base import (
     ChatResponseAnswer,
     ResponseMessageType,
     GeneralResponse,
-    TBGuruAction,
 )
+from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam
 
 prompt = """
