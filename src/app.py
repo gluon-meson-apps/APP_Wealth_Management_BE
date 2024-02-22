@@ -102,7 +102,7 @@ async def score(
         result, conversation = await dialog_manager.handle_message(
             score_command.question,
             session_id,
-            first_file_name=first_file.name,
+            first_file_name=first_file.name if first_file else "",
             file_urls=file_urls,
             is_email_request=score_command.from_email,
         )
