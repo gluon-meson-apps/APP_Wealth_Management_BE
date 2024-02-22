@@ -7,18 +7,18 @@ slots:
   - name: bank entity name
     description: the entity name of the LC bank other than HSBC Singapore
     slotType: text
-    optional: True
   - name: country of bank
     description: the full country name of the bank to be checked, for example United States, China, Germany
     slotType: text
-    optional: True
   - name: country code of bank
     description: the country abbreviation code of the bank's country, which is 2 or 3 character. for example VNM, CHN, US
     slotType: text
-    optional: True
   - name: country of rma
-    description: the full country name or bank and country which used to check RMA, for example Hang Seng - Hong Kong,Hang Seng - China
+    description: the full country name which used to check RMA, for example Hang Seng - Hong Kong,Hang Seng - China
     slotType: text
-    optional: True
+  - name: SWIFT code
+    description: SWIFT/BIC address of the Counterparty Bank
+    slotType: text
 action: rma_checking
+slot_expression: ("bank entity name" and "country of bank" and "country of rma") or ("SWIFT code" and "country of rma")
 

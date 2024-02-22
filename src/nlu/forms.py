@@ -32,7 +32,7 @@ class FormStore:
 
     @staticmethod
     def _valid_slot(slot):
-        return all(key in slot for key in ["name", "description", "slotType", "optional"])
+        return all(key in slot for key in ["name", "description", "slotType"])
 
     def _filter_and_process_slots(self, intent_slots):
         if intent_slots:
