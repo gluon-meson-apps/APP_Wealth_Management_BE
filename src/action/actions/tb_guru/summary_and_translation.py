@@ -6,16 +6,16 @@ import tiktoken
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
+from action.actions.tb_guru.base import TBGuruAction
 from action.base import (
     ActionResponse,
     GeneralResponse,
     ResponseMessageType,
     ChatResponseAnswer,
-    MultipleAttachmentsResponse,
     UploadFileContentType,
     Attachment,
+    AttachmentResponse,
 )
-from action.actions.tb_guru.base import TBGuruAction
 from action.context import ActionContext
 
 MAX_OUTPUT_TOKEN_SiZE = 4096
@@ -156,8 +156,8 @@ class SummarizeAndTranslate(TBGuruAction):
                 content="Please check attachments for all the replies.",
                 intent=context.conversation.current_intent.name,
             )
-            return MultipleAttachmentsResponse(
-                code=200, message="success", answer=answer, jump_out_flag=False, attachments=attachments
+            return AttachmentResponse(
+                code=200, message="success", answer=answer, jump_out_flag=False, attachment=attachments[0]
             )
 
         answer = ChatResponseAnswer(

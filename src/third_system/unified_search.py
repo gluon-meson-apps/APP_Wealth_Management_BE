@@ -60,7 +60,7 @@ class UnifiedSearch:
             try:
                 async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
                     resp.raise_for_status()
-                    file_name = re.findall("filename=(.+)", resp.headers.get("Content-Disposition", ""))
+                    file_name = re.findall('filename="(.+)"', resp.headers.get("Content-Disposition", ""))
                     content = await resp.content.read()
                     return Attachment(
                         path="",
