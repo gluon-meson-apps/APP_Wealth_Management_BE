@@ -1,10 +1,8 @@
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
 from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
 from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
@@ -52,11 +50,9 @@ please summarize the chat history
 """
 
 
-class StandardPricingCheckAction(Action):
+class StandardPricingCheckAction(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "standard_pricing_check"

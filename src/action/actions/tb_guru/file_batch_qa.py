@@ -5,7 +5,6 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from loguru import logger
 
 from action.base import (
-    Action,
     ActionResponse,
     ResponseMessageType,
     ChatResponseAnswer,
@@ -14,12 +13,10 @@ from action.base import (
     UploadFileContentType,
     GeneralResponse,
     UploadStorageFile,
+    TBGuruAction,
 )
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
-
 from action.df_processor import DfProcessor
 from third_system.search_entity import SearchParam, SearchResponse
-from third_system.unified_search import UnifiedSearch
 from tracker.context import ConversationContext
 
 prompt = """## Role
@@ -40,12 +37,10 @@ based on the context, answer the question;
 """
 
 
-class FileBatchAction(Action):
+class FileBatchAction(TBGuruAction):
     def __init__(self):
-        self.unified_search: UnifiedSearch = UnifiedSearch()
+        super().__init__()
         self.df_processor: DfProcessor = DfProcessor()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
 
     def get_name(self) -> str:
         return "file_batch_qa"

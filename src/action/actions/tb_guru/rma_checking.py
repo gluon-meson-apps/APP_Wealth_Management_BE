@@ -1,12 +1,10 @@
 import json
 
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
-from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
 from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
 from utils.action_helper import format_entities_for_search
 
 prompt = """## Role
@@ -30,11 +28,9 @@ every counterparty bank has different cbid
 """
 
 
-class RMACheckingAction(Action):
+class RMACheckingAction(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "rma_checking"

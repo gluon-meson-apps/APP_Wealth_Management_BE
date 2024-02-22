@@ -1,11 +1,14 @@
+import asyncio
 from abc import ABC, abstractmethod
 from enum import unique, Enum
 from typing import Optional, Union, List
 
+from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from pydantic import BaseModel
 
 from action.context import ActionContext, ActionConfigContext
-from third_system.search_entity import SearchItem
+from third_system.search_entity import SearchItem, SearchResponse
+from third_system.unified_search import UnifiedSearch
 
 
 @unique
@@ -259,3 +262,23 @@ class DynamicAction(Action, ABC):
     @abstractmethod
     def load_from_config_context(self, config_context: ActionConfigContext):
         pass
+
+
+class TBGuruAction(Action, ABC):
+    def __init__(self) -> None:
+        self.unified_search = UnifiedSearch()
+        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
+        self.scenario_model = self.get_name() + "_action"
+
+    async def download_first_file(self, context: ActionContext) -> Union[SearchResponse, None]:
+        if len(context.conversation.uploaded_file_urls) == 0:
+            return None
+        contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
+        return contents
+
+    async def download_raw_files(self, context: ActionContext) -> list[str]:
+        if len(context.conversation.uploaded_file_urls) == 0:
+            return []
+        tasks = [self.unified_search.download_file_from_minio(url) for url in context.conversation.uploaded_file_urls]
+        files_res = await asyncio.gather(*tasks)
+        return [f.decode("utf-8") if f else "" for f in files_res]

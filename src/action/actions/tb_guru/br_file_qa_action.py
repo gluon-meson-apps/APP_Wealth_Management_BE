@@ -1,12 +1,10 @@
 import re
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
 from action.context import ActionContext
-from third_system.unified_search import UnifiedSearch
 
 prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on the business resolution file.
@@ -22,11 +20,9 @@ You are a helpful assistant, you need to answer the question from user based on 
 """
 
 
-class BrFileQAAction(Action):
+class BrFileQAAction(TBGuruAction):
     def __init__(self) -> None:
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "br_file_qa"

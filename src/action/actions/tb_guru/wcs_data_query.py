@@ -6,11 +6,9 @@ from typing import Union
 
 import pandas as pd
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import (
-    Action,
     ChatResponseAnswer,
     ResponseMessageType,
     ActionResponse,
@@ -19,9 +17,9 @@ from action.base import (
     AttachmentResponse,
     Attachment,
     GeneralResponse,
+    TBGuruAction,
 )
 from third_system.search_entity import SearchParam, SearchItem
-from third_system.unified_search import UnifiedSearch
 from utils.ppt_helper import generate_ppt
 
 ppt_filename = "tb_guru_ppt.pptx"
@@ -115,11 +113,9 @@ def parse_model_to_dataframe(data):
     return df.drop(columns=["meta__score", "meta__reference", "id"], errors="ignore")
 
 
-class WcsDataQuery(Action):
+class WcsDataQuery(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
         self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/wcs")
 
     def get_name(self) -> str:

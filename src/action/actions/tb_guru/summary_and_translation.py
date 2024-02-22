@@ -1,11 +1,9 @@
 import tiktoken
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ActionResponse, GeneralResponse, ResponseMessageType, ChatResponseAnswer
+from action.base import ActionResponse, GeneralResponse, ResponseMessageType, ChatResponseAnswer, TBGuruAction
 from action.context import ActionContext
-from third_system.unified_search import UnifiedSearch
 
 MAX_OUTPUT_TOKEN_SiZE = 4096
 MAX_FILE_TOKEN_SIZE = 64 * 1024
@@ -54,11 +52,9 @@ async def ask_chatbot(user_input, file_contents, index, chat_model, processed_da
     return result
 
 
-class SummarizeAndTranslate(Action):
+class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
         self.enc = tiktoken.encoding_for_model("gpt-4")
 
     def get_name(self) -> str:

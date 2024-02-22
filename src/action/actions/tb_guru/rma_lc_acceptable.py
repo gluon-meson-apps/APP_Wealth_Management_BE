@@ -1,13 +1,11 @@
 import json
 
-from loguru import logger
-from action.base import Action, ActionResponse, ChatResponseAnswer, ResponseMessageType, GeneralResponse
-from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
-from utils.action_helper import format_entities_for_search
-
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from loguru import logger
+
+from action.base import ActionResponse, ChatResponseAnswer, ResponseMessageType, GeneralResponse, TBGuruAction
+from third_system.search_entity import SearchParam
+from utils.action_helper import format_entities_for_search
 
 prompt = """"## Role
 you are a helpful assistant, you need to check LC acceptable for every counterparty bank with different CBID
@@ -40,11 +38,9 @@ now, answer the question step by step, and reply step result and the final resul
 """
 
 
-class LCAcceptableAction(Action):
+class LCAcceptableAction(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "rma_lc_acceptable"

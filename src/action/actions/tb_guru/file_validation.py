@@ -1,9 +1,7 @@
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import (
-    Action,
     ChatResponseAnswer,
     ResponseMessageType,
     AttachmentResponse,
@@ -11,10 +9,10 @@ from action.base import (
     UploadFileContentType,
     UploadStorageFile,
     GeneralResponse,
+    TBGuruAction,
 )
 from third_system.hsbc_connect_api import HsbcConnectApi
 from third_system.search_entity import SearchItem
-from third_system.unified_search import UnifiedSearch
 
 report_filename = "file_validation_report.html"
 
@@ -50,11 +48,9 @@ Now, answer the user's question, and reply the final result.
 """
 
 
-class FileValidation(Action):
+class FileValidation(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
         self.hsbc_connect_api = HsbcConnectApi()
 
     def get_name(self) -> str:

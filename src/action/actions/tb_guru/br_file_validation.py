@@ -1,11 +1,9 @@
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
 from action.context import ActionContext
 from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
 from utils.utils import get_texts_from_search_response
 
 prompt = """## Role
@@ -37,11 +35,9 @@ Ask the user to check their input because you cannot find related content in tra
 """
 
 
-class BrFileValidation(Action):
+class BrFileValidation(TBGuruAction):
     def __init__(self) -> None:
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "br_file_validation"

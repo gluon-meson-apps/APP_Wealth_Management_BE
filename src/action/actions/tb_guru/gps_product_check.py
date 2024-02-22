@@ -4,10 +4,8 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from loguru import logger
 from tabulate import tabulate
 
-from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse, TBGuruAction
 from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
 
 prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on below provided gps products
@@ -29,11 +27,9 @@ now, answer the user's question in summary, and reply the final result with prov
 """
 
 
-class GPSProductCheckAction(Action):
+class GPSProductCheckAction(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "gps_product_check"

@@ -1,15 +1,13 @@
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
-from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import (
-    Action,
     ChatResponseAnswer,
     ResponseMessageType,
     GeneralResponse,
+    TBGuruAction,
 )
 from third_system.search_entity import SearchParam
-from third_system.unified_search import UnifiedSearch
 
 prompt = """
 ## Role
@@ -40,11 +38,9 @@ please summarize the user question according USER INPUT and chat history
 """
 
 
-class BRExtensionQAAction(Action):
+class BRExtensionQAAction(TBGuruAction):
     def __init__(self):
-        self.unified_search = UnifiedSearch()
-        self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
-        self.scenario_model = self.get_name() + "_action"
+        super().__init__()
 
     def get_name(self) -> str:
         return "br_extension_qa"
