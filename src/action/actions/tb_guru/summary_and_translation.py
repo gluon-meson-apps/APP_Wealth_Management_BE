@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 import uuid
@@ -65,6 +66,14 @@ async def ask_chatbot(user_input, file_contents, index, chat_model, processed_da
     return result
 
 
+def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
+    file_name = f"{origin_file_name.split('.')[0]}.txt"
+    file_path = f"{files_dir}/{file_name}"
+    with open(file_path, "w") as f:
+        f.write(answer)
+    return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)
+
+
 class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
@@ -74,21 +83,20 @@ class SummarizeAndTranslate(TBGuruAction):
     def get_name(self) -> str:
         return "summary_and_translation"
 
-    async def save_answer_to_file(self, origin_file_name, answer) -> list[Attachment]:
+    async def save_answers_to_files(self, origin_files: list[Attachment], answer: list[str]) -> list[Attachment]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         os.makedirs(files_dir, exist_ok=True)
-        file_name = f"{origin_file_name.split('.')[0]}.txt"
-        file_path = f"{files_dir}/{file_name}"
-        with open(file_path, "w") as f:
-            f.write(answer)
-        files = [Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)]
+        files = [save_answer_to_file(files_dir, f.name, answer[index]) for index, f in enumerate(origin_files)]
         links = await self.unified_search.upload_file_to_minio(files)
         shutil.rmtree(files_dir)
         for index, f in enumerate(files):
             f.url = links[index] if links else ""
         return files
 
-    async def loop_ask(self, user_input, file_contents, chat_model):
+    async def loop_ask(self, user_input, file_contents, chat_model) -> str:
+        file_token_size = len(self.enc.encode(file_contents))
+        if file_token_size > MAX_FILE_TOKEN_SIZE:
+            return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
         processed_data = ""
         part = 0
         while True:
@@ -115,54 +123,43 @@ class SummarizeAndTranslate(TBGuruAction):
                 jump_out_flag=False,
             )
 
-        file = await self.download_first_raw_file(context)
-        file_contents = file.contents if file else ""
-        file_token_size = len(self.enc.encode(file.contents)) if file else 0
+        files = await self.download_raw_files(context)
+        available_files = [f for f in files if f]
 
-        logger.info(f"file token size: {file_token_size}")
-
-        if file_token_size > MAX_FILE_TOKEN_SIZE:
-            return GeneralResponse(
-                code=200,
-                message="success",
-                answer=f"Sorry, your file have {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file.",
-                jump_out_flag=False,
-            )
-
-        if file_token_size + input_token_size <= MAX_OUTPUT_TOKEN_SiZE:
+        if not available_files:
             chat_message_preparation = ChatMessagePreparation()
             chat_message_preparation.add_message(
                 "user",
                 direct_prompt,
-                user_input=user_input + "\n\n" + file_contents,
+                user_input=user_input,
             )
             # chat_message_preparation.log(logger)
             result = (
                 await chat_model.achat(
-                    **chat_message_preparation.to_chat_params(),
-                    max_length=MAX_OUTPUT_TOKEN_SiZE,
+                    **chat_message_preparation.to_chat_params(), max_length=MAX_OUTPUT_TOKEN_SiZE, sub_scenario="direct"
                 )
             ).response
             logger.info(f"final direct result: {result}")
-        else:
-            result = await self.loop_ask(context.conversation.current_user_input, file_contents, chat_model)
-            logger.info(f"result token size: {len(self.enc.encode(result))}")
-            logger.info(f"final loop result: {result}")
-
-        if file_token_size > 0:
-            attachments = await self.save_answer_to_file(file.name, result)
             answer = ChatResponseAnswer(
                 messageType=ResponseMessageType.FORMAT_TEXT,
-                content="Please check attachments for all the replies.",
+                content=result,
                 intent=context.conversation.current_intent.name,
             )
-            return AttachmentResponse(
-                code=200, message="success", answer=answer, jump_out_flag=False, attachments=attachments
-            )
+            return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
+        tasks = [
+            self.loop_ask(context.conversation.current_user_input, f.contents, chat_model) for f in available_files
+        ]
+        result = await asyncio.gather(*tasks)
+        result_str = "\n".join(result)
+        logger.info(f"final loop result: {result_str}")
+
+        attachments = await self.save_answers_to_files(available_files, result)
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content=result,
+            content="Please check attachments for all the replies.",
             intent=context.conversation.current_intent.name,
         )
-        return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+        return AttachmentResponse(
+            code=200, message="success", answer=answer, jump_out_flag=False, attachments=attachments
+        )

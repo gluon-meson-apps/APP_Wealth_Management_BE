@@ -33,9 +33,14 @@ class TBGuruAction(Action, ABC):
         file.contents = decode_bytes(file.contents) if file.contents else ""
         return file
 
-    async def download_raw_files(self, context: ActionContext) -> list[str]:
+    async def download_raw_files(self, context: ActionContext) -> list[Attachment]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return []
-        tasks = [self.unified_search.download_file_from_minio(url) for url in context.conversation.uploaded_file_urls]
+        tasks = [
+            self.unified_search.download_raw_file_from_minio(url) for url in context.conversation.uploaded_file_urls
+        ]
         files_res = await asyncio.gather(*tasks)
-        return list(map(decode_bytes, files_res))
+        return [
+            Attachment(name=f.name, path=f.path, content_type=f.content_type, contents=decode_bytes(f.contents))
+            for f in files_res
+        ]
