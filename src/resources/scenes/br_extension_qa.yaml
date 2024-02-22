@@ -1,6 +1,5 @@
 name: br_extension_qa
 business: true
-disabled: true
 description: answer BR supporting documents requirements for for New Authorised Signatory related questions from user input, the required supporting documents include LETTERHEAD and ID/Passport Copies and Proof of Residential Address and Specimen Signature
 examples:
   - Hi TB guru, Could you please help me check the Australia BR supporting document requirement for New Authorised Signatory
