@@ -22,7 +22,7 @@ async def call_search_api(method: str, endpoint: str, payload: dict) -> SearchRe
                 response.raise_for_status()
                 return SearchResponse.model_validate(await response.json())
         except Exception as err:
-            logger.error(f"Error fetch url {endpoint}:", err)
+            logger.error(f"Error fetch url {endpoint}: {err}")
             return SearchResponse()
 
 
@@ -42,7 +42,7 @@ class UnifiedSearch:
                     result = await response.json()
                     return [SearchResponse.model_validate(item) for item in result]
             except Exception as err:
-                logger.error(f"Error search {search_param}:", err)
+                logger.error(f"Error search {search_param}: {err}")
                 return []
 
     async def vector_search(self, search_param: SearchParam, table) -> list[SearchResponse]:
@@ -70,7 +70,7 @@ class UnifiedSearch:
                         content_type=resp.headers.get("Content-Type", ""),
                     )
             except Exception as err:
-                logger.error(f"Error download {file_url}:", err)
+                logger.error(f"Error download {file_url}: {err}")
                 return None
 
     async def download_file_from_minio(self, file_url: str) -> SearchResponse:

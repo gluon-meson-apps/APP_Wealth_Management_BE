@@ -35,7 +35,7 @@ class HsbcConnectApi:
                     response.raise_for_status()
                     return await response.text()
             except Exception as err:
-                logger.error("Error to validate file by HSBC api:", err)
+                logger.error(f"Error to validate file by HSBC api: {err}")
                 raise err
 
     async def validate_file(self, file: SearchItem) -> str:
