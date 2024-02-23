@@ -46,6 +46,6 @@ you are a helpful chatbot
                 sub_scenario="check_same_topic",
             )
         ).get_json_response()
-        return result["start_new_topic"] if "start_new_topic" in result else False, result[
-            "new_request"
-        ] if "new_request" in result else ""
+        if result:
+            return result.get("start_new_topic", False), result.get("new_request", "")
+        return False, ""
