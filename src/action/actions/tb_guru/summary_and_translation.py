@@ -56,6 +56,7 @@ async def ask_chatbot(user_input, file_contents, index, chat_model, processed_da
             processed_data=processed_data,
         )
     # chat_message_preparation.log(logger)
+    logger.info(f"start part {index}")
     result = (
         await chat_model.achat(
             **chat_message_preparation.to_chat_params(),
@@ -83,6 +84,9 @@ class SummarizeAndTranslate(TBGuruAction):
     def get_name(self) -> str:
         return "summary_and_translation"
 
+    def get_token_size(self, v):
+        return len(self.enc.encode(v))
+
     async def save_answers_to_files(self, origin_files: list[Attachment], answer: list[str]) -> list[Attachment]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         os.makedirs(files_dir, exist_ok=True)
@@ -93,17 +97,21 @@ class SummarizeAndTranslate(TBGuruAction):
             f.url = links[index] if links else ""
         return files
 
-    async def loop_ask(self, user_input, file_contents, chat_model) -> str:
-        file_token_size = len(self.enc.encode(file_contents))
+    async def loop_ask(self, user_input, file: Attachment, chat_model) -> str:
+        file_token_size = self.get_token_size(file.contents)
+        logger.info(f"file {file.name} token size: {file_token_size}")
         if file_token_size > MAX_FILE_TOKEN_SIZE:
             return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
         processed_data = ""
         part = 0
         while True:
-            current_result = await ask_chatbot(user_input, file_contents, part, chat_model, processed_data)
+            current_result = await ask_chatbot(user_input, file, part, chat_model, processed_data)
             processed_data += current_result
+            part_token_size = self.get_token_size(current_result)
+            logger.info(f"part {part} token_size: {part_token_size}")
             logger.info(f"part {part} result: {current_result}")
-            if len(self.enc.encode(current_result)) < MAX_OUTPUT_TOKEN_SiZE:
+            if part_token_size < MAX_OUTPUT_TOKEN_SiZE:
+                logger.info(f"loop ended after part {part}")
                 break
             part += 1
         return processed_data
@@ -113,7 +121,7 @@ class SummarizeAndTranslate(TBGuruAction):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         user_input = context.conversation.current_user_input
-        input_token_size = len(self.enc.encode(user_input))
+        input_token_size = self.get_token_size(user_input)
 
         if input_token_size > MAX_OUTPUT_TOKEN_SiZE:
             return GeneralResponse(
@@ -147,11 +155,10 @@ class SummarizeAndTranslate(TBGuruAction):
             )
             return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
-        tasks = [
-            self.loop_ask(context.conversation.current_user_input, f.contents, chat_model) for f in available_files
-        ]
+        tasks = [self.loop_ask(context.conversation.current_user_input, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
         result_str = "\n".join(result)
+        logger.info(f"final result token size: {self.get_token_size(result_str)}")
         logger.info(f"final loop result: {result_str}")
 
         attachments = await self.save_answers_to_files(available_files, result)
