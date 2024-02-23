@@ -1116,8 +1116,8 @@ sseclient-py = ">=1.8.0"
 [package.source]
 type = "git"
 url = "ssh://git@github.com/gluon-meson/sdk.git"
-reference = "hsbc-tb-guru26"
-resolved_reference = "9f19c5a932ece3654613a3f1da29843b5edebcea"
+reference = "hsbc-tb-guru27"
+resolved_reference = "55cdf1fc211f1f00382c906a462ea3355d322cf4"
 
 [[package]]
 name = "gradio"
@@ -4951,4 +4951,4 @@ reference = "tsinghua"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "2a10f26c0e75c686cb6fa45df0552f353e9656837780b2b75bd564895f74c954"
+content-hash = "9a9ef35c40320a1142d824d9d991ad7da42c8a2097ea83dcf3fd2d14b723321a"
