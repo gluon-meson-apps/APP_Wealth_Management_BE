@@ -1,5 +1,4 @@
 import asyncio
-import json
 import time
 from typing import Generator, Union
 
@@ -164,8 +163,7 @@ WHERE id = '{email.id}'
                 yield "", []
 
         if not streaming_returned and response_capture.collected_response:
-            response_json = json.loads(response_capture.collected_response)
-            yield handle_response(response_json)
+            yield handle_response(extract_json_from_text(response_capture.collected_response))
 
     async def ask_thought_agent(self, email: Email) -> (str, list[Attachment]):
         payload = {
