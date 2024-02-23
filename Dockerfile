@@ -30,6 +30,8 @@ WORKDIR /app
 
 ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
+ENV TIKTOKEN_CACHE_DIR=/opt/tiktoken_cache
+
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
@@ -39,6 +41,9 @@ COPY . /app
 
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH=.
+
+RUN python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4');tiktoken.encoding_for_model('gpt2')"
+
 
 # Define the command to start the application
 CMD cd /app/src && python app.py
