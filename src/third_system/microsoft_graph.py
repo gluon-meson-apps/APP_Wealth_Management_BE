@@ -166,7 +166,7 @@ class Graph:
                     data={
                         "@odata.type": "#microsoft.graph.fileAttachment",
                         "name": a.name,
-                        "contentBytes": base64.b64encode(a.contents),
+                        "contentBytes": base64.b64encode(a.contents).decode(),
                         "contentType": a.content_type,
                     },
                     extra_headers={"Content-Type": "application/json"},

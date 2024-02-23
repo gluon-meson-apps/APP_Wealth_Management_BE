@@ -43,4 +43,5 @@ class TBGuruAction(Action, ABC):
         return [
             Attachment(name=f.name, path=f.path, content_type=f.content_type, contents=decode_bytes(f.contents))
             for f in files_res
+            if f
         ]

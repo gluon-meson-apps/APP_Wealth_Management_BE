@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from typing import Generator
+from typing import Generator, Union
 
 import aiohttp
 import environ
@@ -38,11 +38,21 @@ def get_config(cls):
     return environ.to_config(cls)
 
 
+def parse_attachment(a) -> Union[Attachment, None]:
+    try:
+        return Attachment.model_validate_json(a)
+    except Exception as err:
+        logger.error(f"Error when parse attachment: {err}")
+        return None
+
+
 def handle_response(json_result) -> (str, list[Attachment]):
-    answer = json_result["answer"] if "answer" in json_result and json_result["answer"] else ""
-    attachments_list = extract_json_from_text(json_result["attachments"]) if "attachments" in json_result else None
-    attachments = [Attachment(**a) for a in attachments_list if a] if attachments_list else []
-    return answer, attachments
+    if json_result:
+        answer = json_result["answer"] if json_result.get("answer") else ""
+        attachments_list = json_result["attachments"] if json_result.get("attachments") else None
+        attachments = list(map(parse_attachment, attachments_list)) if attachments_list else []
+        return answer, list(filter(lambda a: a, attachments))
+    return "", []
 
 
 def format_html_content(content):
@@ -150,7 +160,7 @@ WHERE id = '{email.id}'
                         streaming_returned = True
                         yield handle_response(extract_json_from_text(event.data))
             except Exception as err:
-                logger.error("Error with thought agent:", err)
+                logger.error(f"Error with thought agent: {err}")
                 yield "", []
 
         if not streaming_returned and response_capture.collected_response:
