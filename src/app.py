@@ -133,7 +133,7 @@ async def score(
         full_history = []
         if conversation is not None:
             full_history = conversation.history.format_messages()
-        await PGModelLogService().async_log(
+        asyncio.create_task(PGModelLogService().async_log(
             session_id,
             "overall",
             "no_model",
@@ -141,7 +141,7 @@ async def score(
             full_history[-1]["content"] if len(full_history) > 0 and "content" in full_history[-1] else "",
             {**score_command.model_dump(), "extra_info": result.answer.extra_info if result else {}},
             err_msg,
-        )
+        ))
 
     return EventSourceResponse(generator())
 
