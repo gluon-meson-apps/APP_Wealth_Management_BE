@@ -1,5 +1,6 @@
 name: file_batch_qa
 business: true
+disabled: true
 description: Batch Q&A about general questions based on csv/excel file
 examples:
   - answer the questions in the csv file
