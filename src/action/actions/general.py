@@ -146,8 +146,9 @@ class AskForIntentChoosingAction(Action):
     async def run(self, context: ActionContext):
         logger.info(f"exec action {self.get_name()}")
 
-        filtered_intents = [
-            intent.minimal_info() for intent in context.conversation.confused_intents if not intent.disabled
+        filtered_intents = [intent.minimal_info() for intent in context.conversation.confused_intents]
+        disabled_intents = [
+            intent.minimal_info() for intent in context.conversation.confused_intents if intent.disabled
         ]
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -157,6 +158,7 @@ class AskForIntentChoosingAction(Action):
             self.prompt_template.template,
             history=context.conversation.get_history().format_string(),
             intent_list=json.dumps(filtered_intents),
+            disabled_intents=json.dumps(disabled_intents),
         )
         chat_message_preparation.log(logger)
 
