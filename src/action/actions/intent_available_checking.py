@@ -24,7 +24,7 @@ you are a chatbot, you need tell user the current feature is suspended
 
 ## INSTRUCT
 
-based on the disabled feature and user input, tell user the specific feature is suspended;
+based on the disabled feature and user input, concisely tell user the specific feature is suspended.
 
 """
 
