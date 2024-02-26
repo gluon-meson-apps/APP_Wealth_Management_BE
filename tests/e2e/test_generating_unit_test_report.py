@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import pandas as pd
 import pytest
+from pandas._testing import assert_frame_equal
 
 import tests.e2e.generating_unit_test_report as report
 
@@ -105,13 +106,11 @@ class TestTraverseTestCaseDirectoryAndExecuteTests:
     ):
         mock_module = mock_import_module.return_value
 
-        async def mock_coroutine():
-            return "Test Result"
-        mock_module.main = MagicMock(return_value=mock_coroutine())
+        mock_module.get_params = MagicMock(return_value="Test Result")
 
         result = report.execute_test("/path/to/package/subfolder1/unit_test_something_unit.py")
 
-        mock_module.main.assert_called_once()
+        mock_module.get_params.assert_called_once()
         assert result == "Test Result"
 
     @patch("tests.e2e.generating_unit_test_report.get_module_name",
@@ -123,14 +122,14 @@ class TestTraverseTestCaseDirectoryAndExecuteTests:
             mock_get_module_name
     ):
         mock_module = mock_import_module.return_value
-        mock_module.main = "Not a callable function"
+        mock_module.get_params = "Not a callable function"
 
         with pytest.raises(Exception) as exc:
             report.execute_test("/path/to/package/subfolder1/unit_test_something_unit.py")
 
         # Assert that the expected exception is raised
         assert str(
-            exc.value) == "The module package.subfolder1.unit_test_something_unit does not have a main function or it's not callable"
+            exc.value) == "The module package.subfolder1.unit_test_something_unit does not have a get_params function or it's not callable"
 
     @patch("tests.e2e.generating_unit_test_report.execute_test")
     def test_given_test_files_list_should_return_results_list_when_tests_are_executed(self, mock_execute_test):
@@ -187,6 +186,31 @@ class TestGenerateReportFromTestingDetails:
         actual_result_df = report.statistic_testing_result(original_df)
 
         assert actual_result_df.equals(expected_df)
+
+    def test_given_test_details_should_return_a_summary_df(self):
+        original_columns = ["use_case", "scenario", "prompt_template", "params", "llm_result", "test_result"]
+        original_data = [
+            ("use_case_1", "scenario_1", "prompt_template_1", "{\"temperature\": 0, \"top_p\": 0.7, \"jsonable\": true}",
+             "llm_result_1_1", "pass"),
+            ("use_case_2", "scenario_1", "prompt_template_1", "{\"temperature\": 0, \"top_p\": 0.7, \"jsonable\": true}",
+             "llm_result_2_1", "fail"),
+            ("use_case_2", "scenario_2", "prompt_template_2", "{\"temperature\": 0.9, \"top_p\": 0.8, \"jsonable\": true}",
+             "llm_result_2_2", "pass"),
+            ("use_case_3", "scenario_1", "prompt_template_1", "{\"temperature\": 0, \"top_p\": 0.7, \"jsonable\": true}",
+             "llm_result_2_2", "fail"),
+        ]
+        original_df = pd.DataFrame(data=original_data, columns=original_columns)
+
+        expected_columns = ["scenario", "prompt_template", "params", "total", "pass", "fail", "pass percentage", "fail percentage"]
+        expected_data = [
+            ["scenario_1", "prompt_template_1", "{\"temperature\": 0, \"top_p\": 0.7, \"jsonable\": true}", 3.0, 1.0, 2.0, 33.333, 66.666],
+            ["scenario_2", "prompt_template_2", "{\"temperature\": 0.9, \"top_p\": 0.8, \"jsonable\": true}", 1.0, 1.0, 0.0, 100.0, 0.0],
+        ]
+        expected_df = pd.DataFrame(data=expected_data, columns=expected_columns)
+
+        actual_result_df = report.statistic_testing_result(original_df)
+
+        assert_frame_equal(actual_result_df, expected_df)
 
     def test_given_dataframe_should_extract_keys_to_new_columns_if_it_is_json_string(self):
         original_columns = ["column1", "column2"]

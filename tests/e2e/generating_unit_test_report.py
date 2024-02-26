@@ -98,11 +98,11 @@ def record_testing_details(ctx, count, test_cases_root_folder):
 
 
 def statistic_testing_result(dataframe):
-    dataframe["test_result"] = dataframe["test_result"].apply(lambda x: x if x in ["pass", "fail"] else "unknown")
+    dataframe["test_result"] = dataframe["test_result"].apply(lambda x: x if x in ["pass", "fail"] else "fail")
 
-    grouped_df = dataframe.groupby(["scenario", "use_case", "test_result"]).size().reset_index(name="count")
+    grouped_df = dataframe.groupby(["scenario", "test_result"]).size().reset_index(name="count")
     pivoted_df = grouped_df.pivot_table(
-        index=["scenario", "use_case"],
+        index=["scenario"],
         columns="test_result",
         values="count",
         fill_value=0,
@@ -112,14 +112,18 @@ def statistic_testing_result(dataframe):
         pivoted_df["pass"] = 0
     if "fail" not in pivoted_df:
         pivoted_df["fail"] = 0
-    if "unknown" not in pivoted_df:
-        pivoted_df["unknown"] = 0
 
-    total_tests = pivoted_df["pass"] + pivoted_df["fail"] + pivoted_df["unknown"]
+    total_tests = pivoted_df["pass"] + pivoted_df["fail"]
     pivoted_df["pass percentage"] = pivoted_df["pass"] / total_tests * 100.0
     pivoted_df["fail percentage"] = pivoted_df["fail"] / total_tests * 100.0
-    merged_df = pd.merge(dataframe, pivoted_df, on=["scenario", "use_case"], how="left")
-    return merged_df
+    merged_df = pd.merge(dataframe, pivoted_df, on=["scenario"], how="left")
+    merged_df['total'] = merged_df['fail'] + merged_df['pass']
+    column_to_be_empty_indexes = [merged_df.columns.get_loc('use_case'), merged_df.columns.get_loc('llm_result'),
+               merged_df.columns.get_loc('test_result')]
+    merged_df.iloc[merged_df[merged_df['total'] > 1].index, column_to_be_empty_indexes] = ["", "", ""]
+    merged_df = merged_df.drop_duplicates(subset=['use_case', 'scenario'])
+    columns = ["scenario", "prompt_template", "params", "total", "pass", "fail", "pass percentage", "fail percentage"]
+    return merged_df.reset_index(drop=True)[columns]
 
 
 def extract_keys(json_str):
@@ -150,11 +154,12 @@ def generate_report_from_testing_details(ctx):
     dataframe = get_testing_details_dataframe_from_excel(ctx.obj["PATH"])
     flattened_df = unnest_json_values(dataframe, "params")
     statistic_df = statistic_testing_result(flattened_df)
-    report_df = statistic_df.groupby(["scenario", "use_case"]).sum().sort_index()
+    report_df = statistic_df
 
     with pd.ExcelWriter(report_file_path,
                         engine="openpyxl",
-                        mode="a") as writer:
+                        mode="a",
+                        if_sheet_exists="replace") as writer:
         report_df.to_excel(writer, sheet_name="summary", index=False)
 
     return report_df
