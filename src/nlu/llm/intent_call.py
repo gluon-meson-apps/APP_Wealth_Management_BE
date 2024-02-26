@@ -5,7 +5,6 @@ from gluon_meson_sdk.models.abstract_models.chat_message_preparation import Chat
 from loguru import logger
 from pydantic import BaseModel
 
-from llm.self_host import ChatModel
 from nlu.intent_config import IntentListConfig
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
@@ -22,11 +21,7 @@ class IntentCall:
         self,
         intent_list_config: IntentListConfig,
         template: PromptWrapper,
-        model: ChatModel,
-        model_type: str,
     ):
-        self.model = model
-        self.model_type = model_type
         self.intent_list_config = intent_list_config
         self.template = template
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()

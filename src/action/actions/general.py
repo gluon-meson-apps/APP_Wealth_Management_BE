@@ -12,7 +12,6 @@ from action.base import (
     ResponseMessageType,
 )
 from action.context import ActionContext
-from llm.self_host import ChatModel
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Intent, Slot
 from prompt_manager.base import PromptManager
@@ -78,7 +77,6 @@ class IntentConfirmAction(Action):
 
     def __init__(self, intent: Intent, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name="intent_confirm")
-        self.llm = ChatModel()
         self.intent = intent
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_confirmation_action"
@@ -109,7 +107,6 @@ class IntentFillingAction(Action):
 
     def __init__(self, prompt_manager: PromptManager, form_store: FormStore):
         self.prompt_template = prompt_manager.load(name="intent_filling")
-        self.llm = ChatModel()
         self.intents = form_store.intent_list_config.get_intent_list()
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "intent_filling_action"
@@ -178,7 +175,6 @@ class SlotConfirmAction(Action):
 
     def __init__(self, intent: Intent, slot: Slot, prompt_manager: PromptManager):
         self.prompt_template = prompt_manager.load(name="slot_confirm")
-        self.llm = ChatModel()
         self.intent = intent
         self.slot = slot
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
@@ -208,9 +204,7 @@ class ChitChatAction(Action):
     def get_name(self) -> str:
         return "chitchat"
 
-    def __init__(self, model_type: str, chat_model: ChatModel):
-        self.model_type = model_type
-        self.chat_model = chat_model
+    def __init__(self):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = "chit_chat_action"
 

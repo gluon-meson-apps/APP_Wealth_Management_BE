@@ -14,7 +14,6 @@ from action.actions.tb_guru.summary_and_translation import SummarizeAndTranslate
 from action.actions.tb_guru.wcs_data_query import WcsDataQuery
 from action.actions.tb_guru.br_extenstion_qa import BRExtensionQAAction
 from action.base import Action
-from llm.self_host import ChatModel
 
 
 class ActionRepository:
@@ -41,7 +40,7 @@ class MemoryBasedActionRepository(ActionRepository):
 
 
 action_repository = MemoryBasedActionRepository()
-action_repository.save(ChitChatAction("azure-gpt-3.5-2", ChatModel()))
+action_repository.save(ChitChatAction())
 action_repository.save(FileBatchAction())
 action_repository.save(StandardPricingCheckAction())
 action_repository.save(BrFileQAAction())

@@ -2,7 +2,6 @@ import json
 from typing import Any, Optional
 
 from gluon_meson_sdk.dbs.milvus.milvus_for_langchain import MilvusForLangchain
-from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from langchain.schema import Document
 from loguru import logger
@@ -76,14 +75,12 @@ def extract_examples_from_response_text(response: SearchResponse):
 class LLMIntentClassifier(IntentClassifier):
     def __init__(
         self,
-        chat_model: ChatModel,
         embedding_model: EmbeddingModel,
         milvus_for_langchain: MilvusForLangchain,
         intent_list_config: IntentListConfig,
         model_type: str,
         prompt_manager: PromptManager,
     ):
-        self.model = chat_model
         self.embedding = embedding_model
         self.milvus_for_langchain = milvus_for_langchain
         self.retrieval_counts = 4
@@ -95,8 +92,6 @@ class LLMIntentClassifier(IntentClassifier):
         self.intent_call = IntentCall(
             intent_list_config,
             prompt_manager.load(name="intent_classification_v2"),
-            chat_model,
-            model_type,
         )
         self.intent_choosing_confirmer = IntentChoosingConfirmer(
             prompt_manager.load(name="intent_choosing_confirm").template

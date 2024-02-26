@@ -10,7 +10,6 @@ from loguru import logger
 
 from action.context import ActionContext
 from action.runner import ActionRunner, SimpleActionRunner
-from llm.self_host import ChatModel as SelfHostChatModel
 from nlu.forms import FormStore
 from nlu.intent_config import IntentListConfig
 from nlu.llm.entity import LLMEntityExtractor
@@ -133,7 +132,6 @@ class DialogManagerFactory:
         prompt_manager = BasePromptManager(prompt_template_folder)
 
         classifier = LLMIntentClassifier(
-            chat_model=SelfHostChatModel(),
             embedding_model=embedding_model,
             milvus_for_langchain=MilvusForLangchain(embedding_model, MilvusConnection()),
             intent_list_config=intent_list_config,
