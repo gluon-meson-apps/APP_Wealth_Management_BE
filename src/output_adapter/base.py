@@ -156,10 +156,18 @@ class BaseOutputAdapter(OutputAdapter):
             if output_html:
                 output.answer.extra_info["References"] = output_html
         self._fill_intent_value(conversation, output)
-        output.answer.extra_info["slots"] = "\n".join(
-            [f"{key}: {value}" for key, value in conversation.get_simplified_entities().items()]
-        )
+        self._fill_slots_value(conversation, output)
         return output
+
+    def _fill_slots_value(self, conversation, output):
+        output.answer.extra_info["slots"] = "\n".join(
+            [
+                f"{entity.type}: {entity.value} (optional)"
+                if entity.possible_slot.optional and not conversation.current_intent.slot_expression
+                else f"{entity.type}: {entity.value}"
+                for entity in conversation.get_current_entities()
+            ]
+        )
 
     def _fill_intent_value(self, conversation, output):
         if conversation.current_intent:

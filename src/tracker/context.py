@@ -185,6 +185,9 @@ class ConversationContext:
     def get_entities(self):
         return self.entities
 
+    def get_current_entities(self):
+        return [entity for entity in self.entities if entity.type in self.current_intent_slot_names]
+
     def get_simplified_entities(self):
         return {entity.type: entity.value for entity in self.entities}
 

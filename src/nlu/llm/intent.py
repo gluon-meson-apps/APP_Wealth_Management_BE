@@ -162,7 +162,14 @@ class LLMIntentClassifier(IntentClassifier):
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
                 description = self.intent_list_config.get_intent(intent).description
                 disabled = self.intent_list_config.get_intent(intent).disabled
-                current_intent = Intent(name=intent, confidence=1.0, description=description, disabled=disabled)
+                slot_expression = self.intent_list_config.get_intent(intent).slot_expression
+                current_intent = Intent(
+                    name=intent,
+                    confidence=1.0,
+                    description=description,
+                    disabled=disabled,
+                    slot_expression=slot_expression,
+                )
                 return await self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
