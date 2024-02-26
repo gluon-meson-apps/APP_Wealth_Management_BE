@@ -155,11 +155,19 @@ class BaseOutputAdapter(OutputAdapter):
             output_html = process_references(output.answer.references)
             if output_html:
                 output.answer.extra_info["References"] = output_html
-        output.answer.extra_info["intent"] = conversation.current_intent.name if conversation.current_intent else ""
+        self._fill_intent_value(conversation, output)
         output.answer.extra_info["slots"] = "\n".join(
             [f"{key}: {value}" for key, value in conversation.get_simplified_entities().items()]
         )
         return output
+
+    def _fill_intent_value(self, conversation, output):
+        if conversation.current_intent:
+            output.answer.extra_info["intent"] = conversation.current_intent.name
+            if conversation.current_intent.disabled:
+                output.answer.extra_info["intent"] += "(suspended)"
+        else:
+            output.answer.extra_info["intent"] = ""
 
     def get_slot_name(self, action_name: str, target_slots: []):
         if action_name in actionsHaveDefaultValue:
