@@ -13,7 +13,7 @@ from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
 from pydantic import BaseModel
 
-from utils import generate_tmp_dir
+from utils.utils import generate_tmp_dir
 
 
 class SlideConfig(BaseModel, arbitrary_types_allowed=True):
