@@ -1,5 +1,4 @@
 import configparser
-import os
 from typing import List
 
 import requests
@@ -11,9 +10,10 @@ from tracker.context import ConversationContext
 
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Entity
+from utils.utils import get_config_path
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
+config.read(get_config_path())
 
 MODEL_URL = config["JointBert"]["base_url"]
 
@@ -34,9 +34,7 @@ class MLMEntityExtractor(EntityExtractor):
             logger.info(f"Slots: {slots}")
             return slots
         else:
-            raise HTTPException(
-                status_code=response.status_code, detail={response.text}
-            )
+            raise HTTPException(status_code=response.status_code, detail={response.text})
 
     def is_valid_entity(self, name, value, confidence, slot_dict):
         """
@@ -71,9 +69,7 @@ class MLMEntityExtractor(EntityExtractor):
             valid_entities = [
                 (name, detail["value"], round(detail["confidence"], 2))
                 for name, detail in entities.items()
-                if self.is_valid_entity(
-                    name, detail["value"], detail["confidence"], slot_dict
-                )
+                if self.is_valid_entity(name, detail["value"], detail["confidence"], slot_dict)
             ]
         else:
             valid_entities = []

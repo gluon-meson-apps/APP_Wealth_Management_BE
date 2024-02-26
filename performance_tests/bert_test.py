@@ -4,8 +4,10 @@ import json
 
 from locust import HttpUser, task, between
 
+from utils.utils import get_config_path
+
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), '../', 'config.ini'))
+config.read(get_config_path())
 
 MODEL_URL = config['JointBert']['base_url']
 

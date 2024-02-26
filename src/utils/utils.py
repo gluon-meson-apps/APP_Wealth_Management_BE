@@ -103,3 +103,11 @@ def get_texts_from_search_response(search_res: SearchResponse) -> str:
     if search_res and search_res.items:
         return "\n".join([re.sub(r"\n+", "\n", i.text) for i in search_res.items])
     return ""
+
+
+def generate_tmp_dir(current_dir: str):
+    return os.path.join(os.path.dirname(__file__), "../../", "tmp", current_dir)
+
+
+def get_config_path():
+    return os.path.join(os.path.dirname(__file__), "../", "config.ini")

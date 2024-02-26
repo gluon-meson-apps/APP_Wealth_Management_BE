@@ -17,6 +17,7 @@ from action.base import (
     AttachmentResponse,
 )
 from action.context import ActionContext
+from utils.utils import generate_tmp_dir
 
 MAX_OUTPUT_TOKEN_SiZE = 4096
 MAX_FILE_TOKEN_SIZE = 64 * 1024
@@ -97,7 +98,7 @@ async def loop_ask(user_input, file: Attachment, chat_model) -> str:
 class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
-        self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/txt")
+        self.tmp_file_dir = generate_tmp_dir("txt")
 
     def get_name(self) -> str:
         return "summary_and_translation"

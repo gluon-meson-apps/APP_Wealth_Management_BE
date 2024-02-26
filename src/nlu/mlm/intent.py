@@ -1,5 +1,4 @@
 import configparser
-import os
 
 from loguru import logger
 
@@ -9,9 +8,10 @@ from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from tracker.context import ConversationContext
+from utils.utils import get_config_path
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
+config.read(get_config_path())
 
 MODEL_URL = config["JointBert"]["base_url"]
 use_cache = config.get("Cache", "enable").lower() == "true"

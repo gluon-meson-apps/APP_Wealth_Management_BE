@@ -1,10 +1,11 @@
 import configparser
-import os
 
 import requests
 from fastapi import HTTPException
 from loguru import logger
 from pydantic import BaseModel
+
+from utils.utils import get_config_path
 
 
 class IntentClassificationModelResponse(BaseModel):
@@ -18,7 +19,7 @@ class IntentClassificationModel:
 
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), "../../", "config.ini"))
+config.read(get_config_path())
 
 MODEL_URL = config["JointBert"]["base_url"]
 
@@ -37,6 +38,4 @@ class JoinBertIntentClassificationModel(IntentClassificationModel):
             confidence = data.get("intent_confidence")
             return IntentClassificationModelResponse(intent=name, confidence=confidence)
         else:
-            raise HTTPException(
-                status_code=response.status_code, detail={response.text}
-            )
+            raise HTTPException(status_code=response.status_code, detail={response.text})

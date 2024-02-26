@@ -13,6 +13,8 @@ from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
 from pydantic import BaseModel
 
+from utils import generate_tmp_dir
+
 
 class SlideConfig(BaseModel, arbitrary_types_allowed=True):
     title: str
@@ -441,6 +443,6 @@ if __name__ == "__main__":
     Q1: Apple Inc.'s CCC increased from 53 to 72 days (FY13-FY21) due to higher DSO and DIO. Reasons could be slower collections and inventory management.
     Q2: Apple Inc.'s CCC (72) is higher than the peer group median (57), indicating less efficiency in working capital management.
     """
-    test_dir = os.path.join(os.path.dirname(__file__), "../../", "tmp/wcs")
+    test_dir = generate_tmp_dir("wcs")
     os.makedirs(test_dir, exist_ok=True)
     generate_ppt(df_current_test, df_all_test, test_insight, test_dir)

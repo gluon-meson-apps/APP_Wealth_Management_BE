@@ -1,5 +1,4 @@
 import asyncio
-import os
 import shutil
 import uuid
 from typing import Union
@@ -20,6 +19,7 @@ from action.base import (
 from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam, SearchItem
 from utils.ppt_helper import generate_ppt
+from utils.utils import generate_tmp_dir
 
 ppt_filename = "tb_guru_ppt.pptx"
 
@@ -115,7 +115,7 @@ def parse_model_to_dataframe(data):
 class WcsDataQuery(TBGuruAction):
     def __init__(self):
         super().__init__()
-        self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/wcs")
+        self.tmp_file_dir = generate_tmp_dir("wcs")
 
     def get_name(self) -> str:
         return "wcs_data_query"
@@ -215,6 +215,6 @@ class WcsDataQuery(TBGuruAction):
 
 
 if __name__ == "__main__":
-    file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/wcs")
+    file_dir = generate_tmp_dir("wcs")
     with open(f"{file_dir}/test.txt", "w") as f:
         f.write("test")
