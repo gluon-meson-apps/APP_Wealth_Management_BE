@@ -56,13 +56,14 @@ class ChatResponseAnswer(BaseModel):
         return self.content + "<br>" + extra_info
 
     def get_chatbot_details(self, template: str):
-        return "".join(
+        details = "".join(
             [
                 template.format(key=key.capitalize(), value=value)
                 for key, value in self.extra_info.items()
                 if key and key != "Attachments" and value
             ]
         )
+        return details.replace("slot_expression", "<b>slot_expression</b>")
 
     def format_attachments_output(self, template) -> str:
         if "Attachments" in self.extra_info:
