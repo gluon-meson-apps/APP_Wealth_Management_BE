@@ -22,7 +22,8 @@ def intent_config():
                 "slotType": "text",
                 "optional": False
             }
-        ]
+        ],
+        disabled=False
     )
 
 
@@ -40,7 +41,8 @@ def create_intent_config_with_multiple_slot_name_optional_tuples(slot_name_optio
                 "optional": slot_optional
             }
             for slot_name, slot_optional in slot_name_optional_tuples
-        ]
+        ],
+        disabled=False
     )
 
 

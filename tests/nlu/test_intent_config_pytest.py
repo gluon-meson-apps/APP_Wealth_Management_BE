@@ -11,6 +11,7 @@ def intent_with_full_name_of_parent_intent(full_name_of_parent_intent):
         slots=[],
         business=False,
         full_name_of_parent_intent=full_name_of_parent_intent,
+        disabled=False,
     )
 
 def ancestor_intent_config():
@@ -21,6 +22,7 @@ def ancestor_intent_config():
         slots=[],
         business=False,
         full_name_of_parent_intent=None,
+        disabled=False,
     )
 
 @pytest.mark.parametrize(
