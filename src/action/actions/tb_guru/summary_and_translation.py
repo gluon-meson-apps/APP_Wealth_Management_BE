@@ -3,7 +3,6 @@ import os
 import shutil
 import uuid
 
-import tiktoken
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
@@ -75,17 +74,33 @@ def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
     return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)
 
 
+async def loop_ask(user_input, file: Attachment, chat_model) -> str:
+    file_token_size = chat_model.get_encode_length(file.contents)
+    logger.info(f"file {file.name} token size: {file_token_size}")
+    if file_token_size > MAX_FILE_TOKEN_SIZE:
+        return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
+    processed_data = ""
+    part = 0
+    while True:
+        current_result = await ask_chatbot(user_input, file, part, chat_model, processed_data)
+        processed_data += current_result
+        part_token_size = chat_model.get_encode_length(current_result)
+        logger.info(f"part {part} token_size: {part_token_size}")
+        logger.info(f"part {part} result: {current_result}")
+        if part_token_size < MAX_OUTPUT_TOKEN_SiZE:
+            logger.info(f"loop ended after part {part}")
+            break
+        part += 1
+    return processed_data
+
+
 class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
-        self.enc = tiktoken.encoding_for_model("gpt-4")
         self.tmp_file_dir = os.path.join(os.path.dirname(__file__), "../../../../", "tmp/txt")
 
     def get_name(self) -> str:
         return "summary_and_translation"
-
-    def get_token_size(self, v):
-        return len(self.enc.encode(v))
 
     async def save_answers_to_files(self, origin_files: list[Attachment], answer: list[str]) -> list[Attachment]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
@@ -97,31 +112,12 @@ class SummarizeAndTranslate(TBGuruAction):
             f.url = links[index] if links else ""
         return files
 
-    async def loop_ask(self, user_input, file: Attachment, chat_model) -> str:
-        file_token_size = self.get_token_size(file.contents)
-        logger.info(f"file {file.name} token size: {file_token_size}")
-        if file_token_size > MAX_FILE_TOKEN_SIZE:
-            return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
-        processed_data = ""
-        part = 0
-        while True:
-            current_result = await ask_chatbot(user_input, file, part, chat_model, processed_data)
-            processed_data += current_result
-            part_token_size = self.get_token_size(current_result)
-            logger.info(f"part {part} token_size: {part_token_size}")
-            logger.info(f"part {part} result: {current_result}")
-            if part_token_size < MAX_OUTPUT_TOKEN_SiZE:
-                logger.info(f"loop ended after part {part}")
-                break
-            part += 1
-        return processed_data
-
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         user_input = context.conversation.current_user_input
-        input_token_size = self.get_token_size(user_input)
+        input_token_size = chat_model.get_encode_length(user_input)
 
         if input_token_size > MAX_OUTPUT_TOKEN_SiZE:
             return GeneralResponse(
@@ -155,10 +151,10 @@ class SummarizeAndTranslate(TBGuruAction):
             )
             return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
-        tasks = [self.loop_ask(context.conversation.current_user_input, f, chat_model) for f in available_files]
+        tasks = [loop_ask(context.conversation.current_user_input, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
         result_str = "\n".join(result)
-        logger.info(f"final result token size: {self.get_token_size(result_str)}")
+        logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
         logger.info(f"final loop result: {result_str}")
 
         attachments = await self.save_answers_to_files(available_files, result)
