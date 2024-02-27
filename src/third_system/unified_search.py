@@ -12,6 +12,8 @@ from third_system.search_entity import SearchParam, SearchResponse
 
 unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
 
+SPLIT_FILE_TOKEN_SiZE = 2000
+
 
 async def call_search_api(method: str, endpoint: str, payload: dict) -> SearchResponse:
     async with aiohttp.ClientSession() as session:
@@ -73,8 +75,14 @@ class UnifiedSearch:
                 logger.error(f"Error download {file_url}: {err}")
                 return None
 
-    async def download_file_from_minio(self, file_url: str) -> SearchResponse:
-        return await call_search_api("GET", f"{self.base_url}/file/download", {"file_url": file_url})
+    async def download_file_from_minio(
+        self, file_url: str, chunk_size: int = SPLIT_FILE_TOKEN_SiZE, chunk_overlap: int = 0
+    ) -> SearchResponse:
+        return await call_search_api(
+            "GET",
+            f"{self.base_url}/file/download",
+            {"file_url": file_url, "chunk_size": chunk_size, "chunk_overlap": chunk_overlap},
+        )
 
     async def upload_file_to_minio(self, files: list[Attachment]) -> list[str]:
         data = aiohttp.FormData()

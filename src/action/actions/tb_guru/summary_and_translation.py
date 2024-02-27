@@ -46,6 +46,8 @@ You are a helpful assistant with name as "TB Guru", you need to answer the user'
 If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
+FILE_ERROR_MSG = "The file is not available for processing. Please upload a valid file."
+
 
 async def ask_chatbot(prompt, chat_model, sub_scenario, processed_data=None):
     chat_message_preparation = ChatMessagePreparation()
@@ -76,27 +78,6 @@ def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
     return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)
 
 
-async def loop_ask(user_input, file: Attachment, chat_model) -> str:
-    file_token_size = chat_model.get_encode_length(file.contents)
-    logger.info(f"file {file.name} token size: {file_token_size}")
-    if file_token_size > MAX_FILE_TOKEN_SIZE:
-        return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
-    processed_data = ""
-    part = 0
-    while True:
-        prompt = file_prompt.format(user_input=user_input, file_contents=file.contents)
-        current_result = await ask_chatbot(prompt, chat_model, f"sub_part_{part}", processed_data)
-        processed_data += current_result
-        part_token_size = chat_model.get_encode_length(current_result)
-        logger.info(f"part {part} token_size: {part_token_size}")
-        logger.info(f"part {part} result: {current_result}")
-        if part_token_size < MAX_OUTPUT_TOKEN_SiZE:
-            logger.info(f"loop ended after part {part}")
-            break
-        part += 1
-    return processed_data
-
-
 async def ask_bot_with_input_only(prompt, conversation: ConversationContext, chat_model):
     result = await ask_chatbot(prompt, chat_model, "direct")
     logger.info(f"final direct result: {result}")
@@ -106,15 +87,6 @@ async def ask_bot_with_input_only(prompt, conversation: ConversationContext, cha
         intent=conversation.current_intent.name,
     )
     return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
-
-
-async def ask_bot_with_file(conversation: ConversationContext, file: Attachment, chat_model):
-    entity_dict = conversation.get_simplified_entities()
-    if entity_dict and entity_dict.get("is_summary_needed"):
-        logger.info("User asks for summary, will direct ask LLM")
-        prompt = file_prompt.format(user_input=conversation.current_user_input, file_contents=file.contents)
-        return await ask_bot_with_input_only(prompt, conversation, chat_model)
-    return loop_ask(conversation.current_user_input, file, chat_model)
 
 
 class SummarizeAndTranslate(TBGuruAction):
@@ -135,6 +107,35 @@ class SummarizeAndTranslate(TBGuruAction):
             f.url = links[index] if links else ""
         return files
 
+    async def split_files_to_ask(self, user_input, file: Attachment, chat_model) -> str:
+        split_file_res = await self.unified_search.download_file_from_minio(file.url)
+        split_file_items = split_file_res.items if split_file_res else []
+
+        if not split_file_items:
+            return FILE_ERROR_MSG
+
+        tasks = [
+            ask_chatbot(
+                file_prompt.format(user_input=user_input, file_contents=f.text), chat_model, f"sub_part_{index}"
+            )
+            for index, f in enumerate(split_file_items)
+        ]
+        result = await asyncio.gather(*tasks)
+        return "\n".join(result) if result else FILE_ERROR_MSG
+
+    async def ask_bot_with_file(self, conversation: ConversationContext, file: Attachment, chat_model) -> str:
+        file_token_size = chat_model.get_encode_length(file.contents)
+        logger.info(f"file {file.name} token size: {file_token_size}")
+        if file_token_size > MAX_FILE_TOKEN_SIZE:
+            return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
+
+        entity_dict = conversation.get_simplified_entities()
+        if entity_dict and entity_dict.get("is_summary_needed"):
+            logger.info("User asks for summary, will direct ask LLM")
+            prompt = file_prompt.format(user_input=conversation.current_user_input, file_contents=file.contents)
+            return await ask_chatbot(prompt, chat_model, "direct")
+        return await self.split_files_to_ask(conversation.current_user_input, file, chat_model)
+
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -150,15 +151,15 @@ class SummarizeAndTranslate(TBGuruAction):
                 jump_out_flag=False,
             )
 
-        files = await self.download_raw_files(context)
-        available_files = [f for f in files if f]
+        raw_files = await self.download_raw_files(context)
+        available_files = [f for f in raw_files if f]
 
         if not available_files:
             return await ask_bot_with_input_only(
                 direct_prompt.format(user_input=user_input), context.conversation, chat_model
             )
 
-        tasks = [ask_bot_with_file(context.conversation, f, chat_model) for f in available_files]
+        tasks = [self.ask_bot_with_file(context.conversation, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
         result_str = "\n".join(result)
         logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
