@@ -11,7 +11,6 @@ from action.base import (
 )
 from action.actions.tb_guru.base import TBGuruAction
 from third_system.hsbc_connect_api import HsbcConnectApi
-from third_system.search_entity import SearchItem
 
 report_filename = "file_validation_report.html"
 
@@ -65,7 +64,7 @@ class FileValidation(TBGuruAction):
     async def run(self, context):
         logger.info(f"exec action: {self.get_name()} ")
 
-        first_file = await self.download_first_file(context)
+        first_file = await self.download_first_raw_file(context)
         if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
@@ -73,9 +72,7 @@ class FileValidation(TBGuruAction):
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
-        first_contents: SearchItem = first_file.items[0] if first_file.items else None
-
-        res = await self.hsbc_connect_api.validate_file(first_contents)
+        res = await self.hsbc_connect_api.validate_file(first_file)
         download_link = await self._upload_file(res)
 
         chat_message_preparation = ChatMessagePreparation()
@@ -85,11 +82,11 @@ class FileValidation(TBGuruAction):
             user_input=context.conversation.current_user_input,
             file_url=download_link,
             report_filename=report_filename,
-            upload_filename=first_file.meta__reference.meta__source_name,
-            upload_file_url=first_file.meta__reference.meta__source_url,
+            upload_filename=first_file.name,
+            upload_file_url=first_file.url,
             upload_file_format=context.conversation.entities[0].value
             if context.conversation.entities
-            else first_file.meta__reference.meta__source_type,
+            else first_file.content_type,
         )
         chat_message_preparation.log(logger)
 

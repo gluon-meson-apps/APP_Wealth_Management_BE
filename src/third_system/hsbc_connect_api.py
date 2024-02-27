@@ -1,11 +1,10 @@
-import mimetypes
 import os
 
 import aiohttp
 import requests
 from loguru import logger
 
-from third_system.search_entity import SearchItem
+from action.base import Attachment
 
 
 def mock_validate_res():
@@ -21,13 +20,13 @@ class HsbcConnectApi:
     def __init__(self):
         self.base_url = os.getenv("HSBC_CONNECT_API_ENDPOINT")
 
-    async def _call_hsbc_connect_api(self, file: SearchItem) -> str:
+    async def _call_hsbc_connect_api(self, file: Attachment) -> str:
         data = aiohttp.FormData()
         data.add_field(
             "Attachment",
-            file.text,
-            filename=file.meta__reference.meta__source_name,
-            content_type=mimetypes.guess_type(file.meta__reference.meta__source_type)[0],
+            file.contents,
+            filename=file.name,
+            content_type=file.content_type,
         )
         async with aiohttp.ClientSession() as session:
             try:
@@ -38,7 +37,7 @@ class HsbcConnectApi:
                 logger.error(f"Error to validate file by HSBC api: {err}")
                 raise err
 
-    async def validate_file(self, file: SearchItem) -> str:
+    async def validate_file(self, file: Attachment) -> str:
         if file and file.text:
             return await self._call_hsbc_connect_api(file) if self.base_url else mock_validate_res().text
         raise FileNotFoundError("No file valid.")
