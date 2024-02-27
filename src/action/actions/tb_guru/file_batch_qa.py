@@ -53,26 +53,18 @@ class FileBatchAction(TBGuruAction):
             context_info = "can't find any result"
             source_name = ""
             result = "no information found, not able to answer"
+            score = None
             if not response or not response[0].items:
-                return result, context_info, source_name
+                return result, context_info, source_name, score
 
             first_result = response[0].items[0]
             faq_answer_column = "meta__answers"
             # todo: if faq score is too low should drop it.
             if faq_answer_column in first_result.meta__reference.model_extra:
-                score_threshold = 0.82
-                if first_result.meta__score < score_threshold:
-                    question_header = "=" * 10 + "question" + "=" * 10
-                    search_result_header = "=" * 10 + "search result question" + "=" * 10
-                    logger.warning(
-                        f"score is too low: {first_result.meta__score} < {score_threshold} for: \n"
-                        f"{question_header}\n{question}\n{search_result_header}\n"
-                        f"{first_result.meta__reference.model_extra[faq_answer_column]}"
-                    )
-                    return result, context_info, source_name
                 result = first_result.meta__reference.model_extra[faq_answer_column]
                 context_info = first_result.model_extra["text"]
                 source_name = first_result.meta__reference.meta__source_name
+                score = first_result.meta__score
             else:
                 context_info = "\n".join([item.model_dump_json() for item in response])
                 chat_message_preparation = ChatMessagePreparation()
@@ -95,7 +87,9 @@ class FileBatchAction(TBGuruAction):
                     {item.meta__reference.meta__source_name for one_response in response for item in one_response.items}
                 )
 
-            return result, context_info, source_name
+                score = "\n".join({str(item.meta__score) for one_response in response for item in one_response.items})
+
+            return result, context_info, source_name, score
 
         return get_result_from_llm
 
@@ -128,9 +122,9 @@ class FileBatchAction(TBGuruAction):
             get_result_from_llm(row[questions_column], index) for index, row in enumerate(df.to_dict(orient="records"))
         ]
         search_res = await asyncio.gather(*tasks)
-        search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name"])
+        search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name", "score"])
         df = df[[questions_column]].merge(search_df, left_index=True, right_index=True, how="left").reset_index()
-        df = df[[questions_column, "answers", "reference_name", "reference_data"]]
+        df = df[[questions_column, "answers", "reference_name", "reference_data", "score"]]
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
