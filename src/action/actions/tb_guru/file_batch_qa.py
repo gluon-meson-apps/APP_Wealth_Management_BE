@@ -83,11 +83,9 @@ class FileBatchAction(TBGuruAction):
                 ).response
                 logger.info(f"chat result: {result}")
 
-                source_name = "\n".join(
-                    {item.meta__reference.meta__source_name for one_response in response for item in one_response.items}
-                )
+                source_name = response[0].items[0].meta__reference.meta__source_name
 
-                score = "\n".join({str(item.meta__score) for one_response in response for item in one_response.items})
+                score = response[0].items[0].meta__score
 
             return result, context_info, source_name, score
 
