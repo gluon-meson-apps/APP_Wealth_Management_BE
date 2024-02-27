@@ -33,7 +33,7 @@ You are a helpful assistant with name as "TB Guru", you need to answer the user'
 If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
-loop_prompt = """## Role
+file_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
 
 ## User input
@@ -84,7 +84,7 @@ async def loop_ask(user_input, file: Attachment, chat_model) -> str:
     processed_data = ""
     part = 0
     while True:
-        prompt = loop_prompt.format(user_input=user_input, file_contents=file.contents)
+        prompt = file_prompt.format(user_input=user_input, file_contents=file.contents)
         current_result = await ask_chatbot(prompt, chat_model, f"sub_part_{part}", processed_data)
         processed_data += current_result
         part_token_size = chat_model.get_encode_length(current_result)
@@ -97,8 +97,8 @@ async def loop_ask(user_input, file: Attachment, chat_model) -> str:
     return processed_data
 
 
-async def ask_bot_with_input_only(conversation: ConversationContext, chat_model):
-    result = await ask_chatbot(direct_prompt.format(user_input=conversation.current_user_input), chat_model, "direct")
+async def ask_bot_with_input_only(prompt, conversation: ConversationContext, chat_model):
+    result = await ask_chatbot(prompt, chat_model, "direct")
     logger.info(f"final direct result: {result}")
     answer = ChatResponseAnswer(
         messageType=ResponseMessageType.FORMAT_TEXT,
@@ -106,6 +106,15 @@ async def ask_bot_with_input_only(conversation: ConversationContext, chat_model)
         intent=conversation.current_intent.name,
     )
     return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+
+
+async def ask_bot_with_file(conversation: ConversationContext, file: Attachment, chat_model):
+    entity_dict = conversation.get_simplified_entities()
+    if entity_dict and entity_dict.get("is_summary_needed"):
+        logger.info("User asks for summary, will direct ask LLM")
+        prompt = file_prompt.format(user_input=conversation.current_user_input, file_contents=file.contents)
+        return await ask_bot_with_input_only(prompt, conversation, chat_model)
+    return loop_ask(conversation.current_user_input, file, chat_model)
 
 
 class SummarizeAndTranslate(TBGuruAction):
@@ -145,9 +154,11 @@ class SummarizeAndTranslate(TBGuruAction):
         available_files = [f for f in files if f]
 
         if not available_files:
-            return await ask_bot_with_input_only(context.conversation, chat_model)
+            return await ask_bot_with_input_only(
+                direct_prompt.format(user_input=user_input), context.conversation, chat_model
+            )
 
-        tasks = [loop_ask(context.conversation.current_user_input, f, chat_model) for f in available_files]
+        tasks = [ask_bot_with_file(context.conversation, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
         result_str = "\n".join(result)
         logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
