@@ -73,7 +73,7 @@ class Slot(HashableBaseModel):
             name=slot_dict["name"],
             description=slot_dict["description"],
             value=slot_dict.get("default", None),
-            optional=bool(slot_dict.get("optional", True)),
+            optional=slot_dict.get("optional", True),
             slot_type=SlotType(slot_dict["slotType"]),
             hidden=slot_dict.get("hidden", False),
         )
