@@ -17,9 +17,10 @@ from action.base import (
     AttachmentResponse,
 )
 from action.context import ActionContext
+from tracker.context import ConversationContext
 from utils.utils import generate_tmp_dir
 
-MAX_OUTPUT_TOKEN_SiZE = 4096
+MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024
 
 direct_prompt = """## Role
@@ -46,9 +47,9 @@ If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
 
-async def ask_chatbot(user_input, file_contents, index, chat_model, processed_data=None):
+async def ask_chatbot(prompt, chat_model, sub_scenario, processed_data=None):
     chat_message_preparation = ChatMessagePreparation()
-    chat_message_preparation.add_message("user", loop_prompt, user_input=user_input, file_contents=file_contents)
+    chat_message_preparation.add_message("user", prompt)
     if processed_data:
         chat_message_preparation.add_message(
             "assistant",
@@ -56,12 +57,12 @@ async def ask_chatbot(user_input, file_contents, index, chat_model, processed_da
             processed_data=processed_data,
         )
     # chat_message_preparation.log(logger)
-    logger.info(f"start part {index}")
+    logger.info(f"start scenario {sub_scenario}")
     result = (
         await chat_model.achat(
             **chat_message_preparation.to_chat_params(),
             max_length=MAX_OUTPUT_TOKEN_SiZE,
-            sub_scenario=f"sub_part_{index}",
+            sub_scenario=sub_scenario,
         )
     ).response
     return result
@@ -83,7 +84,8 @@ async def loop_ask(user_input, file: Attachment, chat_model) -> str:
     processed_data = ""
     part = 0
     while True:
-        current_result = await ask_chatbot(user_input, file, part, chat_model, processed_data)
+        prompt = loop_prompt.format(user_input=user_input, file_contents=file.contents)
+        current_result = await ask_chatbot(prompt, chat_model, f"sub_part_{part}", processed_data)
         processed_data += current_result
         part_token_size = chat_model.get_encode_length(current_result)
         logger.info(f"part {part} token_size: {part_token_size}")
@@ -93,6 +95,17 @@ async def loop_ask(user_input, file: Attachment, chat_model) -> str:
             break
         part += 1
     return processed_data
+
+
+async def ask_bot_with_input_only(conversation: ConversationContext, chat_model):
+    result = await ask_chatbot(direct_prompt.format(user_input=conversation.current_user_input), chat_model, "direct")
+    logger.info(f"final direct result: {result}")
+    answer = ChatResponseAnswer(
+        messageType=ResponseMessageType.FORMAT_TEXT,
+        content=result,
+        intent=conversation.current_intent.name,
+    )
+    return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
 
 class SummarizeAndTranslate(TBGuruAction):
@@ -132,25 +145,7 @@ class SummarizeAndTranslate(TBGuruAction):
         available_files = [f for f in files if f]
 
         if not available_files:
-            chat_message_preparation = ChatMessagePreparation()
-            chat_message_preparation.add_message(
-                "user",
-                direct_prompt,
-                user_input=user_input,
-            )
-            # chat_message_preparation.log(logger)
-            result = (
-                await chat_model.achat(
-                    **chat_message_preparation.to_chat_params(), max_length=MAX_OUTPUT_TOKEN_SiZE, sub_scenario="direct"
-                )
-            ).response
-            logger.info(f"final direct result: {result}")
-            answer = ChatResponseAnswer(
-                messageType=ResponseMessageType.FORMAT_TEXT,
-                content=result,
-                intent=context.conversation.current_intent.name,
-            )
-            return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+            return await ask_bot_with_input_only(context.conversation, chat_model)
 
         tasks = [loop_ask(context.conversation.current_user_input, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
