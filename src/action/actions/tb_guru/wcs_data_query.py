@@ -30,23 +30,23 @@ Help me extract data from user input and reply it with below JSON schema.
 
 ## Schema should be like this
 {
-    // all years data for specific company which should be mentioned in user input
+    // all years data for {{company_name}} company
     "all_years_data": [{
-        "company": "company name", // STRING
-        "days": "the date for the record", // STRING
-        "dpo": "DPO", // NUMBER,
-        "dso": "DSO", // NUMBER,
-        "dio": "DIO", // NUMBER,
-        "ccc": "CCC", // NUMBER,
+        "company": "", // company name, should be STRING type
+        "days": "", // the date for the record, should be STRING type
+        "dpo": "", // DPO, should be NUMBER type,
+        "dso": "", // DPO, should be NUMBER type,
+        "dio": "", // DIO, should be NUMBER type,
+        "ccc": "", // CCC, should be NUMBER type,
     }, ...],
     // latest year data for all companies
     "latest_year_data": [{
-        "company": "company name", // STRING
-        "days": "the date for the record", // STRING
-        "dpo": "DPO", // NUMBER,
-        "dso": "DSO", // NUMBER,
-        "dio": "DIO", // NUMBER,
-        "ccc": "CCC", // NUMBER,
+        "company": "", // company name, should be STRING type
+        "days": "", // the date for the record, should be STRING type
+        "dpo": "", // DPO, should be NUMBER type,
+        "dso": "", // DPO, should be NUMBER type,
+        "dio": "", // DIO, should be NUMBER type,
+        "ccc": "", // CCC, should be NUMBER type,
     }, ...]
 }
 
@@ -80,11 +80,12 @@ now, reply your result with above info.
 """
 
 
-async def extract_data(context, chat_model) -> tuple[list[SearchItem], list[SearchItem]]:
+async def extract_data(context, chat_model, company_name) -> tuple[list[SearchItem], list[SearchItem]]:
     chat_message_preparation = ChatMessagePreparation()
     chat_message_preparation.add_message(
         "system",
         extract_data_prompt,
+        company_name=company_name,
         user_input=context.conversation.current_user_input,
     )
     chat_message_preparation.log(logger)
@@ -154,10 +155,11 @@ class WcsDataQuery(TBGuruAction):
         entity_dict = context.conversation.get_simplified_entities()
         is_ppt_output = entity_dict["is_ppt_output"] if "is_ppt_output" in entity_dict else False
         is_data_provided = entity_dict["is_data_provided"] if "is_data_provided" in entity_dict else False
+        company_name = entity_dict["company"] if "company" in entity_dict else ""
 
         if is_data_provided:
             latest_all_data, current_company_data = (
-                await extract_data(context, chat_model) if is_ppt_output else ([], [])
+                await extract_data(context, chat_model, company_name) if is_ppt_output and company_name else ([], [])
             )
         else:
             latest_all_data, current_company_data = await self._search_db(entity_dict, context.conversation.session_id)

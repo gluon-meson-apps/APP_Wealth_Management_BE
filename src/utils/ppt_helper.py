@@ -115,8 +115,8 @@ def create_table(df, slide, company_name):
     for col in cols:
         df[col + "_rank"] = df[col].rank()
 
-    # Make all the numbers positive
-    df.iloc[:, 1:] = df.iloc[:, 1:].abs()
+    # # Make all the numbers positive
+    # df.iloc[:, 1:] = df.iloc[:, 1:].abs()
 
     # Set Target company as the benchmark
     # benchmark = df[df["company"] == company_name].iloc[0, 1:]
