@@ -11,7 +11,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 from action.base import Attachment
 from models.email_model.model import Email, EmailBody, EmailSender
-from utils.utils import get_value_or_default_from_dict, async_parse_json_response
+from utils.common import get_value_or_default_from_dict, async_parse_json_response
 
 
 def parse_email(value: dict) -> Email:

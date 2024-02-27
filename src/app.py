@@ -23,7 +23,7 @@ from promptflow.command import ScoreCommand
 from router import api_router
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
-from utils.utils import get_value_or_default_from_dict
+from utils.common import get_value_or_default_from_dict
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -63,7 +63,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 @app.post("/chat/")
 def chat(
-    user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
+        user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
 ):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
@@ -74,13 +74,13 @@ def chat(
 async def generate_answer_with_len_limited(answer, **kwargs):
     # chunk with 500
     for i in range(0, len(answer), 1000):
-        yield {"data": json.dumps({"answer": answer[i : i + 1000], **kwargs})}
+        yield {"data": json.dumps({"answer": answer[i: i + 1000], **kwargs})}
 
 
 @app.post("/score/")
 async def score(
-    score_command: ScoreCommand,
-    unified_search: UnifiedSearch = Depends(),
+        score_command: ScoreCommand,
+        unified_search: UnifiedSearch = Depends(),
 ):
     """
     This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score

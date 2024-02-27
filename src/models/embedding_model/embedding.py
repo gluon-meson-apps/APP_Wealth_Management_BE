@@ -1,5 +1,5 @@
 import requests
-from src.utils.utils import init_logger
+from src.utils.common import init_logger
 
 
 class Embedding:
@@ -20,9 +20,7 @@ class Embedding:
 
         try:
             self.logger.debug("Encode query with embedding")
-            response = requests.post(
-                url=self.endpoint, json=body, headers=headers, timeout=30
-            )
+            response = requests.post(url=self.endpoint, json=body, headers=headers, timeout=30)
             return response.json()["embeddings"]
         except Exception as e:
             self.logger.error("Embedding Error: %s", str(e), exc_info=True)

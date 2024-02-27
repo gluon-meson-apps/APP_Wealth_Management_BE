@@ -10,7 +10,7 @@ from tracker.context import ConversationContext
 
 from nlu.forms import FormStore
 from nlu.intent_with_entity import Entity
-from utils.utils import get_config_path
+from utils.common import get_config_path
 
 config = configparser.ConfigParser()
 config.read(get_config_path())

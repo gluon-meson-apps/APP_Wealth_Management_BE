@@ -5,7 +5,7 @@ from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer,
 from action.actions.tb_guru.base import TBGuruAction
 from action.context import ActionContext
 from third_system.search_entity import SearchParam
-from utils.utils import get_texts_from_search_response
+from utils.common import get_texts_from_search_response
 
 prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on below info.

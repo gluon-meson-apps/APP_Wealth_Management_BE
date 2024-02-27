@@ -19,7 +19,7 @@ from action.base import (
 from action.actions.tb_guru.base import TBGuruAction
 from third_system.search_entity import SearchParam, SearchItem
 from utils.ppt_helper import generate_ppt
-from utils.utils import generate_tmp_dir
+from utils.common import generate_tmp_dir
 
 ppt_filename = "tb_guru_ppt.pptx"
 

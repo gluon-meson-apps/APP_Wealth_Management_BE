@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from tests.e2e.e2e_util import standardize_session_name
-from utils.utils import format_jinja_template
+from utils.common import format_jinja_template
 
 
 class E2eTestGenerator:

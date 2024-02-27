@@ -3,7 +3,7 @@ import os
 from loguru import logger
 
 from prompt_manager.local_prompt_service import LocalPromptService
-from utils.utils import format_jinja_template
+from utils.common import format_jinja_template
 
 
 class PromptWrapper:

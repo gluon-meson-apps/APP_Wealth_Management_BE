@@ -18,7 +18,7 @@ from action.base import (
 )
 from action.context import ActionContext
 from tracker.context import ConversationContext
-from utils.utils import generate_tmp_dir
+from utils.common import generate_tmp_dir
 
 MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024

@@ -14,7 +14,7 @@ from action.base import Attachment
 from models.email_model.model import Email
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
-from utils.utils import extract_json_from_text
+from utils.common import extract_json_from_text
 
 load_dotenv()
 

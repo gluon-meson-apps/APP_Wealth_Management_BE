@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from loguru import logger
 from pydantic import BaseModel
 
-from utils.utils import get_config_path
+from utils.common import get_config_path
 
 
 class IntentClassificationModelResponse(BaseModel):

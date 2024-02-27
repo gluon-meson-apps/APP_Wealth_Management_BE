@@ -1,7 +1,7 @@
 from caches.base import Cache
 from models.embedding_model.embedding import Embedding
 from typing import List, Union, Tuple
-from utils.utils import init_logger
+from utils.common import init_logger
 import lancedb
 import pyarrow as pa
 
@@ -9,15 +9,13 @@ import pyarrow as pa
 class LancedbCache(Cache):
     logger = init_logger(__name__)
 
-    def __init__(
-        self, embedding_model: Embedding, cache_path: str, cache_table_name: str
-    ) -> None:
+    def __init__(self, embedding_model: Embedding, cache_path: str, cache_table_name: str) -> None:
         self.embedding_model = embedding_model
         self.cache_path = cache_path
         self.db = lancedb.connect(cache_path)
         try:
             self.cache = self.db.open_table(cache_table_name)
-        except: # noqa: E722
+        except:  # noqa: E722
             self.logger.info("No cache table found, trying to create one")
             schema = pa.schema(
                 [
@@ -48,34 +46,24 @@ class LancedbCache(Cache):
         system, query = self.format_query(messages)
         vector = self.calculate_vector(system, query)
         # always only return the first result
-        cache_search_results = (
-            self.cache.search(vector).metric("cosine").limit(1).to_list()
-        )
+        cache_search_results = self.cache.search(vector).metric("cosine").limit(1).to_list()
 
         if len(cache_search_results) > 0:
             distance = cache_search_results[0]["_distance"]
             if exact_match:
                 # not possible for exact zero, set a small float number
                 if abs(distance) <= 1e-05:
-                    self.logger.info(
-                        f"Find exact match query, the distance is {distance}"
-                    )
+                    self.logger.info(f"Find exact match query, the distance is {distance}")
                     return cache_search_results[0]["response"]
                 else:
-                    self.logger.info(
-                        f"No exact result found in cache, the min distance is {distance}"
-                    )
+                    self.logger.info(f"No exact result found in cache, the min distance is {distance}")
                     return None
             else:
                 if abs(distance) <= similarity_score_threshold:
-                    self.logger.info(
-                        f"Find similar result in cache, the distance is {distance}"
-                    )
+                    self.logger.info(f"Find similar result in cache, the distance is {distance}")
                     return cache_search_results[0]["response"]
                 else:
-                    self.logger.info(
-                        f"No similar result found in cache, the min distance is {distance}"
-                    )
+                    self.logger.info(f"No similar result found in cache, the min distance is {distance}")
                     return None
         else:
             self.logger.info("No result found in cache.")

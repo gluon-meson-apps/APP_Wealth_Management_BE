@@ -3,7 +3,7 @@ import os
 from enum import Enum
 from pathlib import Path
 
-from utils.utils import format_jinja_template
+from utils.common import format_jinja_template
 
 
 # get current file directory

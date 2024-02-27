@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from tests.e2e.e2e_util import standardize_session_name
-from utils.utils import format_jinja_template
+from utils.common import format_jinja_template
 
 data_list = [
     {

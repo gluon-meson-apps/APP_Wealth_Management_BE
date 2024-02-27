@@ -8,7 +8,7 @@ from nlu.base import IntentClassifier
 from nlu.intent_config import IntentListConfig
 from nlu.intent_with_entity import Intent
 from tracker.context import ConversationContext
-from utils.utils import get_config_path
+from utils.common import get_config_path
 
 config = configparser.ConfigParser()
 config.read(get_config_path())

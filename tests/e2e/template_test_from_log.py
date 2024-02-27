@@ -1,7 +1,7 @@
 import json
 import traceback
 
-from utils.utils import extract_json_from_code_block
+from utils.common import extract_json_from_code_block
 
 
 def get_dict_only_with_value_not_empty(d):

@@ -4,7 +4,7 @@ import json
 
 from locust import HttpUser, task, between
 
-from utils.utils import get_config_path
+from utils.common import get_config_path
 
 config = configparser.ConfigParser()
 config.read(get_config_path())
