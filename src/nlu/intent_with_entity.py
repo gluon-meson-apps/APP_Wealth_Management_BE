@@ -53,6 +53,7 @@ class Slot(HashableBaseModel):
     confidence: Optional[float] = None
     optional: bool = True
     priority: int = 0
+    hidden: bool = False
 
     def __hash__(self):
         return hash((self.name,))
@@ -74,6 +75,7 @@ class Slot(HashableBaseModel):
             value=slot_dict.get("default", None),
             optional=bool(slot_dict.get("optional", True)),
             slot_type=SlotType(slot_dict["slotType"]),
+            hidden=slot_dict.get("hidden", False),
         )
 
 

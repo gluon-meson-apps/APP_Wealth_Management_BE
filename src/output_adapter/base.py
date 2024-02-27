@@ -160,16 +160,22 @@ class BaseOutputAdapter(OutputAdapter):
         return output
 
     def _fill_slots_value(self, conversation, output):
-        slot_expression = conversation.current_intent.slot_expression
-        extra_info_slots = [
-            f"{entity.type}: {entity.value} (optional)"
-            if entity.possible_slot.optional and not slot_expression
-            else f"{entity.type}: {entity.value}"
-            for entity in conversation.get_current_entities()
-        ]
-        if slot_expression:
-            extra_info_slots.append(f"slot_expression: '{slot_expression}'")
-        output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
+        if conversation.current_intent:
+            slot_expression = conversation.current_intent.slot_expression
+            unhidden_entities = filter(
+                lambda entity: not entity.possible_slot.hidden, conversation.get_current_entities()
+            )
+            extra_info_slots = [
+                f"{entity.type}: {entity.value} (optional)"
+                if entity.possible_slot.optional and not slot_expression
+                else f"{entity.type}: {entity.value}"
+                for entity in unhidden_entities
+            ]
+            if slot_expression:
+                extra_info_slots.append(f"slot_expression: '{slot_expression}'")
+            output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
+        else:
+            output.answer.extra_info["slots"] = ""
 
     def _fill_intent_value(self, conversation, output):
         if conversation.current_intent:
