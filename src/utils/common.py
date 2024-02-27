@@ -99,9 +99,13 @@ def parse_json_response(response):
         return {}
 
 
+def normalize_newlines(text: str) -> str:
+    return re.sub(r"\n+", "\n", text) if text else ""
+
+
 def get_texts_from_search_response(search_res: SearchResponse) -> str:
     if search_res and search_res.items:
-        return "\n".join([re.sub(r"\n+", "\n", i.text) for i in search_res.items])
+        return "\n".join([normalize_newlines(i.text) for i in search_res.items])
     return ""
 
 
