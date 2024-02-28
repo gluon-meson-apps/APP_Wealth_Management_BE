@@ -155,35 +155,28 @@ class BaseOutputAdapter(OutputAdapter):
             output_html = process_references(output.answer.references)
             if output_html:
                 output.answer.extra_info["References"] = output_html
-        self._fill_intent_value(conversation, output)
-        self._fill_slots_value(conversation, output)
+        if conversation.current_intent:
+            self._fill_intent_value(conversation, output)
+            self._fill_slots_value(conversation, output)
         return output
 
     def _fill_slots_value(self, conversation, output):
-        if conversation.current_intent:
-            slot_expression = conversation.current_intent.slot_expression
-            unhidden_entities = filter(
-                lambda entity: not entity.possible_slot.hidden, conversation.get_current_entities()
-            )
-            extra_info_slots = [
-                f"{entity.type}: {entity.value} (optional)"
-                if entity.possible_slot.optional and not slot_expression
-                else f"{entity.type}: {entity.value}"
-                for entity in unhidden_entities
-            ]
-            if slot_expression:
-                extra_info_slots.append(f"slot_expression: '{slot_expression}'")
-            output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
-        else:
-            output.answer.extra_info["slots"] = ""
+        slot_expression = conversation.current_intent.slot_expression
+        unhidden_entities = filter(lambda entity: not entity.possible_slot.hidden, conversation.get_current_entities())
+        extra_info_slots = [
+            f"{entity.type}: {entity.value} (optional)"
+            if entity.possible_slot.optional and not slot_expression
+            else f"{entity.type}: {entity.value}"
+            for entity in unhidden_entities
+        ]
+        if slot_expression:
+            extra_info_slots.append(f"slot_expression: '{slot_expression}'")
+        output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
 
     def _fill_intent_value(self, conversation, output):
-        if conversation.current_intent:
-            output.answer.extra_info["intent"] = conversation.current_intent.name
-            if conversation.current_intent.disabled:
-                output.answer.extra_info["intent"] += "(suspended)"
-        else:
-            output.answer.extra_info["intent"] = ""
+        output.answer.extra_info["intent"] = conversation.current_intent.name
+        if conversation.current_intent.disabled:
+            output.answer.extra_info["intent"] += "(suspended)"
 
     def get_slot_name(self, action_name: str, target_slots: []):
         if action_name in actionsHaveDefaultValue:
