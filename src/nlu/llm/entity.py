@@ -90,6 +90,7 @@ class LLMEntityExtractor(EntityExtractor):
         # TODO: drop history if it is too long
         chat_message_preparation = ChatMessagePreparation()
         if not form.slots:
+            conversation_context.current_intent_slot_names = []
             return []
         self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
