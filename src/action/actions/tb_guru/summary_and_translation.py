@@ -97,14 +97,16 @@ class SummarizeAndTranslate(TBGuruAction):
     def get_name(self) -> str:
         return "summary_and_translation"
 
-    async def save_answers_to_files(self, origin_files: list[Attachment], answer: list[str]) -> list[Attachment]:
+    async def save_answers_to_files(
+        self, origin_files: list[Attachment], answer: list[str], file_urls: list[str] = None
+    ) -> list[Attachment]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         os.makedirs(files_dir, exist_ok=True)
         files = [save_answer_to_file(files_dir, f.name, answer[index]) for index, f in enumerate(origin_files)]
-        links = await self.unified_search.upload_file_to_minio(files)
+        await self.unified_search.upload_file_to_minio(files, file_urls)
         shutil.rmtree(files_dir)
         for index, f in enumerate(files):
-            f.url = links[index] if links else ""
+            f.url = file_urls[index] if file_urls else ""
         return files
 
     async def split_files_to_ask(self, user_input, file: Attachment, chat_model) -> str:
@@ -136,6 +138,15 @@ class SummarizeAndTranslate(TBGuruAction):
             return await ask_chatbot(prompt, chat_model, "direct")
         return await self.split_files_to_ask(conversation.current_user_input, file, chat_model)
 
+    async def ask_bot_with_files(
+        self, conversation: ConversationContext, available_files, chat_model, file_urls: list[str] = None
+    ) -> list[Attachment]:
+        tasks = [self.ask_bot_with_file(conversation, f, chat_model) for f in available_files]
+        result = await asyncio.gather(*tasks)
+        result_str = "\n".join(result)
+        logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
+        return await self.save_answers_to_files(available_files, result, file_urls)
+
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
@@ -159,16 +170,21 @@ class SummarizeAndTranslate(TBGuruAction):
                 direct_prompt.format(user_input=user_input), context.conversation, chat_model
             )
 
-        tasks = [self.ask_bot_with_file(context.conversation, f, chat_model) for f in available_files]
-        result = await asyncio.gather(*tasks)
-        result_str = "\n".join(result)
-        logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
-        logger.info(f"final loop result: {result_str}")
-
-        attachments = await self.save_answers_to_files(available_files, result)
+        if context.conversation.is_email_request:
+            attachments = await self.ask_bot_with_files(context.conversation, available_files, chat_model)
+            message = "Please check attachments for all the replies."
+        else:
+            file_tasks = [self.unified_search.generate_file_link(f.name) for f in available_files]
+            file_urls = await asyncio.gather(*file_tasks)
+            self.ask_bot_with_files(context.conversation, available_files, chat_model, file_urls)
+            attachments = [
+                Attachment(name=f.name, path=f.path, content_type=f.content_type, url=file_urls[index])
+                for index, f in enumerate(available_files)
+            ]
+            message = "The file is still generated, please wait for 20 minutes and try again."
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content="Please check attachments for all the replies.",
+            content=message,
             intent=context.conversation.current_intent.name,
         )
         return AttachmentResponse(

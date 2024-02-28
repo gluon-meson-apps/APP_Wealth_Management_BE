@@ -84,8 +84,11 @@ class UnifiedSearch:
             {"file_url": file_url, "chunk_size": chunk_size, "chunk_overlap": chunk_overlap},
         )
 
-    async def upload_file_to_minio(self, files: list[Attachment]) -> list[str]:
+    async def upload_file_to_minio(self, files: list[Attachment], file_urls: list[str] = None) -> list[str]:
         data = aiohttp.FormData()
+        if file_urls:
+            for url in file_urls:
+                data.add_field("file_urls", url)
         for f in files:
             if (f.path and os.path.exists(f.path)) or f.contents:
                 data.add_field(
@@ -97,6 +100,17 @@ class UnifiedSearch:
         async with aiohttp.ClientSession() as session:
             async with session.post(f"{self.base_url}/file", data=data) as response:
                 return await response.json()
+
+    async def generate_file_link(self, filename: str) -> str:
+        endpoint = f"{self.base_url}/file/link"
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(endpoint, json={"filename": filename}) as response:
+                    response.raise_for_status()
+                    return await response.json()
+            except Exception as err:
+                logger.error(f"Error fetch url {endpoint}: {err}")
+                return ""
 
 
 async def main():
