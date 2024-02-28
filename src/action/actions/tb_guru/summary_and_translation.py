@@ -71,7 +71,7 @@ async def ask_chatbot(prompt, chat_model, sub_scenario, processed_data=None):
 
 
 def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
-    file_name = f"{origin_file_name.split('.')[0]}.txt"
+    file_name = f"{origin_file_name.split('.')[0]}.docx"
     file_path = f"{files_dir}/{file_name}"
     with open(file_path, "w") as f:
         f.write(answer)
