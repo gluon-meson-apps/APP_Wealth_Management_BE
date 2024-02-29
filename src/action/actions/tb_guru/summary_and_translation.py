@@ -3,7 +3,7 @@ import os
 import shutil
 import uuid
 
-from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation, ChatMessage
 from loguru import logger
 
 from action.actions.tb_guru.base import TBGuruAction
@@ -49,15 +49,9 @@ If the user asks for a summary, please provide a summary less than 3000 words.
 FILE_ERROR_MSG = "The file is not available for processing. Please upload a valid file."
 
 
-async def ask_chatbot(prompt, chat_model, sub_scenario, processed_data=None):
+async def ask_chatbot(prompt, chat_model, sub_scenario):
     chat_message_preparation = ChatMessagePreparation()
     chat_message_preparation.add_message("user", prompt)
-    if processed_data:
-        chat_message_preparation.add_message(
-            "assistant",
-            """## Already processed parts\n{{processed_data}}""",
-            processed_data=processed_data,
-        )
     # chat_message_preparation.log(logger)
     logger.info(f"start scenario {sub_scenario}")
     result = (
@@ -103,10 +97,10 @@ class SummarizeAndTranslate(TBGuruAction):
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         os.makedirs(files_dir, exist_ok=True)
         files = [save_answer_to_file(files_dir, f.name, answer[index]) for index, f in enumerate(origin_files)]
-        await self.unified_search.upload_file_to_minio(files, file_urls)
+        uploaded_file_urls = await self.unified_search.upload_file_to_minio(files, file_urls)
         shutil.rmtree(files_dir)
         for index, f in enumerate(files):
-            f.url = file_urls[index] if file_urls else ""
+            f.url = uploaded_file_urls[index] if uploaded_file_urls else ""
         return files
 
     async def split_files_to_ask(self, user_input, file: Attachment, chat_model) -> str:
@@ -118,7 +112,9 @@ class SummarizeAndTranslate(TBGuruAction):
 
         tasks = [
             ask_chatbot(
-                file_prompt.format(user_input=user_input, file_contents=f.text), chat_model, f"sub_part_{index}"
+                ChatMessage.format_jinjia_template(file_prompt, user_input=user_input, file_contents=f.text),
+                chat_model,
+                f"sub_part_{index}",
             )
             for index, f in enumerate(split_file_items)
         ]
@@ -134,7 +130,9 @@ class SummarizeAndTranslate(TBGuruAction):
         entity_dict = conversation.get_simplified_entities()
         if entity_dict and entity_dict.get("is_summary_needed"):
             logger.info("User asks for summary, will direct ask LLM")
-            prompt = file_prompt.format(user_input=conversation.current_user_input, file_contents=file.contents)
+            prompt = ChatMessage.format_jinjia_template(
+                file_prompt, user_input=conversation.current_user_input, file_contents=file.contents
+            )
             return await ask_chatbot(prompt, chat_model, "direct")
         return await self.split_files_to_ask(conversation.current_user_input, file, chat_model)
 
@@ -167,7 +165,9 @@ class SummarizeAndTranslate(TBGuruAction):
 
         if not available_files:
             return await ask_bot_with_input_only(
-                direct_prompt.format(user_input=user_input), context.conversation, chat_model
+                ChatMessage.format_jinjia_template(direct_prompt, user_input=user_input),
+                context.conversation,
+                chat_model,
             )
 
         if context.conversation.is_email_request:

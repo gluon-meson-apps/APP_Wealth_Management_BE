@@ -97,9 +97,14 @@ class UnifiedSearch:
                     filename=f.name,
                     content_type=f.content_type if f.content_type else mimetypes.guess_type(f.filename)[0],
                 )
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{self.base_url}/file", data=data) as response:
-                return await response.json()
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(f"{self.base_url}/file", data=data) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except Exception as err:
+            logger.error(f"Error upload files: {err}")
+            return []
 
     async def generate_file_link(self, filename: str) -> str:
         endpoint = f"{self.base_url}/file/link"
