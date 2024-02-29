@@ -15,6 +15,15 @@ from pydantic import BaseModel
 
 from utils.common import generate_tmp_dir
 
+RED = "#ab000b"
+LIGHT_GREY = "#d7d8d6"
+DARK_GREY = "#767676"
+BLACK = "#000000"
+
+SERIES = ["dpo", "dso", "dio", "ccc"]
+SERIES_COLORS = [BLACK, RED, LIGHT_GREY, DARK_GREY]
+FONT_NAME = "Univers Next for HSBC Light"
+
 
 class SlideConfig(BaseModel, arbitrary_types_allowed=True):
     title: str
@@ -29,7 +38,8 @@ class SingleChartConfig(BaseModel, arbitrary_types_allowed=True):
     config: SlideConfig
 
 
-SERIES = ["dpo", "dso", "dio", "ccc"]
+def color_to_rgb(color: str):
+    return RGBColor.from_string(color[color.index("#") + 1 :])
 
 
 def plot_graph(config: SlideConfig):
@@ -41,14 +51,14 @@ def plot_graph(config: SlideConfig):
     filter_col = config.x_axis_key
     plt.figure(figsize=(16, 7))
     if not df.empty and set([filter_col] + SERIES).issubset(df.columns):
-        plt.bar(df[filter_col], df["dpo"], color="black")
-        plt.bar(df[filter_col], df["dso"], color="red")
-        plt.bar(df[filter_col], df["dio"], color="grey", bottom=df["dso"])
-        plt.plot(df[filter_col], df["ccc"], color="black", marker="o")
+        plt.plot(df[filter_col], df["ccc"], color=BLACK, marker="o")
+        plt.bar(df[filter_col], df["dpo"], color=BLACK)
+        plt.bar(df[filter_col], df["dso"], color=RED)
+        plt.bar(df[filter_col], df["dio"], color=LIGHT_GREY, bottom=df["dso"])
     plt.ylabel("days", fontweight="bold", fontsize=15)
     plt.title(config.title)
     # plt.legend(df.columns.drop(filter_col))
-    plt.legend(SERIES)
+    plt.legend(["CCC", "DPO", "DSO", "DIO"])
     plt.savefig(config.image_path)
     # remove the plt
     plt.clf()
@@ -71,7 +81,7 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
         category_data = convert_df_column_to_list(df, s)
         if category_data:
             numeric_data = [x if isinstance(x, (int, float)) and not math.isnan(x) else "" for x in category_data]
-            chart_data.add_series(s, numeric_data)
+            chart_data.add_series(s.upper(), numeric_data)
 
     x, y, cx, cy = (
         Inches(1 + chart_width * (chart_config.index % 2)),
@@ -84,6 +94,18 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     chart.chart_title.text_frame.text = slide_config.title
     chart.chart_title.text_frame.paragraphs[0].font.size = Pt(10)
     chart.chart_title.text_frame.paragraphs[0].font.bold = False
+    chart.chart_title.text_frame.paragraphs[0].font.name = FONT_NAME
+
+    plot = chart.plots[0]
+    for series_index in range(0, len(SERIES)):
+        color = color_to_rgb(SERIES_COLORS[series_index])
+        if chart_config.chart_type == XL_CHART_TYPE.LINE:
+            line = plot.series[series_index].format.line
+            line.color.rgb = color
+        else:
+            fill = plot.series[series_index].format.fill
+            fill.solid()
+            fill.fore_color.rgb = color
 
     chart.value_axis.tick_labels.font.size = Pt(8)
     chart.category_axis.tick_labels.font.size = Pt(8)
@@ -92,10 +114,11 @@ def create_single_chart(slide, chart_config: SingleChartConfig):
     chart.legend.position = XL_LEGEND_POSITION.TOP
     chart.legend.include_in_layout = True
     chart.legend.font.size = Pt(8)
+    chart.legend.font.name = FONT_NAME
 
 
 def set_text_style(text_box, font_size=8, bold=False):
-    text_box.text_frame.paragraphs[0].font.name = "Univers Next for HSBC Light"
+    text_box.text_frame.paragraphs[0].font.name = FONT_NAME
     text_box.text_frame.paragraphs[0].font.size = Pt(font_size)
     text_box.text_frame.paragraphs[0].font.bold = bold
     text_box.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
@@ -109,10 +132,8 @@ def add_title_to_slide(slide, title):
 
 
 def create_table(df, slide, company_name):
-    cols = ["dso", "dpo", "dio", "ccc"]
-
     # Calculate the rankings
-    for col in cols:
+    for col in SERIES:
         df[col + "_rank"] = df[col].rank()
 
     # # Make all the numbers positive
@@ -130,7 +151,7 @@ def create_table(df, slide, company_name):
         [Inches(7.37), Inches(1.6), Inches(2), Inches(2)],
     ]
 
-    for col in cols:
+    for col in SERIES:
         table = df[["company", col, col + "_rank"]].sort_values(by=col + "_rank")
         table = table.reset_index(drop=True)
         table["rank"] = table.index + 1
@@ -205,7 +226,7 @@ def trial(tables, location, slide, company_name):
 
         # add the table headers
         table.cell(0, 0).text = "Companies"
-        table.cell(0, 1).text = col
+        table.cell(0, 1).text = col.upper()
         table.cell(0, 2).text = "Rank"
 
         imcd = [
@@ -245,13 +266,13 @@ def trial(tables, location, slide, company_name):
 
         for j in range(3):
             table.cell(rows - 1, j).fill.solid()
-            table.cell(rows - 1, j).fill.fore_color.rgb = RGBColor(175, 175, 175)  # gray
+            table.cell(rows - 1, j).fill.fore_color.rgb = color_to_rgb(LIGHT_GREY)
             table.cell(rows - 1, j).text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)
             table.cell(rows - 1, j).text_frame.vertical_anchor = MSO_VERTICAL_ANCHOR.MIDDLE
 
         for j in range(3):
             table.cell(1, j).text = imcd[j]
-            table.cell(1, j).text_frame.paragraphs[0].font.color.rgb = RGBColor(255, 0, 0)
+            table.cell(1, j).text_frame.paragraphs[0].font.color.rgb = color_to_rgb(RED)
             table.cell(1, j).text_frame.paragraphs[0].font.bold = True
 
         # Setting the font size of the table to 12
