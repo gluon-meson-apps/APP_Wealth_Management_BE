@@ -115,3 +115,9 @@ def generate_tmp_dir(current_dir: str):
 
 def get_config_path():
     return os.path.join(os.path.dirname(__file__), "../", "config.ini")
+
+
+def parse_str_to_bool(v: any, default_value: bool = False) -> bool:
+    if isinstance(v, str):
+        return v.lower() == "true" if v.lower() in ["true", "false"] else default_value
+    return bool(v)

@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 from nlu.intent_config import IntentConfig
 from util import HashableBaseModel
+from utils.common import parse_str_to_bool
 
 
 class SlotType(str, Enum):
@@ -73,7 +74,7 @@ class Slot(HashableBaseModel):
             name=slot_dict["name"],
             description=slot_dict["description"],
             value=slot_dict.get("default", None),
-            optional=slot_dict.get("optional", True),
+            optional=parse_str_to_bool(slot_dict.get("optional", True), True),
             slot_type=SlotType(slot_dict["slotType"]),
             hidden=slot_dict.get("hidden", False),
         )
