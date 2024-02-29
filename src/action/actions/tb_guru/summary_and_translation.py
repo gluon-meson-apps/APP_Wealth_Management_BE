@@ -24,6 +24,7 @@ from utils.common import generate_tmp_dir, parse_str_to_bool
 MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024
 ALLOW_FILE_TYPES = ["txt", "docx", "pdf", "doc"]
+MINUTES_TO_GENERATE_FILE = 2
 
 direct_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
@@ -214,8 +215,8 @@ class SummarizeAndTranslate(TBGuruAction):
                 Attachment(name=name, path="", content_type=UploadFileContentType.DOCX, url=file_urls[index])
                 for index, name in enumerate(docx_names)
             ]
-            total_time = sum([len(f) * 2 for f in available_files])
-            message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=total_time)
+            total_waiting_minutes = sum([len(f) * MINUTES_TO_GENERATE_FILE for f in available_files])
+            message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=total_waiting_minutes)
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=message + ONLY_1_FILE_TIP if len(context.conversation.uploaded_file_urls) > 1 else message,
