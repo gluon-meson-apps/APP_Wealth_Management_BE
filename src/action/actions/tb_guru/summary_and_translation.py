@@ -89,17 +89,6 @@ def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
     return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.DOCX)
 
 
-async def ask_bot_with_input_only(prompt, conversation: ConversationContext, chat_model):
-    result = await ask_chatbot(prompt, chat_model, "direct")
-    logger.info(f"final direct result: {result}")
-    answer = ChatResponseAnswer(
-        messageType=ResponseMessageType.FORMAT_TEXT,
-        content=result,
-        intent=conversation.current_intent.name,
-    )
-    return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
-
-
 def check_summary_needed(conversation: ConversationContext):
     entity_dict = conversation.get_simplified_entities()
     return parse_str_to_bool(entity_dict.get("is_summary_needed", False) if entity_dict else False)
@@ -202,11 +191,16 @@ class SummarizeAndTranslate(TBGuruAction):
         ]
 
         if not available_files:
-            return await ask_bot_with_input_only(
-                ChatMessage.format_jinjia_template(direct_prompt, user_input=user_input),
-                context.conversation,
-                chat_model,
+            result = await ask_chatbot(
+                ChatMessage.format_jinjia_template(direct_prompt, user_input=user_input), chat_model, "direct"
             )
+            logger.info(f"final direct result: {result}")
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content=result,
+                intent=context.conversation.current_intent.name,
+            )
+            return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
         if context.conversation.is_email_request or check_summary_needed(context.conversation):
             attachments = await self.ask_bot_with_files(context.conversation, available_files, chat_model)
