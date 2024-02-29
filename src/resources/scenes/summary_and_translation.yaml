@@ -9,7 +9,7 @@ examples:
   - Hi TB Guru, Please help me summarize the email chain with Chinese.
 slots:
   - name: is_summary_needed
-    description: if the user asks for a summary
+    description: return true if the user asks for a summary
     slotType: boolean
     optional: True
 action: summary_and_translation
