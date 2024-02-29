@@ -1,4 +1,5 @@
 import asyncio
+import mimetypes
 import os
 import shutil
 import uuid
@@ -17,11 +18,13 @@ from action.base import (
     AttachmentResponse,
 )
 from action.context import ActionContext
+from third_system.search_entity import SearchItem
 from tracker.context import ConversationContext
 from utils.common import generate_tmp_dir, parse_str_to_bool
 
 MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024
+ALLOW_FILE_TYPES = ["txt", "docx", "pdf", "doc"]
 
 direct_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
@@ -51,6 +54,12 @@ FILE_ERROR_MSG = "The file is not available for processing. Please upload a vali
 ONLY_1_FILE_TIP = (
     "\nPlease note, if you've uploaded multiple documents, we'll only process the first one at the moment."
 )
+
+FILE_GENERATING_MSG = """
+We've initiated the file generation process, but it's not yet accessible.
+Please allow approximately {{minutes}} minutes for the file to be generated.
+Once complete, you'll be able to download it using the provided link in the attachments to view the results.
+"""
 
 
 async def ask_chatbot(prompt, chat_model, sub_scenario):
@@ -92,6 +101,43 @@ def check_summary_needed(conversation: ConversationContext):
     return parse_str_to_bool(entity_dict.get("is_summary_needed", False) if entity_dict else False)
 
 
+async def split_file_to_ask(user_input, file_items: list[SearchItem], chat_model) -> str:
+    logger.info("Will split files to ask LLM")
+
+    if not file_items:
+        return FILE_ERROR_MSG
+
+    tasks = [
+        ask_chatbot(
+            ChatMessage.format_jinjia_template(file_prompt, user_input=user_input, file_contents=f.text),
+            chat_model,
+            f"sub_part_{index}",
+        )
+        for index, f in enumerate(file_items)
+    ]
+    result = await asyncio.gather(*tasks)
+    return "\n".join(result) if result else FILE_ERROR_MSG
+
+
+async def ask_bot_with_file(conversation: ConversationContext, file_items: list[SearchItem], chat_model) -> str:
+    filename = file_items[0].meta__reference.meta__source_name
+    file_contents = "\n".join([f.text for f in file_items])
+    file_token_size = sum(
+        [f.meta__reference.meta__token_size if f.meta__reference.meta__token_size else 0 for f in file_items]
+    )
+    logger.info(f"file {filename} token size: {file_token_size}")
+    if file_token_size > MAX_FILE_TOKEN_SIZE:
+        return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
+
+    if check_summary_needed(conversation):
+        logger.info("User asks for summary, will direct ask LLM")
+        prompt = ChatMessage.format_jinjia_template(
+            file_prompt, user_input=conversation.current_user_input, file_contents=file_contents
+        )
+        return await ask_chatbot(prompt, chat_model, "direct")
+    return await split_file_to_ask(conversation.current_user_input, file_items, chat_model)
+
+
 class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
@@ -101,54 +147,28 @@ class SummarizeAndTranslate(TBGuruAction):
         return "summary_and_translation"
 
     async def save_answers_to_files(
-        self, origin_files: list[Attachment], answer: list[str], file_urls: list[str] = None
+        self, origin_files: list[list[SearchItem]], answer: list[str], file_urls: list[str] = None
     ) -> list[Attachment]:
         files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
         os.makedirs(files_dir, exist_ok=True)
-        files = [save_answer_to_file(files_dir, f.name, answer[index]) for index, f in enumerate(origin_files)]
+        files = [
+            save_answer_to_file(files_dir, f[0].meta__reference.meta__source_name, answer[index])
+            for index, f in enumerate(origin_files)
+        ]
         uploaded_file_urls = await self.unified_search.upload_file_to_minio(files, file_urls)
         shutil.rmtree(files_dir)
         for index, f in enumerate(files):
             f.url = uploaded_file_urls[index] if uploaded_file_urls else ""
         return files
 
-    async def split_file_to_ask(self, user_input, file: Attachment, chat_model) -> str:
-        logger.info("Will split files to ask LLM")
-        split_file_res = await self.unified_search.download_file_from_minio(file.url)
-        split_file_items = split_file_res.items if split_file_res else []
-
-        if not split_file_items:
-            return FILE_ERROR_MSG
-
-        tasks = [
-            ask_chatbot(
-                ChatMessage.format_jinjia_template(file_prompt, user_input=user_input, file_contents=f.text),
-                chat_model,
-                f"sub_part_{index}",
-            )
-            for index, f in enumerate(split_file_items)
-        ]
-        result = await asyncio.gather(*tasks)
-        return "\n".join(result) if result else FILE_ERROR_MSG
-
-    async def ask_bot_with_file(self, conversation: ConversationContext, file: Attachment, chat_model) -> str:
-        file_token_size = chat_model.get_encode_length(file.contents)
-        logger.info(f"file {file.name} token size: {file_token_size}")
-        if file_token_size > MAX_FILE_TOKEN_SIZE:
-            return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
-
-        if check_summary_needed(conversation):
-            logger.info("User asks for summary, will direct ask LLM")
-            prompt = ChatMessage.format_jinjia_template(
-                file_prompt, user_input=conversation.current_user_input, file_contents=file.contents
-            )
-            return await ask_chatbot(prompt, chat_model, "direct")
-        return await self.split_file_to_ask(conversation.current_user_input, file, chat_model)
-
     async def ask_bot_with_files(
-        self, conversation: ConversationContext, available_files, chat_model, file_urls: list[str] = None
+        self,
+        conversation: ConversationContext,
+        available_files: list[list[SearchItem]],
+        chat_model,
+        file_urls: list[str] = None,
     ) -> list[Attachment]:
-        tasks = [self.ask_bot_with_file(conversation, f, chat_model) for f in available_files]
+        tasks = [ask_bot_with_file(conversation, f, chat_model) for f in available_files]
         result = await asyncio.gather(*tasks)
         result_str = "\n".join(result)
         logger.info(f"final result token size: {chat_model.get_encode_length(result_str)}")
@@ -170,8 +190,12 @@ class SummarizeAndTranslate(TBGuruAction):
             )
 
         # only process the first file
-        raw_files = [await self.download_first_file_contents(context)]
-        available_files = [f for f in raw_files if f]
+        raw_files = [await self.download_first_processed_file(context)]
+        available_files = [
+            f.items
+            for f in raw_files
+            if f and f.items and f.items[0].meta__reference.meta__source_type in ALLOW_FILE_TYPES
+        ]
 
         if not available_files:
             return await ask_bot_with_input_only(
@@ -184,14 +208,16 @@ class SummarizeAndTranslate(TBGuruAction):
             attachments = await self.ask_bot_with_files(context.conversation, available_files, chat_model)
             message = "Please check attachments for all the replies."
         else:
-            file_tasks = [self.unified_search.generate_file_link(f.name) for f in available_files]
+            file_names = [f[0].meta__reference.meta__source_name for f in available_files]
+            file_tasks = [self.unified_search.generate_file_link(name) for name in file_names]
             file_urls = await asyncio.gather(*file_tasks)
             asyncio.create_task(self.ask_bot_with_files(context.conversation, available_files, chat_model, file_urls))
             attachments = [
-                Attachment(name=f.name, path=f.path, content_type=f.content_type, url=file_urls[index])
-                for index, f in enumerate(available_files)
+                Attachment(name=filename, path="", content_type=mimetypes.guess_type(filename)[0], url=file_urls[index])
+                for index, filename in enumerate(file_names)
             ]
-            message = "The file is still processing, please wait for 20 minutes and try again."
+            total_time = sum([len(f) * 2 for f in available_files])
+            message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=total_time)
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=message + ONLY_1_FILE_TIP if len(context.conversation.uploaded_file_urls) > 1 else message,
