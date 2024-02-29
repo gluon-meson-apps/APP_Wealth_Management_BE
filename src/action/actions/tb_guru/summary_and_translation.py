@@ -1,5 +1,4 @@
 import asyncio
-import mimetypes
 import os
 import shutil
 import uuid
@@ -62,6 +61,11 @@ Once complete, you'll be able to download it using the provided link in the atta
 """
 
 
+def replace_file_type_to_docx(filename: str) -> str:
+    file_type = filename.split(".")[-1]
+    return filename.rsplit(f".{file_type}", 1)[0] + ".docx"
+
+
 async def ask_chatbot(prompt, chat_model, sub_scenario):
     chat_message_preparation = ChatMessagePreparation()
     chat_message_preparation.add_message("user", prompt)
@@ -78,11 +82,11 @@ async def ask_chatbot(prompt, chat_model, sub_scenario):
 
 
 def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
-    file_name = f"{origin_file_name.split('.')[0]}.docx"
+    file_name = replace_file_type_to_docx(origin_file_name)
     file_path = f"{files_dir}/{file_name}"
     with open(file_path, "w") as f:
         f.write(answer)
-    return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.TXT)
+    return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.DOCX)
 
 
 async def ask_bot_with_input_only(prompt, conversation: ConversationContext, chat_model):
@@ -208,13 +212,13 @@ class SummarizeAndTranslate(TBGuruAction):
             attachments = await self.ask_bot_with_files(context.conversation, available_files, chat_model)
             message = "Please check attachments for all the replies."
         else:
-            file_names = [f[0].meta__reference.meta__source_name for f in available_files]
-            file_tasks = [self.unified_search.generate_file_link(name) for name in file_names]
+            docx_names = [replace_file_type_to_docx(f[0].meta__reference.meta__source_name) for f in available_files]
+            file_tasks = [self.unified_search.generate_file_link(name) for name in docx_names]
             file_urls = await asyncio.gather(*file_tasks)
             asyncio.create_task(self.ask_bot_with_files(context.conversation, available_files, chat_model, file_urls))
             attachments = [
-                Attachment(name=filename, path="", content_type=mimetypes.guess_type(filename)[0], url=file_urls[index])
-                for index, filename in enumerate(file_names)
+                Attachment(name=name, path="", content_type=UploadFileContentType.DOCX, url=file_urls[index])
+                for index, name in enumerate(docx_names)
             ]
             total_time = sum([len(f) * 2 for f in available_files])
             message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=total_time)
