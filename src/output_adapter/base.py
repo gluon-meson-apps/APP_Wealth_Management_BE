@@ -170,7 +170,7 @@ class BaseOutputAdapter(OutputAdapter):
             for entity in unhidden_entities
         ]
         if slot_expression:
-            extra_info_slots.append(f"slot_expression: '{slot_expression}'")
+            extra_info_slots.append(f"slot_expression: {slot_expression}")
         output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
 
     def _fill_intent_value(self, conversation, output):
