@@ -83,6 +83,11 @@ async def ask_bot_with_input_only(prompt, conversation: ConversationContext, cha
     return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
 
 
+def check_summary_needed(conversation: ConversationContext):
+    entity_dict = conversation.get_simplified_entities()
+    return entity_dict.get("is_summary_needed", False) if entity_dict else False
+
+
 class SummarizeAndTranslate(TBGuruAction):
     def __init__(self) -> None:
         super().__init__()
@@ -127,8 +132,7 @@ class SummarizeAndTranslate(TBGuruAction):
         if file_token_size > MAX_FILE_TOKEN_SIZE:
             return f"Sorry, the file has {file_token_size} tokens but the maximum limit for the file is {MAX_FILE_TOKEN_SIZE} tokens. Please upload a smaller file."
 
-        entity_dict = conversation.get_simplified_entities()
-        if entity_dict and entity_dict.get("is_summary_needed"):
+        if check_summary_needed(conversation):
             logger.info("User asks for summary, will direct ask LLM")
             prompt = ChatMessage.format_jinjia_template(
                 file_prompt, user_input=conversation.current_user_input, file_contents=file.contents
@@ -170,7 +174,7 @@ class SummarizeAndTranslate(TBGuruAction):
                 chat_model,
             )
 
-        if context.conversation.is_email_request:
+        if context.conversation.is_email_request or check_summary_needed(context.conversation):
             attachments = await self.ask_bot_with_files(context.conversation, available_files, chat_model)
             message = "Please check attachments for all the replies."
         else:
