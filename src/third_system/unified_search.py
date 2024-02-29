@@ -2,6 +2,7 @@ import asyncio
 import mimetypes
 import os
 import re
+import urllib.parse
 from typing import Union
 
 import aiohttp
@@ -26,6 +27,16 @@ async def call_search_api(method: str, endpoint: str, payload: dict) -> SearchRe
         except Exception as err:
             logger.error(f"Error fetch url {endpoint}: {err}")
             return SearchResponse()
+
+
+def extract_filename_from_header(header_value) -> str:
+    if "''" in header_value:
+        _, encoded_filename = header_value.split("''", 1)
+        return urllib.parse.unquote(encoded_filename)
+    elif '="' in header_value:
+        return re.findall(r'filename="(.+)"', header_value)[0]
+    else:
+        return ""
 
 
 class UnifiedSearch:
@@ -62,14 +73,14 @@ class UnifiedSearch:
             try:
                 async with session.get(f"{self.base_url}/file/download_raw", params={"file_url": file_url}) as resp:
                     resp.raise_for_status()
-                    file_name = re.findall('filename="(.+)"', resp.headers.get("Content-Disposition", ""))
+                    filename = extract_filename_from_header(resp.headers.get("Content-Disposition", ""))
                     content = await resp.content.read()
                     return Attachment(
                         path="",
                         url=file_url,
-                        name=file_name[0] if file_name else "",
+                        name=filename,
                         contents=content,
-                        content_type=resp.headers.get("Content-Type", ""),
+                        content_type=resp.headers.get("Content-Type", "").split(";")[0],
                     )
             except Exception as err:
                 logger.error(f"Error download {file_url}: {err}")
@@ -110,7 +121,7 @@ class UnifiedSearch:
         endpoint = f"{self.base_url}/file/link"
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(endpoint, json={"filename": filename}) as response:
+                async with session.get(endpoint, params={"filename": filename}) as response:
                     response.raise_for_status()
                     return await response.json()
             except Exception as err:
