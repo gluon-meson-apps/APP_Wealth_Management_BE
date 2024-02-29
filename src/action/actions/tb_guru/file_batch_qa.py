@@ -96,7 +96,7 @@ class FileBatchAction(TBGuruAction):
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        first_file = await self.download_first_file(context)
+        first_file = await self.download_first_processed_file(context)
         if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name

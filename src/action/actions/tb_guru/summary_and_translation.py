@@ -170,7 +170,7 @@ class SummarizeAndTranslate(TBGuruAction):
             )
 
         # only process the first file
-        raw_files = [await self.download_first_raw_file(context)]
+        raw_files = [await self.download_first_file_contents(context)]
         available_files = [f for f in raw_files if f]
 
         if not available_files:

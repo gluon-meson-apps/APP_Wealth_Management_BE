@@ -20,20 +20,20 @@ class TBGuruAction(Action, ABC):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
 
-    async def download_first_file(self, context: ActionContext) -> Union[SearchResponse, None]:
+    async def download_first_processed_file(self, context: ActionContext) -> Union[SearchResponse, None]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return None
         contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
         return contents
 
-    async def download_first_raw_file(self, context: ActionContext) -> Union[Attachment, None]:
+    async def download_first_file_contents(self, context: ActionContext) -> Union[Attachment, None]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return None
         file = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
         file.contents = decode_bytes(file.contents) if file.contents else ""
         return file
 
-    async def download_raw_files(self, context: ActionContext) -> list[Attachment]:
+    async def download_files_contents(self, context: ActionContext) -> list[Attachment]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return []
         tasks = [
