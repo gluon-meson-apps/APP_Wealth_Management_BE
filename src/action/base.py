@@ -63,7 +63,8 @@ class ChatResponseAnswer(BaseModel):
                 if key and key != "Attachments" and value
             ]
         )
-        return details.replace("slot_expression", "<b>slot_expression</b>")
+        details = details.replace("\nslot_expression", "\n<b>slot_expression</b>")
+        return details
 
     def format_attachments_output(self, template) -> str:
         if "Attachments" in self.extra_info:
