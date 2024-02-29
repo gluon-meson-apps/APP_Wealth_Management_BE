@@ -40,8 +40,9 @@ class TBGuruAction(Action, ABC):
             self.unified_search.download_raw_file_from_minio(url) for url in context.conversation.uploaded_file_urls
         ]
         files_res = await asyncio.gather(*tasks)
-        return [
-            Attachment(name=f.name, path=f.path, content_type=f.content_type, contents=decode_bytes(f.contents))
-            for f in files_res
-            if f
-        ]
+        result = []
+        for f in files_res:
+            if f:
+                f.contents = decode_bytes(f.contents)
+                result.append(f)
+        return result

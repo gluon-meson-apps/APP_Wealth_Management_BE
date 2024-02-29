@@ -18,7 +18,7 @@ from action.base import (
 )
 from action.context import ActionContext
 from tracker.context import ConversationContext
-from utils.common import generate_tmp_dir
+from utils.common import generate_tmp_dir, parse_str_to_bool
 
 MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024
@@ -85,7 +85,7 @@ async def ask_bot_with_input_only(prompt, conversation: ConversationContext, cha
 
 def check_summary_needed(conversation: ConversationContext):
     entity_dict = conversation.get_simplified_entities()
-    return entity_dict.get("is_summary_needed", False) if entity_dict else False
+    return parse_str_to_bool(entity_dict.get("is_summary_needed", False) if entity_dict else False)
 
 
 class SummarizeAndTranslate(TBGuruAction):
@@ -109,6 +109,7 @@ class SummarizeAndTranslate(TBGuruAction):
         return files
 
     async def split_files_to_ask(self, user_input, file: Attachment, chat_model) -> str:
+        logger.info("Will split files to ask LLM")
         split_file_res = await self.unified_search.download_file_from_minio(file.url)
         split_file_items = split_file_res.items if split_file_res else []
 
@@ -180,7 +181,7 @@ class SummarizeAndTranslate(TBGuruAction):
         else:
             file_tasks = [self.unified_search.generate_file_link(f.name) for f in available_files]
             file_urls = await asyncio.gather(*file_tasks)
-            self.ask_bot_with_files(context.conversation, available_files, chat_model, file_urls)
+            asyncio.create_task(self.ask_bot_with_files(context.conversation, available_files, chat_model, file_urls))
             attachments = [
                 Attachment(name=f.name, path=f.path, content_type=f.content_type, url=file_urls[index])
                 for index, f in enumerate(available_files)

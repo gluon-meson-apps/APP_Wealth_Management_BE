@@ -11,5 +11,5 @@ slots:
   - name: is_summary_needed
     description: if the user asks for a summary
     slotType: boolean
-    optional: False
+    optional: True
 action: summary_and_translation
