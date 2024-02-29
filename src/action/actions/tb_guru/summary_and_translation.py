@@ -48,6 +48,10 @@ If the user asks for a summary, please provide a summary less than 3000 words.
 
 FILE_ERROR_MSG = "The file is not available for processing. Please upload a valid file."
 
+ONLY_1_FILE_TIP = (
+    "\nPlease note, if you've uploaded multiple documents, we'll only process the first one at the moment."
+)
+
 
 async def ask_chatbot(prompt, chat_model, sub_scenario):
     chat_message_preparation = ChatMessagePreparation()
@@ -108,7 +112,7 @@ class SummarizeAndTranslate(TBGuruAction):
             f.url = uploaded_file_urls[index] if uploaded_file_urls else ""
         return files
 
-    async def split_files_to_ask(self, user_input, file: Attachment, chat_model) -> str:
+    async def split_file_to_ask(self, user_input, file: Attachment, chat_model) -> str:
         logger.info("Will split files to ask LLM")
         split_file_res = await self.unified_search.download_file_from_minio(file.url)
         split_file_items = split_file_res.items if split_file_res else []
@@ -139,7 +143,7 @@ class SummarizeAndTranslate(TBGuruAction):
                 file_prompt, user_input=conversation.current_user_input, file_contents=file.contents
             )
             return await ask_chatbot(prompt, chat_model, "direct")
-        return await self.split_files_to_ask(conversation.current_user_input, file, chat_model)
+        return await self.split_file_to_ask(conversation.current_user_input, file, chat_model)
 
     async def ask_bot_with_files(
         self, conversation: ConversationContext, available_files, chat_model, file_urls: list[str] = None
@@ -165,7 +169,8 @@ class SummarizeAndTranslate(TBGuruAction):
                 jump_out_flag=False,
             )
 
-        raw_files = await self.download_raw_files(context)
+        # only process the first file
+        raw_files = [await self.download_first_raw_file(context)]
         available_files = [f for f in raw_files if f]
 
         if not available_files:
@@ -186,10 +191,10 @@ class SummarizeAndTranslate(TBGuruAction):
                 Attachment(name=f.name, path=f.path, content_type=f.content_type, url=file_urls[index])
                 for index, f in enumerate(available_files)
             ]
-            message = "The file is still generated, please wait for 20 minutes and try again."
+            message = "The file is still processing, please wait for 20 minutes and try again."
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content=message,
+            content=message + ONLY_1_FILE_TIP if len(context.conversation.uploaded_file_urls) > 1 else message,
             intent=context.conversation.current_intent.name,
         )
         return AttachmentResponse(
