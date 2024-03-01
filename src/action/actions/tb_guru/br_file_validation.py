@@ -58,6 +58,8 @@ stop
 ## business resolution file content
 {{br_file_contents}}
 
+## user input
+{{user_input}}
 
 ## instruction
 follow the chart flow to answer the user's question
@@ -107,10 +109,7 @@ class BrFileValidation(TBGuruAction):
                 "system",
                 rule_in_input_prompt,
                 br_file_contents=br_file_contents,
-            )
-            chat_message_preparation.add_message(
-                "user",
-                user_input,
+                user_input=user_input,
             )
         else:
             training_doc = get_texts_from_search_response(search_res[0]) if search_res else ""
