@@ -38,6 +38,6 @@ class HsbcConnectApi:
                 raise err
 
     async def validate_file(self, file: Attachment) -> str:
-        if file and file.text:
+        if file and file.contents:
             return await self._call_hsbc_connect_api(file) if self.base_url else mock_validate_res().text
         raise FileNotFoundError("No file valid.")
