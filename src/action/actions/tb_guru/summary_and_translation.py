@@ -1,7 +1,4 @@
 import asyncio
-import os
-import shutil
-import uuid
 
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation, ChatMessage
 from loguru import logger
@@ -82,14 +79,6 @@ async def ask_chatbot(prompt, chat_model, sub_scenario):
     return result
 
 
-def save_answer_to_file(files_dir, origin_file_name, answer) -> Attachment:
-    file_name = replace_file_type_to_docx(origin_file_name)
-    file_path = f"{files_dir}/{file_name}"
-    with open(file_path, "w") as f:
-        f.write(answer)
-    return Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.DOCX)
-
-
 def check_summary_needed(conversation: ConversationContext):
     entity_dict = conversation.get_simplified_entities()
     return parse_str_to_bool(entity_dict.get("is_summary_needed", False) if entity_dict else False)
@@ -143,14 +132,16 @@ class SummarizeAndTranslate(TBGuruAction):
     async def save_answers_to_files(
         self, origin_files: list[list[SearchItem]], answer: list[str], file_urls: list[str] = None
     ) -> list[Attachment]:
-        files_dir = f"{self.tmp_file_dir}/{str(uuid.uuid4())}"
-        os.makedirs(files_dir, exist_ok=True)
         files = [
-            save_answer_to_file(files_dir, f[0].meta__reference.meta__source_name, answer[index])
+            Attachment(
+                name=replace_file_type_to_docx(f[0].meta__reference.meta__source_name),
+                path="",
+                content_type=UploadFileContentType.DOCX,
+                contents=answer[index],
+            )
             for index, f in enumerate(origin_files)
         ]
         uploaded_file_urls = await self.unified_search.upload_file_to_minio(files, file_urls)
-        shutil.rmtree(files_dir)
         for index, f in enumerate(files):
             f.url = uploaded_file_urls[index] if uploaded_file_urls else ""
         return files
