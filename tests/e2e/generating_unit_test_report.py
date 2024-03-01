@@ -136,7 +136,6 @@ def unnest_json_values(original_df, extract_column):
 
     final_df = pd.concat([original_df, new_columns], axis=1)
 
-    final_df.drop(extract_column, axis=1, inplace=True)
 
     return final_df
 
