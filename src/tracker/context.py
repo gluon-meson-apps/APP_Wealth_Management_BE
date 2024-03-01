@@ -132,6 +132,12 @@ class ConversationContext:
     def start_one_chat(self):
         self.appended_history_count_in_one_chat = 0
 
+    def contains_multiple_files(self):
+        return len(self.uploaded_file_urls) > 1
+
+    def get_first_file_name(self):
+        return self.uploaded_file_urls[0].split("/")[-1]
+
     def get_history(self) -> History:
         return self.history
 

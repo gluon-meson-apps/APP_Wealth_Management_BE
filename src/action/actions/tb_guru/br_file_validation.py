@@ -143,9 +143,13 @@ class BrFileValidation(TBGuruAction):
         ).response
         logger.info(f"chat result: {result}")
 
+        mention_of_only_one_file_processed = ""
+        if context.conversation.contains_multiple_files():
+            mention_of_only_one_file_processed = f"\n\n Attention: we can only process one attachment in a time, so we only processed the first file named {context.conversation.get_first_file_name()} you sent."
+
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content=result,
+            content=result + mention_of_only_one_file_processed,
             intent=context.conversation.current_intent.name,
             references=search_res[0].items if search_res else [],
         )
