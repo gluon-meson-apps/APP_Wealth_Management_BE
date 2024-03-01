@@ -7,7 +7,7 @@ from loguru import logger
 
 from nlu.base import EntityExtractor
 from nlu.forms import FormStore, Form
-from nlu.intent_with_entity import Entity, SlotType
+from nlu.intent_with_entity import Entity, SlotType, Slot
 from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
 from utils.common import parse_str_to_bool
@@ -98,28 +98,24 @@ class LLMEntityExtractor(EntityExtractor):
         entities = (
             await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True)
         ).get_json_response()
+        logger.debug(f"extract entities: {entities}")
 
-        logger.debug(entities)
-        if not entities:
-            return []
+        bool_slots_entities = {
+            slot.name: parse_str_to_bool(entities.get(slot.name) if entities else False)
+            for slot in form.slots
+            if slot.slot_type == SlotType.BOOLEAN
+        }
+        logger.debug(f"bool entities: {bool_slots_entities}")
+
+        merged_entities = {**entities, **bool_slots_entities} if entities else bool_slots_entities
+
+        logger.debug(f"final entities: {merged_entities}")
+
         slot_name_to_slot = {slot.name: slot for slot in form.slots}
-        print(f"slot_name_to_slot {slot_name_to_slot}")
+        entity_list = [tup for tup in merged_entities.items() if tup[0] in slot_name_to_slot] if merged_entities else []
+        if not entity_list:
+            return []
         conversation_context.current_intent_slot_names = slot_name_to_slot.keys()
-
-        if entities:
-            entity_list = list(
-                filter(
-                    lambda tup: tup[0] in slot_name_to_slot
-                    and tup[1] is not None
-                    and (isinstance(tup[1], int) or len(str(tup[1])) > 0),
-                    list(entities.items()),
-                )
-            )
-        else:
-            entity_list = []
-
-        def get_slot_value(slot, value):
-            return parse_str_to_bool(value) if slot.slot_type == SlotType.BOOLEAN else value
 
         def get_slot(name, value):
             if slot_name_to_slot:
@@ -127,11 +123,18 @@ class LLMEntityExtractor(EntityExtractor):
                     origin_slot = slot_name_to_slot[name]
                     slot = origin_slot.copy(
                         update={
-                            "value": get_slot_value(origin_slot, value),
+                            "value": value,
                         }
                     )
                     slot.confidence = 1
                     return slot
             return None
 
-        return [Entity(type=name, value=value, possible_slot=get_slot(name, value)) for name, value in entity_list]
+        def check_slot_value_valid(value) -> bool:
+            return value is not None and (isinstance(value, int) or len(str(value)) > 0)
+
+        slots: list[Slot] = [get_slot(name, value) for name, value in entity_list]
+        available_slots = [slot for slot in slots if check_slot_value_valid(slot.value)]
+
+        logger.debug(f"extracted slots: {available_slots}")
+        return [Entity(type=s.name, value=s.value, possible_slot=s) for s in available_slots]
