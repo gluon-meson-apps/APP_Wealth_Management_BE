@@ -8,13 +8,13 @@ slots:
     description: the entity name of the LC bank other than HSBC Singapore
     slotType: text
   - name: country of bank
-    description: the full country name of the bank to be checked, for example United States, China, Germany
+    description: the full country name of the bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
     slotType: text
   - name: country code of bank
     description: the country abbreviation code of the bank's country, which is 2 or 3 character. for example VNM, CHN, US
     slotType: text
   - name: country of rma
-    description: the full country name which used to check RMA, for example Hang Seng - Hong Kong,Hang Seng - China
+    description: the full country name, when user input contains "I", "we", "us", it represents Singapore
     slotType: text
   - name: rma code
     description: the code used to check RMA, value MUST equal to one of HKBAAU2S,HSBCAU2S,HSBCBDDH,HSBCCNSH,HSBCHKHH,HSBCINAA,HSBCINBB,HSBCIDJA,HSBCJPJT,HSBCKRSE,HSBCMOMX,HBMBMYKL,HMABMYKL,HSBCMYKA,HSBCMVMV,HSBCMUMU,HSBCNZ2A,HSBCPHMM,HSBCSGSG,HSBCLKLX,HSBCTWTP,HSBCTW2P,HSBCTHBK,HSBCVNVX,HASECNSH,HASEHKHH,HASEMOMX,MIDLAM22,HSBCBEBB,BBDABMHM,MIDLCZPP,CCFRFRPP,TUBDDEDD,TUBDDEHH,MIDLGRAA,BLICGGSX,HSBCIE2D,HSBCILIT,MIDLITMX,MMEBMTMT,HSBCNL2A,HSBCPLPW,BLICRUMM,HSBCZAJJ,MIDLESMM,HSBCCHZZ,HSBCGB2L,MIDLGB22,HBUKGB4B,BACOARBA,HSBNBRSS,BLICCLRM,BIMEMXMM,BLICUYMM,HSBCDZAL,BBMEBHBX,EBBKEGCX,HBMEKWKW,BBMEOMRX,BBMEQAQX,HSBCTRIX,BBMEAEAD,HKBCCATT,MRMDUS33
@@ -23,5 +23,4 @@ slots:
     description: SWIFT/BIC address of the Counterparty Bank, the value MUST NOT exist in following list (HKBAAU2S,HSBCAU2S,HSBCBDDH,HSBCCNSH,HSBCHKHH,HSBCINAA,HSBCINBB,HSBCIDJA,HSBCJPJT,HSBCKRSE,HSBCMOMX,HBMBMYKL,HMABMYKL,HSBCMYKA,HSBCMVMV,HSBCMUMU,HSBCNZ2A,HSBCPHMM,HSBCSGSG,HSBCLKLX,HSBCTWTP,HSBCTW2P,HSBCTHBK,HSBCVNVX,HASECNSH,HASEHKHH,HASEMOMX,MIDLAM22,HSBCBEBB,BBDABMHM,MIDLCZPP,CCFRFRPP,TUBDDEDD,TUBDDEHH,MIDLGRAA,BLICGGSX,HSBCIE2D,HSBCILIT,MIDLITMX,MMEBMTMT,HSBCNL2A,HSBCPLPW,BLICRUMM,HSBCZAJJ,MIDLESMM,HSBCCHZZ,HSBCGB2L,MIDLGB22,HBUKGB4B,BACOARBA,HSBNBRSS,BLICCLRM,BIMEMXMM,BLICUYMM,HSBCDZAL,BBMEBHBX,EBBKEGCX,HBMEKWKW,BBMEOMRX,BBMEQAQX,HSBCTRIX,BBMEAEAD,HKBCCATT,MRMDUS33)
     slotType: text
 action: rma_checking
-slot_expression: ("bank entity name" and "country of bank" and "country of rma") or ("bank entity name" and "rma code") or ("SWIFT code" and "country of rma")
-
+slot_expression: ("bank entity name" and "country of bank" and ("country of rma" or "rma code")) or ("SWIFT code" and ("country of rma" or "rma code"))
