@@ -11,7 +11,7 @@ prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on below info.
 
 ## business resolution file content
-{{br_file_content}}
+{{br_file_contents}}
 
 ## Training document
 {{training_doc}}
@@ -21,6 +21,46 @@ You are a helpful assistant, you need to answer the question from user based on 
 
 ## instruction
 Now, answer the user's question, and reply the result.
+"""
+
+rule_in_input_prompt = """## Role
+You are a helpful assistant, you need to answer the question from user based on below info. User input contains BR validation rules. flow the following steps , don't mention step in your answer.
+
+
+## Chat Flow
+@startuml
+start
+
+repeat :For i=1 to #rules;
+  :Show:"rule $i";
+  :Show:" - Rule Description:" the summary description of the rule;
+if (Validation result) then ([conformed])
+  :Show:" - Validation Result: Conformed";
+else ([not conformed])
+  :Show:" - Validation Result: Not Conformed";
+endif
+if (find related BR file content) then ([found])
+  :Show: "- Reference:" related BR file content(must quote from the BR file);
+else ([not found])
+  :Show:"N/A";
+endif
+repeat while (next i)
+:Show: "Summary:" the overall summary of\nthe validation result;
+
+if (user mention other requests except BR rule validation?) then ([mentioned])
+  :Show: Answer user's other requests\n;
+endif
+
+:Show: "Summary Table:" Summary in table format: Rule Number, Rule Description, Validation Result, Detailed Reason, Reference;
+stop
+
+@enduml
+## business resolution file content
+{{br_file_contents}}
+
+
+## instruction
+follow the chart flow to answer the user's question
 """
 
 no_data_prompt = """## Role
@@ -57,26 +97,39 @@ class BrFileValidation(TBGuruAction):
         user_input = context.conversation.current_user_input
 
         search_res = await self.unified_search.vector_search(SearchParam(query=user_input, size=2), "training_doc")
-        training_doc = get_texts_from_search_response(search_res[0]) if search_res else ""
 
-        br_file_contents = normalize_newlines(first_file.contents) if training_doc else ""
+        br_file_contents =normalize_newlines(first_file.contents)
 
         chat_message_preparation = ChatMessagePreparation()
-        if training_doc:
+        rule_provided = context.conversation.get_entity_by_name("BR validation rules provided")
+        if rule_provided and rule_provided.value:
+            chat_message_preparation.add_message(
+                "system",
+                rule_in_input_prompt,
+                br_file_contents=br_file_contents,
+            )
             chat_message_preparation.add_message(
                 "user",
-                prompt,
-                br_file_content=br_file_contents,
-                user_input=user_input,
-                training_doc=training_doc,
+                user_input,
             )
         else:
-            chat_message_preparation.add_message("system", no_data_prompt, user_input=user_input)
+            training_doc = get_texts_from_search_response(search_res[0]) if search_res else ""
+            if training_doc:
+                chat_message_preparation.add_message(
+                    "user",
+                    prompt,
+                    br_file_contents=br_file_contents,
+                    user_input=user_input,
+                    training_doc=training_doc,
+                )
+            else:
+                chat_message_preparation.add_message("system", no_data_prompt, user_input=user_input)
+                br_file_contents = ""
         chat_message_preparation.log(logger)
         result = (
             await chat_model.achat(
                 **chat_message_preparation.to_chat_params(),
-                max_length=1024,
+                max_length=2048,
                 sub_scenario="validation" if br_file_contents else "no_data",
             )
         ).response

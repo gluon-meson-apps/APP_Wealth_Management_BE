@@ -1,7 +1,12 @@
 name: br_file_validation
-description: according to BR (board resolution) training document, help to check if the provided br file is good enough
+description: according to BR (board resolution) training document or user provided rules, help to check if the provided br file is good enough
 business: true
 action: br_file_validation
+slots:
+  - name: BR validation rules provided
+    description: check if user already provided BR validation rules in the input, rules are always concrete
+    slotType: boolean
+    optional: True
 examples:
   - "Hi TB Guru, Can you please help me review my Board resolution file, it relates to cash management service, please help me check if that is good enough base on the board resolution training guide. thanks"
   - "Hi TB Guru, Can you please help me review my Board resolution file, it relates to accounting opening, please help me check if that is good enough base on the board resolution training guide. thanks"
