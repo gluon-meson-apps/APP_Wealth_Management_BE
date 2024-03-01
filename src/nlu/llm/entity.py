@@ -7,9 +7,10 @@ from loguru import logger
 
 from nlu.base import EntityExtractor
 from nlu.forms import FormStore, Form
-from nlu.intent_with_entity import Entity
+from nlu.intent_with_entity import Entity, SlotType
 from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
+from utils.common import parse_str_to_bool
 
 system_template = """
 ## Role & Task
@@ -117,10 +118,18 @@ class LLMEntityExtractor(EntityExtractor):
         else:
             entity_list = []
 
+        def get_slot_value(slot, value):
+            return parse_str_to_bool(value) if slot.slot_type == SlotType.BOOLEAN else value
+
         def get_slot(name, value):
             if slot_name_to_slot:
                 if name in slot_name_to_slot:
-                    slot = slot_name_to_slot[name].copy(update={"value": value})
+                    origin_slot = slot_name_to_slot[name]
+                    slot = origin_slot.copy(
+                        update={
+                            "value": get_slot_value(origin_slot, value),
+                        }
+                    )
                     slot.confidence = 1
                     return slot
             return None

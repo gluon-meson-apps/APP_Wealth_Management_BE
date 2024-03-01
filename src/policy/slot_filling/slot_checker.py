@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from nlu.forms import Form
-from nlu.intent_with_entity import Slot
+from nlu.intent_with_entity import Slot, SlotType
 from policy.slot_filling.base_slot_checker import BaseSlotChecker
 from policy.slot_filling.expression_slot_checker import ExpressionSlotSequenceChecker
 from policy.slot_filling.slot_sequence_checker import OneSlotSequenceChecker
@@ -13,7 +13,7 @@ class SlotChecker:
             self.real_checker: BaseSlotChecker = ExpressionSlotSequenceChecker(form.slot_expression)
         else:
             self.real_checker: BaseSlotChecker = OneSlotSequenceChecker(
-                [slot.name for slot in form.slots if not slot.optional]
+                [slot.name for slot in form.slots if not slot.optional and slot.slot_type != SlotType.BOOLEAN]
             )
         self.form = form
         self.possible_slots = possible_slots
