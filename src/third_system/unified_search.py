@@ -8,7 +8,7 @@ from typing import Union
 import aiohttp
 from loguru import logger
 
-from action.base import UploadFileContentType, Attachment
+from action.base import Attachment
 from third_system.search_entity import SearchParam, SearchResponse
 
 unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
@@ -63,7 +63,9 @@ class UnifiedSearch:
         return [result] if result.items else []
 
     async def upload_intents_examples(self, table, intent_examples):
-        return await call_search_api("POST", f"{self.base_url}/vector/{table}/intent_examples", intent_examples)
+        return await call_search_api(
+            "POST", f"{self.base_url}/vector/{table}/intent_examples?recreate=True", intent_examples
+        )
 
     async def search_for_intent_examples(self, table, user_input):
         return await call_search_api("POST", f"{self.base_url}/vector/{table}/search", {"query": user_input})
@@ -130,21 +132,18 @@ class UnifiedSearch:
 
 
 async def main():
-    files = [
-        Attachment(
-            name="test.txt",
-            path="../resources/prompt_templates/slot_confirm.txt",
-            content_type=UploadFileContentType.TXT,
-        ),
-    ]
-    result = await UnifiedSearch().upload_file_to_minio(files)
-    print(result)
+    # files = [
+    #     Attachment(
+    #         name="test.txt",
+    #         path="../resources/prompt_templates/slot_confirm.txt",
+    #         content_type=UploadFileContentType.TXT,
+    #     ),
+    # ]
+    # result = await UnifiedSearch().upload_file_to_minio(files)
+    # print(result)
 
-    search_result = await UnifiedSearch().search(
-        SearchParam(
-            query="Hi TB Guru, Please help me to extract Apple company data from the @WCS system, and share some data insight with me.",
-        ),
-        conversation_id="test",
+    search_result = await UnifiedSearch().download_file_from_minio(
+        "http://47.106.182.247:19000/rlin-test/BR MASKED 6.docx"
     )
     print(search_result)
 
