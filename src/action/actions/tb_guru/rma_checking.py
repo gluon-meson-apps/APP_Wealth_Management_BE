@@ -41,7 +41,9 @@ class RMACheckingAction(TBGuruAction):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank", "country of rma"])
+        bank_info = format_entities_for_search(
+            context.conversation, ["country of HSBC bank", "country of rma", "rma code"]
+        )
         query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
