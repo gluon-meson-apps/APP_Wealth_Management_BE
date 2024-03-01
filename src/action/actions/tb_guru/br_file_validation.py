@@ -5,7 +5,7 @@ from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer,
 from action.actions.tb_guru.base import TBGuruAction
 from action.context import ActionContext
 from third_system.search_entity import SearchParam
-from utils.common import get_texts_from_search_response, normalize_newlines
+from utils.common import get_texts_from_search_response
 
 prompt = """## Role
 You are a helpful assistant, you need to answer the question from user based on below info.
@@ -86,7 +86,7 @@ class BrFileValidation(TBGuruAction):
     async def run(self, context: ActionContext) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
 
-        first_file = await self.download_first_file_contents(context)
+        first_file = await self.download_first_processed_file(context)
         if not first_file:
             return GeneralResponse.normal_failed_text_response(
                 "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
@@ -98,7 +98,7 @@ class BrFileValidation(TBGuruAction):
 
         search_res = await self.unified_search.vector_search(SearchParam(query=user_input, size=2), "training_doc")
 
-        br_file_contents =normalize_newlines(first_file.contents)
+        br_file_contents = get_texts_from_search_response(first_file)
 
         chat_message_preparation = ChatMessagePreparation()
         rule_provided = context.conversation.get_entity_by_name("BR validation rules provided")
