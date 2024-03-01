@@ -24,35 +24,40 @@ Now, answer the user's question, and reply the result.
 """
 
 rule_in_input_prompt = """## Role
-You are a helpful assistant, you need to answer the question from user based on below info. User input contains BR validation rules. flow the following steps , don't mention step in your answer.
+You are a helpful assistant, you need to answer the question from user input with instruction provided below.
 
+## ATTENTION
+User input contains BR(Business Resolution) validation rules.
 
 ## CHAT FLOW
 @startuml
 start
+:print(we will first list all the rules);
+
+:list all summarized rules in one short sentence in number list format(ignore the rules if inapplicable to this business resolution file content);
 
 repeat :For i=1 to #rules;
-  :Show:"rule $i";
-  :Show:"- Rule Description:" the summary description of the rule;
+  :print("rule $i");
+  :print("- Rule Description:" the summary description of the rule);
 if (conformed to the rule) then ([conformed])
-  :Show:"- Validation Result: Conformed";
+  :print("- Validation Result: Conformed");
 else ([not conformed])
-  :Show:"- Validation Result: Not Conformed";
+  :print("- Validation Result: Not Conformed");
 endif
 if (find related BR file content) then ([found])
-  :Show: "- Reference:" related BR file content(must quote from the BR file);
+  :print("- Reference:" related BR file content(must quote from the BR file));
 else ([not found])
-  :Show:"N/A";
+  :print("N/A");
 endif
 repeat while (next i)
-:Show: "Summary:" the overall summary of
+:print("Summary:" the overall summary of)
 the validation result;
 
-:Show: "Summary Table:" Summary in table format: Rule Number, Rule Description, Validation Result, Detailed Reason, Reference;
+:print("Summary Table:" Summary in table format: Rule Number, Rule Description, Validation Result, Detailed Reason, Reference);
 stop
 
 if (user mention other requests except BR rule validation?) then ([mentioned])
-  :Show: Answer user's other requests
+  :print(Answer user's other requests);
 ;
 endif
 
