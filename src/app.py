@@ -63,7 +63,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 @app.post("/chat/")
 def chat(
-        user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
+    user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
 ):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
@@ -74,13 +74,17 @@ def chat(
 async def generate_answer_with_len_limited(answer, **kwargs):
     # chunk with 500
     for i in range(0, len(answer), 1000):
-        yield {"data": json.dumps({"answer": answer[i: i + 1000], **kwargs})}
+        yield {"data": json.dumps({"answer": answer[i : i + 1000], **kwargs})}
+
+
+async def parse_file_name(file_url):
+    return file_url.split("/")[-1]
 
 
 @app.post("/score/")
 async def score(
-        score_command: ScoreCommand,
-        unified_search: UnifiedSearch = Depends(),
+    score_command: ScoreCommand,
+    unified_search: UnifiedSearch = Depends(),
 ):
     """
     This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score
@@ -102,7 +106,7 @@ async def score(
         result, conversation = await dialog_manager.handle_message(
             score_command.question,
             session_id,
-            first_file_name=first_file.name if first_file else "",
+            first_file_name=await parse_file_name(file_urls[0]) if first_file else None,
             file_urls=file_urls,
             is_email_request=score_command.from_email,
         )
