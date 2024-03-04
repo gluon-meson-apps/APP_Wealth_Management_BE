@@ -1,5 +1,5 @@
 name: wcs_data_query
-description: query data from WCS system
+description: get WCS data and generate insight
 business: true
 examples:
   - Hi TB Guru, Please help me to extract Apple company data from the @WCS system, and share some data insight with me.
@@ -8,6 +8,12 @@ examples:
     Q1. Describe Apple company's CCC figure changes across year and the reason behind it.
     Q2. Compare Apple company's figure against other companies and benchmark.
     Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
+  - Hi TB Guru, Please help me to check CDT N.V. company data from the below WCS data table, and share some data insight with me.
+    1. Company data by past years.
+    ...
+    2. Company data for this year.
+    ...
+    Please help format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
 slots:
   - name: company
     description: the company name, return empty if the company name is "WCS" or "@WCS"
