@@ -53,7 +53,7 @@ class ChatResponseAnswer(BaseModel):
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
-        return self.content + "\n<br>" + extra_info
+        return self.content + "\n\n<br>" + extra_info
 
     def get_chatbot_details(self, template: str):
         details = "".join(
