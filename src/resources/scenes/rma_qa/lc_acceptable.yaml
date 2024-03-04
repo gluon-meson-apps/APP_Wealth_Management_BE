@@ -7,7 +7,6 @@ slots:
   - name: bank entity name
     description: the entity name of the LC bank other than HSBC Singapore
     slotType: text
-    hidden: true
   - name: country of bank
     description: the full country name of the bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
     slotType: text
