@@ -113,7 +113,8 @@ class BrFileValidation(TBGuruAction):
 
         chat_message_preparation = ChatMessagePreparation()
         rule_provided = context.conversation.get_entity_by_name("BR validation rules provided")
-        if rule_provided and rule_provided.value:
+        rule_is_provided = rule_provided and rule_provided.value
+        if rule_is_provided:
             chat_message_preparation.add_message(
                 "system",
                 rule_in_input_prompt,
@@ -151,6 +152,6 @@ class BrFileValidation(TBGuruAction):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result + mention_of_only_one_file_processed,
             intent=context.conversation.current_intent.name,
-            references=search_res[0].items if search_res else [],
+            references=search_res[0].items if search_res and not rule_is_provided else [],
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
