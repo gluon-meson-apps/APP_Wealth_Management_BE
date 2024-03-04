@@ -21,7 +21,7 @@ from utils.common import generate_tmp_dir, parse_str_to_bool
 MAX_OUTPUT_TOKEN_SiZE = 3000
 MAX_FILE_TOKEN_SIZE = 64 * 1024
 ALLOW_FILE_TYPES = ["txt", "docx", "pdf", "doc"]
-MINUTES_TO_GENERATE_FILE = 2
+MINUTES_TO_GENERATE_FILE = 5
 
 direct_prompt = """## Role
 You are a helpful assistant with name as "TB Guru", you need to answer the user's question.
@@ -170,7 +170,11 @@ class SummarizeAndTranslate(TBGuruAction):
             return GeneralResponse(
                 code=200,
                 message="success",
-                answer=f"Sorry, your input have {input_token_size} tokens but the maximum limit for the input is {MAX_OUTPUT_TOKEN_SiZE} tokens. Please put the parts that need to be translated or summarized in a TXT file and upload it as an attachment.",
+                answer=ChatResponseAnswer(
+                    messageType=ResponseMessageType.FORMAT_TEXT,
+                    content=f"Sorry, your input have {input_token_size} tokens but the maximum limit for the input is {MAX_OUTPUT_TOKEN_SiZE} tokens. Please put the parts that need to be translated or summarized in a TXT file and upload it as an attachment.",
+                    intent=context.conversation.current_intent.name,
+                ),
                 jump_out_flag=False,
             )
 
@@ -206,8 +210,7 @@ class SummarizeAndTranslate(TBGuruAction):
                 Attachment(name=name, path="", content_type=UploadFileContentType.DOCX, url=file_urls[index])
                 for index, name in enumerate(docx_names)
             ]
-            total_waiting_minutes = sum([len(f) * MINUTES_TO_GENERATE_FILE for f in available_files])
-            message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=total_waiting_minutes)
+            message = ChatMessage.format_jinjia_template(FILE_GENERATING_MSG, minutes=MINUTES_TO_GENERATE_FILE)
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=message + ONLY_1_FILE_TIP if len(context.conversation.uploaded_file_urls) > 1 else message,
