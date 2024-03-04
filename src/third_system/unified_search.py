@@ -8,7 +8,7 @@ from typing import Union
 import aiohttp
 from loguru import logger
 
-from action.base import Attachment
+from action.base import Attachment, UploadFileContentType
 from third_system.search_entity import SearchParam, SearchResponse
 
 unified_search_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
@@ -132,15 +132,16 @@ class UnifiedSearch:
 
 
 async def main():
-    # files = [
-    #     Attachment(
-    #         name="test.txt",
-    #         path="../resources/prompt_templates/slot_confirm.txt",
-    #         content_type=UploadFileContentType.TXT,
-    #     ),
-    # ]
-    # result = await UnifiedSearch().upload_file_to_minio(files)
-    # print(result)
+    files = [
+        Attachment(
+            name="cases.docx",
+            contents="test1234\ntest1234",
+            path="",
+            content_type=UploadFileContentType.DOCX,
+        ),
+    ]
+    result = await UnifiedSearch().upload_file_to_minio(files)
+    print(result)
 
     search_result = await UnifiedSearch().download_file_from_minio(
         "http://47.106.182.247:19000/rlin-test/BR MASKED 6.docx"
