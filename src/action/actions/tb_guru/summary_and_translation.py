@@ -53,9 +53,15 @@ ONLY_1_FILE_TIP = (
 )
 
 FILE_GENERATING_MSG = """
-We've initiated the file generation process, but it's not yet accessible.
-Please allow approximately {{minutes}} minutes for the file to be generated.
+We've initiated the file generation process, but it's may not yet accessible right now.
+Please be aware, it may takes approximately {{minutes}} minutes for the file to be generated.
+When the generating in progress, you will not get the .docx file from below link.
 Once complete, you'll be able to download it using the provided link in the attachments to view the results.
+"""
+
+INPUT_TOKEN_EXCEED_MSG = """
+Sorry, your input have {{input_token_size}} tokens but the maximum limit for the input is {{max_input_size}} tokens.
+Please put the parts that need to be translated or summarized in a TXT, DOCX or PDF file and upload it as an attachment.
 """
 
 
@@ -172,7 +178,9 @@ class SummarizeAndTranslate(TBGuruAction):
                 message="success",
                 answer=ChatResponseAnswer(
                     messageType=ResponseMessageType.FORMAT_TEXT,
-                    content=f"Sorry, your input have {input_token_size} tokens but the maximum limit for the input is {MAX_OUTPUT_TOKEN_SiZE} tokens. Please put the parts that need to be translated or summarized in a TXT file and upload it as an attachment.",
+                    content=ChatMessage.format_jinjia_template(
+                        INPUT_TOKEN_EXCEED_MSG, input_token_size=input_token_size, max_input_size=MAX_OUTPUT_TOKEN_SiZE
+                    ),
                     intent=context.conversation.current_intent.name,
                 ),
                 jump_out_flag=False,
