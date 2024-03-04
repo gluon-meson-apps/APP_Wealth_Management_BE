@@ -12,7 +12,8 @@ prompt = """## Role
 you are a helpful assistant, based on provided all banks info, retrieve EVERY bank's RMA status and bank info
 
 ## ATTENTION
-if all banks has more than one item, should retrieve RMA status of country {{country_of_rma}} and bank info for every cbid
+if all banks has more than one item, should retrieve RMA status based on country {{country_of_rma}} or code {{rma_code}}
+and bank info for every cbid.
 
 ## all banks info
 
@@ -24,8 +25,8 @@ if all banks has more than one item, should retrieve RMA status of country {{cou
 
 ## INSTRUCT
 
-now, retrieve EVERY founded bank's RMA status of country {{country_of_rma}} and bank info(INCLUDE column names) one by one,
-every counterparty bank has different cbid
+now, retrieve EVERY founded bank's RMA status based on country {{country_of_rma}} or code {{rma_code}} and bank
+info(INCLUDE column names) one by one,every counterparty bank has different cbid
 """
 
 
@@ -67,7 +68,8 @@ class RMACheckingAction(TBGuruAction):
         chat_message_preparation.add_message(
             "user",
             prompt,
-            country_of_rma=entity_dict["country of rma"],
+            country_of_rma=entity_dict["country of rma"] if "country of rma" in entity_dict.keys() else "None",
+            rma_code=entity_dict["rma code"] if "rma code" in entity_dict.keys() else "None",
             all_banks=all_banks_str,
             bank_info=bank_info,
             user_input=context.conversation.current_user_input,
