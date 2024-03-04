@@ -166,6 +166,8 @@ class BaseOutputAdapter(OutputAdapter):
         extra_info_slots = [
             f"{entity.type}: {entity.value} (optional)"
             if entity.possible_slot.optional and not slot_expression
+            else f"{entity.type}: {entity.value} (mandatory)"
+            if not slot_expression
             else f"{entity.type}: {entity.value}"
             for entity in unhidden_entities
         ]
