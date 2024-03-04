@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from utils.common import generate_tmp_dir
 
-RED = "#ab000b"
+RED = "#db0011"
 LIGHT_GREY = "#d7d8d6"
 DARK_GREY = "#767676"
 BLACK = "#000000"
