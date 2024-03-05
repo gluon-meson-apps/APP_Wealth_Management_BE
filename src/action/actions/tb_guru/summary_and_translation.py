@@ -19,7 +19,7 @@ from tracker.context import ConversationContext
 from utils.common import generate_tmp_dir, parse_str_to_bool
 
 MAX_OUTPUT_TOKEN_SiZE = 3000
-MAX_FILE_TOKEN_SIZE = 64 * 1024
+MAX_FILE_TOKEN_SIZE = 20 * 1024
 ALLOW_FILE_TYPES = ["txt", "docx", "pdf", "doc"]
 MINUTES_TO_GENERATE_FILE = 5
 
