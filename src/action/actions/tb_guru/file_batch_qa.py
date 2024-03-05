@@ -157,7 +157,7 @@ class FileBatchAction(TBGuruAction):
         file_path = os.path.join(self.tmp_file_dir, file_name)
         df.to_excel(file_path, index=False)
         attachment = Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.XLSX)
-        urls = await self.unified_search.upload_file_to_minio([attachment])
+        urls = await self.unified_search.upload_files_to_minio([attachment])
         attachment.url = urls[0]
 
         return AttachmentResponse(

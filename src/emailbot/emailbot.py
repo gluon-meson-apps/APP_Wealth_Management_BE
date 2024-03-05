@@ -189,7 +189,7 @@ WHERE id = '{email.id}'
     async def upload_email_attachments(self, email):
         if email.has_attachments:
             attachments = await self.graph.list_attachments(email.id)
-            return await self.unified_search.upload_file_to_minio(attachments)
+            return await self.unified_search.upload_files_to_minio(attachments)
         return []
 
 

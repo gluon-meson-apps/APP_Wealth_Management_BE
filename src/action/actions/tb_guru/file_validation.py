@@ -56,7 +56,7 @@ class FileValidation(TBGuruAction):
 
     async def _upload_file(self, res: str) -> str:
         files = [Attachment(name=report_filename, contents=res, content_type=UploadFileContentType.HTML, path="")]
-        links = await self.unified_search.upload_file_to_minio(files)
+        links = await self.unified_search.upload_files_to_minio(files)
         if links and links[0]:
             return links[0]
         raise Exception("Upload file failed.")

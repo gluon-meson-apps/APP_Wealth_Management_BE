@@ -128,7 +128,7 @@ class WcsDataQuery(TBGuruAction):
         ppt_path = generate_ppt(df_current, df_all, insight, files_dir)
         if ppt_path:
             attachment = Attachment(name="tb_guru_ppt.pptx", path=ppt_path, content_type=UploadFileContentType.PPTX)
-            links = await self.unified_search.upload_file_to_minio([attachment])
+            links = await self.unified_search.upload_files_to_minio([attachment])
             shutil.rmtree(files_dir)
             attachment.url = links[0] if links else ""
             return attachment

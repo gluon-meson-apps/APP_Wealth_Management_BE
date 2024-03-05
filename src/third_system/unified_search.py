@@ -101,7 +101,7 @@ class UnifiedSearch:
             {"file_url": file_url, "chunk_size": chunk_size, "chunk_overlap": chunk_overlap},
         )
 
-    async def upload_file_to_minio(self, files: list[Attachment], file_urls: list[str] = None) -> list[str]:
+    async def upload_files_to_minio(self, files: list[Attachment], file_urls: list[str] = None) -> list[str]:
         data = aiohttp.FormData()
         if file_urls:
             for url in file_urls:
@@ -164,7 +164,7 @@ async def main():
             content_type=UploadFileContentType.DOCX,
         ),
     ]
-    result = await UnifiedSearch().upload_file_to_minio(files)
+    result = await UnifiedSearch().upload_files_to_minio(files)
     print(result)
 
     search_result = await UnifiedSearch().download_file_from_minio(
