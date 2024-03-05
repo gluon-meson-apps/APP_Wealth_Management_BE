@@ -1,7 +1,7 @@
 import asyncio
 
 import pandas as pd
-from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation, ChatMessage
 from loguru import logger
 
 from action.base import (
@@ -17,6 +17,13 @@ from action.actions.tb_guru.base import TBGuruAction
 from action.df_processor import DfProcessor
 from third_system.search_entity import SearchParam, SearchResponse
 from tracker.context import ConversationContext
+
+MAX_ROW_COUNT = 50
+MA_ROW_EXCEED_MSG = """
+Dear user, your first {{max_row}} questions has been answered.
+We are sorry your question count has reached the system capacity, we can not answer the questions after the {{max_row}}th.
+Please put them into another request, we will serve you there.”
+"""
 
 prompt = """## Role
 you are a chatbot, you need to answer the question from user
@@ -114,12 +121,22 @@ class FileBatchAction(TBGuruAction):
                 f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
                 conversation.current_intent.name,
             )
+
         df = df[df[questions_column].notna()].reset_index()
+
+        answer_msg = (
+            ChatMessage.format_jinjia_template(MA_ROW_EXCEED_MSG, max_row=MAX_ROW_COUNT)
+            if df.shape[0] > MAX_ROW_COUNT
+            else "Already replied all questions in file"
+        )
+        # Only process the first 50 rows
+        answer_df = df.iloc[:MAX_ROW_COUNT, :]
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
         tasks = [
-            get_result_from_llm(row[questions_column], index) for index, row in enumerate(df.to_dict(orient="records"))
+            get_result_from_llm(row[questions_column], index)
+            for index, row in enumerate(answer_df.to_dict(orient="records"))
         ]
         search_res = await asyncio.gather(*tasks)
         search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name", "score"])
@@ -128,7 +145,7 @@ class FileBatchAction(TBGuruAction):
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
-            content="Already replied all questions in file",
+            content=answer_msg,
             intent=conversation.current_intent.name,
         )
 
