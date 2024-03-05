@@ -158,19 +158,27 @@ class UnifiedSearch:
 async def main():
     files = [
         Attachment(
-            name="cases.docx",
-            contents="test1234\ntest1234",
-            path="",
+            name="BR_MASKED_6.docx",
+            path="../../tmp/BR_MASKED_6.docx",
             content_type=UploadFileContentType.DOCX,
         ),
     ]
     result = await UnifiedSearch().upload_files_to_minio(files)
     print(result)
 
-    search_result = await UnifiedSearch().download_file_from_minio(
-        "http://47.106.182.247:19000/rlin-test/BR MASKED 6.docx"
+    new_file = Attachment(
+        name="cases.docx",
+        contents="test1234\ntest1234",
+        path="",
+        content_type=UploadFileContentType.DOCX,
     )
-    print(search_result)
+    result = await UnifiedSearch().generate_new_file(new_file)
+    print(result)
+
+    # search_result = await UnifiedSearch().download_file_from_minio(
+    #     "http://47.106.182.247:19000/rlin-test/BR MASKED 6.docx"
+    # )
+    # print(search_result)
 
 
 if __name__ == "__main__":
