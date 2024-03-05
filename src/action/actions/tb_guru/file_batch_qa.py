@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pandas as pd
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation, ChatMessage
@@ -17,6 +18,7 @@ from action.actions.tb_guru.base import TBGuruAction
 from action.df_processor import DfProcessor
 from third_system.search_entity import SearchParam, SearchResponse
 from tracker.context import ConversationContext
+from utils.common import generate_tmp_dir
 
 MAX_ROW_COUNT = 50
 MA_ROW_EXCEED_MSG = """
@@ -47,6 +49,8 @@ class FileBatchAction(TBGuruAction):
     def __init__(self):
         super().__init__()
         self.df_processor: DfProcessor = DfProcessor()
+        self.tmp_file_dir = generate_tmp_dir("batch_qa")
+        os.makedirs(self.tmp_file_dir, exist_ok=True)
 
     def get_name(self) -> str:
         return "file_batch_qa"
@@ -150,7 +154,7 @@ class FileBatchAction(TBGuruAction):
         )
 
         file_name = f"{conversation.session_id}.xlsx"
-        file_path = f"/tmp/{file_name}"
+        file_path = os.path.join(self.tmp_file_dir, file_name)
         content_type = UploadFileContentType.CSV
         df.to_excel(file_path, index=False)
         attachment = Attachment(name=file_name, path=file_path, content_type=content_type)
