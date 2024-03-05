@@ -144,12 +144,14 @@ class SummarizeAndTranslate(TBGuruAction):
                 path="",
                 content_type=UploadFileContentType.DOCX,
                 contents=answer[index],
+                url=file_urls[index] if file_urls else None,
             )
             for index, f in enumerate(origin_files)
         ]
-        uploaded_file_urls = await self.unified_search.upload_file_to_minio(files, file_urls)
+        file_tasks = list(map(self.unified_search.generate_new_file, files))
+        new_file_urls = await asyncio.gather(*file_tasks)
         for index, f in enumerate(files):
-            f.url = uploaded_file_urls[index] if uploaded_file_urls else ""
+            f.url = new_file_urls[index] if new_file_urls else ""
         return files
 
     async def ask_bot_with_files(

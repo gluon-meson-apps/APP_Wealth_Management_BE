@@ -39,6 +39,10 @@ def extract_filename_from_header(header_value) -> str:
         return ""
 
 
+def get_content_type(file: Attachment) -> str:
+    return file.content_type if file.content_type else mimetypes.guess_type(file.filename)[0]
+
+
 class UnifiedSearch:
     def __init__(self):
         self.base_url = unified_search_url
@@ -103,12 +107,12 @@ class UnifiedSearch:
             for url in file_urls:
                 data.add_field("file_urls", url)
         for f in files:
-            if (f.path and os.path.exists(f.path)) or f.contents:
+            if f.path and os.path.exists(f.path):
                 data.add_field(
                     "files",
-                    f.contents if f.contents else open(f.path, "rb"),
+                    open(f.path, "rb"),
                     filename=f.name,
-                    content_type=f.content_type if f.content_type else mimetypes.guess_type(f.filename)[0],
+                    content_type=get_content_type(f),
                 )
         try:
             async with aiohttp.ClientSession() as session:
@@ -118,6 +122,26 @@ class UnifiedSearch:
         except Exception as err:
             logger.error(f"Error upload files: {err}")
             return []
+
+    async def generate_new_file(self, file: Attachment) -> str:
+        data = aiohttp.FormData()
+        if file.url:
+            data.add_field("file_url", file.url)
+        if file.contents:
+            data.add_field(
+                "file",
+                file.contents,
+                filename=file.name,
+                content_type=get_content_type(file),
+            )
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(f"{self.base_url}/file/new", data=data) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except Exception as err:
+            logger.error(f"Error upload files: {err}")
+            return ""
 
     async def generate_file_link(self, filename: str) -> str:
         endpoint = f"{self.base_url}/file/link"
