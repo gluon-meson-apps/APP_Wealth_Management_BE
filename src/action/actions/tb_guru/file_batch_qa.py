@@ -155,9 +155,8 @@ class FileBatchAction(TBGuruAction):
 
         file_name = f"{conversation.session_id}.xlsx"
         file_path = os.path.join(self.tmp_file_dir, file_name)
-        content_type = UploadFileContentType.CSV
         df.to_excel(file_path, index=False)
-        attachment = Attachment(name=file_name, path=file_path, content_type=content_type)
+        attachment = Attachment(name=file_name, path=file_path, content_type=UploadFileContentType.XLSX)
         urls = await self.unified_search.upload_file_to_minio([attachment])
         attachment.url = urls[0]
 
