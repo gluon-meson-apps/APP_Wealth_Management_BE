@@ -160,7 +160,8 @@ class ConversationContext:
         self.files.add_files(files)
 
     def add_file_urls(self, urls: list[str]):
-        self.uploaded_file_urls.extend(urls)
+        new_urls = list(set(urls) - set(self.uploaded_file_urls))
+        self.uploaded_file_urls.extend(new_urls)
 
     def delete_files(self):
         self.files.delete_files()
