@@ -91,8 +91,9 @@ class LLMEntityExtractor(EntityExtractor):
         # TODO: drop history if it is too long
         chat_message_preparation = ChatMessagePreparation()
         if not form.slots:
-            conversation_context.current_intent_slot_names = []
+            conversation_context.current_intent_slots = []
             return []
+        conversation_context.current_intent_slots = form.slots
         self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
         entities = (
@@ -115,7 +116,6 @@ class LLMEntityExtractor(EntityExtractor):
         entity_list = [tup for tup in merged_entities.items() if tup[0] in slot_name_to_slot] if merged_entities else []
         if not entity_list:
             return []
-        conversation_context.current_intent_slot_names = slot_name_to_slot.keys()
 
         def get_slot(name, value):
             if slot_name_to_slot:

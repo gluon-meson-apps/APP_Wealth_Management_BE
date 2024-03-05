@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Any, Optional
 from fastapi import UploadFile
 
-from nlu.intent_with_entity import Entity, Intent
+from nlu.intent_with_entity import Entity, Intent, Slot
 from collections import deque
 
 from loguru import logger
@@ -109,7 +109,7 @@ class ConversationContext:
         self.current_user_input = current_user_input
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
-        self.current_intent_slot_names = []
+        self.current_intent_slots: List[Slot] = []
         self.intent_queue = deque(maxlen=3)
         self.history = History([])
         self.summarized_history_context = None
@@ -192,8 +192,16 @@ class ConversationContext:
     def get_entities(self):
         return self.entities
 
-    def get_current_entities(self):
-        return [entity for entity in self.entities if entity.type in self.current_intent_slot_names]
+    def get_current_intent_slot_names(self) -> List[str]:
+        return [slot.name for slot in self.current_intent_slots]
+
+    def get_extracted_entities(self) -> List[Entity]:
+        return [entity for entity in self.entities if entity.type in self.get_current_intent_slot_names()]
+
+    def get_unfilled_slots(self) -> List[Slot]:
+        return [
+            slot for slot in self.current_intent_slots if slot.name not in [entity.type for entity in self.entities]
+        ]
 
     def get_simplified_entities(self):
         return {entity.type: entity.value for entity in self.entities}

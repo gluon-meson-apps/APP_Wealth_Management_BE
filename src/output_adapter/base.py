@@ -156,14 +156,33 @@ class BaseOutputAdapter(OutputAdapter):
             if output_html:
                 output.answer.extra_info["References"] = output_html
         if conversation.current_intent:
+            slot_expression = conversation.current_intent.slot_expression
             self._fill_intent_value(conversation, output)
-            self._fill_slots_value(conversation, output)
+            self._fill_filled_slots_value(conversation, output, slot_expression)
+            self._fill_unfilled_slots_value(conversation, output, slot_expression)
+            self._fill_slot_expression(output, slot_expression)
         return output
 
-    def _fill_slots_value(self, conversation, output):
-        slot_expression = conversation.current_intent.slot_expression
-        unhidden_entities = filter(lambda entity: not entity.possible_slot.hidden, conversation.get_current_entities())
-        extra_info_slots = [
+    def _fill_slot_expression(self, output, slot_expression):
+        output.answer.extra_info["slot expression"] = slot_expression
+
+    def _fill_unfilled_slots_value(self, conversation, output, slot_expression):
+        unhidden_slots = filter(lambda slot: not slot.hidden, conversation.get_unfilled_slots())
+        unfilled_slots = [
+            f"{slot.name} (optional)"
+            if slot.optional and not slot_expression
+            else f"{slot.name} (mandatory)"
+            if not slot_expression
+            else f"{slot.name}"
+            for slot in unhidden_slots
+        ]
+        output.answer.extra_info["unfilled slots"] = "\n".join(unfilled_slots)
+
+    def _fill_filled_slots_value(self, conversation, output, slot_expression):
+        unhidden_entities = filter(
+            lambda entity: not entity.possible_slot.hidden, conversation.get_extracted_entities()
+        )
+        filled_slots = [
             f"{entity.type}: {entity.value} (optional)"
             if entity.possible_slot.optional and not slot_expression
             else f"{entity.type}: {entity.value} (mandatory)"
@@ -171,9 +190,7 @@ class BaseOutputAdapter(OutputAdapter):
             else f"{entity.type}: {entity.value}"
             for entity in unhidden_entities
         ]
-        if slot_expression:
-            extra_info_slots.append(f"slot_expression: {slot_expression}")
-        output.answer.extra_info["slots"] = "\n".join(extra_info_slots)
+        output.answer.extra_info["filled slots"] = "\n".join(filled_slots)
 
     def _fill_intent_value(self, conversation, output):
         output.answer.extra_info["intent"] = conversation.current_intent.name
