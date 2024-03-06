@@ -24,6 +24,7 @@ class Intent(HashableBaseModel):
     full_name_of_parent_intent: Optional[str] = None
     disabled: Optional[bool] = False
     slot_expression: Optional[str] = None
+    ignore_previous_slots: Optional[bool] = False
 
     def get_full_intent_name(self) -> str:
         return f"{self.full_name_of_parent_intent}.{self.name}" if self.full_name_of_parent_intent else self.name
@@ -43,6 +44,7 @@ class Intent(HashableBaseModel):
             full_name_of_parent_intent=intent_config.full_name_of_parent_intent,
             disabled=intent_config.disabled,
             slot_expression=intent_config.slot_expression,
+            ignore_previous_slots=intent_config.ignore_previous_slots,
         )
 
 

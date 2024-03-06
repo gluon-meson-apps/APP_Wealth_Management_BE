@@ -1,5 +1,6 @@
 name: rma_checking
 business: true
+ignore_previous_slots: true
 description: check RMA for the bank
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?

@@ -16,6 +16,7 @@ class IntentConfig:
         has_children=False,
         full_name_of_parent_intent=None,
         slot_expression=None,
+        ignore_previous_slots=False,
     ):
         self.name = name
         self.description = description
@@ -27,6 +28,7 @@ class IntentConfig:
         self.has_children = has_children or False
         self.full_name_of_parent_intent: str = full_name_of_parent_intent
         self.slot_expression = slot_expression
+        self.ignore_previous_slots = ignore_previous_slots
 
     def is_ancestor_of(self, other_intent: "IntentConfig"):
         if other_intent.full_name_of_parent_intent and other_intent.full_name_of_parent_intent.startswith(
@@ -117,6 +119,7 @@ class IntentListConfig:
                 has_children=data.get("has_children"),
                 full_name_of_parent_intent=parent_intent_full_name,
                 slot_expression=data.get("slot_expression"),
+                ignore_previous_slots=data.get("ignore_previous_slots", False),
             )
             intents.append(intent)
 

@@ -1,5 +1,6 @@
 name: lc_acceptable
 business: true
+ignore_previous_slots: true
 description: check whether HSBC can accept an LC from the issuing bank
 examples:
   - Hi TB Guru, Can you advise if HSBC Singapore is able to accept an LC from Meezan Bank in Pakistan
