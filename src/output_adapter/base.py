@@ -176,7 +176,7 @@ class BaseOutputAdapter(OutputAdapter):
             else f"{slot.name}"
             for slot in unhidden_slots
         ]
-        output.answer.extra_info["unfilled slots"] = "\n".join(unfilled_slots)
+        output.answer.extra_info["unfilled key information"] = "\n".join(unfilled_slots)
 
     def _fill_filled_slots_value(self, conversation, output, slot_expression):
         unhidden_entities = filter(
@@ -190,7 +190,7 @@ class BaseOutputAdapter(OutputAdapter):
             else f"{entity.type}: {entity.value}"
             for entity in unhidden_entities
         ]
-        output.answer.extra_info["filled slots"] = "\n".join(filled_slots)
+        output.answer.extra_info["filled key information"] = "\n".join(filled_slots)
 
     def _fill_intent_value(self, conversation, output):
         output.answer.extra_info["intent"] = conversation.current_intent.name
