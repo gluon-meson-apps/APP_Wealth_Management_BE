@@ -12,8 +12,8 @@ prompt = """## Role
 you are a helpful assistant, based on provided all banks info, retrieve EVERY bank's RMA status and bank info
 
 ## ATTENTION
-if all banks has more than one item, should retrieve RMA status based on country {{country_of_rma}} or code {{rma_code}}
-and bank info for every cbid.
+if all banks has more than one item, should retrieve RMA status based on country {{country_of_service_offering_bank}} or
+code {{bic_code}} and bank info for every cbid.
 
 ## all banks info
 
@@ -25,8 +25,11 @@ and bank info for every cbid.
 
 ## INSTRUCT
 
-now, retrieve EVERY founded bank's RMA status based on country {{country_of_rma}} or code {{rma_code}} and bank
-info(INCLUDE column names) one by one,every counterparty bank has different cbid
+now, retrieve EVERY founded bank's RMA status based on service offering bank country {{country_of_service_offering_bank}}
+or BIC code {{bic_code}} and bank info(INCLUDE column names) one by one,every counterparty bank has different cbid.
+
+Highlight which fields service offering bank country or BIC code you are used to retrieve RMA status.
+
 """
 
 
@@ -43,7 +46,7 @@ class RMACheckingAction(TBGuruAction):
         entity_dict = context.conversation.get_simplified_entities()
 
         bank_info = format_entities_for_search(
-            context.conversation, ["country of HSBC bank", "country of rma", "rma code"]
+            context.conversation, ["country of HSBC bank", "country of service offering bank", "bic code"]
         )
         query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
@@ -68,8 +71,10 @@ class RMACheckingAction(TBGuruAction):
         chat_message_preparation.add_message(
             "user",
             prompt,
-            country_of_rma=entity_dict["country of rma"] if "country of rma" in entity_dict.keys() else "None",
-            rma_code=entity_dict["rma code"] if "rma code" in entity_dict.keys() else "None",
+            country_of_service_offering_bank=entity_dict["country of service offering bank"]
+            if "country of service offering bank" in entity_dict.keys()
+            else "None",
+            bic_code=entity_dict["bic code"] if "bic code" in entity_dict.keys() else "None",
             all_banks=all_banks_str,
             bank_info=bank_info,
             user_input=context.conversation.current_user_input,

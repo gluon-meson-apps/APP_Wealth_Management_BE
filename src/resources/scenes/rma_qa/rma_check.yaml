@@ -1,27 +1,27 @@
 name: rma_checking
 business: true
 ignore_previous_slots: true
-description: check RMA for the bank
+description: check RMA statue of the service receiving bank and service offering bank
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
 slots:
   - name: bank entity name
-    description: the entity name of the LC bank other than HSBC Singapore
+    description: the entity name of the LC service receiving bank other than HSBC Singapore
     slotType: text
   - name: country of bank
-    description: the full country name of the bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
+    description: the full country name of the service receiving bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
     slotType: text
   - name: country code of bank
-    description: the country abbreviation code of the bank's country, which is 2 or 3 character. for example VNM, CHN, US
+    description: the country abbreviation code of the service receiving bank's country, which is 2 or 3 character. for example VNM, CHN, US
     slotType: text
-  - name: country of rma
-    description: the full country name, when user input contains "I", "we", "us", it represents Singapore
+  - name: country of service offering bank
+    description: the full country name of service offering bank, when user input contains "I", "we", "us", it represents Singapore
     slotType: text
-  - name: rma code
-    description: the code used to check RMA, value MUST equal to one of HKBAAU2S,HSBCAU2S,HSBCBDDH,HSBCCNSH,HSBCHKHH,HSBCINAA,HSBCINBB,HSBCIDJA,HSBCJPJT,HSBCKRSE,HSBCMOMX,HBMBMYKL,HMABMYKL,HSBCMYKA,HSBCMVMV,HSBCMUMU,HSBCNZ2A,HSBCPHMM,HSBCSGSG,HSBCLKLX,HSBCTWTP,HSBCTW2P,HSBCTHBK,HSBCVNVX,HASECNSH,HASEHKHH,HASEMOMX,MIDLAM22,HSBCBEBB,BBDABMHM,MIDLCZPP,CCFRFRPP,TUBDDEDD,TUBDDEHH,MIDLGRAA,BLICGGSX,HSBCIE2D,HSBCILIT,MIDLITMX,MMEBMTMT,HSBCNL2A,HSBCPLPW,BLICRUMM,HSBCZAJJ,MIDLESMM,HSBCCHZZ,HSBCGB2L,MIDLGB22,HBUKGB4B,BACOARBA,HSBNBRSS,BLICCLRM,BIMEMXMM,BLICUYMM,HSBCDZAL,BBMEBHBX,EBBKEGCX,HBMEKWKW,BBMEOMRX,BBMEQAQX,HSBCTRIX,BBMEAEAD,HKBCCATT,MRMDUS33
+  - name: bic code
+    description: the BIC code of service offering bank which is used to check RMA, value MUST equal to one of HKBAAU2S,HSBCAU2S,HSBCBDDH,HSBCCNSH,HSBCHKHH,HSBCINAA,HSBCINBB,HSBCIDJA,HSBCJPJT,HSBCKRSE,HSBCMOMX,HBMBMYKL,HMABMYKL,HSBCMYKA,HSBCMVMV,HSBCMUMU,HSBCNZ2A,HSBCPHMM,HSBCSGSG,HSBCLKLX,HSBCTWTP,HSBCTW2P,HSBCTHBK,HSBCVNVX,HASECNSH,HASEHKHH,HASEMOMX,MIDLAM22,HSBCBEBB,BBDABMHM,MIDLCZPP,CCFRFRPP,TUBDDEDD,TUBDDEHH,MIDLGRAA,BLICGGSX,HSBCIE2D,HSBCILIT,MIDLITMX,MMEBMTMT,HSBCNL2A,HSBCPLPW,BLICRUMM,HSBCZAJJ,MIDLESMM,HSBCCHZZ,HSBCGB2L,MIDLGB22,HBUKGB4B,BACOARBA,HSBNBRSS,BLICCLRM,BIMEMXMM,BLICUYMM,HSBCDZAL,BBMEBHBX,EBBKEGCX,HBMEKWKW,BBMEOMRX,BBMEQAQX,HSBCTRIX,BBMEAEAD,HKBCCATT,MRMDUS33
     slotType: text
   - name: SWIFT code
-    description: SWIFT/BIC address of the Counterparty Bank
+    description: SWIFT/BIC code of the service receiving bank
     slotType: text
 action: rma_checking
-slot_expression: ("bank entity name" and "country of bank" and ("country of rma" or "rma code")) or ("SWIFT code" and ("country of rma" or "rma code"))
+slot_expression: ("bank entity name" and "country of bank" and ("country of service offering bank" or "bic code")) or ("SWIFT code" and ("country of service offering bank" or "bic code"))
