@@ -51,13 +51,17 @@ class LLMEntityExtractor(EntityExtractor):
         form: Form,
         conversation_context: ConversationContext,
         preparation: ChatMessagePreparation,
+        use_latest_history: bool = False,
     ) -> None:
         slots = form.get_available_slots_str()
+        history = conversation_context.get_history()
         preparation.add_message(
             "system",
             self.slot_extraction_prompt.template,
             user_intent=intent.name,
-            chat_history=conversation_context.get_history().format_string_with_file_name(),
+            chat_history=history.format_latest_string_with_file_name()
+            if use_latest_history
+            else history.format_string_with_file_name(),
             entity_types_and_values=slots,
         )
         for example in self.examples:
@@ -78,7 +82,9 @@ class LLMEntityExtractor(EntityExtractor):
         ]
         return examples
 
-    async def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
+    async def extract_entity(
+        self, conversation_context: ConversationContext, use_latest_history: bool = False
+    ) -> List[Entity]:
         user_input = conversation_context.current_user_input
         intent = conversation_context.current_intent
         form = self.form_store.get_form_from_intent(intent)
@@ -94,7 +100,9 @@ class LLMEntityExtractor(EntityExtractor):
             conversation_context.current_intent_slots = []
             return []
         conversation_context.current_intent_slots = form.slots
-        self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
+        self.construct_messages(
+            user_input, intent, form, conversation_context, chat_message_preparation, use_latest_history
+        )
         chat_message_preparation.log(logger)
         entities = (
             await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True)

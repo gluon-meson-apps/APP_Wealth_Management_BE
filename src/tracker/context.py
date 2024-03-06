@@ -70,6 +70,10 @@ class History:
     def format_string_with_file_name(self):
         return "\n".join([self.format_message_with_file_name(entry) for entry in self.rounds])
 
+    def format_latest_string_with_file_name(self):
+        latest_round = self.rounds[-1]
+        return self.format_message_with_file_name(latest_round)
+
     def format_messages(self):
         return [{"role": entry["role"], "content": entry["content"]} for entry in self.rounds]
 
