@@ -24,7 +24,7 @@ class IntegratedNLU(Nlu):
     async def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
         conversation.set_status("analyzing user's intent")
 
-        current_intent = await self.intent_classifier.classify_intent(conversation)
+        current_intent, start_new_topic = await self.intent_classifier.classify_intent(conversation)
         if current_intent and conversation.is_confused_with_intents():
             return IntentWithEntity(intent=current_intent, entities=[], action="")
 
@@ -38,7 +38,10 @@ class IntegratedNLU(Nlu):
         logger.info("extracting utterance's slots")
         current_entities = await self.entity_extractor.extract_entity(conversation)
         # Retain entities
-        existing_entities = conversation.get_entities()
+        # If the user start a new topic and the current intent is set to ignore previous slots, then the existing entities will be ignored
+        existing_entities = (
+            [] if start_new_topic and conversation.current_intent.ignore_previous_slots else conversation.get_entities()
+        )
         merged_entities = self.merge_entities(
             existing_entities, current_entities, conversation.get_current_intent_slot_names()
         )
