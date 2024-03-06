@@ -1,5 +1,6 @@
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+from loguru import logger
 
 
 class SameTopicChecker:
@@ -38,6 +39,7 @@ you are a helpful chatbot
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
         chat_message_preparation.add_message("user", self.format_history(history))
+        chat_message_preparation.log(logger)
         result = (
             await chat_model.achat(
                 **chat_message_preparation.to_chat_params(),
@@ -45,6 +47,7 @@ you are a helpful chatbot
                 jsonable=True,
             )
         ).get_json_response()
+        logger.info(f"same topic check result: {result}")
         if result:
             return result.get("start_new_topic", False), result.get("new_request", "")
         return False, ""
