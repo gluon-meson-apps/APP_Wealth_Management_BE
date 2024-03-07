@@ -100,7 +100,8 @@ class BrFileValidation(TBGuruAction):
         first_file = await self.download_first_processed_file(context)
         if not first_file:
             return GeneralResponse.normal_failed_text_response(
-                "No file uploaded, please upload a file and try again.", context.conversation.current_intent.name
+                "No valid file uploaded, please upload a valid file and try again.",
+                context.conversation.current_intent.name,
             )
 
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)

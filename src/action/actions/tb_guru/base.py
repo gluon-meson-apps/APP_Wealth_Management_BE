@@ -3,6 +3,7 @@ from abc import ABC
 from typing import Union
 
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
+from loguru import logger
 
 from action.base import Action, Attachment
 from action.context import ActionContext
@@ -11,7 +12,11 @@ from third_system.unified_search import UnifiedSearch
 
 
 def decode_bytes(contents: Union[bytes, None]) -> str:
-    return contents.decode("utf-8") if contents else ""
+    try:
+        return contents.decode("utf-8") if contents else ""
+    except Exception as e:
+        logger.error("Error decoding file contents: " + str(e))
+        return ""
 
 
 class TBGuruAction(Action, ABC):
@@ -31,7 +36,7 @@ class TBGuruAction(Action, ABC):
             return None
         file = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
         file.contents = decode_bytes(file.contents) if file.contents else ""
-        return file
+        return file if file else None
 
     async def download_files_contents(self, context: ActionContext) -> list[Attachment]:
         if len(context.conversation.uploaded_file_urls) == 0:
