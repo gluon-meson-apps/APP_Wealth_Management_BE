@@ -21,7 +21,7 @@ slots:
     description: the BIC code of service offering bank which is used to check RMA, value MUST equal to one of HKBAAU2S,HSBCAU2S,HSBCBDDH,HSBCCNSH,HSBCHKHH,HSBCINAA,HSBCINBB,HSBCIDJA,HSBCJPJT,HSBCKRSE,HSBCMOMX,HBMBMYKL,HMABMYKL,HSBCMYKA,HSBCMVMV,HSBCMUMU,HSBCNZ2A,HSBCPHMM,HSBCSGSG,HSBCLKLX,HSBCTWTP,HSBCTW2P,HSBCTHBK,HSBCVNVX,HASECNSH,HASEHKHH,HASEMOMX,MIDLAM22,HSBCBEBB,BBDABMHM,MIDLCZPP,CCFRFRPP,TUBDDEDD,TUBDDEHH,MIDLGRAA,BLICGGSX,HSBCIE2D,HSBCILIT,MIDLITMX,MMEBMTMT,HSBCNL2A,HSBCPLPW,BLICRUMM,HSBCZAJJ,MIDLESMM,HSBCCHZZ,HSBCGB2L,MIDLGB22,HBUKGB4B,BACOARBA,HSBNBRSS,BLICCLRM,BIMEMXMM,BLICUYMM,HSBCDZAL,BBMEBHBX,EBBKEGCX,HBMEKWKW,BBMEOMRX,BBMEQAQX,HSBCTRIX,BBMEAEAD,HKBCCATT,MRMDUS33
     slotType: text
   - name: SWIFT code
-    description: SWIFT/BIC address of the issuing bank
+    description: SWIFT/BIC address of the service receiving bank
     slotType: text
 action: rma_lc_acceptable
 slot_expression: ("bank entity name" and "country of bank" and ("country of service offering bank" or "bic code")) or ("SWIFT code" and ("country of service offering bank" or "bic code"))
