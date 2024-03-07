@@ -15,9 +15,7 @@ class BaseNlu(Nlu):
 
 
 class EntityExtractor:
-    async def extract_entity(
-        self, conversation_context: ConversationContext, use_latest_history: bool = False
-    ) -> List[Entity]:
+    async def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
         raise NotImplementedError()
 
 
