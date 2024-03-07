@@ -11,16 +11,19 @@ from utils.action_helper import format_entities_for_search
 prompt = """"## Role
 you are a helpful assistant, you need to check LC acceptable for every counterparty bank with different CBID
 ## LC acceptable check
-1. check whether the issuing bank's {{country_of_rma}} RMA status is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or Network Bank.
-if not, then return we are not able to accept a letter of credit from the $bank, if yes, then return we are able to accept a letter of credit from the $bank
+1. based on the country {{country_of_service_offering_bank}} or code {{bic_code}}, check whether the RMA status of the
+issuing bank's is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or
+Network Bank. if not, then return we are not able to accept a letter of credit from the $bank, if yes, then return we
+are able to accept a letter of credit from the $bank
 
 ## ATTENTION
 1 if all banks has more than one item, should do the check for every cbid
 2 if one bank has more than one RMA column, should do the check for every RMA column
 
 ## steps
-1. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of {{country_of_rma}}
-2. return EVERY bank's {{country_of_rma}} RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
+1. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of
+ {{country_of_service_offering_bank}} or {{bic_code}}
+2. return EVERY bank's RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
 
 ## counterparty bank list
 
@@ -51,7 +54,7 @@ class LCAcceptableAction(TBGuruAction):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(context.conversation, ["country of HSBC bank", "country of rma"])
+        bank_info = format_entities_for_search(context.conversation, ["country of service offering bank", "bic code"])
         query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
@@ -74,7 +77,10 @@ class LCAcceptableAction(TBGuruAction):
         chat_message_preparation.add_message(
             "user",
             prompt,
-            country_of_rma=entity_dict["country of HSBC bank"],
+            country_of_service_offering_bank=entity_dict["country of service offering bank"]
+            if "country of service offering bank" in entity_dict.keys()
+            else "None",
+            bic_code=entity_dict["bic code"] if "bic code" in entity_dict.keys() else "None",
             all_banks=all_banks_str,
             bank_info=bank_info,
             user_input=context.conversation.current_user_input,

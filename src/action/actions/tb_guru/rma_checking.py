@@ -28,8 +28,6 @@ code {{bic_code}} and bank info for every cbid.
 now, retrieve EVERY founded bank's RMA status based on service offering bank country {{country_of_service_offering_bank}}
 or BIC code {{bic_code}} and bank info(INCLUDE column names) one by one,every counterparty bank has different cbid.
 
-Highlight which fields service offering bank country or BIC code you are used to retrieve RMA status.
-
 """
 
 
@@ -45,9 +43,7 @@ class RMACheckingAction(TBGuruAction):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(
-            context.conversation, ["country of HSBC bank", "country of service offering bank", "bic code"]
-        )
+        bank_info = format_entities_for_search(context.conversation, ["country of service offering bank", "bic code"])
         query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
