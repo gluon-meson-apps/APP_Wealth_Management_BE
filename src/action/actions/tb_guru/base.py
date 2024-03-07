@@ -28,15 +28,16 @@ class TBGuruAction(Action, ABC):
     async def download_first_processed_file(self, context: ActionContext) -> Union[SearchResponse, None]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return None
-        contents = await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
-        return contents
+        return await self.unified_search.download_file_from_minio(context.conversation.uploaded_file_urls[0])
 
     async def download_first_file_contents(self, context: ActionContext) -> Union[Attachment, None]:
         if len(context.conversation.uploaded_file_urls) == 0:
             return None
         file = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
-        file.contents = decode_bytes(file.contents) if file.contents else ""
-        return file if file else None
+        if file:
+            file.contents = decode_bytes(file.contents) if file.contents else ""
+            return file
+        return None
 
     async def download_files_contents(self, context: ActionContext) -> list[Attachment]:
         if len(context.conversation.uploaded_file_urls) == 0:
