@@ -4,6 +4,15 @@ from nlu.base import Nlu, IntentClassifier, EntityExtractor
 from nlu.intent_with_entity import IntentWithEntity
 
 
+def should_use_latest_history(conversation: ConversationContext, previous_intent_name: str) -> bool:
+    if conversation.current_intent.ignore_previous_slots:
+        return (
+            conversation.start_new_question
+            or previous_intent_name != conversation.current_intent.get_full_intent_name()
+        )
+    return False
+
+
 class IntegratedNLU(Nlu):
     def __init__(self, intent_classifier: IntentClassifier, entity_extractor: EntityExtractor):
         self.intent_classifier = intent_classifier
@@ -24,6 +33,7 @@ class IntegratedNLU(Nlu):
     async def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
         conversation.set_status("analyzing user's intent")
 
+        previous_intent_name = conversation.current_intent.get_full_intent_name() if conversation.current_intent else ""
         current_intent, start_new_topic = await self.intent_classifier.classify_intent(conversation)
         if current_intent and conversation.is_confused_with_intents():
             return IntentWithEntity(intent=current_intent, entities=[], action="")
@@ -35,7 +45,7 @@ class IntegratedNLU(Nlu):
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
-        use_latest_history = not conversation.state and conversation.current_intent.ignore_previous_slots
+        use_latest_history = should_use_latest_history(conversation, previous_intent_name)
         if use_latest_history:
             conversation.history.keep_latest_n_rounds(1)
 

@@ -91,7 +91,7 @@ class BaseDialogManager:
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
         if isinstance(response, JumpOutResponse):
-            conversation.set_state("")
+            conversation.set_start_new_question(True)
         return response, conversation
 
 

@@ -127,7 +127,7 @@ class AssistantPolicy(Policy):
             and IE.intent.confidence > INTENT_SIG_TRH
             and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
         ):
-            context.set_state("")
+            context.set_start_new_question(True)
             if action is not None:
                 return PolicyResponse(True, action)
             return PolicyResponse(
@@ -140,13 +140,13 @@ class AssistantPolicy(Policy):
             and IE.intent.confidence <= INTENT_SIG_TRH
             and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
         ):
-            context.set_state("")
+            context.set_start_new_question(True)
             return PolicyResponse(True, EndDialogueAction())
 
         # 范围内意图，且此轮槽位有更新或者是新的意图
         if intent_in_scope(IE.intent.name) and context.has_update:
             context.has_update = False
-            context.set_state("")
+            context.set_start_new_question(True)
             if action is not None:
                 return PolicyResponse(True, action)
             return PolicyResponse(
