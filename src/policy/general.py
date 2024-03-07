@@ -33,12 +33,10 @@ class EndDialoguePolicy(Policy):
     def handle(self, IE: IntentWithEntity, context: ConversationContext) -> PolicyResponse:
         logger.info(f"Inquiry_times: {context.inquiry_times}")
         # 追问次数超过最大值
-        if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and context.current_intent is None:
-            return PolicyResponse(True, EndDialogueAction())
-
-        if context.current_intent is not None:
-            if context.inquiry_times >= MAX_FOLLOW_UP_TIMES and not intent_in_scope(context.current_intent.name):
+        if context.inquiry_times >= MAX_FOLLOW_UP_TIMES:
+            if context.current_intent is None or not intent_in_scope(context.current_intent.name):
                 return PolicyResponse(True, EndDialogueAction())
+
         return PolicyResponse(False, None)
 
 
@@ -129,6 +127,7 @@ class AssistantPolicy(Policy):
             and IE.intent.confidence > INTENT_SIG_TRH
             and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
         ):
+            context.set_state("")
             if action is not None:
                 return PolicyResponse(True, action)
             return PolicyResponse(
@@ -141,12 +140,13 @@ class AssistantPolicy(Policy):
             and IE.intent.confidence <= INTENT_SIG_TRH
             and context.inquiry_times >= MAX_FOLLOW_UP_TIMES
         ):
-            context.set_state("intent_confirm")
+            context.set_state("")
             return PolicyResponse(True, EndDialogueAction())
 
         # 范围内意图，且此轮槽位有更新或者是新的意图
         if intent_in_scope(IE.intent.name) and context.has_update:
             context.has_update = False
+            context.set_state("")
             if action is not None:
                 return PolicyResponse(True, action)
             return PolicyResponse(

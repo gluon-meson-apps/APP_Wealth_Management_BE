@@ -133,7 +133,6 @@ class ConversationContext:
         self.uploaded_file_urls: list[str] = []
         self.confused_intents: list[Intent] = []
         self.appended_history_count_in_one_chat = 0
-        self.is_slot_filling = False
 
     def start_one_chat(self):
         self.appended_history_count_in_one_chat = 0
@@ -223,7 +222,7 @@ class ConversationContext:
         self.state = state
         state_prefix = state.split(":")[0]
         keywords = ["intent_filling", "intent_confirm", "slot_filling"]
-        if any(keyword in state_prefix for keyword in keywords):
+        if state_prefix and any(keyword in state_prefix for keyword in keywords):
             self.inquiry_times += 1
 
     def handle_intent(self, next_intent: Intent):
@@ -307,6 +306,3 @@ class ConversationContext:
 
     def get_file_name(self):
         return self.history.rounds[-1]["file_name"]
-
-    def set_slot_filling(self, is_slot_filling: bool):
-        self.is_slot_filling = is_slot_filling

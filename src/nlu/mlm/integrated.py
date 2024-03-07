@@ -35,7 +35,7 @@ class IntegratedNLU(Nlu):
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
-        use_latest_history = not conversation.is_slot_filling and conversation.current_intent.ignore_previous_slots
+        use_latest_history = not conversation.state and conversation.current_intent.ignore_previous_slots
         if use_latest_history:
             conversation.history.keep_latest_n_rounds(1)
 

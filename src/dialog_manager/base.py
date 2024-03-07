@@ -8,6 +8,7 @@ from gluon_meson_sdk.models.chat_model import ChatModel
 from gluon_meson_sdk.models.embedding_model import EmbeddingModel
 from loguru import logger
 
+from action.base import JumpOutResponse
 from action.context import ActionContext
 from action.runner import ActionRunner, SimpleActionRunner
 from nlu.forms import FormStore
@@ -89,6 +90,8 @@ class BaseDialogManager:
             await self.history_summarizer.summarize_history(conversation)
         self.conversation_tracker.save_conversation(conversation.session_id, conversation)
         conversation.current_round += 1
+        if isinstance(response, JumpOutResponse):
+            conversation.set_state("")
         return response, conversation
 
 
@@ -148,7 +151,7 @@ class DialogManagerFactory:
         )
 
         slot_filling_policy = SlotFillingPolicy(prompt_manager, form_store)
-        assitant_policy = AssistantPolicy(prompt_manager, form_store)
+        assistant_policy = AssistantPolicy(prompt_manager, form_store)
         intent_filling_policy = IntentFillingPolicy(prompt_manager, form_store)
         intent_available_checking_policy = IntentAvailableCheckingPolicy(prompt_manager)
         end_dialogue_policy = EndDialoguePolicy(prompt_manager, form_store)
@@ -163,7 +166,7 @@ class DialogManagerFactory:
                 intent_filling_policy,
                 intent_available_checking_policy,
                 slot_filling_policy,
-                assitant_policy,
+                assistant_policy,
             ],
             prompt_manager=prompt_manager,
             action_model_type=action_model_type,
