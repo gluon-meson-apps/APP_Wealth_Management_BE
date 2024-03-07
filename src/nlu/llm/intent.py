@@ -181,7 +181,7 @@ class LLMIntentClassifier(IntentClassifier):
                 chat_history, conversation.session_id
             )
             if previous_intent and not start_new_topic:
-                return previous_intent, start_new_topic
+                return previous_intent, False
 
         return await self.classify_intent_until_leaf_or_confused(conversation, None), True
 

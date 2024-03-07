@@ -46,6 +46,11 @@ class History:
         for _ in range(n):
             self.rounds.pop()
 
+    def keep_latest_n_rounds(self, n: int):
+        if n <= 0:
+            return
+        self.rounds = self.rounds[-n:]
+
     def flag_history_summarized(self, n: int):
         if n <= 0:
             return
@@ -128,6 +133,7 @@ class ConversationContext:
         self.uploaded_file_urls: list[str] = []
         self.confused_intents: list[Intent] = []
         self.appended_history_count_in_one_chat = 0
+        self.is_slot_filling = False
 
     def start_one_chat(self):
         self.appended_history_count_in_one_chat = 0
@@ -301,3 +307,6 @@ class ConversationContext:
 
     def get_file_name(self):
         return self.history.rounds[-1]["file_name"]
+
+    def set_slot_filling(self, is_slot_filling: bool):
+        self.is_slot_filling = is_slot_filling

@@ -35,13 +35,15 @@ class IntegratedNLU(Nlu):
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
 
+        use_latest_history = not conversation.is_slot_filling and conversation.current_intent.ignore_previous_slots
+        if use_latest_history:
+            conversation.history.keep_latest_n_rounds(1)
+
         logger.info("extracting utterance's slots")
         current_entities = await self.entity_extractor.extract_entity(conversation)
         # Retain entities
         # If the user start a new topic and the current intent is set to ignore previous slots, then the existing entities will be ignored
-        existing_entities = (
-            [] if start_new_topic and conversation.current_intent.ignore_previous_slots else conversation.get_entities()
-        )
+        existing_entities = [] if use_latest_history else conversation.get_entities()
         merged_entities = self.merge_entities(
             existing_entities, current_entities, conversation.get_current_intent_slot_names()
         )

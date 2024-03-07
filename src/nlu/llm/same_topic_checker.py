@@ -23,8 +23,8 @@ class SameTopicChecker:
 you are a helpful chatbot
 
 ## Tasks
-1. estimate if the user is changed to a new topic.
-2. if the user is changed to a new topic, reorganize use's new request combine with the history ON BEHALF OF USER.
+1. estimate if the user changed to a new topic.
+2. if the user changed to a new topic, reorganize use's new request combine with the history ON BEHALF OF USER.
 
 ## ATTENTION
 1. the summary should contains details, someone who don't know the history should be able to understand new request.
