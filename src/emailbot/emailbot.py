@@ -124,8 +124,11 @@ WHERE id = '{email.id}'
 
     async def periodically_call_api(self):
         while True:
-            new_email = await self.receive_email()
-            await self.process_emails(new_email)
+            try:
+                new_email = await self.receive_email()
+                await self.process_emails(new_email)
+            except Exception as err:
+                logger.error(f"Error in periodically_call_api: {err}")
             time.sleep(self.interval)
 
     async def receive_email(self):
