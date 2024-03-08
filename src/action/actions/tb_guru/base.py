@@ -35,7 +35,7 @@ class TBGuruAction(Action, ABC):
             return None
         file = await self.unified_search.download_raw_file_from_minio(context.conversation.uploaded_file_urls[0])
         if file:
-            file.contents = decode_bytes(file.contents) if file.contents else ""
+            file.contents = decode_bytes(file.contents)
             return file
         return None
 
