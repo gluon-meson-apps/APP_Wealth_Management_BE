@@ -44,6 +44,7 @@ class IntegratedNLU(Nlu):
 
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
+        logger.info(f"Start new question: {conversation.start_new_question}")
 
         use_latest_history = should_use_latest_history(conversation, previous_intent_name)
         if use_latest_history:

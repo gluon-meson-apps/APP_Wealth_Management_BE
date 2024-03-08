@@ -82,6 +82,7 @@ class IntentFillingPolicy(Policy):
         # 没有非辅助外的意图
         if IE.intent is None:
             context.set_state("intent_filling")
+            context.set_start_new_question(True)
             return PolicyResponse(
                 True, IntentFillingAction(prompt_manager=self.prompt_manager, form_store=self.form_store)
             )
