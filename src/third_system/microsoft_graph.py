@@ -135,7 +135,7 @@ class Graph:
         )
         data = await self.call_graph_api(endpoint, extra_headers={"Prefer": 'outlook.body-content-type="text"'})
         first_message = next(iter(data), None) if data else None
-        if first_message:
+        if first_message and isinstance(first_message, dict):
             parsed_email = parse_email(first_message)
             if parsed_email.body.content:
                 return parsed_email
@@ -143,6 +143,8 @@ class Graph:
                 logger.info(f"Email {parsed_email.subject} has no content, archiving it.")
                 await self.archive_email(parsed_email)
                 return None
+        if first_message:
+            logger.error(f"Email {first_message} is not valid.")
         return None
 
     async def list_attachments(self, message_id) -> list[Attachment]:
