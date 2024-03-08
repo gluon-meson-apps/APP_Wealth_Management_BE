@@ -137,6 +137,7 @@ class Graph:
         first_message = next(iter(data), None) if data else None
         if first_message and isinstance(first_message, dict):
             parsed_email = parse_email(first_message)
+            logger.info(f"Email {parsed_email.id} with {parsed_email.subject} received.")
             if parsed_email.body.content:
                 return parsed_email
             else:

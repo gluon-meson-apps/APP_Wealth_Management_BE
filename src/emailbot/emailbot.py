@@ -139,6 +139,7 @@ WHERE id = '{email.id}'
 
     async def process_emails(self, new_email):
         if new_email:
+            logger.info(f"Processing email: {new_email.id}")
             answer, attachments = await self.ask_thought_agent(new_email)
             email_attachments = await self.parse_attachments_in_answer(attachments)
             await self.graph.reply_email(new_email, answer, email_attachments)
