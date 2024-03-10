@@ -190,7 +190,8 @@ def main():
             reload_dirs=os.path.dirname(os.path.abspath(__file__)),
         )
     else:
-        logger.add("log_{time}.log", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", serialize=True, rotation="2 days", retention="1 week")
+        logger.configure(extra={"application_name": "thought agent"})
+        logger.add("logs/log_{time}.log", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", serialize=True, rotation="2 days", retention="1 week")
         run("app:app", host="0.0.0.0", port=7788)
 
 
