@@ -23,17 +23,14 @@ more_info_prompt = """## ROLE
 you are a helpful chatbot
 
 ## Tasks
-1. we asked a few questions for more details, please help estimate if the user is trying to answer our questions in the latest input.
-2. if the user is answering questions to provide more details, reorganize use's new request combine with the history ON BEHALF OF USER.
-
-## ATTENTION
-1. the summary should contains details, someone who don't know the history should be able to understand new request.
-2. DON'T MENTION the previous request in the summary.
-3. DON'T add or miss any information in the summary.
-
+1. The user's last input was missing some necessary information, so you asked the user some questions to obtain this information.
+2. Please determine whether user is response to our requirement to provide the missing information.
 
 ## OUTPUT FORMAT
-{"is_providing_info": true/false, "new_request": "describe the new request ON BEHALF OF USER"}
+{ "reason": "...", "response_to_requirement": true/false}
+
+## ATTENTION
+Should return true even if user provide the information with wrong format.
 """
 
 
@@ -78,5 +75,5 @@ class SameTopicChecker:
         result = await self.run(history, session_id, more_info_prompt)
         logger.info(f"more info check result: {result}")
         if result:
-            return result.get("is_providing_info", False), result.get("new_request", "")
+            return result.get("response_to_requirement", False), result.get("new_request", "")
         return False, ""
