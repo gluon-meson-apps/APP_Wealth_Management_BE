@@ -31,16 +31,34 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 load_dotenv()
 
+local_mode = os.getenv("LOCAL_MODE")
+
+log_handler = [
+    {"sink": "logs/log_{time}.log", "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", "serialize": True,
+     "rotation": "2days", "retention": "1 week"}
+]
+
 app = FastAPI()
 
-intercept_handler = InterceptHandler()
-logging.getLogger("uvicorn").handlers = [intercept_handler]
-logging.getLogger("uvicorn.access").handlers = [intercept_handler]
-logging.root.handlers = [intercept_handler]
-app.include_router(api_router)
+
+def get_app() -> FastAPI:
+    app.include_router(api_router)
+    init_logging()
+    return app
+
+
+def init_logging():
+    intercept_handler = InterceptHandler()
+    logging.getLogger("uvicorn").handlers = [intercept_handler]
+    logging.getLogger("uvicorn.access").handlers = [intercept_handler]
+    logging.root.handlers = [intercept_handler]
+    if local_mode != "1":
+        logger.configure(handlers=log_handler, extra={"application_name": "thought agent"})
+
+
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
-if os.getenv("LOCAL_MODE") == "1":
+if local_mode == "1":
     origins = [
         "http://127.0.0.1",
         "http://127.0.0.1:8089",
@@ -172,11 +190,9 @@ async def start_emailbot():
     bot = EmailBot(emailbot_configuration, graph)
     await bot.periodically_call_api()
 
-log_handler = [
-    {"sink": "logs/log_{time}.log", "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", "serialize": True, "rotation": "2days", "retention": "1 week"}
-]
 
 def run_child_process():
+    logging.root.handlers = [InterceptHandler()]
     logger.configure(handlers=log_handler, extra={"application_name": "thought agent", "process": "emailbot"})
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -188,14 +204,11 @@ def run_child_process():
 
 
 def main():
-    if os.getenv("LOCAL_MODE") != "1":
-        logger.configure(handlers=log_handler, extra={"application_name": "thought agent"})
-
     if get_value_or_default_from_dict(os.environ, "START_EMAILBOT", "").lower() == "true":
         child_process = multiprocessing.Process(target=run_child_process)
         child_process.start()
 
-    if os.getenv("LOCAL_MODE") == "1":
+    if local_mode == "1":
         run(
             "app:app",
             host="0.0.0.0",
@@ -204,7 +217,7 @@ def main():
             reload_dirs=os.path.dirname(os.path.abspath(__file__)),
         )
     else:
-        run("app:app", host="0.0.0.0", port=7788)
+        run("app:get_app", host="0.0.0.0", port=7788)
 
 
 if __name__ == "__main__":
