@@ -2,6 +2,40 @@ from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioM
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
+same_topic_prompt = """## ROLE
+you are a helpful chatbot
+
+## Tasks
+1. estimate if the user changed to a new topic.
+2. if the user changed to a new topic, reorganize use's new request combine with the history ON BEHALF OF USER.
+
+## ATTENTION
+1. the summary should contains details, someone who don't know the history should be able to understand new request.
+2. DON'T MENTION the previous request in the summary.
+3. DON'T add or miss any information in the summary.
+
+
+## OUTPUT FORMAT
+{"start_new_topic": true/false, "new_request": "describe the new request ON BEHALF OF USER"}
+"""
+
+more_info_prompt = """## ROLE
+you are a helpful chatbot
+
+## Tasks
+1. we asked a few questions for more details, please help estimate if the user is trying to answer our questions in the latest input.
+2. if the user is answering questions to provide more details, reorganize use's new request combine with the history ON BEHALF OF USER.
+
+## ATTENTION
+1. the summary should contains details, someone who don't know the history should be able to understand new request.
+2. DON'T MENTION the previous request in the summary.
+3. DON'T add or miss any information in the summary.
+
+
+## OUTPUT FORMAT
+{"is_providing_info": true/false, "new_request": "describe the new request ON BEHALF OF USER"}
+"""
+
 
 class SameTopicChecker:
     def __init__(self):
@@ -18,23 +52,7 @@ class SameTopicChecker:
             chat_history_str += f"{i_or_you}: {chat['content']}\n"
         return chat_history_str
 
-    async def check_same_topic(self, history, session_id):
-        prompt = """## ROLE
-you are a helpful chatbot
-
-## Tasks
-1. estimate if the user changed to a new topic.
-2. if the user changed to a new topic, reorganize use's new request combine with the history ON BEHALF OF USER.
-
-## ATTENTION
-1. the summary should contains details, someone who don't know the history should be able to understand new request.
-2. DON'T MENTION the previous request in the summary.
-3. DON'T add or miss any information in the summary.
-
-
-## OUTPUT FORMAT
-{"start_new_topic": true/false, "new_request": "describe the new request ON BEHALF OF USER"}
-"""
+    async def run(self, history, session_id, prompt):
         chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
@@ -47,7 +65,18 @@ you are a helpful chatbot
                 jsonable=True,
             )
         ).get_json_response()
+        return result
+
+    async def check_same_topic(self, history, session_id):
+        result = await self.run(history, session_id, same_topic_prompt)
         logger.info(f"same topic check result: {result}")
         if result:
             return result.get("start_new_topic", False), result.get("new_request", "")
+        return False, ""
+
+    async def check_is_providing_more_info(self, history, session_id):
+        result = await self.run(history, session_id, more_info_prompt)
+        logger.info(f"more info check result: {result}")
+        if result:
+            return result.get("is_providing_info", False), result.get("new_request", "")
         return False, ""

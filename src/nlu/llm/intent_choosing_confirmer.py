@@ -39,6 +39,6 @@ class IntentChoosingConfirmer:
             )
         ).get_json_response()
 
-        if result["user_reply_with_intent"]:
+        if result and result["user_reply_with_intent"]:
             return result["intent"]
         return None

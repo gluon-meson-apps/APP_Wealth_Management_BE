@@ -153,7 +153,15 @@ class LLMIntentClassifier(IntentClassifier):
             return intents[0]
         return None
 
-    async def classify_intent(self, conversation: ConversationContext) -> tuple[Optional[Intent], Optional[bool]]:
+    async def check_is_providing_more_info(self, conversation: ConversationContext) -> bool:
+        if not conversation.start_new_question:
+            result = await self.same_topic_checker.check_is_providing_more_info(
+                conversation.get_history().format_messages(), conversation.session_id
+            )
+            return result[0]
+        return False
+
+    async def classify_intent(self, conversation: ConversationContext) -> Optional[Intent]:
         # intent confuse confirm
         if conversation.is_confused_with_intents():
             intent = await self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
@@ -170,7 +178,7 @@ class LLMIntentClassifier(IntentClassifier):
                     disabled=disabled,
                     slot_expression=slot_expression,
                 )
-                return await self.classify_intent_until_leaf_or_confused(conversation, current_intent), False
+                return await self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
         chat_history = conversation.get_history().format_messages()
@@ -181,9 +189,9 @@ class LLMIntentClassifier(IntentClassifier):
                 chat_history, conversation.session_id
             )
             if previous_intent and not start_new_topic:
-                return previous_intent, False
+                return previous_intent
 
-        return await self.classify_intent_until_leaf_or_confused(conversation, None), True
+        return await self.classify_intent_until_leaf_or_confused(conversation, None)
 
     async def classify_intent_until_leaf_or_confused(
         self, conversation: ConversationContext, start_intent: Optional[Intent]

@@ -1,15 +1,16 @@
 from loguru import logger
 from tracker.context import ConversationContext
 from nlu.base import Nlu, IntentClassifier, EntityExtractor
-from nlu.intent_with_entity import IntentWithEntity
+from nlu.intent_with_entity import IntentWithEntity, Intent
 
 
-def should_use_latest_history(conversation: ConversationContext, previous_intent_name: str) -> bool:
-    if conversation.current_intent.ignore_previous_slots:
-        return (
-            conversation.start_new_question
-            or previous_intent_name != conversation.current_intent.get_full_intent_name()
-        )
+def should_use_latest_history(
+    current_intent: Intent, start_new_question: bool, previous_intent_name: str, is_providing_more_info: bool
+) -> bool:
+    if current_intent.ignore_previous_slots:
+        if start_new_question:
+            return True
+        return previous_intent_name != current_intent.get_full_intent_name() or not is_providing_more_info
     return False
 
 
@@ -34,21 +35,28 @@ class IntegratedNLU(Nlu):
         conversation.set_status("analyzing user's intent")
 
         previous_intent_name = conversation.current_intent.get_full_intent_name() if conversation.current_intent else ""
-        current_intent, start_new_topic = await self.intent_classifier.classify_intent(conversation)
-        if current_intent and conversation.is_confused_with_intents():
-            return IntentWithEntity(intent=current_intent, entities=[], action="")
+        current_intent = await self.intent_classifier.classify_intent(conversation)
 
         if current_intent is None:
             logger.info("No intent found")
             return IntentWithEntity(intent=None, entities=[], action="")
 
+        is_providing_more_info = False
+        if not conversation.start_new_question:
+            is_providing_more_info = await self.intent_classifier.check_is_providing_more_info(conversation)
+
+        use_latest_history = should_use_latest_history(
+            current_intent, conversation.start_new_question, previous_intent_name, is_providing_more_info
+        )
+        if use_latest_history:
+            conversation.history.keep_latest_n_rounds(1)
+
+        if conversation.is_confused_with_intents():
+            return IntentWithEntity(intent=current_intent, entities=[], action="")
+
         conversation.handle_intent(current_intent)
         logger.info(f"Current intent: {conversation.current_intent}")
         logger.info(f"Start new question: {conversation.start_new_question}")
-
-        use_latest_history = should_use_latest_history(conversation, previous_intent_name)
-        if use_latest_history:
-            conversation.history.keep_latest_n_rounds(1)
 
         logger.info("extracting utterance's slots")
         current_entities = await self.entity_extractor.extract_entity(conversation)

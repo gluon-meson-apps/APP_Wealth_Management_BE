@@ -224,8 +224,9 @@ class ConversationContext:
         state_prefix = state.split(":")[0]
         keywords = ["intent_filling", "intent_confirm", "slot_filling"]
         if state_prefix and any(keyword in state_prefix for keyword in keywords):
-            self.set_start_new_question(False)
             self.inquiry_times += 1
+        if state_prefix and any(keyword in state_prefix for keyword in ["intent_confirm", "slot_filling"]):
+            self.set_start_new_question(False)
 
     def handle_intent(self, next_intent: Intent):
         # if slot_filling intent found, we will not change current intent to next intent
