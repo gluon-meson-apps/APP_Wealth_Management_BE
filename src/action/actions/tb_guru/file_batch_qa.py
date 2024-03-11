@@ -144,9 +144,10 @@ class FileBatchAction(TBGuruAction):
             for index, row in enumerate(answer_df.to_dict(orient="records"))
         ]
         search_res = await asyncio.gather(*tasks)
-        search_df = pd.DataFrame(search_res, columns=["answers", "reference_data", "reference_name", "score"])
+        search_df = pd.DataFrame(search_res, columns=["answers", "reference_question", "reference_name", "score"])
+        search_df["reference_answer"] = search_df["answers"]
         df = df[[questions_column]].merge(search_df, left_index=True, right_index=True, how="left").reset_index()
-        df = df[[questions_column, "answers", "reference_name", "reference_data", "score"]]
+        df = df[[questions_column, "answers", "reference_name", "reference_question", "reference_answer", "score"]]
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
