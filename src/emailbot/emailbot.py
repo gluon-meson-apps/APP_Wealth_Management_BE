@@ -125,25 +125,28 @@ WHERE id = '{email.id}'
     async def periodically_call_api(self):
         while True:
             try:
+                logger.info("Start to receive email.")
                 new_email = await self.receive_email()
-                await self.process_emails(new_email)
+                if new_email and new_email.id:
+                    await self.process_emails(new_email)
+                else:
+                    logger.info(f"No new email, will wait for {self.interval} seconds.")
+                    time.sleep(self.interval)
             except Exception as err:
                 logger.error(f"Error in periodically_call_api: {err}")
-            time.sleep(self.interval)
 
-    async def receive_email(self):
+    async def receive_email(self) -> Union[Email, None]:
         new_email = await self.graph.get_first_inbox_message()
         if new_email:
             new_email.attachment_urls = await self.upload_email_attachments(new_email)
         return new_email
 
     async def process_emails(self, new_email):
-        if new_email:
-            logger.info(f"Processing email: {new_email.id}")
-            answer, attachments = await self.ask_thought_agent(new_email)
-            email_attachments = await self.parse_attachments_in_answer(attachments)
-            await self.graph.reply_email(new_email, answer, email_attachments)
-            self.database.insert_processed_email_into_database(new_email)
+        logger.info(f"Processing email: {new_email.id}")
+        answer, attachments = await self.ask_thought_agent(new_email)
+        email_attachments = await self.parse_attachments_in_answer(attachments)
+        await self.graph.reply_email(new_email, answer, email_attachments)
+        self.database.insert_processed_email_into_database(new_email)
 
     async def _ask_thought_agent(self, payload: dict) -> Generator[str, list[Attachment], None]:
         streaming_returned = False
