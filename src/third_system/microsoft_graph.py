@@ -72,6 +72,7 @@ class Graph:
         return self
 
     async def get_access_token(self) -> str:
+        logger.info("Get access token.")
         data = {
             "grant_type": "client_credentials",
             "client_id": self.config["client_id"],
@@ -86,13 +87,15 @@ class Graph:
                     headers={"Content-Type": "application/x-www-form-urlencoded"},
                 ) as response:
                     response.raise_for_status()
+                    logger.info(f"Get access token response: {response}")
                     result = await async_parse_json_response(response)
-                    return result["access_token"] if "access_token" in result else ""
+                    return result["access_token"] if result and "access_token" in result else ""
             except Exception as err:
                 logger.error(f"Other error occurred: {err}")
                 raise EmailHandlingFailedException(str(err), "GET_TOKEN_FAILED")
 
     async def refresh_access_token(self):
+        logger.info("Refresh access token.")
         self.access_token = await self.get_access_token()
 
     @retry(wait=wait_random_exponential(multiplier=1, max=40), stop=stop_after_attempt(3))
@@ -120,14 +123,26 @@ class Graph:
                 raise EmailHandlingFailedException(str(err), "CALL_API_FAILED")
 
     async def list_folders(self):
+        logger.info("List folders.")
         data = await self.call_graph_api(f"{self.user_api_endpoint}/mailFolders")
-        inbox_folder = next(filter(lambda v: v.get("displayName") in ["收件箱", "Inbox"], data), None) if data else None
-        archive_folder = (
-            next(filter(lambda v: v.get("displayName") in ["存档", "Archive"], data), None) if data else None
+        logger.info(f"List folders successfully: {data}")
+        inbox_folder = (
+            next(filter(lambda v: v and "displayName" in v and v["displayName"] in ["收件箱", "Inbox"], data), None)
+            if data
+            else None
         )
-        return inbox_folder.get("id") if inbox_folder else "", archive_folder.get("id") if archive_folder else ""
+        archive_folder = (
+            next(filter(lambda v: v and "displayName" in v and v["displayName"] in ["存档", "Archive"], data), None)
+            if data
+            else None
+        )
+        logger.info(f"Inbox folder: {inbox_folder}, Archive folder: {archive_folder}")
+        return inbox_folder["id"] if inbox_folder and "id" in inbox_folder else "", archive_folder[
+            "id"
+        ] if archive_folder and "id" in archive_folder else ""
 
     async def get_first_inbox_message(self) -> Union[Email, None]:
+        logger.info("Try to receive email.")
         fields_query = "$select=id,conversationId,subject,sender,body,hasAttachments,receivedDateTime"
         order_query = "$orderby=receivedDateTime asc"
         endpoint = (
@@ -138,10 +153,13 @@ class Graph:
         if first_message and isinstance(first_message, dict):
             parsed_email = parse_email(first_message)
             logger.info(f"Email {parsed_email.id} with {parsed_email.subject} received.")
-            if parsed_email.body.content:
+            if parsed_email.body.content and parsed_email.sender.address:
                 return parsed_email
             else:
-                logger.info(f"Email {parsed_email.subject} has no content, archiving it.")
+                if not parsed_email.body.content:
+                    logger.info(f"Email {parsed_email.subject} has no content, archiving it.")
+                else:
+                    logger.info(f"Email {parsed_email.subject} has no sender, archiving it.")
                 await self.archive_email(parsed_email)
                 return None
         if first_message:
@@ -149,17 +167,20 @@ class Graph:
         return None
 
     async def list_attachments(self, message_id) -> list[Attachment]:
+        logger.info(f"List attachments for {message_id}.")
         endpoint = f"{self.user_api_endpoint}/messages/{message_id}/attachments"
         data = await self.call_graph_api(endpoint)
+        logger.info(f"List attachments for {message_id} successfully.")
         return [
             Attachment(
                 name=a["name"], path="", contents=base64.b64decode(a["contentBytes"]), content_type=a["contentType"]
             )
             for a in data
-            if a and a.get("contentBytes")
+            if a and "contentBytes" in a
         ]
 
     async def upload_email_attachments(self, email_id: str, attachments: list[Attachment] = None):
+        logger.info(f"Upload email attachments for {email_id}.")
         endpoint = f"{self.user_api_endpoint}/messages/{email_id}/attachments"
         if attachments:
             tasks = [
@@ -182,6 +203,7 @@ class Graph:
             logger.info(f"No attachments to upload for {email_id}.")
 
     async def reply_email(self, email: Email, answer: str, attachments: list[Attachment] = None):
+        logger.info(f"Create draft email for {email.sender.address} with email id {email.id}.")
         draft_email = await self.call_graph_api(
             f"{self.user_api_endpoint}/messages/{email.id}/createReply",
             method="POST",
@@ -190,6 +212,7 @@ class Graph:
             },
             extra_headers={"Content-Type": "application/json"},
         )
+        logger.info(f"Create draft email for {email.sender.address} successfully.")
         draft_email_id = draft_email["id"] if draft_email and "id" in draft_email else ""
         if draft_email_id:
             await self.upload_email_attachments(draft_email_id, attachments)
@@ -204,6 +227,7 @@ class Graph:
             raise EmailHandlingFailedException("Reply email failed.", "REPLY_EMAIL_FAILED")
 
     async def archive_email(self, email: Email):
+        logger.info(f"Archive email {email.id}.")
         endpoint = f"{self.user_api_endpoint}/mailFolders/{self.inbox_folder_id}/messages/{email.id}/move"
         await self.call_graph_api(
             endpoint,
