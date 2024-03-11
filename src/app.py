@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 import json
+import logging
 import multiprocessing
 import os
 import traceback
@@ -19,6 +20,7 @@ from uvicorn import run
 from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from emailbot.emailbot import get_config, EmailBot, EmailBotSettings
+from logging_intercept_handler import InterceptHandler
 from promptflow.command import ScoreCommand
 from router import api_router
 from third_system.microsoft_graph import Graph
@@ -30,6 +32,8 @@ config.read("config.ini")
 load_dotenv()
 
 app = FastAPI()
+logging.getLogger("uvicorn").handlers = [InterceptHandler()]
+logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
 app.include_router(api_router)
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
@@ -165,8 +169,12 @@ async def start_emailbot():
     bot = EmailBot(emailbot_configuration, graph)
     await bot.periodically_call_api()
 
+log_handler = [
+    {"sink": "logs/log_{time}.log", "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", "serialize": True, "rotation": "2days", "retention": "1 week"}
+]
 
 def run_child_process():
+    logger.configure(handlers=log_handler, extra={"application_name": "thought agent", "process": "emailbot"})
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -177,6 +185,9 @@ def run_child_process():
 
 
 def main():
+    if os.getenv("LOCAL_MODE") != "1":
+        logger.configure(handlers=log_handler, extra={"application_name": "thought agent"})
+
     if get_value_or_default_from_dict(os.environ, "START_EMAILBOT", "").lower() == "true":
         child_process = multiprocessing.Process(target=run_child_process)
         child_process.start()
@@ -190,8 +201,6 @@ def main():
             reload_dirs=os.path.dirname(os.path.abspath(__file__)),
         )
     else:
-        logger.configure(extra={"application_name": "thought agent"})
-        logger.add("logs/log_{time}.log", format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", serialize=True, rotation="2 days", retention="1 week")
         run("app:app", host="0.0.0.0", port=7788)
 
 
