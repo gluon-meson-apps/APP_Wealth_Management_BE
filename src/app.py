@@ -32,9 +32,11 @@ config.read("config.ini")
 load_dotenv()
 
 app = FastAPI()
-logging.getLogger("uvicorn").handlers = [InterceptHandler()]
-logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
-logging.root.handlers = [InterceptHandler()]
+
+intercept_handler = InterceptHandler()
+logging.getLogger("uvicorn").handlers = [intercept_handler]
+logging.getLogger("uvicorn.access").handlers = [intercept_handler]
+logging.root.handlers = [intercept_handler]
 app.include_router(api_router)
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
