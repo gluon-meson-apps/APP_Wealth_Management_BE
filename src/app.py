@@ -31,11 +31,16 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 load_dotenv()
 
-local_mode = os.getenv("LOCAL_MODE")
+is_local_mode = os.environ.get("ENV", "").lower() == "local"
 
 log_handler = [
-    {"sink": "logs/log_{time}.log", "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}", "serialize": True,
-     "rotation": "2days", "retention": "1 week"}
+    {
+        "sink": "logs/log_{time}.log",
+        "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} {level} {message}",
+        "serialize": True,
+        "rotation": "2days",
+        "retention": "1 week",
+    }
 ]
 
 app = FastAPI()
@@ -52,13 +57,13 @@ def init_logging():
     logging.getLogger("uvicorn").handlers = [intercept_handler]
     logging.getLogger("uvicorn.access").handlers = [intercept_handler]
     logging.root.handlers = [intercept_handler]
-    if local_mode != "1":
+    if not is_local_mode:
         logger.configure(handlers=log_handler, extra={"application_name": "thought agent"})
 
 
 dialog_manager: BaseDialogManager = DialogManagerFactory.create_dialog_manager()
 
-if local_mode == "1":
+if is_local_mode:
     origins = [
         "http://127.0.0.1",
         "http://127.0.0.1:8089",
@@ -208,7 +213,7 @@ def main():
         child_process = multiprocessing.Process(target=run_child_process)
         child_process.start()
 
-    if local_mode == "1":
+    if is_local_mode:
         run(
             "app:app",
             host="0.0.0.0",
