@@ -126,6 +126,7 @@ class IntentListConfig:
                 ignore_previous_slots=data.get("ignore_previous_slots", False),
                 display_name=data.get("display_name"),
                 hints=data.get("hints"),
+                examples=data.get("examples"),
             )
             intents.append(intent)
 
