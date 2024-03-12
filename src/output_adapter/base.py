@@ -193,9 +193,17 @@ class BaseOutputAdapter(OutputAdapter):
         output.answer.extra_info["filled key information"] = "\n".join(filled_slots)
 
     def _fill_intent_value(self, conversation, output):
-        output.answer.extra_info["intent"] = conversation.current_intent.name
+        output.answer.extra_info["intent"] = conversation.current_intent.display_name
         if conversation.current_intent.disabled:
             output.answer.extra_info["intent"] += "(suspended)"
+        if conversation.current_intent.hints:
+            output.answer.extra_info["hints"] = conversation.current_intent.hints
+        if conversation.current_intent.examples:
+            output.answer.extra_info["examples"] = ""
+            for index, example in enumerate(conversation.current_intent.examples):
+                if index > 0:
+                    output.answer.extra_info["examples"] += "\n"
+                output.answer.extra_info["examples"] += f"Example {index + 1}: {example}"
 
     def get_slot_name(self, action_name: str, target_slots: []):
         if action_name in actionsHaveDefaultValue:
