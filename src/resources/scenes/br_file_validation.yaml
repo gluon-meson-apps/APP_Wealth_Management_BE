@@ -1,4 +1,5 @@
 name: br_file_validation
+display_name: Board resolution file validation with rules from training document or user inputted rules
 description: according to BR (board resolution) training document or user provided rules, help to check if the provided br file is good enough
 business: true
 action: br_file_validation
@@ -8,9 +9,9 @@ slots:
     slotType: boolean
     optional: True
 examples:
+  - Hi TB Guru, Can you please help me review my Board resolution file if that is good enough base on the board resolution training guide. thanks
   - >
-    Hi TB Guru, Can you please help me review my Board resolution file, Please help me to check if the attached BR document provided by client adhere to the BR validation rule specified below:
-    BR validation rule:
-    .... ....
-  - "Hi TB Guru, Can you please help me review my Board Resolution file, it relates to cash management service, please help me check if that is good enough base on the board resolution training guide. thanks"
-  - "Hi TB Guru, Can you please help me review my Board Resolution file, it relates to accounting opening, please help me check if that is good enough base on the board resolution training guide. thanks"
+    Hi TB Guru, Can you please help me review my Board resolution file with below rules:
+    Rule #1...
+    Rule #2...
+hints: User must upload a BR file or attach your BR if you send email to TB guru for answers. you may give your rule, if not, TB guru will validate your file with training document from knowledge base

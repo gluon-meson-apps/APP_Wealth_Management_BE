@@ -1,9 +1,10 @@
 name: rma_checking
+display_name: RMA validation use case
 business: true
 ignore_previous_slots: true
 description: check RMA status of the service receiving bank and service offering bank
 examples:
-  - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
+  - Can you advise if HSBC SG has RMA with counterparty bank XXX in country YYY?
 slots:
   - name: bank entity name
     description: the entity name of the LC service receiving bank other than HSBC Singapore
@@ -25,3 +26,4 @@ slots:
     slotType: text
 action: rma_checking
 slot_expression: ("bank entity name" and "country of bank" and ("country of service offering bank" or "bic code")) or ("SWIFT code" and ("country of service offering bank" or "bic code"))
+hints: User must state clearly the serving HSBC entity (e.g. HSBCSG) and client’s counterparty bank name and country, and give a context (e.g. if there is RMA, etc

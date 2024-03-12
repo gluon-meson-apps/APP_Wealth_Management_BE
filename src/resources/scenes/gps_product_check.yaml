@@ -1,8 +1,9 @@
 name: gps_product_check
+display_name: GPS product Question and answer use case
 description: according to provided products information, answer the questions from user input
 business: true
 examples:
-  - Hi TB Guru, Can you provide the GPS payment products for SG of HSBC?
-  - Hi TB Guru, Can you provide product under Notional Pooling and Merchant Services?
-  - Hi TB Guru, What products are sold onshore in Seg_MME under Notional Pooling Product sub family
+  - Hi TB Guru, What products are sold in Seg_MME under Notional Pooling Product sub family in HSBC Singapore?
+  - Can you provide the GPS payment products for SG of HSBC?
 action: gps_product_check
+hints: User must state clearly which column you want to check and which country it belongs to

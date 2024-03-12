@@ -1,15 +1,16 @@
 name: summary_and_translation
+display_name: Paragraph summarize and translation use case
 description: summarize or translate a paragraph
 business: true
 examples:
-  - Hi TB Guru, Please help me summarize the email chain.
-  - Hi TB Guru, Please help me summarize the following contents into 200 words.
-  - Hi TB Guru, Please help me translate the email chain to Chinese.
-  - Hi TB Guru, Please help me translate the following contents to Chinese.
-  - Hi TB Guru, Please help me summarize the email chain with Chinese.
+  - Hi TB Guru, could you please help me translate my uploaded file.
+  - Hi TB Guru, could you please help me summarize my uploaded file.
+  - Hi TB Guru, could you please help me translate below paragraph.
+  - Hi TB Guru, could you please help me summarize and translate below paragraph.
 slots:
   - name: is_summary_needed
     description: return true if the user asks for a summary
     slotType: boolean
     optional: True
 action: summary_and_translation
+hints: User must upload your file or attach your file if you send email to TB guru for summarization or translation. Please be aware, we support paragraph character limitaion in chatbox or email content is 3000 characters. if you put them into attachment, the character limitation can be extended to 20,000 characters in maximum.

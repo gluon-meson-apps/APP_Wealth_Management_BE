@@ -1,11 +1,9 @@
 name: file_batch_qa
+display_name: RFP question and answers in batch file use case
 business: true
 description: Batch Q&A about general questions based on csv/excel file
 examples:
-  - answer the questions in the csv file
-  - answer the questions in the excel file
-  - I've prepared a csv file, please answer the questions in it
-  - please answer the questions in this excel file. related to GPS product line and RFP
+  - Hi TB Guru, could you please help me answer my Brazil RFP question list in a batch?
 slots:
   - name: context
     description: "the context of the question. such as: RFP/Product Guide/Implementation Guide/
@@ -29,3 +27,4 @@ Sample Reports"
     slotType: text
     optional: True
 action: file_batch_qa
+hints: User must upload a RFP question list file or attach your RFP question list file if you send email to TB guru for answers. meanwhile please state RFP and which country you are referring to in your questions

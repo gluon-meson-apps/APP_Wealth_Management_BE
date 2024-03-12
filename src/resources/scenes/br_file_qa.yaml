@@ -1,4 +1,5 @@
 name: br_file_qa
+display_name: Board resolution file validation use case
 description: according to provided board resolution file, answer the questions from user input
 business: true
 slots:
@@ -8,4 +9,5 @@ slots:
     optional: True
 action: br_file_qa
 examples:
-  - "Examine the board resolution and highlight which HSBC product or service is the draft referring to."
+  - Please highlight specific provisions in the BR that include the agent / delegation clause.
+hints: User must upload a BR file or attach your BR if you send email to TB guru for answers. you may ask TB Guru to check if there any clause included in the uploaded file
