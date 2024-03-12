@@ -33,6 +33,8 @@ class UnitTestGenerator:
 
     def process_one_round_group(self, inner_df):
 
+        if 'round_group' not in inner_df.columns:
+            return inner_df
         round_count = inner_df['round_group'].iloc[0] + 1
         test_prefix = 'unit_test_' if inner_df['test'].iloc[0] else ''
         session_name = inner_df['session_name'].iloc[0]
@@ -50,7 +52,7 @@ class UnitTestGenerator:
 
 
         def process_one_scenario(row):
-            if row.get('scenario') == 'overall':
+            if row.get('scenario') in ('overall', 'overall_unified_search'):
                 return
             params = row.get('params')
             data_list = row.get('possible_message_templates')
@@ -77,4 +79,4 @@ class UnitTestGenerator:
         df['session_name'] = df['log_id'].apply(lambda x: x.split('___')[-1])
         df['test'] = df['log_id'].apply(lambda x: x.startswith('test__'))
         df = df.groupby('log_id').apply(self.add_round_group_to_df).reset_index(drop=True)
-        result = df.groupby(['session_name']).apply(self.process_one_group).reset_index()
+        df.groupby(['session_name']).apply(self.process_one_group)
