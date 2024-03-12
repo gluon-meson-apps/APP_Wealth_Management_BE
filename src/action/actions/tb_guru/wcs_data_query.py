@@ -173,13 +173,12 @@ class WcsDataQuery(TBGuruAction):
             user_prompt,
             user_input=context.conversation.current_user_input,
         )
+        df_non_duplicate = pd.concat([df_current_company, df_all_companies], ignore_index=True).drop_duplicates()
         if not is_data_provided:
             chat_message_preparation.add_message(
                 "assistant",
                 """## WCS data are extracted already\n{{wcs_data}}""",
-                wcs_data=pd.concat([df_current_company, df_all_companies], ignore_index=True)
-                .drop_duplicates()
-                .to_string(),
+                wcs_data=df_non_duplicate.to_string(),
             )
         chat_message_preparation.log(logger)
 
@@ -207,7 +206,9 @@ class WcsDataQuery(TBGuruAction):
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=final_result,
             intent=context.conversation.current_intent.name,
-            references=[] if is_data_provided else current_company_data + latest_all_data,
+            references=[]
+            if is_data_provided
+            else [SearchItem(meta__score=1, **d) for d in df_non_duplicate.to_dict(orient="records")],
         )
         if ppt_attachment:
             return AttachmentResponse(
