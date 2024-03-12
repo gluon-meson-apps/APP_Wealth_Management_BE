@@ -30,7 +30,7 @@ you are a helpful chatbot
 { "reason": "...", "response_to_requirement": true/false}
 
 ## ATTENTION
-Should return true even if user provide the information with wrong format.
+Return true if the user provided a related response even the response is incomplete or incorrect.
 """
 
 
