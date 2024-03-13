@@ -56,17 +56,6 @@ class GPSProductCheckAction(TBGuruAction):
             "meta__score",
             "meta__reference",
             "id",
-            "seg_bb_rm",
-            "seg_mme",
-            "seg_lc",
-            "seg_mc",
-            "seg_fi",
-            "seg_nbfi",
-            "seg_af",
-            "seg_ps",
-            "seg_rbb",
-            "seg_gpb",
-            "seg_bb_non_rm",
         ]
         gps_products = ""
         if len(data) > 0:
