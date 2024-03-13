@@ -11,6 +11,7 @@ from urllib.request import Request
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
 from gluon_meson_sdk.models.longging.pg_log_service import PGModelLogService
+from gluon_meson_sdk.models.exceptions import TokenLimitExceededException
 from loguru import logger
 from sse_starlette import EventSourceResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -144,7 +145,14 @@ async def score(
         logger.info(traceback.format_exc())
         if conversation:
             conversation.reset_history()
-        err_msg = f"Error occurred: {err}, please try again later."
+
+        if isinstance(err, TokenLimitExceededException):
+            err_msg = "Dear user, your input has exceeded the allowed token numbers." + err.message.split(":")[
+                1
+            ].replace("This model's maximum context length is", "We allow")
+            err_msg = err_msg.replace("Your messages has exceeded the model's maximum context length.", "")
+        else:
+            err_msg = f"Error occurred: {err}, please try again later."
 
     async def generator():
         if not result:
