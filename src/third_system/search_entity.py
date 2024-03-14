@@ -29,6 +29,7 @@ class SearchParam(BaseModel):
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
+    meta__source_url: Union[str, None] = None
     meta__source_sub_name: Union[str, None] = None
     meta__source_sub_type: Union[str, None] = None
 

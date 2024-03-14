@@ -131,6 +131,8 @@ def process_references(references: List[SearchItem]):
             summary = item.meta__reference.meta__source_name
             if item.meta__reference.meta__source_sub_name:
                 summary += f"({item.meta__reference.meta__source_sub_name})"
+            if item.meta__reference.meta__source_url:
+                summary += f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href={item.meta__reference.meta__source_url}>Download for checking details</a>"
             summary_detail_dict.setdefault(summary, []).append(item)
 
     for summary in summary_detail_dict.keys():
