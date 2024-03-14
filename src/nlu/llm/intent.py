@@ -168,8 +168,8 @@ class LLMIntentClassifier(IntentClassifier):
             conversation.confused_intents_resolved()
             if intent:
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
-                current_intent = self.intent_list_config.get_intent(intent)
-                current_intent.confidence = 1.0
+                intent_config = self.intent_list_config.get_intent(intent)
+                current_intent = Intent.from_intent_config(intent, 1.0, intent_config)
                 return await self.classify_intent_until_leaf_or_confused(conversation, current_intent)
 
         # same topic check
