@@ -18,15 +18,15 @@ class SlotType(str, Enum):
 
 class Intent(HashableBaseModel):
     name: str
-    display_name: Optional[str]
-    description: Optional[str]
+    display_name: Optional[str] = None
+    description: Optional[str] = None
     confidence: Optional[float] = 1
     business: Optional[bool] = False
     full_name_of_parent_intent: Optional[str] = None
     disabled: Optional[bool] = False
     slot_expression: Optional[str] = None
     ignore_previous_slots: Optional[bool] = False
-    hints: Optional[str]
+    hints: Optional[str] = None
     examples: Optional[List[str]] = None
 
     def get_full_intent_name(self) -> str:
