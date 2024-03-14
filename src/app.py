@@ -150,7 +150,9 @@ async def score(
             err_msg = "Dear user, your input has exceeded the allowed token numbers." + err.message.split(":")[
                 1
             ].replace("This model's maximum context length is", "We allow")
-            err_msg = err_msg.replace("Your messages has exceeded the model's maximum context length.", "")
+            err_msg = (
+                err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
+            )
         else:
             err_msg = f"Error occurred: {err}, please try again later."
 
