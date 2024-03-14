@@ -154,7 +154,7 @@ async def score(
                 err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
             )
         else:
-            err_msg = f"Error occurred: {err}, please try again later."
+            err_msg = "Ops.... seems we hit problem to serve you, please contact your IT team for further assistance."
 
     async def generator():
         if not result:
