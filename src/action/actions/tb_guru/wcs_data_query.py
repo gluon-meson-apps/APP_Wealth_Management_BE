@@ -110,7 +110,7 @@ async def extract_data(context, chat_model, company_name) -> tuple[list[SearchIt
 def parse_model_to_dataframe(data):
     df = pd.DataFrame([w.model_dump() for w in data])
     df = df.sort_values(by="days", ascending=False) if "days" in df.columns else df
-    return df.drop(columns=["meta__score", "meta__reference", "id"], errors="ignore")
+    return df
 
 
 class WcsDataQuery(TBGuruAction):
@@ -173,12 +173,16 @@ class WcsDataQuery(TBGuruAction):
             user_prompt,
             user_input=context.conversation.current_user_input,
         )
-        df_non_duplicate = pd.concat([df_current_company, df_all_companies], ignore_index=True).drop_duplicates()
+        df_non_duplicate = pd.concat([df_current_company, df_all_companies], ignore_index=True).drop_duplicates(
+            subset=["id"]
+        )
         if not is_data_provided:
             chat_message_preparation.add_message(
                 "assistant",
                 """## WCS data are extracted already\n{{wcs_data}}""",
-                wcs_data=df_non_duplicate.to_string(),
+                wcs_data=df_non_duplicate.drop(
+                    columns=["meta__score", "meta__reference", "id"], errors="ignore"
+                ).to_string(),
             )
         chat_message_preparation.log(logger)
 
@@ -208,7 +212,7 @@ class WcsDataQuery(TBGuruAction):
             intent=context.conversation.current_intent.name,
             references=[]
             if is_data_provided
-            else [SearchItem(meta__score=1, **d) for d in df_non_duplicate.to_dict(orient="records")],
+            else [SearchItem(**d) for d in df_non_duplicate.to_dict(orient="records")],
         )
         if ppt_attachment:
             return AttachmentResponse(
