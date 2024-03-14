@@ -150,7 +150,7 @@ class BaseOutputAdapter(OutputAdapter):
 
     async def process_output(self, output: object, conversation: ConversationContext) -> object:
         if isinstance(output, AttachmentResponse):
-            urls = [a.url for a in output.attachments]
+            urls = [f"<a href={a.url}>{a.url}</a>" for a in output.attachments]
             logger.info(f"process attachment: {urls}")
             output.answer.extra_info["Attachments"] = urls
         if output.answer.references and len(output.answer.references) > 0:
