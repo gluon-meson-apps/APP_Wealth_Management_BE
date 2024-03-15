@@ -97,7 +97,7 @@ class LLMEntityExtractor(EntityExtractor):
         self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
         entities = (
-            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=4096, jsonable=True)
+            await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, jsonable=True)
         ).get_json_response()
         logger.debug(f"extract entities: {entities}")
 
