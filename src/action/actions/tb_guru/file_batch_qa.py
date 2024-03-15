@@ -24,7 +24,7 @@ MAX_ROW_COUNT = 50
 MA_ROW_EXCEED_MSG = """
 Dear user, your first {{max_row}} questions has been answered.
 We are sorry your question count has reached the system capacity, we can not answer the questions after the {{max_row}}th.
-Please put them into another request, we will serve you there.”
+Please put them into another request, we will serve you there.
 """
 
 prompt = """## Role
