@@ -41,9 +41,6 @@ You are a helpful assistant with name as "TB Guru", you need to answer the user'
 
 ## Contents to be processed
 {{file_contents}}
-
-## Attention
-If the user asks for a summary, please provide a summary less than 3000 words.
 """
 
 FILE_ERROR_MSG = "The file is not available for processing. Please upload a valid file."
@@ -173,6 +170,8 @@ class SummarizeAndTranslate(TBGuruAction):
 
         user_input = context.conversation.current_user_input
         input_token_size = chat_model.get_encode_length(user_input)
+
+        logger.info(f"input token size: {input_token_size}")
 
         if input_token_size > MAX_OUTPUT_TOKEN_SiZE:
             return GeneralResponse(
