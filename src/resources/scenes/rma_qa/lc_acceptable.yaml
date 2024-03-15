@@ -2,28 +2,28 @@ name: lc_acceptable
 display_name: RMA Letter of credit acceptable validation use case
 business: true
 ignore_previous_slots: true
-description: check whether HSBC can accept an LC from the issuing bank
+description: check whether HSBC can accept an LC from the requested/issued bank
 examples:
-  - Can you advise if HSBC SG can accept a LC from a client with counterparty bank XXX in country YYY?
+  - Can you advise if HSBC Singapore can accept a LC requested/issued by a client with counterparty bank XXX in country YYY?
 slots:
-  - name: bank entity name
-    description: the entity name of the LC service receiving bank other than HSBC Singapore
-    slotType: text
-  - name: country of bank
-    description: the full country name of the service receiving bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
-    slotType: text
-  - name: country code of bank
-    description: the country abbreviation code of the service receiving bank's country, which is 2 or 3 character. for example VNM, CHN, US
-    slotType: text
-  - name: country of service offering bank
-    description: the full country name, when user inputs "I", "we", "us", it represents Singapore
-    slotType: text
   - name: bic code
-    description: the BIC code of service offering bank which is used to check RMA
+    description: the BIC code of LC service provider bank
     slotType: text
   - name: SWIFT code
-    description: SWIFT/BIC address of the service receiving bank
+    description: the SWIFT/BIC code of the LC service requester bank
+    slotType: text
+  - name: bank entity name
+    description: must be the bank entity name of the LC service requester other than HSBC Singapore
+    slotType: text
+  - name: country of bank
+    description: the full country name of the LC service requester bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
+    slotType: text
+  - name: country code of bank
+    description: the country abbreviation code of the LC service requester bank, which is 2 or 3 character. for example VNM, CHN, US
+    slotType: text
+  - name: country of service provider
+    description: must be country name or "i" or "we" or "you" or "us", the users themselves represent Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
     slotType: text
 action: rma_lc_acceptable
-slot_expression: ("bank entity name" and "country of bank" and ("country of service offering bank" or "bic code")) or ("SWIFT code" and ("country of service offering bank" or "bic code"))
-hints: User must state clearly the serving HSBC entity (e.g. HSBCSG) and client’s counterparty bank name and country, and give a context (e.g. if we can offer LC)
+slot_expression: ("bank entity name" and "country of bank" and ("country of service provider" or "bic code")) or ("SWIFT code" and ("country of service provider" or "bic code"))
+hints: User must state clearly the serving HSBC entity (e.g. HSBC Singapore) and client’s counterparty bank name and country, and give a context (e.g. if we can accept LC)

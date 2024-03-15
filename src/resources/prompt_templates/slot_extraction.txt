@@ -8,10 +8,10 @@ you are a helpful assistant
 2. you have to refer to the chat_history to extract the entities.
 3. if you can't find the entities, you should output empty string. if the entities is a number, you should output the number that user explicitly expressed.
 4. if file name is provided, you should refer to the file name to extract the entities.
-
+5. you need to infer the entity value and explain the reason for each entity in background, then extract the value, entity list: {{entity_list}}
 ## ATTENTION
 
-your result should be a json string, like this:
+your result MUST be a json string without anything else, like this:
 
 {
     "entity name1": "value of entity1",  // the ENTITY NAME MUST listed in Entities info

@@ -53,11 +53,13 @@ class LLMEntityExtractor(EntityExtractor):
         preparation: ChatMessagePreparation,
     ) -> None:
         slots = form.get_available_slots_str()
+        entity_list = form.get_slot_name_list()
         preparation.add_message(
             "system",
             self.slot_extraction_prompt.template,
             user_intent=intent.name,
             chat_history=conversation_context.get_history().format_string_with_file_name(),
+            entity_list=entity_list,
             entity_types_and_values=slots,
         )
         for example in self.examples:

@@ -25,6 +25,9 @@ class Form(HashableBaseModel):
             ]
         )
 
+    def get_slot_name_list(self) -> str:
+        return ", ".join([slot.name for slot in self.slots])
+
 
 class FormStore:
     def __init__(self, intent_list_config):
