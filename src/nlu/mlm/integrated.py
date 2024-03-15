@@ -68,7 +68,11 @@ class IntegratedNLU(Nlu):
         )
 
         entities_string = str([(entity.type, entity.value, entity.confidence) for entity in merged_entities])
-        conversation.add_entity(current_entities)
+        if use_latest_history:
+            conversation.flush_entities()
+            conversation.add_entity(merged_entities)
+        else:
+            conversation.add_entity(current_entities)
         logger.info(f"Session {conversation.session_id}, entities: {entities_string}")
 
         return IntentWithEntity(intent=conversation.current_intent, entities=merged_entities, action="")
