@@ -7,6 +7,7 @@ import chinese2digits as c2d
 import numpy as np
 from fastapi import Depends
 from loguru import logger
+from requests.utils import requote_uri
 
 from action.base import (
     SlotType,
@@ -154,7 +155,7 @@ class BaseOutputAdapter(OutputAdapter):
 
     async def process_output(self, output: object, conversation: ConversationContext) -> object:
         if isinstance(output, AttachmentResponse):
-            urls = [f"<a href={a.url}>{quote(a.url)}</a>" for a in output.attachments]
+            urls = [f"<a href={requote_uri(a.url)}>{requote_uri(a.url)}</a>" for a in output.attachments]
             logger.info(f"process attachment: {urls}")
             output.answer.extra_info["Attachments"] = urls
         if output.answer.references and len(output.answer.references) > 0:
