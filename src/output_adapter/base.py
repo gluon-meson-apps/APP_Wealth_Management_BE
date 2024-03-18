@@ -1,6 +1,7 @@
 import configparser
 from typing import List
 import re
+from urllib.parse import quote
 
 import chinese2digits as c2d
 import numpy as np
@@ -132,7 +133,10 @@ def process_references(references: List[SearchItem]):
             if item.meta__reference.meta__source_sub_name:
                 summary += f"({item.meta__reference.meta__source_sub_name})"
             if item.meta__reference.meta__source_url:
-                summary += f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href={item.meta__reference.meta__source_url}>Download for checking details</a>"
+                url = quote(item.meta__reference.meta__source_url)
+                summary += (
+                    f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href={url}>Download for checking details</a>"
+                )
             summary_detail_dict.setdefault(summary, []).append(item)
 
     for summary in summary_detail_dict.keys():
@@ -150,7 +154,7 @@ class BaseOutputAdapter(OutputAdapter):
 
     async def process_output(self, output: object, conversation: ConversationContext) -> object:
         if isinstance(output, AttachmentResponse):
-            urls = [f"<a href={a.url}>{a.url}</a>" for a in output.attachments]
+            urls = [f"<a href={quote(a.url)}>{a.url}</a>" for a in output.attachments]
             logger.info(f"process attachment: {urls}")
             output.answer.extra_info["Attachments"] = urls
         if output.answer.references and len(output.answer.references) > 0:
