@@ -23,7 +23,7 @@ Sample Reports"
     slotType: text
     optional: True
   - name: questions_column_name
-    description: the column name of the questions in the csv/excel file
+    description: "(ATTENTION: DO NOT extract value from file name)the column name of the questions in the csv/excel file"
     slotType: text
     optional: True
 action: file_batch_qa

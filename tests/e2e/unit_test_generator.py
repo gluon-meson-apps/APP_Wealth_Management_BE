@@ -14,7 +14,7 @@ def get_log_result(module_name):
             raise Exception(f"The module {module_name} does not have a main function or it's not callable")
     except Exception as e:
         print(str(e))
-        raise Exception(str(e))
+        return [{},{},{},{}]
 
 
 
