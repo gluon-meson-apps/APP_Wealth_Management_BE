@@ -134,7 +134,6 @@ WHERE id = '{email.id}'
                     time.sleep(self.interval)
             except Exception as err:
                 logger.error(f"Error in periodically_call_api: {err}")
-                raise err
 
     async def receive_email(self) -> Union[Email, None]:
         new_email = await self.graph.get_first_inbox_message()
@@ -168,7 +167,7 @@ WHERE id = '{email.id}'
                         yield handle_response(extract_json_from_text(event.data))
             except Exception as err:
                 logger.error(f"Error with thought agent: {err}")
-                raise err
+                yield "", []
 
         if not streaming_returned and response_capture.collected_response:
             yield handle_response(extract_json_from_text(response_capture.collected_response))
