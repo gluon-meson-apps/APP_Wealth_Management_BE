@@ -88,7 +88,9 @@ class LLMEntityExtractor(EntityExtractor):
             logger.debug(f"this intent [{intent.name}] does not need to extract entity")
             return []
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, log_id=conversation_context.session_id)
+        chat_model = await self.scenario_model_registry.get_model(
+            self.scenario_model, log_id=conversation_context.session_id
+        )
 
         # TODO: drop history if it is too long
         chat_message_preparation = ChatMessagePreparation()

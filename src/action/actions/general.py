@@ -51,7 +51,7 @@ class SlotFillingAction(Action):
         logger.info("exec action slot filling")
         slots = [slot.minimal_info() for slot in self.slots]
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -93,7 +93,7 @@ class IntentConfirmAction(Action):
         )
         chat_message_preparation.log(logger)
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         response = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=128)).response
         detail = ChatResponseAnswer(messageType=ResponseMessageType.FORMAT_TEXT, content=response)
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
@@ -114,7 +114,7 @@ class IntentFillingAction(Action):
     async def run(self, context):
         logger.info("exec action intent_filling")
         filtered_intents = [intent.minial_info() for intent in self.intents if intent.business and not intent.disabled]
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -151,7 +151,7 @@ class AskForIntentChoosingAction(Action):
             intent.minimal_info() for intent in context.conversation.confused_intents if intent.disabled
         ]
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "system",
@@ -184,7 +184,7 @@ class SlotConfirmAction(Action):
 
     async def run(self, context):
         logger.info("exec action slot confirm")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
@@ -219,7 +219,7 @@ class ChitChatAction(Action):
     async def run(self, context) -> ActionResponse:
         logger.info("exec action slot chitchat")
         # todo: add history from context
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(

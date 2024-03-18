@@ -37,7 +37,7 @@ class GPSProductCheckAction(TBGuruAction):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         user_input = context.conversation.current_user_input
 
         response = await self.unified_search.search(

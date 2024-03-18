@@ -72,7 +72,7 @@ class FileValidation(TBGuruAction):
                 context.conversation.current_intent.name,
             )
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         res = await self.hsbc_connect_api.validate_file(first_file)
         download_link = await self._upload_file(res)

@@ -149,7 +149,7 @@ class WcsDataQuery(TBGuruAction):
         return all_companies_data, current_company_data
 
     async def run(self, context) -> ActionResponse:
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         logger.info(f"exec action: {self.get_name()} ")
 
         entity_dict = context.conversation.get_simplified_entities()

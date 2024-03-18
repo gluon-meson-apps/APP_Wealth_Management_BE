@@ -44,7 +44,7 @@ class IntentCall:
         self, query: str, examples, session_id, full_name_of_parent_intent: str = None
     ) -> IntentClassificationResponse:
         # TODO: drop history if it is too long
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, session_id)
 
         chat_message_preparation = ChatMessagePreparation()
 

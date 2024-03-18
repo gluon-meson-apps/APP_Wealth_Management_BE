@@ -54,7 +54,7 @@ class EmailOutputAdapter(OutputAdapter):
     async def process_output(self, result: object, conversation: ConversationContext) -> object:
         if not conversation.check_is_email_request() or not isinstance(result, ActionResponse):
             return result
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "system",

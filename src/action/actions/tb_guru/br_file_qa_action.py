@@ -41,7 +41,7 @@ class BrFileQAAction(TBGuruAction):
         file_content = "\n".join([i.text for i in first_file.items])
         br_file_content = re.sub(r"\n+", "\n", file_content)
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         # get the url from entity
 

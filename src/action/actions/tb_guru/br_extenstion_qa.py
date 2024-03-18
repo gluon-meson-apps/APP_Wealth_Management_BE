@@ -48,7 +48,7 @@ class BRExtensionQAAction(TBGuruAction):
     async def run(self, context):
         logger.info(f"exec action: {self.get_name()} ")
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         user_input = context.conversation.current_user_input
         history = context.conversation.get_history().format_string()
         chat_message_preparation = ChatMessagePreparation()

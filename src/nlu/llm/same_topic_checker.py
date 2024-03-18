@@ -50,7 +50,7 @@ class SameTopicChecker:
         return chat_history_str
 
     async def run(self, history, session_id, prompt):
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, session_id)
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt)
         chat_message_preparation.add_message("user", self.format_history(history))

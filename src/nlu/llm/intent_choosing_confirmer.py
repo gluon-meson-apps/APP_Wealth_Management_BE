@@ -21,7 +21,7 @@ class IntentChoosingConfirmer:
         self.intent_choosing_template = intent_choosing_template
 
     async def confirm(self, conversation: ConversationContext, session_id: str) -> Optional[str]:
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, session_id)
 
         chat_message_preparation = ChatMessagePreparation()
 

@@ -40,7 +40,7 @@ class RMACheckingAction(TBGuruAction):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
         bank_info = format_entities_for_search(context.conversation, ["country of service offering bank", "bic code"])

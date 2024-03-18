@@ -141,7 +141,7 @@ class FileBatchAction(TBGuruAction):
         # Only process the first 50 rows
         answer_df = df.iloc[:MAX_ROW_COUNT, :]
 
-        chat_model = self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, conversation.session_id)
         get_result_from_llm = self.get_function_with_chat_model(chat_model, {"basic_type": "faq", **tags}, conversation)
         tasks = [
             get_result_from_llm(row[questions_column], index)
