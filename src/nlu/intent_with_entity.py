@@ -17,7 +17,7 @@ class SlotType(str, Enum):
 
 
 class Intent(HashableBaseModel):
-    name: int
+    name: str
     display_name: Optional[str] = None
     description: Optional[str] = None
     confidence: Optional[float] = 1
