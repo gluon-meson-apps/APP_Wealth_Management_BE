@@ -106,6 +106,7 @@ class FileBatchAction(TBGuruAction):
 
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
+        default_questions_column = "questions"
 
         first_file = await self.download_first_processed_file(context)
         if not first_file:
@@ -122,10 +123,13 @@ class FileBatchAction(TBGuruAction):
         questions_column_entity = conversation.get_entity_by_name("questions_column_name")
         questions_column = questions_column_entity.value.lower() if questions_column_entity else "questions"
         if questions_column not in df.columns:
-            return GeneralResponse.normal_failed_text_response(
-                f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
-                conversation.current_intent.name,
-            )
+            if default_questions_column in df.columns:
+                questions_column = default_questions_column
+            else:
+                return GeneralResponse.normal_failed_text_response(
+                    f"No header named {questions_column} found in file. please modify your file to add a {questions_column} header and upload again, or you can provide another column header name you want to use as questions column.",
+                    conversation.current_intent.name,
+                )
 
         df = df[df[questions_column].notna()].reset_index()
 

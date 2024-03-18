@@ -4,6 +4,8 @@ business: true
 description: Batch Q&A about general questions based on csv/excel file
 examples:
   - Hi TB Guru, could you please help me answer my Brazil RFP question list in a batch?
+  - Hi TB Guru, could you please help me answer my questions in csv file?
+  - Hi TB Guru, could you please help me answer my questions in excel file?
 slots:
   - name: context
     description: "the context of the question. such as: RFP/Product Guide/Implementation Guide/
