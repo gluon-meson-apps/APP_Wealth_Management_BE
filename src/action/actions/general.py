@@ -202,6 +202,12 @@ class SlotConfirmAction(Action):
         return GeneralResponse(code=200, message="success", answer=detail, jump_out_flag=False)
 
 
+chat_template = """
+## Role
+you are a helpful assistant named TB Guru, user is chit-chatting with you.
+"""
+
+
 class ChitChatAction(Action):
     def get_name(self) -> str:
         return "chitchat"
@@ -218,6 +224,10 @@ class ChitChatAction(Action):
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "system",
+            chat_template,
+        )
+        chat_message_preparation.add_message(
+            "user",
             context.conversation.current_user_input,
         )
         chat_message_preparation.log(logger)

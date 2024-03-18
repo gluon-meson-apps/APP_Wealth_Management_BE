@@ -3,3 +3,7 @@ description: chitchat with bot
 business: false
 slots: []
 action: chitchat
+examples:
+  - hello
+  - who are you
+  - hi
