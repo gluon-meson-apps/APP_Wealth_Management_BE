@@ -44,7 +44,7 @@ class GPSProductCheckAction(TBGuruAction):
             SearchParam(query=user_input, tags={"product_line": "gps_product"}), context.conversation.session_id
         )
         logger.info(f"search response: {response}")
-        if len(response) == 0:
+        if len(response) == 0 or response[0].is_empty():
             answer = ChatResponseAnswer(
                 messageType=ResponseMessageType.FORMAT_TEXT,
                 content="Sorry, I can't answer your question, since there is no GPS product found.",

@@ -45,3 +45,6 @@ class SearchResponse(BaseModel):
     size: int = 0
     total: int = 0
     items: list[SearchItem] = []
+
+    def is_empty(self):
+        return self.total == 0
