@@ -10,6 +10,7 @@ class Form(HashableBaseModel):
     action: str
     slot_required: bool = False
     slot_expression: Optional[str] = None
+    intent_description: str  # mandatory since it could help llm to extract entity
 
     def has_slot_expression(self):
         return self.slot_expression is not None
@@ -61,4 +62,5 @@ class FormStore:
             slot_required=slot_required,
             action=intent_config.action,
             slot_expression=intent_config.slot_expression,
+            intent_description=intent_config.description,
         )

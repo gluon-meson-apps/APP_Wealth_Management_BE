@@ -7,10 +7,10 @@ examples:
   - Can you advise if HSBC Singapore can accept a LC requested/issued by a client with counterparty bank XXX in country YYY?
 slots:
   - name: bic code
-    description: the BIC code of LC service provider bank
+    description: the BIC code of LC service provider bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM
     slotType: text
   - name: SWIFT code
-    description: the SWIFT/BIC code of the LC service requester bank
+    description: the SWIFT/BIC code of the LC service requester bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH
     slotType: text
   - name: bank entity name
     description: must be the bank entity name of the LC service requester other than HSBC Singapore

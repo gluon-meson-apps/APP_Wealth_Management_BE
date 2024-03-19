@@ -43,7 +43,7 @@ class RMACheckingAction(TBGuruAction):
         chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
         entity_dict = context.conversation.get_simplified_entities()
 
-        bank_info = format_entities_for_search(context.conversation, ["country of service offering bank", "bic code"])
+        bank_info = format_entities_for_search(context.conversation, ["country of rma holder", "bic code"])
         query = "search the counterparty bank" + f"\n #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
@@ -67,8 +67,8 @@ class RMACheckingAction(TBGuruAction):
         chat_message_preparation.add_message(
             "user",
             prompt,
-            country_of_service_offering_bank=entity_dict["country of service offering bank"]
-            if "country of service offering bank" in entity_dict.keys()
+            country_of_rma_holder=entity_dict["country of rma holder"]
+            if "country of rma holder" in entity_dict.keys()
             else "None",
             bic_code=entity_dict["bic code"] if "bic code" in entity_dict.keys() else "None",
             all_banks=all_banks_str,

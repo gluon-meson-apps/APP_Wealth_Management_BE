@@ -60,6 +60,7 @@ class LLMEntityExtractor(EntityExtractor):
             user_intent=intent.name,
             chat_history=conversation_context.get_history().format_string_with_file_name(),
             entity_list=entity_list,
+            intent_description=form.intent_description,
             entity_types_and_values=slots,
         )
         for example in self.examples:
