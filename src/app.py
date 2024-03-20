@@ -11,7 +11,7 @@ from urllib.request import Request
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, Form, Depends
 from gluon_meson_sdk.models.longging.pg_log_service import PGModelLogService
-from gluon_meson_sdk.models.exceptions import TokenLimitExceededException
+from gluon_meson_sdk.models.exceptions import TokenLimitExceededException, ChatModelRequestException
 from loguru import logger
 from sse_starlette import EventSourceResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -153,6 +153,8 @@ async def score(
             err_msg = (
                 err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
             )
+        elif isinstance(err, ChatModelRequestException):
+            err_msg = "Ops.... share platform broke down, please contact your IT team for further assistance."
         else:
             err_msg = "Ops.... seems we hit problem to serve you, please contact your IT team for further assistance."
 
