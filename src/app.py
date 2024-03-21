@@ -154,7 +154,8 @@ async def score(
                 err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
             )
         elif isinstance(err, ChatModelRequestException):
-            err_msg = "Ops.... share platform broke down, please contact your IT team for further assistance."
+            model_type = " ".join(err.message.split()[:2])
+            err_msg = f"Ops.... {model_type} broke down, please contact your IT team for further assistance."
         else:
             err_msg = "Ops.... seems we hit problem to serve you, please contact your IT team for further assistance."
 
