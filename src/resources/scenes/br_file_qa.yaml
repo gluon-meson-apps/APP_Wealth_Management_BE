@@ -1,5 +1,5 @@
 name: br_file_qa
-display_name: Board resolution file validation use case
+display_name: GPS Board Resolution Validation
 description: according to provided board resolution file, answer the questions from user input
 business: true
 slots:
@@ -9,5 +9,7 @@ slots:
     optional: True
 action: br_file_qa
 examples:
-  - Please highlight specific provisions in the BR that include the agent / delegation clause.
-hints: User must upload a BR file or attach your BR if you send email to TB guru for answers. you may ask TB Guru to check if there any clause included in the uploaded file
+  - Refers attached BR, please advise which kind of banking services the client refers.
+  - Refers attached BR, please advise if the client has specific the names of authorised persons to represent the company to operate the banking services specified.
+  - Refers attached BR, please check if the client input align with our BR standard on Accounts and/or Subscription for Services section."
+hints: User must upload/ attach a BR file then ask anything about the document OR check against certain BR guideline.

@@ -1,13 +1,13 @@
 name: file_validation
-display_name: XMLV3 file validation use case
+display_name: GPS Client File Validation
 description: file validation to check if the file is valid and match the standard
 business: true
 examples:
-  - Hi TB Guru, Please help me to check if the file provided by client below is valid. It is in @XML-V3 format.
+  - Please check if payment file attached (in XML-V3 format) compliant with our standard.
 slots:
   - name: file_format
     description: "the format of the file; available values: XML-V3, XML-V4, Excel, CSV"
     slotType: text
     optional: True
 action: file_validation
-hints: User must upload XMLV3 file or attach your XMLV3 file if you send email to TB guru for answers. Please state clearly XMLV3 for validation
+hints: "User must upload/attach a payment file, tell TB Guru which file format it refers, and ask TB Guru to check if it meet our standard. Note: currently TB Guru only support XML V3"

@@ -1,5 +1,5 @@
 name: lc_acceptable
-display_name: RMA Letter of credit acceptable validation use case
+display_name: GTRF RMA & Limits Validation
 business: true
 ignore_previous_slots: true
 description: check whether HSBC can accept an LC from the requested/issued bank, for example, "Hi TB Guru, can we accept LC service requested by BANK OF INDIA in India?" -> (we is LC service provider, BANK OF INDIA in India is LC service requester), "Hi TB Guru, are you able to accept LC service issued by OSABJPJS?" -> (you is LC service provider, OSABJPJS is LC service requester)

@@ -1,24 +1,29 @@
 name: wcs_data_query
-display_name: WCS data Query and ppt generation use case
+display_name: GTRF Working Capital Benchmarks
 description: get WCS data and generate insight
 business: true
 examples:
   - >
-    Hi TB Guru
-    Please help me to check CDT N.V. company data from the below WCS data table, and share some data insight with me.
-    1. Company data by past years.
-    Company,Days,DPO,DSO,DIO,CCC
-    CDT N.V.,FY13,-44,51,47,53
-    .......
-    CDT N.V.,FY21,-44,51,47,53
-    2. Company data for this year.
-    Company,Days,DPO,DSO,DIO,CCC
-    ABC Holding,FY21,-78,67,41,30
-    ....
-    CDT N.V.,FY21,-46,55,63,72
+    Please help me to review ABC company data from the information extracted from WCS information below, and share some data insight with me.  Please help format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
 
-    Please help format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
-  - Hi TB Guru, Please help me to extract apple company data from the @WCS system, and share some data insight with me.
+    WCS Information:
+
+    Historical data:
+    Company,Year,DPO,DSO,DIO,CCC
+    ABC Company,FY19,-44,51,47,53
+    ABC Company,FY20,-44,51,47,53
+    :
+    ABC Company,FY24,-44,51,47,53
+
+    Peer Group Comparison
+    Company,Year,DPO,DSO,DIO,CCC
+    ABC Company,FY24,-44,51,47,53
+    :
+    XYZ Company,FY24,-44,51,47,53
+
+    Industry benchmark
+    Year,DPO,DSO,DIO,CCC
+    FY24,-44,51,47,53"
 slots:
   - name: company
     description: the company name, return empty if the company name is "WCS" or "@WCS"
@@ -37,4 +42,4 @@ slots:
     slotType: boolean
     optional: True
 action: wcs_data_query
-hints: User must state clearly this is a WCS query, user is able to either ask TB guru to retrieve company data from WCS or provide data in question, please be aware company name is a must have parameter here. if user provide data in question body, please make sure the company data is qualified, without data missing, poor quality company yearly data will lead bad response
+hints: User must state clearly this is a WCS query and provide the data exported from WCS alongside with query. User should also specify which is target client for pitching ppt deck generation.

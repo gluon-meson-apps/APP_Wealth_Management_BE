@@ -1,5 +1,5 @@
 name: rma_qa
-display_name: RMA related use case
+display_name: GTRF RMA Validation
 description: according to counterparty banks info, answer rma related questions from user input
 business: true
 has_children: true

@@ -1,5 +1,5 @@
 name: br_file_validation
-display_name: Board resolution file validation with rules from training document or user inputted rules
+display_name: GPS Board Resolution Validation (rule provided by user)
 description: according to BR (board resolution) training document or user provided rules, help to check if the provided br file is good enough
 business: true
 action: br_file_validation
@@ -11,7 +11,8 @@ slots:
 examples:
   - Hi TB Guru, Can you please help me review my Board resolution file if that is good enough base on the board resolution training guide. thanks
   - >
-    Hi TB Guru, Can you please help me review my Board resolution file with below rules:
-    Rule #1...
-    Rule #2...
-hints: User must upload a BR file or attach your BR if you send email to TB guru for answers. you may give your rule, if not, TB guru will validate your file with training document from knowledge base
+    Please check the attached BR document provided by client against the validation rules provided below and tell me the client's input adhere to the standard.
+    Explain your judgement with details and example.
+    Validation rule #1...
+    Validation rule #2...
+hints: User must upload/ attach a BR file first, then supplement the validation rule alongside with your query so that TB Guru will help to check the BR against the rule you specified.

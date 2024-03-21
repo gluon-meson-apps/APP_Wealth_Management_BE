@@ -1,16 +1,20 @@
 name: summary_and_translation
-display_name: Paragraph summarize and translation use case
+display_name: Call Report Writer (Summary/ Translation)
 description: summarize or translate a paragraph
 business: true
 examples:
-  - Hi TB Guru, could you please help me translate my uploaded file.
-  - Hi TB Guru, could you please help me summarize my uploaded file.
-  - Hi TB Guru, could you please help me translate below paragraph.
-  - Hi TB Guru, could you please help me summarize and translate below paragraph.
+  - Please translate the content of attached file into English.
+  - Please summarise the content of attached file.
+  - >
+    Please translate the following text content (delimited by \\\) into English.
+    \\\xxxxxxxx text content here xxxxxxxxxx\\\
+  - >
+    Please give me a 200-word summary of the following text content.
+    Text content: xxxxxxxxxxxxxxxx
 slots:
   - name: is_summary_needed
     description: return true if the user asks for a summary
     slotType: boolean
     optional: True
 action: summary_and_translation
-hints: User must upload your file or attach your file if you send email to TB guru for summarization or translation. Please be aware, we support paragraph character limitaion in chatbox or email content is 3000 characters. if you put them into attachment, the character limitation can be extended to 20,000 characters in maximum.
+hints: User can put their text-content in a .txt, .docx or .pdf file (max 20K tokens) and ask TB Guru to translate/ summarise it.  User can also specify their text-content right after their query, but max length 3000 tokens.

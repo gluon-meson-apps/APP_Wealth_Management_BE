@@ -1,18 +1,15 @@
 name: br_extension_qa
-display_name: Board resolution extension Question & Answer use case
+display_name: Signatory Update (Global Requirements Database) (SURE) Q&A
 business: true
 ignore_previous_slots: true
 description: answer BR supporting documents requirements for for New Authorised Signatory related questions from user input, the required supporting documents include LETTERHEAD and ID/Passport Copies and Proof of Residential Address and Specimen Signature
 examples:
-  - Hi TB guru, Could you please help me check the Australia BR supporting document requirement for New Authorised Signatory
-  - Hi TB guru, Please help me what’s the specification I need to follow on the BR ID/Password copies in China
-  - Hi TB guru, Please provide the sample attachments of the BR documents ID/Passport Copies
-  - Hi TB guru, Please help me what’s the specification I need to follow on the Australia BR supporting documents LETTERHEAD
-  - Hi TB guru, Please help me what’s the specification I need to follow on the Australia BR FILE LETTERHEAD
+  - Under the context of SURE, please check what is the document requirement for New Authorised Signatory in Australia?
+  - Under the context of SURE, is there any additional remarks about the requirement on ID/Passport in Australia?"
 slots:
   - name: country
     description: the country of the user
     slotType: text
     optional: False
 action: br_extension_qa
-hints: User must state clearly the which portion(column header or row header for checking)
+hints: User must specify which country you want TB Guru to locate the required documents and details.
