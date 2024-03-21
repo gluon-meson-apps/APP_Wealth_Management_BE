@@ -20,10 +20,10 @@ slots:
     description: must be country name or  "i" or "we" or "you" or "us", convert "i"/"we"/"you"/"us" to Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
     slotType: text
   - name: bic code
-    description: the BIC code of rma holder bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM
+    description: the BIC code of rma holder bank
     slotType: text
   - name: SWIFT code
-    description: SWIFT/BIC code of the RMA Counterparty bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH
+    description: SWIFT/BIC code of the RMA Counterparty bank
     slotType: text
 action: rma_checking
 slot_expression: ("bank entity name" and "country of bank" and ("country of rma holder" or "bic code")) or ("SWIFT code" and ("country of rma holder" or "bic code"))

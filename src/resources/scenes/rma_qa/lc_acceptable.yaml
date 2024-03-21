@@ -2,15 +2,15 @@ name: lc_acceptable
 display_name: RMA Letter of credit acceptable validation use case
 business: true
 ignore_previous_slots: true
-description: check whether HSBC can accept an LC from the requested/issued bank
+description: check whether HSBC can accept an LC from the requested/issued bank, for example, "Hi TB Guru, can we accept LC service requested by BANK OF INDIA in India?" -> (we is LC service provider, BANK OF INDIA in India is LC service requester), "Hi TB Guru, are you able to accept LC service issued by OSABJPJS?" -> (you is LC service provider, OSABJPJS is LC service requester)
 examples:
   - Can you advise if HSBC Singapore can accept a LC requested/issued by a client with counterparty bank XXX in country YYY?
 slots:
   - name: bic code
-    description: the BIC code of LC service provider bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM
+    description: the BIC code of LC service provider bank
     slotType: text
   - name: SWIFT code
-    description: the SWIFT/BIC code of the LC service requester bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH
+    description: the SWIFT/BIC code of the LC service requester bank
     slotType: text
   - name: bank entity name
     description: must be the bank entity name of the LC service requester other than HSBC Singapore
