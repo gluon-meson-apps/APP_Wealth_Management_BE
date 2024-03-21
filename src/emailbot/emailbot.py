@@ -12,7 +12,6 @@ from sqlalchemy import text
 
 from action.base import Attachment
 from models.email_model.model import Email
-from third_system.atom_service import AtomService, DownstreamMessageFromEnum
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
 from utils.common import extract_json_from_text
@@ -122,7 +121,6 @@ WHERE id = '{email.id}'
         self.database = EmailBot.DatabaseConnection(config.email_db)
         self.graph = graph
         self.unified_search = UnifiedSearch()
-        self.atom_service = AtomService()
 
     async def periodically_call_api(self):
         while True:
@@ -143,27 +141,9 @@ WHERE id = '{email.id}'
             new_email.attachment_urls = await self.upload_email_attachments(new_email)
         return new_email
 
-    async def create_human_message(self, email: Email):
-        await self.atom_service.create_message(
-            conversation_id=email.id,
-            user_id=email.sender.address,
-            message=email.body.content,
-            message_from=DownstreamMessageFromEnum.HUMAN,
-        )
-
-    async def create_ai_message(self, email: Email, answer: str):
-        await self.atom_service.create_message(
-            conversation_id=email.id,
-            user_id=email.sender.address,
-            message=answer,
-            message_from=DownstreamMessageFromEnum.AI,
-        )
-
     async def process_emails(self, new_email):
         logger.info(f"Processing email: {new_email.id}")
-        await self.create_human_message(new_email)
         answer, attachments = await self.ask_thought_agent(new_email)
-        await self.create_ai_message(new_email, answer)
         email_attachments = await self.parse_attachments_in_answer(attachments)
         await self.graph.reply_email(new_email, answer, email_attachments)
         self.database.insert_processed_email_into_database(new_email)
