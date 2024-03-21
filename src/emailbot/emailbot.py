@@ -176,7 +176,7 @@ WHERE id = '{email.id}'
         payload = {
             "question": email.body.content,
             "conversation_id": email.id,
-            "user_id": "emailbot",
+            "user_id": email.sender.address,
             "file_urls": email.attachment_urls,
             "from_email": True,
         }

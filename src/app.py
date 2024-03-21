@@ -18,12 +18,13 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from uvicorn import run
 
-from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse
+from action.base import ErrorResponse, AttachmentResponse, JumpOutResponse, ActionResponse, ChatResponseAnswer
 from dialog_manager.base import BaseDialogManager, DialogManagerFactory
 from emailbot.emailbot import get_config, EmailBot, EmailBotSettings
 from logging_intercept_handler import InterceptHandler
 from promptflow.command import ScoreCommand
 from router import api_router
+from third_system.atom_service import AtomService
 from third_system.microsoft_graph import Graph
 from third_system.unified_search import UnifiedSearch
 from utils.common import get_value_or_default_from_dict
@@ -116,6 +117,7 @@ async def parse_file_name(file_url):
 async def score(
     score_command: ScoreCommand,
     unified_search: UnifiedSearch = Depends(),
+    atom_service: AtomService = Depends(),
 ):
     """
     This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score
@@ -124,19 +126,23 @@ async def score(
     result = None
     conversation = None
     session_id = score_command.conversation_id
+    user_id = score_command.user_id
     file_urls = []
     if score_command.file_urls:
         file_urls = score_command.file_urls
     elif score_command.file_url:
         file_urls = [score_command.file_url]
 
+    if score_command.from_email:
+        await atom_service.create_human_message(session_id, user_id, score_command.question)
+
     try:
         first_file = (
             await unified_search.download_raw_file_from_minio(file_urls[0]) if file_urls and file_urls[0] else None
         )
         result, conversation = await dialog_manager.handle_message(
-            score_command.question,
-            session_id,
+            message=score_command.question,
+            session_id=session_id,
             first_file_name=await parse_file_name(file_urls[0]) if first_file else None,
             file_urls=file_urls,
             is_email_request=score_command.from_email,
@@ -174,6 +180,21 @@ async def score(
                     else {}
                 ),
             }
+        if score_command.from_email:
+            origin_answer = result.answer if isinstance(result, ActionResponse) else None
+            ai_message = await atom_service.create_ai_message(
+                session_id,
+                user_id,
+                message=origin_answer.content if isinstance(origin_answer, ChatResponseAnswer) else None,
+                prompt_message=answer,
+            )
+            feedback_link = (
+                atom_service.generate_feedback_link(ai_message["id"])
+                if ai_message and "id" in ai_message and ai_message["id"]
+                else None
+            )
+            if feedback_link:
+                answer["answer"] += f"<br><a href='{feedback_link}'>Click here to share your feedback with us!</a>"
 
         async for answer in generate_answer_with_len_limited(**answer):
             yield answer
