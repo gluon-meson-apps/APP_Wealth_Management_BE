@@ -54,6 +54,8 @@ class LLMEntityExtractor(EntityExtractor):
     ) -> None:
         slots = form.get_available_slots_str()
         entity_list = form.get_slot_name_list()
+        # todo: currently we do latest request summary twice(here and new topic check),
+        #  should consider provide the latest request summary in one place.
         preparation.add_message(
             "system",
             self.slot_extraction_prompt.template,
@@ -62,11 +64,12 @@ class LLMEntityExtractor(EntityExtractor):
             entity_list=entity_list,
             intent_description=form.intent_description,
             entity_types_and_values=slots,
+            file_names=conversation_context.get_file_name(),
         )
         # for example in self.examples:
         #     preparation.add_message("user", example[0])
         #     preparation.add_message("assistant", example[1])
-        preparation.add_message("user", user_input + f" (with file name :{conversation_context.get_file_name()})")
+        # preparation.add_message("user", user_input + f" (with file name :{conversation_context.get_file_name()})")
 
     def prepare_examples(self):
         examples = [

@@ -13,10 +13,16 @@ you are a helpful assistant
 
 ## ATTENTION
 
-your result MUST be a json string without anything else, like this:
+1. the "latest request" should contains details, someone who don't know the history should be able to understand new request.
+2. DON'T MENTION the previous request in the "latest request".
+3. DON'T add or miss any information in the "latest request".
+
+your final result MUST be a json string without anything else, like this:
+
 
 {
-    "chain of thought": "...", // should start with "let's think step by step, first the request of user is $request, consider the relationship between it with the previous request, ..."
+    "latest request": "", // reorganize use's new request combine with the history ON BEHALF OF USER. for example: I want to.../I'd like to.../Can you help me to.../Hello.../
+    "chain of thought": "...", // should start with "let's think step by step, first the latest request of user is $request, consider the relationship between it with the previous request, ..."
     "entity name1": "value of entity1",  // the ENTITY NAME MUST listed in Entities info
     "entity name2": "value of entity2",
     ...
@@ -36,5 +42,10 @@ your output will be sent to the next model in the pipeline. so you are VERY IMPO
 ## Intent Description
 {{intent_description}}
 
+## file names
+{{file_names}}
+
 ## Chat History
 {{chat_history}}
+
+## OUTPUT

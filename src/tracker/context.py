@@ -29,7 +29,7 @@ def prepare_response_content(answer):
 
 
 class History:
-    def __init__(self, rounds: List[dict[str, Any]], max_history: int = 6):
+    def __init__(self, rounds: List[dict[str, Any]], max_history: int = 9):
         self.max_history = max_history
         self.rounds = rounds[-self.max_history :]
 
