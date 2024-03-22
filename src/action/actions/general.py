@@ -43,8 +43,8 @@ class SlotFillingAction(Action):
 
     def get_slot_names(self):
         result = []
-        for slots in self.slots:
-            result.append([s.name for s in slots])
+        for slot in self.slots:
+            result.append(slot.name)
         return result
 
     async def run(self, context):

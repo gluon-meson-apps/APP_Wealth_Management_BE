@@ -115,9 +115,9 @@ class FakePromptManager:
     (False, None, [("test", False)], ["test"], []),
     (False, None, [("test", True)], ["test"], []),
     (False, None, [("test", True)], [], []),
-    (True, "slot_filling", [("test", True), ("test2", False)], ["test"], [["test2"]]),
-    (True, "slot_filling", [("test", True), ("test2", False)], [], [["test2"]]),
-    (True, "slot_filling", [("test", False)], [], [["test"]]),
+    (True, "slot_filling", [("test", True), ("test2", False)], ["test"], ["test2"]),
+    (True, "slot_filling", [("test", True), ("test2", False)], [], ["test2"]),
+    (True, "slot_filling", [("test", False)], [], ["test"]),
     (False, None, [], [], []),
     (False, None, [], ["any"], []),
 ])

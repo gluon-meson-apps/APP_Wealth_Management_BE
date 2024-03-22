@@ -82,7 +82,7 @@ def test_one_slot_sequence_checker_get_missed_slots(comment, sequence: Sequence[
 
         ("not_match_with_empty", [["a", "b"], ["c", "d"]], [], [["a", "b"], ["c", "d"]]),
         ("not_match_with_each_sequence_only_match_partial", [["a", "b"], ["c", "d"]], ["a", "d"], [["b"], ["c"]]),
-        ("not_match_with_each_sequence_only_match_partial_and_same_slot_in_diff_seq", [["a", "b"], ["a", "c", "d"]], ["a", "d"], [["b"], ["c"]]),
+        ("not_match_with_each_sequence_only_match_partial_and_same_slot_in_diff_seq", [["a", "b"], ["a", "c", "d"]], ["a", "d"], [["c"], ["b"]]),
         ("not_match_with_different_elements", [["a", "b"], ["c", "d"]], ["x", "y", "z"], [["a", "b"], ["c", "d"]]),
     ]
 )
@@ -91,3 +91,22 @@ def test_multiple_slot_sequence_checker_get_missed_slots(comment, sequence: Sequ
     actual = checker.get_missed_slots(real_slots)
     for a, e in zip(actual, expected):
         assert set(a) == set(e)
+
+# test calc missing weight
+
+@pytest.mark.parametrize(
+    "comment, missed_len, total_len, expected",
+    [
+        ("match_empty_slots", 0, 0, 0),
+        ("match_1_slot", 1, 1, 2),
+        ("match_3_slots", 3, 3, 4),
+
+        ("not_match_1_slot_total_2", 1, 2, 1.5),
+        ("not_match_1_slots_total_3", 1, 3, 1.333333),
+
+    ]
+)
+def test_calc_missing_weight(comment, missed_len, total_len, expected):
+    checker = OneSlotSequenceChecker([])
+    actual = checker.calc_missing_weight(missed_len, total_len)
+    assert actual == pytest.approx(expected, 0.0001)

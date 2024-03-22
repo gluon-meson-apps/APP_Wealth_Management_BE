@@ -1,7 +1,7 @@
 import ast
 from typing import Sequence
 
-from policy.slot_filling.base_slot_checker import BaseSlotChecker
+from policy.slot_filling.base_slot_checker import BaseSlotChecker, SlotCheckResult
 from policy.slot_filling.slot_expression_visitor import SlotExpressionVisitor
 from policy.slot_filling.slot_sequence_checker import MultiSlotSequenceChecker
 
@@ -23,3 +23,6 @@ class ExpressionSlotSequenceChecker(BaseSlotChecker):
 
     def get_missed_slots(self, real_slots: Sequence[str]) -> Sequence[Sequence[str]]:
         return self.slot_sequences_checker.get_missed_slots(real_slots)
+
+    def get_unsorted_missed_slots(self, real_slots: Sequence[str]) -> Sequence[SlotCheckResult]:
+        return self.slot_sequences_checker.get_unsorted_missed_slots(real_slots)
