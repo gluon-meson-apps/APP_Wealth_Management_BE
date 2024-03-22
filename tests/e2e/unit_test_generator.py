@@ -46,6 +46,7 @@ class UnitTestGenerator:
                 return scenario
             return f'{scenario}_{sub_scenario}'
 
+        inner_df['main_scenario'] = inner_df['scenario']
         inner_df['scenario'] = inner_df.apply(merge_scenario, axis=1)
         results = get_log_result(f"tests.e2e.{self.generate_dir_name}.{session_name}.generated_e2e_test.{session_name}_log")
 
@@ -58,12 +59,16 @@ class UnitTestGenerator:
             data_list = row.get('possible_message_templates')
             output = row.get('output')
             scenario = row.get('scenario')
+            main_scenario = row.get('main_scenario')
             file_name = f'{test_prefix}round{round_count}_{scenario}'
-            expected_output = results[round_count - 1].get(f'round{round_count}_retry_{scenario}', "")
+            try:
+                expected_output = results[round_count - 1].get(f'round{round_count}_retry_{scenario}', "")
+            except Exception as e:
+                expected_output = ""
             if expected_output == "":
                 logger.warning(f"expected_output is empty for {session_name} {round_count} {scenario}")
 
-            generate_one_unit_test(session_name, data_list, params, output, scenario, file_name, self.generate_dir_name, expected_output)
+            generate_one_unit_test(session_name, data_list, params, output, scenario, main_scenario, file_name, self.generate_dir_name, expected_output)
 
         inner_df.apply(process_one_scenario, axis=1)
 

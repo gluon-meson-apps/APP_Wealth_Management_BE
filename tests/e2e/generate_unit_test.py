@@ -7,7 +7,7 @@ from utils.common import format_jinja_template
 
 
 # params_list = inner_df['params'].apply(process_one_params).tolist()
-def generate_one_unit_test(session_name, data_list, params, output, scenario, file_name, generate_dir_name='generated',
+def generate_one_unit_test(session_name, data_list, params, output, scenario, main_scenario, file_name, generate_dir_name='generated',
                            expected_output=None):
     if expected_output is None:
         expected_output = ""
@@ -23,6 +23,7 @@ def generate_one_unit_test(session_name, data_list, params, output, scenario, fi
                 params=params,
                 output=output,
                 scenario=scenario,
+                main_scenario=main_scenario,
                 use_case=session_name,
                 expected=expected_output,
             ))

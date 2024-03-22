@@ -51,7 +51,7 @@ async def main():
 
 
     scenario_model_registry = DefaultScenarioModelRegistryCenter()
-    chat_model = scenario_model_registry.get_model('{{ scenario }}')
+    chat_model = await scenario_model_registry.get_model('{{ main_scenario }}')
 
     chat_params, _ = construct_chat_message()
 
