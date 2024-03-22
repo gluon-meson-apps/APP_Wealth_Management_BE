@@ -28,6 +28,7 @@ class Intent(HashableBaseModel):
     ignore_previous_slots: Optional[bool] = False
     hints: Optional[str] = None
     examples: Optional[List[str]] = None
+    display_examples: Optional[List[str]] = None
 
     def get_full_intent_name(self) -> str:
         return f"{self.full_name_of_parent_intent}.{self.name}" if self.full_name_of_parent_intent else self.name
@@ -51,6 +52,7 @@ class Intent(HashableBaseModel):
             display_name=intent_config.display_name,
             hints=intent_config.hints,
             examples=intent_config.examples,
+            display_examples=intent_config.display_examples,
         )
 
 

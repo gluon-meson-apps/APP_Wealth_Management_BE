@@ -19,6 +19,7 @@ class IntentConfig:
         ignore_previous_slots=False,
         display_name=None,
         hints=None,
+        display_examples=None,
     ):
         self.name = name
         self.description = description
@@ -33,6 +34,7 @@ class IntentConfig:
         self.ignore_previous_slots = ignore_previous_slots
         self.display_name = display_name
         self.hints = hints
+        self.display_examples = display_examples
 
     def is_ancestor_of(self, other_intent: "IntentConfig"):
         if other_intent.full_name_of_parent_intent and other_intent.full_name_of_parent_intent.startswith(
@@ -127,6 +129,7 @@ class IntentListConfig:
                 display_name=data.get("display_name"),
                 hints=data.get("hints"),
                 examples=data.get("examples"),
+                display_examples=data.get("display_examples"),
             )
             intents.append(intent)
 

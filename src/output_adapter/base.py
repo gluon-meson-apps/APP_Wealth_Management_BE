@@ -205,9 +205,9 @@ class BaseOutputAdapter(OutputAdapter):
             output.answer.extra_info["intent"] += "(suspended)"
         if conversation.current_intent.hints:
             output.answer.extra_info["hints"] = conversation.current_intent.hints
-        if conversation.current_intent.examples:
+        if conversation.current_intent.display_examples:
             output.answer.extra_info["examples"] = ""
-            for index, example in enumerate(conversation.current_intent.examples):
+            for index, example in enumerate(conversation.current_intent.display_examples):
                 if index > 0:
                     output.answer.extra_info["examples"] += "\n"
                 output.answer.extra_info["examples"] += f"Example {index + 1}: {example}"
