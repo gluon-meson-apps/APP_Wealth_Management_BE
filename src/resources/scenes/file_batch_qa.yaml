@@ -2,8 +2,12 @@ name: file_batch_qa
 display_name: GPS RFP Q&A
 business: true
 description: Batch Q&A about general questions based on csv/excel file
-examples:
+display_examples:
   - Pls answer the RFP related query from Brazil client specified in the attached excel.
+examples:
+  - answer the questions in the csv file
+  - answer the questions in the excel file
+  - I've prepared a csv file, please answer the questions in it
 slots:
   - name: context
     description: "the context of the question. such as: RFP/Product Guide/Implementation Guide/

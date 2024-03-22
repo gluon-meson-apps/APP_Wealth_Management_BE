@@ -3,7 +3,7 @@ display_name: GTRF RMA Validation
 business: true
 ignore_previous_slots: true
 description: Check RMA status of the RMA holder bank and RMA counterparty bank. For example, "Hi TB Guru, do we have RAM with PIRAEUS Bank SA in Greece?" -> (we is RMA Holder, PIRAEUS Bank SA in Greece is RMA counterparty), "Hi TB Guru, do you have RAM with OSABJPJS?" -> (you is RMA Holder, OSABJPJS is the SWIFT code of RMA counterparty)
-examples:
+display_examples:
   - Does we have RMA with counterparty bank XXX in country YYY?
   - Does HSBC SG have RMA with counterparty bank XXX in country YYY?
 slots:

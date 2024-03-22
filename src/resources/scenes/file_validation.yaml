@@ -2,8 +2,11 @@ name: file_validation
 display_name: GPS Client File Validation
 description: file validation to check if the file is valid and match the standard
 business: true
-examples:
+display_examples:
   - Please check if payment file attached (in XML-V3 format) compliant with our standard.
+examples:
+  - Please help me to check if the file provided by client below is valid. It is in @XML-V3 format.
+  - Please help me to check if the file match our standard. It is an excel.
 slots:
   - name: file_format
     description: "the format of the file; available values: XML-V3, XML-V4, Excel, CSV"

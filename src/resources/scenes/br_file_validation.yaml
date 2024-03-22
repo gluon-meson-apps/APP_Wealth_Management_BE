@@ -8,11 +8,14 @@ slots:
     description: check if user already provided BR validation rules in the input, rules are always concrete
     slotType: boolean
     optional: True
-examples:
-  - Hi TB Guru, Can you please help me review my Board resolution file if that is good enough base on the board resolution training guide. thanks
+display_examples:
+  - Can you please help me review my Board resolution file if that is good enough base on the board resolution training guide. thanks
   - >
     Please check the attached BR document provided by client against the validation rules provided below and tell me the client's input adhere to the standard.
     Explain your judgement with details and example.
     Validation rule #1...
     Validation rule #2...
+examples:
+  - Can you please help me review my Board resolution file, it relates to cash management service, please help me check if that is good enough base on the board resolution training guide. thanks
+  - Can you please help me review my Board resolution file, it relates to accounting opening, please help me check if that is good enough base on the board resolution training guide. thanks
 hints: User must upload/ attach a BR file first, then supplement the validation rule alongside with your query so that TB Guru will help to check the BR against the rule you specified.

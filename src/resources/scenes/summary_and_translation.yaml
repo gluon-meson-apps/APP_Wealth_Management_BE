@@ -2,15 +2,21 @@ name: summary_and_translation
 display_name: Call Report Writer (Summary/ Translation)
 description: summarize or translate a paragraph
 business: true
-examples:
+display_examples:
   - Please translate the content of attached file into English.
   - Please summarise the content of attached file.
   - >
-    Please translate the following text content (delimited by \\\) into English.
-    \\\xxxxxxxx text content here xxxxxxxxxx\\\
+    Please translate the following text content into English.
+    Text content: xxxxxxxxxxxxxxxx
   - >
     Please give me a 200-word summary of the following text content.
     Text content: xxxxxxxxxxxxxxxx
+examples:
+  - Please help me summarize the email chain.
+  - Please help me summarize the following contents into 200 words.
+  - Please help me translate the email chain to Chinese.
+  - Please help me translate the following contents to Chinese.
+  - Please help me summarize the email chain with Chinese.
 slots:
   - name: is_summary_needed
     description: return true if the user asks for a summary

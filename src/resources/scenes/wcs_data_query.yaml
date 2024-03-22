@@ -2,7 +2,7 @@ name: wcs_data_query
 display_name: GTRF Working Capital Benchmarks
 description: get WCS data and generate insight
 business: true
-examples:
+display_examples:
   - >
     Please help me to review ABC company data from the information extracted from WCS information below, and share some data insight with me.  Please help format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
 
@@ -23,7 +23,14 @@ examples:
 
     Industry benchmark
     Year,DPO,DSO,DIO,CCC
-    FY24,-44,51,47,53"
+    FY24,-44,51,47,53
+examples:
+  - Please help me to extract Apple company data from the @WCS system, and share some data insight with me.
+    Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
+  - Please help me to extract CDT N.V. company data from the @WCS system, and generate the insight as my request below,
+    Q1. Describe CDT N.V. company's CCC figure changes across year and the reason behind it.
+    Q2. Compare CDT N.V. company's figure against other companies and benchmark.
+    Format your output into ppt format so that I can work out the pitching deck to meet the client tomorrow.
 slots:
   - name: company
     description: the company name, return empty if the company name is "WCS" or "@WCS"

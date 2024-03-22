@@ -8,8 +8,10 @@ slots:
     slotType: text
     optional: True
 action: br_file_qa
-examples:
+display_examples:
   - Refers attached BR, please advise which kind of banking services the client refers.
   - Refers attached BR, please advise if the client has specific the names of authorised persons to represent the company to operate the banking services specified.
   - Refers attached BR, please check if the client input align with our BR standard on Accounts and/or Subscription for Services section."
+examples:
+  - Examine the board resolution and highlight which HSBC product or service is the draft referring to.
 hints: User must upload/ attach a BR file then ask anything about the document OR check against certain BR guideline.

@@ -3,9 +3,15 @@ display_name: Signatory Update (Global Requirements Database) (SURE) Q&A
 business: true
 ignore_previous_slots: true
 description: answer BR supporting documents requirements for for New Authorised Signatory related questions from user input, the required supporting documents include LETTERHEAD and ID/Passport Copies and Proof of Residential Address and Specimen Signature
-examples:
+display_examples:
   - Under the context of SURE, please check what is the document requirement for New Authorised Signatory in Australia?
   - Under the context of SURE, is there any additional remarks about the requirement on ID/Passport in Australia?"
+examples:
+  - Could you please help me check the Australia BR supporting document requirement for New Authorised Signatory
+  - Please help me what’s the specification I need to follow on the BR ID/Password copies in China
+  - Please provide the sample attachments of the BR documents ID/Passport Copies
+  - Please help me what’s the specification I need to follow on the Australia BR supporting documents LETTERHEAD
+  - Please help me what’s the specification I need to follow on the Australia BR FILE LETTERHEAD
 slots:
   - name: country
     description: the country of the user
