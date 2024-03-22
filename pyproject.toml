@@ -5,6 +5,9 @@ description = ""
 authors = ["Dan Chen <dchen@thoughtworks.com>"]
 readme = "README.md"
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [[tool.poetry.source]]
 name = "tsinghua"
 url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
@@ -41,6 +44,7 @@ pre-commit = "^3.6.0"
 pytest-html = "^4.1.1"
 openpyxl = "^3.1.2"
 click = "^8.1.7"
+pytest-asyncio = "^0.23.6"
 
 [build-system]
 requires = ["poetry-core"]

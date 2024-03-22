@@ -34,22 +34,22 @@ class IntegratedNLU(Nlu):
     async def extract_intents_and_entities(self, conversation: ConversationContext) -> IntentWithEntity:
         conversation.set_status("analyzing user's intent")
 
-        previous_intent_name = conversation.current_intent.get_full_intent_name() if conversation.current_intent else ""
+        # previous_intent_name = conversation.current_intent.get_full_intent_name() if conversation.current_intent else ""
         current_intent = await self.intent_classifier.classify_intent(conversation)
 
         if current_intent is None:
             logger.info("No intent found")
             return IntentWithEntity(intent=None, entities=[], action="")
 
-        is_providing_more_info = False
-        if not conversation.start_new_question:
-            is_providing_more_info = await self.intent_classifier.check_is_providing_more_info(conversation)
+        # is_providing_more_info = False
+        # if not conversation.start_new_question:
+        #     is_providing_more_info = await self.intent_classifier.check_is_providing_more_info(conversation)
 
-        use_latest_history = should_use_latest_history(
-            current_intent, conversation.start_new_question, previous_intent_name, is_providing_more_info
-        )
-        if use_latest_history:
-            conversation.history.keep_latest_n_rounds(1)
+        # use_latest_history = should_use_latest_history(
+        #     current_intent, conversation.start_new_question, previous_intent_name, is_providing_more_info
+        # )
+        # if use_latest_history:
+        #     conversation.history.keep_latest_n_rounds(1)
 
         if conversation.is_confused_with_intents():
             return IntentWithEntity(intent=current_intent, entities=[], action="")
@@ -62,17 +62,19 @@ class IntegratedNLU(Nlu):
         current_entities = await self.entity_extractor.extract_entity(conversation)
         # Retain entities
         # If the user start a new topic and the current intent is set to ignore previous slots, then the existing entities will be ignored
-        existing_entities = [] if use_latest_history else conversation.get_entities()
-        merged_entities = self.merge_entities(
-            existing_entities, current_entities, conversation.get_current_intent_slot_names()
-        )
+        # existing_entities = [] if use_latest_history else conversation.get_entities()
+        # merged_entities = self.merge_entities(
+        #     existing_entities, current_entities, conversation.get_current_intent_slot_names()
+        # )
 
-        entities_string = str([(entity.type, entity.value, entity.confidence) for entity in merged_entities])
-        if use_latest_history:
-            conversation.flush_entities()
-            conversation.add_entity(merged_entities)
-        else:
-            conversation.add_entity(current_entities)
+        entities_string = str([(entity.type, entity.value, entity.confidence) for entity in current_entities])
+        conversation.flush_entities()
+        conversation.add_entity(current_entities)
+        # if use_latest_history:
+        #     conversation.flush_entities()
+        #     conversation.add_entity(merged_entities)
+        # else:
+        #     conversation.add_entity(current_entities)
         logger.info(f"Session {conversation.session_id}, entities: {entities_string}")
 
-        return IntentWithEntity(intent=conversation.current_intent, entities=merged_entities, action="")
+        return IntentWithEntity(intent=conversation.current_intent, entities=current_entities, action="")

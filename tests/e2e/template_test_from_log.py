@@ -9,6 +9,7 @@ def get_dict_only_with_value_not_empty(d):
         k: v for k, v in d.items() if v
     }
 
+
 def check_json_result(expected, actual, keys_to_check=None):
     try:
         expected_entity = get_dict_only_with_value_not_empty(extract_json_from_code_block(expected))
@@ -19,6 +20,21 @@ def check_json_result(expected, actual, keys_to_check=None):
     except:
         print(traceback.format_exc())
         return False
+
+
+def check_totally_same_json_result(expected, actual):
+    try:
+        if isinstance(expected, str):
+            expected = extract_json_from_code_block(expected)
+        if isinstance(actual, str):
+            actual = extract_json_from_code_block(actual)
+        expected_entity = get_dict_only_with_value_not_empty(expected)
+        actual_entity = get_dict_only_with_value_not_empty(actual)
+        return expected_entity == actual_entity
+    except:
+        print(traceback.format_exc())
+        return False
+
 
 def template_test_for_one_case(logs, test_case):
     expected = logs["expected"]
@@ -39,8 +55,10 @@ def template_test_for_one_case(logs, test_case):
                 actual_entity = actual_item[unit_test_key]
                 expected_entity_json = get_dict_only_with_value_not_empty(extract_json_from_code_block(expected_entity))
                 actual_entity_json = get_dict_only_with_value_not_empty(extract_json_from_code_block(actual_entity))
-                assert check_json_result(expected_entity, actual_entity, ['intent']), f"round{i+1}: {expected_entity_json['intent']} != {actual_entity_json['intent']}\n check {key}"
+                assert check_json_result(expected_entity, actual_entity, [
+                    'intent']), f"round{i + 1}: {expected_entity_json['intent']} != {actual_entity_json['intent']}\n check {key}"
             elif 'entity_extractor' in key and test_case == "entity_extractor":
                 expected_entity = expected_item[key]
                 actual_entity = actual_item[unit_test_key]
-                assert check_json_result(expected_entity, actual_entity), f"round{i+1}: {expected_entity} != {actual_entity}\n check {key}"
+                assert check_json_result(expected_entity,
+                                         actual_entity), f"round{i + 1}: {expected_entity} != {actual_entity}\n check {key}"

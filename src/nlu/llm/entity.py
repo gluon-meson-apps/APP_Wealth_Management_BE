@@ -63,9 +63,9 @@ class LLMEntityExtractor(EntityExtractor):
             intent_description=form.intent_description,
             entity_types_and_values=slots,
         )
-        for example in self.examples:
-            preparation.add_message("user", example[0])
-            preparation.add_message("assistant", example[1])
+        # for example in self.examples:
+        #     preparation.add_message("user", example[0])
+        #     preparation.add_message("assistant", example[1])
         preparation.add_message("user", user_input + f" (with file name :{conversation_context.get_file_name()})")
 
     def prepare_examples(self):

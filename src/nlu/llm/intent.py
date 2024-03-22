@@ -156,7 +156,7 @@ class LLMIntentClassifier(IntentClassifier):
     async def check_is_providing_more_info(self, conversation: ConversationContext) -> bool:
         if not conversation.start_new_question:
             result = await self.same_topic_checker.check_is_providing_more_info(
-                conversation.get_history().format_messages(), conversation.session_id
+                conversation.get_history().format_messages(), conversation.session_id, conversation.get_unfilled_slots()
             )
             return result[0]
         return False
@@ -176,6 +176,7 @@ class LLMIntentClassifier(IntentClassifier):
         chat_history = conversation.get_history().format_messages()
         previous_intent = conversation.current_intent
 
+        new_request = None
         if len(chat_history) > 1:
             start_new_topic, new_request = await self.same_topic_checker.check_same_topic(
                 chat_history, conversation.session_id
@@ -183,15 +184,15 @@ class LLMIntentClassifier(IntentClassifier):
             if previous_intent and not start_new_topic:
                 return previous_intent
 
-        return await self.classify_intent_until_leaf_or_confused(conversation, None)
+        return await self.classify_intent_until_leaf_or_confused(conversation, None, new_request)
 
     async def classify_intent_until_leaf_or_confused(
-        self, conversation: ConversationContext, start_intent: Optional[Intent]
+        self, conversation: ConversationContext, start_intent: Optional[Intent], new_request: str = None
     ) -> Optional[Intent]:
         current_intent = start_intent
         while current_intent is None or self.intent_list_config.get_intent(current_intent.name).has_children:
             current_intent, unique_intent_from_examples = await self.classify_single_layer_intent(
-                conversation, current_intent
+                conversation, current_intent, new_request
             )
             if current_intent is None:
                 break
@@ -206,9 +207,12 @@ class LLMIntentClassifier(IntentClassifier):
         return current_intent
 
     async def classify_single_layer_intent(
-        self, conversation: ConversationContext, parent_intent: Intent = None
+        self, conversation: ConversationContext, parent_intent: Intent = None, new_request: str = None
     ) -> tuple[Optional[Intent], Optional[Intent]]:
-        user_input = conversation.current_user_input
+        if new_request:
+            user_input = new_request
+        else:
+            user_input = conversation.current_user_input
         parent_intent_name_of_current_layer: str = parent_intent.get_full_intent_name() if parent_intent else None
         intent_examples = await get_intent_examples(user_input, parent_intent_name_of_current_layer)
         for intent_example in intent_examples:
