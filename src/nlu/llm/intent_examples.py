@@ -22,14 +22,16 @@ def retrieve_intent_examples_from_intent_yaml(folder_path, full_parent_intent=No
 
         with open(file_path, "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
-        intent_name = data.get("name")
-        if data.get("has_children"):
-            full_parent = f"{full_parent_intent}.{intent_name}" if full_parent_intent else intent_name
-            examples = retrieve_intent_examples_from_intent_yaml(f"{folder_path}/{intent_name}", full_parent)
-            intent_examples.extend(examples)
+        if data and data.get("name"):
+            intent_name = data.get("name")
+            if data.get("has_children"):
+                full_parent = f"{full_parent_intent}.{intent_name}" if full_parent_intent else intent_name
+                examples = retrieve_intent_examples_from_intent_yaml(f"{folder_path}/{intent_name}", full_parent)
+                intent_examples.extend(examples)
 
-        if "examples" in data:
-            for example in data["examples"]:
+            all_examples = data.get("examples", []) + data.get("display_examples", [])
+
+            for example in all_examples:
                 intent_examples.append(
                     {
                         "intent": data["name"],
