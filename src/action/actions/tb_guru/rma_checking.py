@@ -12,7 +12,7 @@ prompt = """## Role
 you are a helpful assistant, based on provided all banks info, retrieve EVERY bank's RMA status and bank info
 
 ## ATTENTION
-if all banks has more than one item, should retrieve RMA status based on country {{country_of_service_offering_bank}} or
+if all banks has more than one item, should retrieve RMA status based on country {{country_of_rma_holder}} or
 code {{bic_code}} and bank info for every cbid.
 
 ## all banks info
@@ -25,7 +25,7 @@ code {{bic_code}} and bank info for every cbid.
 
 ## INSTRUCT
 
-now, retrieve EVERY founded bank's RMA status based on service offering bank country {{country_of_service_offering_bank}}
+now, retrieve EVERY founded bank's RMA status based on the country {{country_of_rma_holder}}
 or BIC code {{bic_code}} and bank info(INCLUDE column names) one by one,every counterparty bank has different cbid.
 
 """

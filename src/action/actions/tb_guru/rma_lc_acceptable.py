@@ -11,7 +11,7 @@ from utils.action_helper import format_entities_for_search
 prompt = """"## Role
 you are a helpful assistant, you need to check LC acceptable for every counterparty bank with different CBID
 ## LC acceptable check
-1. based on the country {{country_of_service_offering_bank}} or code {{bic_code}}, check whether the RMA status of the
+1. based on the country {{country_of_service_provider}} or code {{bic_code}}, check whether the RMA status of the
 issuing bank's is not NO and check whether the bank's counterparty type is one of FIG Client or HSBC Group or
 Network Bank. if not, then return we are not able to accept a letter of credit from the $bank, if yes, then return we
 are able to accept a letter of credit from the $bank
@@ -22,7 +22,7 @@ are able to accept a letter of credit from the $bank
 
 ## steps
 1. do the LC acceptable check for every counterparty bank with different CBID and different RMA column of
- {{country_of_service_offering_bank}} or {{bic_code}}
+ {{country_of_service_provider}} or {{bic_code}}
 2. return EVERY bank's RMA status(es)(INCLUDE column names) and ALL bank info(INCLUDE column names, exclude RMA columns)
 
 ## counterparty bank list
