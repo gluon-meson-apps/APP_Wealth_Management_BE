@@ -1,8 +1,6 @@
-import json
-
+import pandas as pd
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
-from tabulate import tabulate
 
 from action.base import ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from action.actions.tb_guru.base import TBGuruAction
@@ -51,25 +49,16 @@ class GPSProductCheckAction(TBGuruAction):
                 intent=context.conversation.current_intent.name,
             )
             return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
-        data = [item.json() for item in response[0].items]
+        data = [item.dict() for item in response[0].items]
         keys_to_exclude = [
             "meta__score",
             "meta__reference",
             "id",
         ]
-        gps_products = ""
-        if len(data) > 0:
-            headers = (json.loads(data[0])).keys()
-            headers = list(filter(lambda x: x not in keys_to_exclude, headers))
-            pure_values = [
-                {key: value for key, value in json.loads(item).items() if key not in keys_to_exclude}.values()
-                for item in data
-            ]
-            gps_products = tabulate(pure_values, headers=headers)
-            logger.info(f"headers: {gps_products}")
+        gsp_products = pd.DataFrame(data).drop(keys_to_exclude, axis=1)
 
         chat_message_preparation = ChatMessagePreparation()
-        chat_message_preparation.add_message("user", prompt, gps_products=gps_products, user_input=user_input)
+        chat_message_preparation.add_message("user", prompt, gps_products=gsp_products.to_string(), user_input=user_input)
         chat_message_preparation.log(logger)
 
         result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
