@@ -60,16 +60,22 @@ class BRExtensionQAAction(TBGuruAction):
         ).response
 
         query = f"""## User input:
-search the BR extension
+search the BR requirements
 ## User question
 {summary_user_input}
-## ATTENTION
-1. fields to be queried: {context.conversation.get_simplified_entities()}
 """
         logger.info(f"search query: {query}")
 
         response = await self.unified_search.search(SearchParam(query=query, tags={"product_line": "BR extension"}), context.conversation.session_id)
         logger.info(f"search response: {response}")
+
+        if len(response) == 0 or response[0].is_empty():
+            answer = ChatResponseAnswer(
+                messageType=ResponseMessageType.FORMAT_TEXT,
+                content="Sorry, I can't answer your question, since there is no BR extension documents information found.",
+                intent=context.conversation.current_intent.name,
+            )
+            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
 
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message("system", prompt, user_input=user_input, br_extension_content=response)
