@@ -13,6 +13,7 @@ from action.actions.tb_guru.file_validation import FileValidation
 from action.actions.tb_guru.summary_and_translation import SummarizeAndTranslate
 from action.actions.tb_guru.wcs_data_query import WcsDataQuery
 from action.actions.tb_guru.br_extenstion_qa import BRExtensionQAAction
+from action.actions.tb_guru.rma_pricing import RMAPricingAction
 from action.base import Action
 
 
@@ -52,3 +53,4 @@ action_repository.save(GPSProductCheckAction())
 action_repository.save(BrFileValidation())
 action_repository.save(BRExtensionQAAction())
 action_repository.save(SummarizeAndTranslate())
+action_repository.save(RMAPricingAction())

@@ -1,0 +1,42 @@
+name: rma_pricing
+display_name: RMA bank line and confirmation/financing pricing validation use case
+business: true
+disabled: true
+ignore_previous_slots: true
+description: check whether HSBC can provide the bank line and the pricing rate of confirmation or financing for the requested/issuing bank
+examples:
+  - |
+    Do you have bank line for the following LC?
+    Issuing bank: Union Bank of India, India
+    Tenor: 36 months usance
+    Issuance date: Expected 1 Oct 2023
+    Expiry date: 1 Dec 2023
+    Please give me your best rate for LC confirmation.
+slots:
+  - name: bic code
+    description: the BIC code of LC service provider bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM
+    slotType: text
+  - name: SWIFT code
+    description: the SWIFT/BIC code of the LC service requester bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH
+    slotType: text
+  - name: bank entity name
+    description: must be the bank entity name of the LC service requester other than HSBC Singapore
+    slotType: text
+  - name: country of bank
+    description: the full country name of the LC service requester bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
+    slotType: text
+  - name: country of service provider
+    description: must be country name or "i" or "we" or "you" or "us", the users themselves represent Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
+    slotType: text
+  - name:  tenor
+    description: the length of time the transaction will be held with the bank, for example (36 months, 180 days, 360 days)
+    slotType: text
+  - name: issuance date
+    description: issuance date of the transaction
+    slotType: date
+  - name: expiry date
+    description: expiry date of the transaction
+    slotType: date
+action: rma_pricing
+slot_expression: ("bank entity name" and "country of bank" and ("country of service provider" or "bic code")) or ("SWIFT code" and ("country of service provider" or "bic code"))
+hints: User must state clearly the serving HSBC entity (e.g. HSBC Singapore) and client’s counterparty bank name and country, and give a context (e.g. if we can accept LC)

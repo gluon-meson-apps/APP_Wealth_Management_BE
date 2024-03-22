@@ -14,6 +14,7 @@ class SlotType(str, Enum):
     FLOAT = "float"
     BOOLEAN = "boolean"
     NUMERIC_OR_TEXT = "numeric or text"
+    DATE = "date"
 
 
 class Intent(HashableBaseModel):
