@@ -160,7 +160,7 @@ async def score(
                 err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
             )
         elif isinstance(err, ChatModelRequestException):
-            if err.model_type == "HSBC":
+            if err.model_source == "HSBC":
                 err_msg = "Ops.... share platform broke down, please contact your IT team for further assistance."
             else:
                 err_msg = "Ops.... GM model broke down, please contact your IT team for further assistance."
