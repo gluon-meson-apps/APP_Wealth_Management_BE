@@ -153,11 +153,12 @@ async def score(
             conversation.reset_history()
 
         if isinstance(err, TokenLimitExceededException):
-            err_msg = "Dear user, your input has exceeded the allowed token numbers." + err.message.split(":")[
-                1
-            ].replace("This model's maximum context length is", "We allow")
+            err_msg = "Dear user, your current context has exceeded the allowed token numbers." + err.message.split(
+                ":"
+            )[1].replace("This model's maximum context length is", "We allow")
             err_msg = (
-                err_msg.replace("Your messages has exceeded the model's maximum context length. ", "") + " Thanks."
+                err_msg.replace("Your messages has exceeded the model's maximum context length. ", "")
+                + " Please start a new conversation, thanks."
             )
         elif isinstance(err, ChatModelRequestException):
             if err.model_source == "HSBC":
