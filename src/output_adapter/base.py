@@ -1,7 +1,6 @@
 import configparser
 from typing import List
 import re
-from urllib.parse import quote
 
 import chinese2digits as c2d
 import numpy as np
@@ -134,7 +133,7 @@ def process_references(references: List[SearchItem]):
             if item.meta__reference.meta__source_sub_name:
                 summary += f"({item.meta__reference.meta__source_sub_name})"
             if item.meta__reference.meta__source_url:
-                url = quote(item.meta__reference.meta__source_url)
+                url = requote_uri(item.meta__reference.meta__source_url)
                 summary += (
                     f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href={url}>Download for checking details</a>"
                 )
