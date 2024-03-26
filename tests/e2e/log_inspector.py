@@ -7,7 +7,7 @@ import os
 from streamlit_tree_select import tree_select
 
 from tests.e2e.generate_fix_test import generate_fix_test
-from tests.e2e.test import folder_to_dict, convert_folder_dict_list_like
+from tests.e2e.folder_util import folder_to_dict, convert_folder_dict_list_like
 from code_editor import code_editor
 
 st.set_page_config(layout="wide")
