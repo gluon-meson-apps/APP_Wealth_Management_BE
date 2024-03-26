@@ -38,6 +38,7 @@ dateparser = "^1.2.0"
 streamlit-code-editor = "^0.1.12"
 streamlit = "1.12.0"
 streamlit-tree-select = "^0.0.5"
+altair = "<5"
 
 
 
