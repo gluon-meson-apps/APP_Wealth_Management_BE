@@ -1,7 +1,7 @@
 name: rma_pricing
 display_name: RMA bank line and confirmation/financing pricing validation use case
 business: true
-disabled: true
+disabled: false
 ignore_previous_slots: true
 description: check whether HSBC can provide the bank line and the pricing rate of confirmation or financing for the requested/issuing bank
 examples:
@@ -13,20 +13,20 @@ examples:
     Expiry date: 1 Dec 2023
     Please give me your best rate for LC confirmation.
 slots:
-  - name: bic code
-    description: the BIC code of LC service provider bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM
-    slotType: text
-  - name: SWIFT code
-    description: the SWIFT/BIC code of the LC service requester bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH
-    slotType: text
   - name: bank entity name
-    description: must be the bank entity name of the LC service requester other than HSBC Singapore
+    description: the bank name of the RMA Counterparty other than HSBC Singapore
     slotType: text
   - name: country of bank
-    description: the full country name of the LC service requester bank to be checked, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
+    description: the full country name of the RMA Counterparty bank, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China)
     slotType: text
-  - name: country of service provider
-    description: must be country name or "i" or "we" or "you" or "us", the users themselves represent Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
+  - name: country of rma holder
+    description: must be country name or  "i" or "we" or "you" or "us", convert "i"/"we"/"you"/"us" to Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
+    slotType: text
+  - name: bic code
+    description: the BIC code of rma holder bank
+    slotType: text
+  - name: SWIFT code
+    description: SWIFT/BIC code of the RMA Counterparty bank
     slotType: text
   - name:  tenor
     description: the length of time the transaction will be held with the bank, for example (36 months, 180 days, 360 days)
@@ -38,5 +38,5 @@ slots:
     description: expiry date of the transaction
     slotType: date
 action: rma_pricing
-slot_expression: ("bank entity name" and "country of bank" and ("country of service provider" or "bic code")) or ("SWIFT code" and ("country of service provider" or "bic code"))
-hints: User must state clearly the serving HSBC entity (e.g. HSBC Singapore) and client’s counterparty bank name and country, and give a context (e.g. if we can accept LC)
+slot_expression: ("bank entity name" and "country of bank" and ("country of rma holder" or "bic code")) or ("SWIFT code" and ("country of rma holder" or "bic code"))
+hints: User must state clearly the serving HSBC entity (e.g. HSBCSG) and client’s counterparty bank name and country, and give a context (e.g. if there is RMA with us)
