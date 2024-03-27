@@ -32,7 +32,7 @@ def convert_folder_dict_list_like(dict_tree, prefix=""):
             })
         else:
             current_layer_folders.append({"label": key, "value": prefix+'/'+key})
-    return current_layer_folders
+    return sorted(current_layer_folders, key=lambda x: x['label'])
 
 
 if __name__ == '__main__':
