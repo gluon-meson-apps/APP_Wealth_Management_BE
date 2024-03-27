@@ -7,7 +7,7 @@ from loguru import logger
 
 from nlu.base import EntityExtractor
 from nlu.forms import FormStore, Form
-from nlu.intent_with_entity import Entity, SlotType, Slot
+from nlu.intent_with_entity import Entity, SlotType, Slot, Intent
 from prompt_manager.base import PromptManager
 from tracker.context import ConversationContext
 from utils.common import parse_str_to_bool
@@ -46,30 +46,45 @@ class LLMEntityExtractor(EntityExtractor):
 
     def construct_messages(
         self,
-        user_input,
-        intent,
+        intent: Intent,
         form: Form,
         conversation_context: ConversationContext,
         preparation: ChatMessagePreparation,
     ) -> None:
+        self.construct_messages_cls(
+            self.slot_extraction_prompt.template,
+            intent.name,
+            form,
+            conversation_context.get_history().format_string_with_file_name(),
+            conversation_context.get_file_name(),
+            preparation,
+        )
+
+    @classmethod
+    def construct_messages_cls(
+        cls,
+        slot_extraction_prompt,
+        intent,
+        form: Form,
+        chat_history: str,
+        file_names: str,
+        preparation: ChatMessagePreparation,
+    ):
         slots = form.get_available_slots_str()
         entity_list = form.get_slot_name_list()
+
         # todo: currently we do latest request summary twice(here and new topic check),
         #  should consider provide the latest request summary in one place.
         preparation.add_message(
             "system",
-            self.slot_extraction_prompt.template,
-            user_intent=intent.name,
-            chat_history=conversation_context.get_history().format_string_with_file_name(),
+            slot_extraction_prompt,
+            user_intent=intent,
+            chat_history=chat_history,
             entity_list=entity_list,
             intent_description=form.intent_description,
             entity_types_and_values=slots,
-            file_names=conversation_context.get_file_name(),
+            file_names=file_names,
         )
-        # for example in self.examples:
-        #     preparation.add_message("user", example[0])
-        #     preparation.add_message("assistant", example[1])
-        # preparation.add_message("user", user_input + f" (with file name :{conversation_context.get_file_name()})")
 
     def prepare_examples(self):
         examples = [
@@ -85,8 +100,7 @@ class LLMEntityExtractor(EntityExtractor):
         return examples
 
     async def extract_entity(self, conversation_context: ConversationContext) -> List[Entity]:
-        user_input = conversation_context.current_user_input
-        intent = conversation_context.current_intent
+        intent: Intent = conversation_context.current_intent
         form = self.form_store.get_form_from_intent(intent)
         if not form:
             logger.debug(f"this intent [{intent.name}] does not need to extract entity")
@@ -102,7 +116,7 @@ class LLMEntityExtractor(EntityExtractor):
             conversation_context.current_intent_slots = []
             return []
         conversation_context.current_intent_slots = form.slots
-        self.construct_messages(user_input, intent, form, conversation_context, chat_message_preparation)
+        self.construct_messages(intent, form, conversation_context, chat_message_preparation)
         chat_message_preparation.log(logger)
         entities = (
             await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=1024, jsonable=True)

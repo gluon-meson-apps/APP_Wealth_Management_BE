@@ -1,13 +1,15 @@
-import json
-
 import asyncio
-
-import pytest
+import json
 import os
 
-from dialog_manager.base import DialogManagerFactory
+import pytest
+
+from nlu.forms import FormStore
+from nlu.intent_config import IntentListConfig
+from nlu.intent_with_entity import Intent
+from nlu.llm.entity import LLMEntityExtractor
 from prompt_manager.base import BasePromptManager
-from utils.common import extract_json_from_code_block
+from resources.util import get_resources
 
 os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
@@ -27,56 +29,47 @@ params = {
 
 scenario_model_registry = DefaultScenarioModelRegistryCenter()
 
-def construct_chat_message(chat_history):
-    from loguru import logger
-    from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
+user_intent="""rma_checking"""
+def get_construct_chat_message(user_intent):
+    def construct_chat_message(chat_history):
+        from loguru import logger
+        from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 
-    entity_list="""bank entity name, country of bank, country code of bank, country of rma holder, bic code, SWIFT code"""
-    user_intent="""rma_checking"""
-    intent_description="""Check RMA status of the RMA holder bank and RMA counterparty bank. For example, "Hi TB Guru, do we have RAM with PIRAEUS Bank SA in Greece?" -> (we is RMA Holder, PIRAEUS Bank SA in Greece is RMA counterparty), "Hi TB Guru, do you have RAM with OSABJPJS?" -> (you is RMA Holder, OSABJPJS is the SWIFT code of RMA counterparty)"""
-    entity_types_and_values=""" * bank entity name: the bank name of the RMA Counterparty other than HSBC Singapore, entity_type：text, entity_optional：True
- * country of bank: the full country name of the RMA Counterparty bank, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China), entity_type：text, entity_optional：True
- * country code of bank: the country abbreviation code of the RMA Counterparty bank country, which is 2 or 3 character. for example VNM, CHN, US, entity_type：text, entity_optional：True
- * country of rma holder: must be country name or  "we" or "you" or "us", convert "we"/"you"/"us" to Singapore, for example ("we" or "you" or "us" -> Singapore),(HSBC country -> country), entity_type：text, entity_optional：True
- * bic code: the BIC code of rma holder bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM; this is conflict with country of rma holder, choose either of them, entity_type：text, entity_optional：True
- * SWIFT code: SWIFT/BIC code of the RMA Counterparty bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH, this is conflict with bank entity name and country of bank, choose either of them, entity_type：text, entity_optional：True"""
+        entity_list="""bank entity name, country of bank, country code of bank, country of rma holder, bic code, SWIFT code"""
+        user_intent="""rma_checking"""
+        intent_description="""Check RMA status of the RMA holder bank and RMA counterparty bank. For example, "Hi TB Guru, do we have RAM with PIRAEUS Bank SA in Greece?" -> (we is RMA Holder, PIRAEUS Bank SA in Greece is RMA counterparty), "Hi TB Guru, do you have RAM with OSABJPJS?" -> (you is RMA Holder, OSABJPJS is the SWIFT code of RMA counterparty)"""
+        entity_types_and_values=""" * bank entity name: the bank name of the RMA Counterparty other than HSBC Singapore, entity_type：text, entity_optional：True
+     * country of bank: the full country name of the RMA Counterparty bank, it may appear after bank name or follow bank name with dash, for example (Greece, PIRAEUS Bank SA - Greece),(Hong Kong, AIA COMPANY LIMITED Hong Kong),(China, SCOTIABANK CHILE in China), entity_type：text, entity_optional：True
+     * country code of bank: the country abbreviation code of the RMA Counterparty bank country, which is 2 or 3 character. for example VNM, CHN, US, entity_type：text, entity_optional：True
+     * country of rma holder: must be country name or  "we" or "you" or "us", convert "we"/"you"/"us" to Singapore, for example ("we" or "you" or "us" -> Singapore),(HSBC country -> country), entity_type：text, entity_optional：True
+     * bic code: the BIC code of rma holder bank, for example HKBAAU2S, HSBCIDJA, HSBCPHMM; this is conflict with country of rma holder, choose either of them, entity_type：text, entity_optional：True
+     * SWIFT code: SWIFT/BIC code of the RMA Counterparty bank, for example BBDAHKHX, UOVBHKHH, PNBPHKHH, this is conflict with bank entity name and country of bank, choose either of them, entity_type：text, entity_optional：True"""
 
 
-    chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation = ChatMessagePreparation()
+        intent_config_file_path = get_resources("scenes")
+        form = FormStore(IntentListConfig.from_scenes(intent_config_file_path)).get_form_from_intent(Intent(name=user_intent))
 
-    first_prompt = BasePromptManager().load("slot_extraction").template
-    chat_message_preparation.add_message(
-        'system',
-        first_prompt,
-            entity_list=entity_list,
-            user_intent=user_intent,
+        first_prompt = BasePromptManager().load("slot_extraction").template
+        LLMEntityExtractor.construct_messages_cls(
+            first_prompt,
+            user_intent,
+            form=form,
             chat_history=chat_history,
-            intent_description=intent_description,
-            entity_types_and_values=entity_types_and_values,
-            file_names="None"
+            file_names="None",
+            preparation=chat_message_preparation
         )
 
-    chat_message_preparation.log(logger)
-    chat_params = chat_message_preparation.to_chat_params()
-    return chat_params, first_prompt
+        chat_message_preparation.log(logger)
+        chat_params = chat_message_preparation.to_chat_params()
+        return chat_params, first_prompt
+    return construct_chat_message
 
 @pytest.fixture(scope="session")
 async def chat_model():
     print("get_chat_model")
     model = await scenario_model_registry.get_model('llm_entity_extractor')
     return model
-
-
-chat_history1="""user: do IISODWID have RMA relationship with shanghai bank
-assistant: Dear user, to assist you better with your query, could you please provide the SWIFT/BIC code of the shanghai bank? This code is unique to each bank and will help us accurately determine the RMA relationship status. For example, the SWIFT/BIC code could be something like BBDAHKHX, UOVBHKHH, PNBPHKHH.
-user: PNBPAWHH
-assistant: the bank 'shanghai bank PNBPAWHH' cannot be found in the Counterparty Bank file, please do further checks.
-user: sorry, actually I mean PNBPAHHI
-assistant: We have RMA relationship with shanghai bank and with code PNBPAHHI
-user: I need to check another bank
-assistant: Dear user, to assist you better with your query, could you please provide the SWIFT/BIC code of counterparty bank. and bic code of rma holder bank
-user: I don't know the SWIFT code for counterparty bank, but the bank country is China; HAAU2S for rma holder
-"""
 
 @pytest.mark.parametrize("chat_history, response, confused_fields, retry_count, minimal_success_count", [
     ("""user: do IISODWID have RMA relationship with shanghai bank
@@ -137,7 +130,7 @@ user: please direct use country British Columbia Interior to check, don't replac
 ])
 async def test_extract_entity_from_history(chat_history, response, confused_fields, retry_count, minimal_success_count, chat_model):
 
-    chat_params, _ = construct_chat_message(chat_history)
+    chat_params, _ = get_construct_chat_message(user_intent)(chat_history)
 
     results = []
     actual_values = []
@@ -165,25 +158,3 @@ async def test_extract_entity_from_history(chat_history, response, confused_fiel
             return
 
     assert sum(results) >= minimal_success_count, f"results: {results}"
-
-
-expected = """"""
-previous_output = """{
-    "bank entity name": "shanghai bank",
-    "country of bank": "",
-    "country code of bank": "",
-    "country of rma holder": "Singapore",
-    "bic code": "",
-    "SWIFT code": "PNBPAWHH"
-}"""
-
-def get_params():
-    from tests.e2e.template_test_from_log import check_json_result
-    chat_params, prompt_template = construct_chat_message()
-    result = ""
-    if params['jsonable']:
-        result = 'pass' if check_json_result(expected, previous_output) else 'fail'
-    return use_case, scenario, prompt_template, chat_params["text"], json.dumps(params), previous_output, result
-
-if __name__ == '__main__':
-    asyncio.run(main())
