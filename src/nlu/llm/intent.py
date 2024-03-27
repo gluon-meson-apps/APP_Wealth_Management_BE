@@ -165,7 +165,7 @@ class LLMIntentClassifier(IntentClassifier):
         # intent confuse confirm
         if conversation.is_confused_with_intents():
             intent = await self.intent_choosing_confirmer.confirm(conversation, conversation.session_id)
-            conversation.confused_intents_resolved()
+            conversation.confused_intents_resolved(intent)
             if intent:
                 logger.info(f"session {conversation.session_id}, intent: {intent}")
                 intent_config = self.intent_list_config.get_intent(intent)

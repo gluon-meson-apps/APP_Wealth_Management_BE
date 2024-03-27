@@ -295,11 +295,12 @@ class ConversationContext:
     def is_confused_with_intents(self):
         return self.state == "asking_user_for_intent_choosing"
 
-    def confused_intents_resolved(self):
+    def confused_intents_resolved(self, intent: Optional[str]):
         self.state = ""
         self.confused_intents = []
-        self.history.delete_latest_conversation_history()
-        self.current_user_input = self.history.get_latest()
+        if intent:
+            self.history.delete_latest_conversation_history()
+            self.current_user_input = self.history.get_latest()
 
     def check_is_email_request(self):
         return self.is_email_request
