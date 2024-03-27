@@ -27,8 +27,8 @@ with st.sidebar:
         os.environ[key] = db[key]
 
     st.write("db name:", db['GLUON_MESON_SDK_LOG_DB_DATABASE'])
-    rootdir = './tests/e2e/generated'
-    root_folder = st.text_input("Enter log id", rootdir)
+    root_folder_path = 'tests/e2e/generated'
+    root_folder = st.text_input("Enter root folder path", root_folder_path)
 
     nodes = get_nodes(root_folder)
     return_select = tree_select(nodes)
