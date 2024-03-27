@@ -115,7 +115,7 @@ WHERE id = '{email.id}'
                 )
                 connection.commit()
 
-    def __init__(self, config: EmailBotSettings, graph: Graph, interval=300):
+    def __init__(self, config: EmailBotSettings, graph: Graph, interval=10):
         self.thought_agent_endpoint = config.THOUGHT_AGENT_ENDPOINT
         self.interval = interval
         self.database = EmailBot.DatabaseConnection(config.email_db)

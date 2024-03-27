@@ -38,7 +38,7 @@ class AtomService:
             raise ValueError("GLUON_MESON_ATOM_HOMEPAGE_URL is not set")
 
     def generate_feedback_link(self, message_id: str) -> str:
-        return f"{self.home_url}/copilots/chat/{self.app_id}/feedback/{message_id}"
+        return f"{self.home_url}/assistants/chat/{self.app_id}/feedback/{message_id}"
 
     async def create_message(
         self,
