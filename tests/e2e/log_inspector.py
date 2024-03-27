@@ -30,9 +30,11 @@ with st.sidebar:
 
     st.write("db name:", db['GLUON_MESON_SDK_LOG_DB_DATABASE'])
     root_folder_path = 'tests/e2e/generated'
+
     root_folder = st.text_input("Enter root folder path", root_folder_path)
 
     nodes = get_nodes(root_folder)
+
     return_select = tree_select(nodes)
     st.write(return_select)
 
@@ -44,6 +46,7 @@ with col1:
 
     if st.button("Generate Fix Test"):
         generate_fix_test([log_id])
+        get_nodes.clear()
     st.write(f"Fix test {log_id} generated")
     if return_select and return_select['checked']:
         with open(root_folder + "/" + return_select['checked'][-1], "r") as f:
