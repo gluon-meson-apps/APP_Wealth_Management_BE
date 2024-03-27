@@ -28,17 +28,20 @@ class DownstreamMessageTypeEnum(str, enum.Enum):
 class AtomService:
     def __init__(self):
         self.app_id = os.getenv("GLUON_MESON_ATOM_APP_ID")
+        self.assistant_id = os.getenv("GLUON_MESON_ASSISTANT_ID")
         self.api_url = os.getenv("GLUON_MESON_ATOM_API_URL")
         self.home_url = os.getenv("GLUON_MESON_ATOM_HOMEPAGE_URL")
         if not self.app_id:
             raise ValueError("GLUON_MESON_ATOM_APP_ID is not set")
+        if not self.assistant_id:
+            raise ValueError("GLUON_MESON_ASSISTANT_ID is not set")
         if not self.api_url:
             raise ValueError("GLUON_MESON_ATOM_API_URL is not set")
         if not self.home_url:
             raise ValueError("GLUON_MESON_ATOM_HOMEPAGE_URL is not set")
 
     def generate_feedback_link(self, message_id: str) -> str:
-        return f"{self.home_url}/assistants/chat/{self.app_id}/feedback/{message_id}"
+        return f"{self.home_url}/assistants/chat/{self.assistant_id}/feedback/{message_id}"
 
     async def create_message(
         self,
