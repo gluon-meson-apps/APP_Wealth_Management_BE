@@ -1,8 +1,11 @@
 name: br_extension_qa
-display_name: Signatory Update (Global Requirements Database) (SURE) Q&A
+display_name: Board Resolution (BR) Signatory Requirement (SURE) checking
 business: true
 ignore_previous_slots: true
-description: answer instruction for entity and BR supporting documents requirements for New Authorised Signatory related questions from user input, the required supporting documents include LETTERHEAD and ID/Passport Copies and Proof of Residential Address and Specimen Signature
+description: >
+  answer instruction for entity and BR supporting documents requirements for New Authorised Signatory related questions from user input, the required supporting documents include LETTERHEAD and ID/Passport Copies and Proof of Residential Address and Specimen Signature
+  Different HSBC entity/country has different requirements on the signatory and supporting document (SURE) requirements for Board Resolution document submission.
+  User will ask query like what kind of supporting document is required for BR in country-A, and what are the detail requirements when submitting the supporting documents like (Letterhead, ID/Passport Copies, Proof of Residential Address, Specimen Signature etc).
 display_examples:
   - Under the context of SURE, please check what is the document requirement for New Authorised Signatory in Australia?
   - Under the context of SURE, is there any additional remarks about the requirement on ID/Passport in Australia?"

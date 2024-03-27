@@ -1,6 +1,6 @@
 name: br_file_qa
-display_name: GPS Board Resolution Validation
-description: according to provided board resolution file, answer the questions from user input
+display_name: Board Resolution (BR) documentation section checking
+description: according to provided board resolution file, answer the questions from user input. user would like to check the board resolution (BR) document on a particular section.
 business: true
 slots:
   - name: country

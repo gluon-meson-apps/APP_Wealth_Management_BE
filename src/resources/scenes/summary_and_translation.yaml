@@ -1,6 +1,6 @@
 name: summary_and_translation
-display_name: Call Report Writer (Summary/ Translation)
-description: summarize or translate a paragraph
+display_name: Summary or Translation request
+description: summarize or translate a paragraph, User can input or upload a file to TB Guru for summarize the content or translate to another language
 business: true
 display_examples:
   - Please translate the content of attached file into English.

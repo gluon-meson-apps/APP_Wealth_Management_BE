@@ -1,9 +1,0 @@
-name: chitchat
-description: chitchat with bot
-business: false
-slots: []
-action: chitchat
-display_examples:
-  - hello
-  - who are you
-  - hi

@@ -1,6 +1,6 @@
 name: br_file_validation
-display_name: GPS Board Resolution Validation (rule provided by user)
-description: according to BR (board resolution) training document or user provided rules, help to check if the provided br file is good enough
+display_name: Board Resolution (BR) documentation validation
+description: according to BR (board resolution) training document or user provided rules, help to check if the provided BR file is good enough.
 business: true
 action: br_file_validation
 slots:

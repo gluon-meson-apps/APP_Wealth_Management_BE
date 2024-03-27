@@ -1,7 +1,7 @@
 name: file_batch_qa
-display_name: GPS RFP Q&A
+display_name: Request for Proposal (RFP) Q&A
 business: true
-description: Batch Q&A about general questions based on csv/excel file
+description: Batch Q&A about general questions based on csv/excel file. Answer the RFP related queries, raised by a client from country X, which are put inside an excel file.
 display_examples:
   - Pls answer the RFP related query from Brazil client specified in the attached excel.
 examples:

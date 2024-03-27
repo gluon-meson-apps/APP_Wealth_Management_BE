@@ -1,6 +1,6 @@
 name: wcs_data_query
-display_name: GTRF Working Capital Benchmarks
-description: get WCS data and generate insight
+display_name: GTRF Working Capital Solution (WCS) Queries
+description: get WCS data and generate insight, Base on the Trade Working Capital Solution (WCS) data to generate insight and format output in ppt.
 business: true
 display_examples:
   - >

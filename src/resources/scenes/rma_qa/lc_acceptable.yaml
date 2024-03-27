@@ -1,10 +1,11 @@
 name: lc_acceptable
-display_name: GTRF RMA & Limits Validation
+display_name: Trade Service (e.g. Letter of Credit (LC)) acceptance and pricing/limit checking
 business: true
 ignore_previous_slots: true
 description: check whether HSBC can accept an LC from the requested/issued bank, for example, "Hi TB Guru, can we accept LC service requested by BANK OF INDIA in India?" -> (we is LC service provider, BANK OF INDIA in India is LC service requester), "Hi TB Guru, are you able to accept LC service issued by OSABJPJS?" -> (you is LC service provider, OSABJPJS is LC service requester)
 display_examples:
   - Can you advise if HSBC Singapore can accept a LC requested/issued by a client with counterparty bank XXX in country YYY?
+  - Does HSBC SG accept LC from DBS bank in Hong Kong with the following details?
 examples:
   - Hi TB Guru, I am expecting to receive an LC from Shinhan Bank, Vietnam. Do you have RMA with them?
 slots:
