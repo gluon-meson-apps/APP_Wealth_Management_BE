@@ -28,5 +28,5 @@ slots:
     description: must be country name or "i" or "we" or "you" or "us", the users themselves represent Singapore, for example ("i" or "we" or "you" or "us" -> Singapore),(HSBC country -> country)
     slotType: text
 action: rma_lc_acceptable
-slot_expression: ("bank entity name" and "country of bank" and ("country of service provider" or "bic code")) or ("SWIFT code" and ("country of service provider" or "bic code"))
+slot_expression: (("bank entity name" and "country of bank") or "SWIFT code") and ("country of service provider" or "bic code")
 hints: User must state clearly the serving HSBC entity (e.g. HSBC Singapore) and client’s counterparty bank name and country, and give a context (e.g. if we can accept LC)

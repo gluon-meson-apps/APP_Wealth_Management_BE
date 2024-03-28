@@ -28,5 +28,5 @@ slots:
     description: SWIFT/BIC code of the RMA Counterparty bank; this is conflict with bank entity name and country of bank, choose either of them
     slotType: text
 action: rma_checking
-slot_expression: ("bank entity name" and "country of bank" and ("country of rma holder" or "bic code")) or ("SWIFT code" and ("country of rma holder" or "bic code"))
+slot_expression: (("bank entity name" and "country of bank") or "SWIFT code") and ("country of service provider" or "bic code")
 hints: User must state clearly the serving HSBC entity (e.g. HSBCSG) and client’s counterparty bank name and country, and give a context (e.g. if there is RMA with us)
