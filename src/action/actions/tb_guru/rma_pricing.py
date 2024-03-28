@@ -167,7 +167,7 @@ class RMAPricingAction(TBGuruAction):
         ratio = 1
         is_hsbc_group = False
         if "china" == counterparty_bank["country"].lower():
-            extra_fields = {"crr": counterparty_bank["crr"], "entity_name": counterparty_bank["entity_name"],
+            extra_fields = {"crr": counterparty_bank["crr"], "cbid": counterparty_bank["cbid"],
                             "country_classification": counterparty_bank["country_credit_classification"]}
             query = f"search the China {pricing_type} price #extra infos: fields to be queried: {extra_fields}"
         else:
