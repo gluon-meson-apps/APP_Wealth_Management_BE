@@ -67,7 +67,16 @@ tools = [{
 }]
 
 
-def is_float(string):
+# {
+#     "type": "function",
+#     "function": {
+#         "name": "validate_bank_line",
+#         "description": "validate/check bank line",
+#     }
+# }]
+
+
+def is_float(string) -> bool:
     try:
         float(string)
         return True
@@ -75,11 +84,10 @@ def is_float(string):
         return False
 
 
-def validate_rma_status(counterparty_bank, rma_country, bic_code):
+def validate_rma_status(counterparty_bank, rma_country, bic_code) -> bool:
     if rma_country:
         for key, value in counterparty_bank.items():
             if key.startswith(rma_country.lower()) and value and value.lower() != "no":
-                logger.info("rma check {} {}", key, value)
                 return True
     if bic_code:
         for key, value in counterparty_bank.items():
@@ -88,7 +96,7 @@ def validate_rma_status(counterparty_bank, rma_country, bic_code):
     return False
 
 
-def validate_credit_status(counterparty_bank):
+def validate_credit_status(counterparty_bank) -> bool:
     credit_status = counterparty_bank["confirmation/negotiation_credit_status"]
     return credit_status and "PROCEED WITHIN DELEGATED AUTHORITY".lower() == credit_status.lower()
 
@@ -117,6 +125,36 @@ def validate_counterparty_bank(counterparty_bank, all_banks, intent,
         return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
 
 
+lc_amount_mapping = {
+    (0.1, 1.2): 20000000,
+    (2.1, 3.3): 10000000,
+    (4.1, 6.1): 5000000,
+    (6.2, 9): 1500000,
+}
+
+
+def validate_bank_line(counterparty_bank, validity, tenor, amount) -> bool:
+    credit_classification = counterparty_bank["country_credit_classification"]
+    maturity = validity.months + tenor.months
+    if credit_classification and credit_classification.lower() in ["prm", "nor", "fair"]:
+        if maturity > 12:
+            return False
+        if amount:
+            crr = counterparty_bank["crr"]
+            max_amount = next((value for key, value in lc_amount_mapping.items() if key[0] <= crr <= key[1]), None)
+            if max_amount and amount > max_amount:
+                return False
+    if credit_classification and credit_classification.lower() in ["cbc", "rst", "con"]:
+        if maturity > 12:
+            return False
+        if tenor.days > 180:
+            return False
+        if amount and amount > 500000:
+            return False
+    # todo: check Business requirement
+    return False
+
+
 class RMAPricingAction(TBGuruAction):
     def __init__(self):
         super().__init__()
@@ -125,6 +163,7 @@ class RMAPricingAction(TBGuruAction):
         return "rma_pricing"
 
     async def search_pricing(self, counterparty_bank, tenor, session_id, pricing_type: str = "confirmation"):
+        rate_info = {}
         ratio = 1
         is_hsbc_group = False
         if "china" == counterparty_bank["country"].lower():
@@ -145,10 +184,9 @@ class RMAPricingAction(TBGuruAction):
         logger.info(f"search query: {query}")
 
         response = await self.unified_search.search(SearchParam(query=query), session_id)
-        if len(response) == 0 or response[0].is_empty():
-            return None
-        else:
+        if len(response) > 0 and response[0].total > 0:
             item = response[0].items[0]
+            rate_info.update({"reference": item})
             field_mapping = {
                 (1, 30): "30_days",
                 (91, 180): "180_days",
@@ -162,11 +200,13 @@ class RMAPricingAction(TBGuruAction):
                 if start <= tenor.days <= end:
                     rate_value = item.dict().get(field)
                     if is_float(rate_value):
-                        return format(float(rate_value) / ratio, ".4f")
-                    return rate_value
-            return None
+                        rate_value = format(float(rate_value) / ratio, ".4f")
+                    rate_info.update({"rate": rate_value})
+        return rate_info
 
     async def execute_function_call(self, counterparty_bank, tenor, session_id, message):
+        rate = None
+        bank_line_validation_result = None
         for function_item in message:
             if function_item["type"] == "function":
                 if function_item["function"]["name"] == "search_pricing":
@@ -184,6 +224,7 @@ class RMAPricingAction(TBGuruAction):
         expiry_date = dateparser.parse(entity_dict["expiry date"])
         issuance_date = dateparser.parse(entity_dict["issuance date"])
         tenor = datetime.now() - dateparser.parse(entity_dict["tenor"])
+        validity = expiry_date - issuance_date
         logger.info("time info {} {} {}", expiry_date, issuance_date, tenor.days)
 
         fields_to_extract = ['bank entity name', 'country of bank', 'SWIFT code']
@@ -236,14 +277,17 @@ class RMAPricingAction(TBGuruAction):
 
         # calculate confirmation/pricing rate and format replay template
         if isinstance(result, list):
-            rate = await self.execute_function_call(counterparty_bank_dict, tenor, context.conversation.session_id,
-                                                    result)
+            rate_info = await self.execute_function_call(counterparty_bank_dict, tenor,
+                                                                    context.conversation.session_id,
+                                                                    result)
+            if rate_info.get("reference"):
+                all_banks.append(rate_info.get("reference"))
             chat_message_preparation = ChatMessagePreparation()
             chat_message_preparation.add_message(
                 "user",
                 prompt,
                 counterparty_bank=json.dumps(counterparty_bank_dict),
-                rate=rate,
+                rate=rate_info.get("rate"),
                 user_input=user_input,
                 country_of_rma_or_bic=country_of_rma_holder or bic_code
             )
