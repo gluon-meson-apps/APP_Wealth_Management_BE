@@ -34,6 +34,7 @@ def main():
             {%- set round_name = data['round_name'] %}
             {%- if round_name.startswith('unit_test') %} {{ round_name }}, {%- endif %}
         {%- endfor %}],
+        "all_local_vars": locals(),
     }
 
 def logs():

@@ -24,6 +24,8 @@ def folder_to_dict(root_folder):
 def convert_folder_dict_list_like(dict_tree, prefix=""):
     current_layer_folders = []
     for key, value in dict_tree.items():
+        if key in ('tmp', "__pycache__", ".pytest_cache", ".git", ".idea", ".vscode"):
+            continue
         if isinstance(value, dict):
             current_layer_folders.append({
                 "label": key,
