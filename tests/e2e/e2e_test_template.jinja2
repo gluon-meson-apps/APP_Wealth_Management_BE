@@ -10,7 +10,7 @@ def main():
       "{{ key }}": {{ value }},
     {%- else %}
         {%- if value is not none %}
-      "{{ key }}": """{{ value }}""",
+      "{{ key }}": """{{ value | string | replace('"', '\\"') }}""",
         {%- endif %}
     {%- endif %}
     {%- endfor %}

@@ -86,7 +86,7 @@ with col1:
 
         for round_name, scenarios in result.items():
             if re.fullmatch(round_pattern, round_name):
-                with st.expander(round_name):
+                with st.expander(f"{round_name}: {scenarios['user'][:150]}..."):
                     for scenario_name, scenario_result in scenarios.items():
                         scenario_name_short = scenario_name.split('.')[-1]
                         st.text_area(scenario_name_short, scenario_result, key=scenario_name_short+'text_area'+round_name)

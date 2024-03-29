@@ -16,9 +16,15 @@ def main():
     """,
         {%- for key, value in data.items() %}
             {%- if value is not none and key not in keys_not_to_render_automatically %}
+                {%- if key.find("overall_unified_search") == -1 %}
         {{ value[1] }}.__name__: """
         {{ value[0] }}
     """,
+                {% else %}
+        "{{ value[1] }}": """
+        {{ value[0] }}
+    """,
+                {%- endif%}
             {%- endif %}
         {%- endfor %}
     }

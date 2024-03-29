@@ -45,7 +45,7 @@ class LogsGenerator:
         other_scenarios = inner_df[~inner_df['scenario'].isin(['overall'])]. \
             sort_values(by=['created_at'])['data'].tolist()
         other_scenarios_data = {x[0]: x[1:-1] for x in other_scenarios}
-        other_scenarios_imports = [x[-1] for x in other_scenarios]
+        other_scenarios_imports = [x[-1] for x in other_scenarios if x[-1].find("overall_unified_search") == -1]
 
         round = {
             "user": over_all['params']['question'],

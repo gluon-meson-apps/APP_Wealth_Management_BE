@@ -15,7 +15,7 @@ def construct_chat_message():
     from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
     {% for data in data_list %}
         {%- for key, value in data["kwargs"].items() %}
-    {{ key }}="""{{ value }}"""
+    {{ key }}="""{{ value | string | replace('"', '\\"') }}"""
         {%- endfor %}
 
     {% endfor %}
@@ -28,7 +28,7 @@ def construct_chat_message():
     chat_message_preparation.add_message(
         '{{ data['role'] }}',
         {%- if loop.index != 1 %}
-        """{{ data["template"] }}""",
+        """{{ data["template"] | string | replace('"', '\\"') }}""",
         {%- else %}
         first_prompt,
         {%- endif %}
