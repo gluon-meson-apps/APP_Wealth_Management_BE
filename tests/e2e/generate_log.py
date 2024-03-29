@@ -55,8 +55,8 @@ data_list = [
     }]
 
 # params_list = inner_df['params'].apply(process_one_params).tolist()
-def generate_one_log(session_name, data_list, generate_dir_name='generated'):
-    session_name = standardize_session_name(session_name)
+def generate_one_log(session_name, data_list, generate_dir_name='generated', prefx=""):
+    session_name = standardize_session_name(session_name, prefx)
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     with open(f"{cur_dir}/e2e_log_template.jinja2", "r") as rf:
         template = rf.read()

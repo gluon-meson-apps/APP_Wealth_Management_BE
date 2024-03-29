@@ -15,10 +15,11 @@ def generate_fix_test(log_ids: list[str]):
 
     log_id_filter = get_log_id_filter(log_ids)
 
-    E2eTestGenerator(connection, get_log_id_filter=log_id_filter).process()
-    LogsGenerator(connection, get_log_id_filter=log_id_filter).process()
-    UnitTestGenerator(connection, get_log_id_filter=log_id_filter).process()
+    prefix_for_session_name = "__l__"
+    E2eTestGenerator(connection, get_log_id_filter=log_id_filter, prefix_for_session_name=prefix_for_session_name).process()
+    LogsGenerator(connection, get_log_id_filter=log_id_filter, prefix_for_session_name=prefix_for_session_name).process()
+    UnitTestGenerator(connection, get_log_id_filter=log_id_filter, prefix_for_session_name=prefix_for_session_name).process()
 
 
 if __name__ == "__main__":
-    generate_fix_test(['rma_checking_6'])
+    generate_fix_test(['rma_vietnam'])

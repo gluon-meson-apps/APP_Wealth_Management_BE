@@ -1,5 +1,7 @@
-def standardize_session_name(session_name):
-    return session_name.replace(" ", "_").replace("-", "_")
+def standardize_session_name(session_name, prefix=""):
+    session_name = session_name.replace(" ", "_").replace("-", "_")
+    return f"{prefix}{session_name}"
+
 
 def get_log_id_filter(specific_log_ids: list[str]):
     log_id_filter = ""

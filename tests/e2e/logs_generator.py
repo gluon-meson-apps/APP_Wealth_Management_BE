@@ -4,11 +4,12 @@ from tests.e2e.generate_log import generate_one_log
 
 
 class LogsGenerator:
-    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter=""):
+    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter="", prefix_for_session_name=""):
         self.connection = connection
         self.get_log_id_filter = get_log_id_filter
         self.log_table_name = log_table_name
         self.generate_dir_name = generate_dir_name
+        self.prefix_for_session_name = prefix_for_session_name
 
     def add_round_group_to_df(self, inner_df):
         inner_df = inner_df.sort_values(by=['created_at'])
@@ -23,7 +24,7 @@ class LogsGenerator:
         test_prefix = 'unit_test_' if inner_df['test'].iloc[0] else ''
         retry_overall = f'{test_prefix}round{round_count}_retry_overall_response'
         session_name = inner_df['session_name'].iloc[0]
-        session_name = standardize_session_name(session_name)
+        session_name = standardize_session_name(session_name, self.prefix_for_session_name)
 
         def merge_scenario(row):
             scenario = row.get('scenario')
@@ -74,6 +75,6 @@ class LogsGenerator:
         def log_one_session(row):
             session_name = row.get('session_name')
             data = row.get(0)
-            generate_one_log(session_name, data, self.generate_dir_name)
+            generate_one_log(session_name, data, self.generate_dir_name, self.prefix_for_session_name)
 
         result.apply(log_one_session, axis=1)

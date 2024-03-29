@@ -19,11 +19,12 @@ def get_log_result(module_name):
 
 
 class UnitTestGenerator:
-    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter=""):
+    def __init__(self, connection, log_table_name='model_log', generate_dir_name='generated', get_log_id_filter="", prefix_for_session_name=""):
         self.connection = connection
         self.get_log_id_filter = get_log_id_filter
         self.log_table_name = log_table_name
         self.generate_dir_name = generate_dir_name
+        self.prefix_for_session_name = prefix_for_session_name
     def add_round_group_to_df(self, inner_df):
         inner_df = inner_df.sort_values(by=['created_at'])
         inner_df['round'] = inner_df['scenario'] == 'overall' # 10 hours
@@ -81,7 +82,7 @@ class UnitTestGenerator:
 
     def process(self):
         df = pd.read_sql(f"SELECT * FROM {self.log_table_name} where 1=1" + self.get_log_id_filter, self.connection)
-        df['session_name'] = df['log_id'].apply(lambda x: x.split('___')[-1])
+        df['session_name'] = self.prefix_for_session_name + df['log_id'].apply(lambda x: x.split('___')[-1])
         df['test'] = df['log_id'].apply(lambda x: x.startswith('test__'))
         df = df.groupby('log_id').apply(self.add_round_group_to_df).reset_index(drop=True)
         df.groupby(['session_name']).apply(self.process_one_group)
