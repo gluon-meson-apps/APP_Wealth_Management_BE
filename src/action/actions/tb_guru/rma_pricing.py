@@ -131,28 +131,28 @@ def validate_credit_status(counterparty_bank) -> bool:
     return credit_status and "PROCEED WITHIN DELEGATED AUTHORITY".lower() == credit_status.lower()
 
 
+def create_failure_response(content, intent, references=None) -> ActionResponse:
+    answer = ChatResponseAnswer(
+        messageType=ResponseMessageType.FORMAT_TEXT,
+        content=content,
+        intent=intent,
+        references=references,
+    )
+    return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
+
+
 def validate_counterparty_bank(counterparty_bank, all_banks, intent,
                                bank_info, country_of_rma_holder, bic_code) -> ActionResponse:
     rma_status_validation_result = validate_rma_status(counterparty_bank, country_of_rma_holder, bic_code)
     logger.info("rma status validation result {}", rma_status_validation_result)
     if not rma_status_validation_result:
-        answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT,
-            content=f"HSBC {country_of_rma_holder or bic_code} don't have RMA with '{bank_info}'. Please seek for Trade Transaction Approval (TTA).",
-            intent=intent,
-            references=all_banks,
-        )
-        return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
+        content = f"HSBC {country_of_rma_holder or bic_code} don't have RMA with '{bank_info}'. Please seek for Trade Transaction Approval (TTA)."
+        return create_failure_response(content, intent, all_banks)
 
     credit_status_validation_result = validate_credit_status(counterparty_bank)
     if not credit_status_validation_result:
-        answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT,
-            content="The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).",
-            intent=intent,
-            references=all_banks,
-        )
-        return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
+        content = "The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA)."
+        return create_failure_response(content, intent, all_banks)
 
 
 class RMAPricingAction(TBGuruAction):
@@ -164,7 +164,7 @@ class RMAPricingAction(TBGuruAction):
 
     async def _validate_bank_line(self, model, counterparty_bank, session_id, validity, tenor,
                                   amount: str = None) -> dict:
-        validation_info = {}
+        validation_info = {"reference": [], "result": {}}
         extra_fields = {"country_classification": counterparty_bank["country_credit_classification"]}
         query = f"search the counterparty bank line rule #extra infos: fields to be queried: {extra_fields}"
         response = await self.unified_search.search(SearchParam(query=query), session_id)
@@ -190,7 +190,7 @@ class RMAPricingAction(TBGuruAction):
         return validation_info
 
     async def _search_pricing(self, counterparty_bank, tenor, session_id, pricing_type: str = "confirmation"):
-        rate_info = {}
+        rate_info = {"reference": [], "rate": None}
         ratio = 1
         is_hsbc_group = False
         if "china" == counterparty_bank["country"].lower():
@@ -268,23 +268,14 @@ class RMAPricingAction(TBGuruAction):
         bank_info_str = ', '.join(bank_info.values())
         all_banks = [item for res in response for item in res.items]
         if len(all_banks) == 0:
-            answer = ChatResponseAnswer(
-                messageType=ResponseMessageType.FORMAT_TEXT,
-                content=f"the bank '{bank_info_str}' cannot be found in the Counterparty Bank file, please do further checks.",
-                intent=intent,
-            )
-            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
+            content = f"the bank '{bank_info_str}' cannot be found in the Counterparty Bank file, please do further checks."
+            return create_failure_response(content, intent)
 
         # validate counterparty bank information
         counterparty_bank = next((bank for bank in all_banks if is_float(bank.crr)), None)
         if counterparty_bank is None:
-            answer = ChatResponseAnswer(
-                messageType=ResponseMessageType.FORMAT_TEXT,
-                content=f"the bank '{bank_info_str}' don't have CRR. Please seek for Trade Transaction Approval (TTA).",
-                intent=intent,
-                references=all_banks,
-            )
-            return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
+            content = f"the bank '{bank_info_str}' don't have CRR. Please seek for Trade Transaction Approval (TTA)."
+            return create_failure_response(content, intent, all_banks)
         counterparty_bank_dict = counterparty_bank.dict()
         country_of_rma_holder = entity_dict.get("country of rma holder")
         bic_code = entity_dict.get("bic code")
@@ -311,10 +302,9 @@ class RMAPricingAction(TBGuruAction):
                 chat_model, counterparty_bank_dict, tenor, validity, entity_dict.get("LC amount"), session_id, result)
             logger.info("rma execute function call result, validation_info: {}, rate_info: {}",
                         validation_info.get("result"), rate_info.get("rate"))
-            if validation_info.get("reference"):
-                all_banks.extend(validation_info.get("reference"))
-            if rate_info.get("reference"):
-                all_banks.extend(rate_info.get("reference"))
+            all_banks.extend(validation_info.get("reference", []))
+            all_banks.extend(rate_info.get("reference", []))
+
             if validation_info.get("result") and validation_info.get("result").get("validation_result") is False:
                 failed_reason = validation_info.get("result").get("validation_failed_reason")
                 final_result = f"The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).\n{failed_reason}"
