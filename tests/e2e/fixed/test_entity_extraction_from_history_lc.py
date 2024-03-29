@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from tests.e2e.fixed.tmp.extraction_from_history import get_construct_chat_message, \
+from tests.e2e.fixed.extraction_from_history import get_construct_chat_message, \
     check_entity_extraction_from_history
 
 os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"

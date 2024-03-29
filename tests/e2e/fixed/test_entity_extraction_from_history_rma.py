@@ -1,26 +1,18 @@
-import asyncio
-import json
 import os
 
 import pytest
 
-from nlu.forms import FormStore
-from nlu.intent_config import IntentListConfig
-from nlu.intent_with_entity import Intent
-from nlu.llm.entity import LLMEntityExtractor
-from prompt_manager.base import BasePromptManager
-from resources.util import get_resources
-from tests.e2e.fixed.tmp.extraction_from_history import get_construct_chat_message, \
+from tests.e2e.fixed.extraction_from_history import get_construct_chat_message, \
     check_entity_extraction_from_history
 
 os.environ["GLUON_MESON_CONTROL_CENTER_ENDPOINT"] = "http://bj-3090.private.gluon-meson.tech:18000"
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 
-from tests.e2e.template_test_from_log import check_totally_same_json_result, get_dict_only_with_value_not_empty
-
 scenario = "llm_entity_extractor"
 use_case = "ec9f15ef_d77a_4eeb_9514_3abceae52f0d"
 params = {
+    #top_p: 0.95: 100% 0.7: 100%; 0.2: 100% 5min; 0.05: 100% 4m
+    #temperature: 2: 5/7 sometimes can't generate valid json, somethings can't generate correct result
     "top_p": 0.7,
     "jsonable": True,
     "max_length": 1024,
