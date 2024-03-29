@@ -112,6 +112,7 @@ class ConversationContext:
     ):
         self.is_email_request = False
         self.current_user_input = current_user_input
+        self.current_new_request = None
         self.session_id = session_id if session_id else str(uuid.uuid4())
         self.current_intent = current_user_intent
         self.current_intent_slots: List[Slot] = []

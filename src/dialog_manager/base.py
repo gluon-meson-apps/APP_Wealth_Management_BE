@@ -74,6 +74,7 @@ class BaseDialogManager:
         conversation.start_one_chat()
         logger.info(f"current intent is {conversation.current_intent}")
         conversation.current_user_input = message
+        conversation.current_new_request = None
         conversation.append_user_history(message, first_file_name)
         conversation.add_files(files)
         conversation.add_file_urls(file_urls)

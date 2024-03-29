@@ -182,6 +182,8 @@ class LLMIntentClassifier(IntentClassifier):
             )
             if previous_intent and not start_new_topic:
                 return previous_intent
+            else:
+                conversation.current_new_request = new_request
 
         return await self.classify_intent_until_leaf_or_confused(conversation, None, new_request)
 

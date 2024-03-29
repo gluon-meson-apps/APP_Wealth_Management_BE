@@ -248,7 +248,8 @@ class RMAPricingAction(TBGuruAction):
     async def run(self, context) -> ActionResponse:
         logger.info(f"exec action: {self.get_name()} ")
         intent = context.conversation.current_intent.name
-        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
+        session_id = context.conversation.session_id
+        chat_model = await self.scenario_model_registry.get_model(self.scenario_model, session_id)
         entity_dict = context.conversation.get_simplified_entities()
         expiry_date = dateparser.parse(entity_dict["expiry date"])
         issuance_date = dateparser.parse(entity_dict["issuance date"])
@@ -261,7 +262,7 @@ class RMAPricingAction(TBGuruAction):
         query = f"search the counterparty bank #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
 
-        response = await self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
+        response = await self.unified_search.search(SearchParam(query=query), session_id)
         logger.info(f"search response: {response}")
 
         bank_info_str = ', '.join(bank_info.values())
@@ -270,7 +271,7 @@ class RMAPricingAction(TBGuruAction):
             answer = ChatResponseAnswer(
                 messageType=ResponseMessageType.FORMAT_TEXT,
                 content=f"the bank '{bank_info_str}' cannot be found in the Counterparty Bank file, please do further checks.",
-                intent=context.conversation.current_intent.name,
+                intent=intent,
             )
             return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
 
@@ -287,12 +288,12 @@ class RMAPricingAction(TBGuruAction):
         counterparty_bank_dict = counterparty_bank.dict()
         country_of_rma_holder = entity_dict.get("country of rma holder")
         bic_code = entity_dict.get("bic code")
-        validation_response = validate_counterparty_bank(counterparty_bank_dict, all_banks, intent,
-                                                         bank_info_str, country_of_rma_holder, bic_code)
+        validation_response = validate_counterparty_bank(
+            counterparty_bank_dict, all_banks, intent, bank_info_str, country_of_rma_holder, bic_code)
         if validation_response:
             return validation_response
 
-        user_input = context.conversation.current_user_input
+        user_input = context.conversation.current_new_request if context.conversation.current_new_request else context.conversation.current_user_input
         chat_message_preparation = ChatMessagePreparation()
         chat_message_preparation.add_message(
             "user",
@@ -306,10 +307,8 @@ class RMAPricingAction(TBGuruAction):
 
         # execute function and format replay template
         if isinstance(result, list):
-            validation_info, rate_info = await self._execute_function_call(chat_model, counterparty_bank_dict, tenor,
-                                                                           validity, entity_dict.get("LC amount"),
-                                                                           context.conversation.session_id,
-                                                                           result)
+            validation_info, rate_info = await self._execute_function_call(
+                chat_model, counterparty_bank_dict, tenor, validity, entity_dict.get("LC amount"), session_id, result)
             logger.info("rma execute function call result, validation_info: {}, rate_info: {}",
                         validation_info.get("result"), rate_info.get("rate"))
             if validation_info.get("reference"):
@@ -318,7 +317,7 @@ class RMAPricingAction(TBGuruAction):
                 all_banks.extend(rate_info.get("reference"))
             if validation_info.get("result") and validation_info.get("result").get("validation_result") is False:
                 failed_reason = validation_info.get("result").get("validation_failed_reason")
-                final_result = f"The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).{failed_reason}"
+                final_result = f"The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).\n{failed_reason}"
             else:
                 chat_message_preparation = ChatMessagePreparation()
                 chat_message_preparation.add_message(
