@@ -49,10 +49,7 @@ class RMACheckingAction(TBGuruAction):
 
         response = await self.unified_search.search(SearchParam(query=query), context.conversation.session_id)
         logger.info(f"search response: {response}")
-        all_banks = []
-        for item in response:
-            all_banks.extend(item.items)
-
+        all_banks = [item for res in response for item in res.items]
         if len(all_banks) == 0:
             bank_name = " ".join(json.loads(bank_info).values())
             answer = ChatResponseAnswer(
@@ -67,10 +64,8 @@ class RMACheckingAction(TBGuruAction):
         chat_message_preparation.add_message(
             "user",
             prompt,
-            country_of_rma_holder=entity_dict["country of rma holder"]
-            if "country of rma holder" in entity_dict.keys()
-            else "None",
-            bic_code=entity_dict["bic code"] if "bic code" in entity_dict.keys() else "None",
+            country_of_rma_holder=entity_dict.get("country of rma holder"),
+            bic_code=entity_dict.get("bic code"),
             all_banks=all_banks_str,
             bank_info=bank_info,
             user_input=context.conversation.current_user_input,
@@ -80,14 +75,10 @@ class RMACheckingAction(TBGuruAction):
         result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
         logger.info(f"chat result: {result}")
 
-        references = []
-        for res in response:
-            references += res.items
-
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,
             content=result,
             intent=context.conversation.current_intent.name,
-            references=references,
+            references=all_banks,
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
