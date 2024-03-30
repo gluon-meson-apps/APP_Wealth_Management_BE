@@ -105,7 +105,6 @@ with col1:
 
 with col2:
     # st.write(current_file)
-
     if return_select and return_select['checked']:
         file = root_folder + "/" + return_select['checked'][-1]
         if st.session_state.get('current_file', None):
@@ -117,7 +116,11 @@ with col2:
                 with open(file, "w") as wf:
                     wf.write(the_code["text"])
     if the_code and the_code["type"] == "submit":
-        module_name = package + return_select['checked'][-1].replace('/', ".").replace(".py", "")
+
+        file = package + return_select['checked'][-1]
+        if st.session_state.get('current_file', None):
+            file = st.session_state.current_file
+        module_name =  file.replace('/', ".").replace(".py", "")
         module = importlib.import_module(module_name)
         # if hasattr(module, "get_params") and callable(module.get_params):
         #     st.write(module.get_params())
