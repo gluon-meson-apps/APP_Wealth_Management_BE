@@ -117,3 +117,15 @@ async def test_case_6(chat_model):
     results, reason = await check_entity_extraction_from_history(chat_model, chat_params, response, [],
                                                                  retry_count, minimal_success_count, params)
     assert results[0] == results[1], reason
+
+async def test_case_7(chat_model):
+    chat_history = """Can you advise if HKBAAU2S is able to accept an LC from BANK OF INDIA in India？"""
+
+    response = {"bic code": "HKBAAU2S", "bank entity name": "BANK OF INDIA", "country of bank": "India"}
+    retry_count = 3
+    minimal_success_count = 3
+
+    chat_params, _ = get_construct_chat_message(user_intent)(chat_history)
+    results, reason = await check_entity_extraction_from_history(chat_model, chat_params, response, [],
+                                                                 retry_count, minimal_success_count, params)
+    assert results[0] == results[1], reason
