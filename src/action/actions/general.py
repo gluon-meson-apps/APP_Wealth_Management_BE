@@ -47,7 +47,7 @@ class SlotFillingAction(Action):
             result.append(slot.name)
         return result
 
-    async def run(self, context):
+    async def run(self, context) -> GeneralResponse:
         logger.info("exec action slot filling")
         slots = [slot.minimal_info() for slot in self.slots]
 

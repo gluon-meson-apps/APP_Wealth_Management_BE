@@ -1,12 +1,15 @@
 import json
 from datetime import datetime
+from typing import Union
 
 import dateparser
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from loguru import logger
 
+from action.actions.general import SlotFillingAction
 from action.base import ActionResponse, ChatResponseAnswer, ResponseMessageType, GeneralResponse
 from action.actions.tb_guru.base import TBGuruAction
+from prompt_manager.base import BasePromptManager
 from third_system.search_entity import SearchParam
 
 prompt = """"## Role
@@ -131,28 +134,32 @@ def validate_credit_status(counterparty_bank) -> bool:
     return credit_status and "PROCEED WITHIN DELEGATED AUTHORITY".lower() == credit_status.lower()
 
 
-def create_failure_response(content, intent, references=None) -> ActionResponse:
-    answer = ChatResponseAnswer(
-        messageType=ResponseMessageType.FORMAT_TEXT,
-        content=content,
-        intent=intent,
-        references=references,
-    )
-    return GeneralResponse(code=200, message="failed", answer=answer, jump_out_flag=False)
-
-
 def validate_counterparty_bank(counterparty_bank, all_banks, intent,
                                bank_info, country_of_rma_holder, bic_code) -> ActionResponse:
     rma_status_validation_result = validate_rma_status(counterparty_bank, country_of_rma_holder, bic_code)
     logger.info("rma status validation result {}", rma_status_validation_result)
     if not rma_status_validation_result:
         content = f"HSBC {country_of_rma_holder or bic_code} don't have RMA with '{bank_info}'. Please seek for Trade Transaction Approval (TTA)."
-        return create_failure_response(content, intent, all_banks)
+        return GeneralResponse.normal_failed_text_response(content, intent, all_banks)
 
     credit_status_validation_result = validate_credit_status(counterparty_bank)
     if not credit_status_validation_result:
         content = "The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA)."
-        return create_failure_response(content, intent, all_banks)
+        return GeneralResponse.normal_failed_text_response(content, intent, all_banks)
+
+
+def check_missed_slots_for_functions(function_call_result, entity_dict) -> list[str]:
+    functions_dict = {item['function']['name']: item['function'] for item in function_call_result}
+    missed_slots = []
+    if "validate_bank_line" in functions_dict:
+        if entity_dict.get("tenor"):
+            missed_slots.append("tenor")
+    if "search_pricing" in functions_dict:
+        if entity_dict.get("expiry date"):
+            missed_slots.append("expiry date")
+        if entity_dict.get("issuance date"):
+            missed_slots.append("issuance date")
+    return missed_slots
 
 
 class RMAPricingAction(TBGuruAction):
@@ -239,18 +246,44 @@ class RMAPricingAction(TBGuruAction):
         if "validate_bank_line" in functions_dict:
             validation_info = await self._validate_bank_line(model, counterparty_bank, session_id, validity, tenor,
                                                              lc_mount)
-            if validation_info.get("result", {}).get("validation_result", False):
-                if "search_pricing" in functions_dict:
-                    pricing_type = json.loads(functions_dict["search_pricing"]["arguments"])["pricing type"]
-                    rate_info = await self._search_pricing(counterparty_bank, tenor, session_id, pricing_type)
+            if validation_info.get("result", {}).get("validation_result", False) and "search_pricing" in functions_dict:
+                pricing_type = json.loads(functions_dict["search_pricing"]["arguments"])["pricing type"]
+                rate_info = await self._search_pricing(counterparty_bank, tenor, session_id, pricing_type)
+        elif "search_pricing" in functions_dict:
+            pricing_type = json.loads(functions_dict["search_pricing"]["arguments"])["pricing type"]
+            rate_info = await self._search_pricing(counterparty_bank, tenor, session_id, pricing_type)
         return validation_info, rate_info
 
-    async def run(self, context) -> ActionResponse:
+    async def run(self, context) -> Union[ActionResponse, GeneralResponse]:
         logger.info(f"exec action: {self.get_name()} ")
         intent = context.conversation.current_intent.name
+        user_input = context.conversation.current_new_request if context.conversation.current_new_request else context.conversation.current_user_input
+        entity_dict = context.conversation.get_simplified_entities()
         session_id = context.conversation.session_id
         chat_model = await self.scenario_model_registry.get_model(self.scenario_model, session_id)
-        entity_dict = context.conversation.get_simplified_entities()
+
+        chat_message_preparation = ChatMessagePreparation()
+        chat_message_preparation.add_message(
+            "user",
+            function_call_prompt,
+            user_input=user_input
+        )
+        chat_message_preparation.log(logger)
+        function_call_result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=256,
+                                                       tools=tools, sub_scenario="function call")).response
+        logger.info(f"function call result: {function_call_result}")
+
+        if isinstance(function_call_result, list):
+            missed_slots = check_missed_slots_for_functions(function_call_result, entity_dict)
+            if len(missed_slots) > 0:
+                logger.debug(f"Slots to be filled： {missed_slots}")
+                slots = [context.conversation.get_slot_by_names(missed_slots)]
+                slot_filling = SlotFillingAction(slots, context.conversation.current_intent,
+                                                 prompt_manager=BasePromptManager())
+                return await slot_filling.run(context)
+        else:
+            return GeneralResponse.normal_failed_text_response(function_call_result, intent)
+
         expiry_date = dateparser.parse(entity_dict["expiry date"])
         issuance_date = dateparser.parse(entity_dict["issuance date"])
         tenor = datetime.now() - dateparser.parse(entity_dict["tenor"])
@@ -261,7 +294,6 @@ class RMAPricingAction(TBGuruAction):
         bank_info = {field: entity_dict[field] for field in fields_to_extract if field in entity_dict}
         query = f"search the counterparty bank #extra infos: fields to be queried: {bank_info} "
         logger.info(f"search query: {query}")
-
         response = await self.unified_search.search(SearchParam(query=query), session_id)
         logger.info(f"search response: {response}")
 
@@ -269,13 +301,13 @@ class RMAPricingAction(TBGuruAction):
         all_banks = [item for res in response for item in res.items]
         if len(all_banks) == 0:
             content = f"the bank '{bank_info_str}' cannot be found in the Counterparty Bank file, please do further checks."
-            return create_failure_response(content, intent)
+            return GeneralResponse.normal_failed_text_response(content, intent)
 
         # validate counterparty bank information
         counterparty_bank = next((bank for bank in all_banks if is_float(bank.crr)), None)
         if counterparty_bank is None:
             content = f"the bank '{bank_info_str}' don't have CRR. Please seek for Trade Transaction Approval (TTA)."
-            return create_failure_response(content, intent, all_banks)
+            return GeneralResponse.normal_failed_text_response(content, intent, all_banks)
         counterparty_bank_dict = counterparty_bank.dict()
         country_of_rma_holder = entity_dict.get("country of rma holder")
         bic_code = entity_dict.get("bic code")
@@ -284,53 +316,34 @@ class RMAPricingAction(TBGuruAction):
         if validation_response:
             return validation_response
 
-        user_input = context.conversation.current_new_request if context.conversation.current_new_request else context.conversation.current_user_input
-        chat_message_preparation = ChatMessagePreparation()
-        chat_message_preparation.add_message(
-            "user",
-            function_call_prompt,
-            user_input=user_input
-        )
-        chat_message_preparation.log(logger)
-        result = (await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=256,
-                                         tools=tools, sub_scenario="function call")).response
-        logger.info(f"function call result: {result}")
+        # execute function call
+        validation_info, rate_info = await self._execute_function_call(
+            chat_model, counterparty_bank_dict, tenor, validity, entity_dict.get("LC amount"), session_id,
+            function_call_result)
+        logger.info("rma execute function call result, validation_info: {}, rate_info: {}",
+                    validation_info.get("result"), rate_info.get("rate"))
+        all_banks.extend(validation_info.get("reference", []))
+        all_banks.extend(rate_info.get("reference", []))
 
-        # execute function and format replay template
-        if isinstance(result, list):
-            validation_info, rate_info = await self._execute_function_call(
-                chat_model, counterparty_bank_dict, tenor, validity, entity_dict.get("LC amount"), session_id, result)
-            logger.info("rma execute function call result, validation_info: {}, rate_info: {}",
-                        validation_info.get("result"), rate_info.get("rate"))
-            all_banks.extend(validation_info.get("reference", []))
-            all_banks.extend(rate_info.get("reference", []))
-
-            if validation_info.get("result") and validation_info.get("result").get("validation_result") is False:
-                failed_reason = validation_info.get("result").get("validation_failed_reason")
-                final_result = f"The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).\n{failed_reason}"
-            else:
-                chat_message_preparation = ChatMessagePreparation()
-                chat_message_preparation.add_message(
-                    "user",
-                    prompt,
-                    counterparty_bank=json.dumps(counterparty_bank_dict),
-                    user_data=json.dumps(
-                        {"bank_line_validation_result": validation_info.get("result"), "rate": rate_info.get("rate")}),
-                    user_input=user_input,
-                    country_of_rma_or_bic=country_of_rma_holder or bic_code
-                )
-                chat_message_preparation.log(logger)
-                final_result = (
-                    await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
-                logger.info(f"final result: {final_result}")
+        # format replay template
+        if validation_info.get("result") and validation_info.get("result").get("validation_result") is False:
+            failed_reason = validation_info.get("result").get("validation_failed_reason")
+            final_result = f"The transaction falls outside of delegated authority. Please seek for Trade Transaction Approval (TTA).\n{failed_reason}"
         else:
-            final_result = result
+            chat_message_preparation = ChatMessagePreparation()
+            chat_message_preparation.add_message(
+                "user",
+                prompt,
+                counterparty_bank=json.dumps(counterparty_bank_dict),
+                user_data=json.dumps(
+                    {"bank_line_validation_result": validation_info.get("result"), "rate": rate_info.get("rate")}),
+                user_input=user_input,
+                country_of_rma_or_bic=country_of_rma_holder or bic_code
+            )
+            chat_message_preparation.log(logger)
+            final_result = (
+                await chat_model.achat(**chat_message_preparation.to_chat_params(), max_length=2048)).response
+            logger.info(f"final result: {final_result}")
 
         # final response
-        answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT,
-            content=final_result,
-            intent=intent,
-            references=all_banks,
-        )
-        return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
+        return GeneralResponse.normal_success_text_response(final_result, intent, all_banks)

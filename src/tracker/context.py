@@ -2,7 +2,7 @@ import os
 import shutil
 import uuid
 from datetime import datetime
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Sequence
 from fastapi import UploadFile
 
 from nlu.intent_with_entity import Entity, Intent, Slot
@@ -314,3 +314,6 @@ class ConversationContext:
 
     def set_start_new_question(self, start_new_question: bool):
         self.start_new_question = start_new_question
+
+    def get_slot_by_names(self, slot_names: Sequence[str]) -> list[Slot]:
+        return [slot for slot in self.current_intent_slots if slot.name in slot_names]

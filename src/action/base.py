@@ -109,7 +109,7 @@ class GeneralResponse(ActionResponse):
     jump_out_flag: bool
 
     @staticmethod
-    def normal_failed_text_response(content: str, intent: str):
+    def normal_failed_text_response(content: str, intent: str, references: List[SearchItem] = None):
         return GeneralResponse(
             code=400,
             message="failed",
@@ -117,12 +117,13 @@ class GeneralResponse(ActionResponse):
                 messageType=ResponseMessageType.FORMAT_TEXT,
                 content=content,
                 intent=intent,
+                references=references
             ),
             jump_out_flag=False,
         )
 
     @staticmethod
-    def normal_success_text_response(content: str, intent: str):
+    def normal_success_text_response(content: str, intent: str, references: List[SearchItem] = None):
         return GeneralResponse(
             code=200,
             message="success",
@@ -130,6 +131,7 @@ class GeneralResponse(ActionResponse):
                 messageType=ResponseMessageType.FORMAT_TEXT,
                 content=content,
                 intent=intent,
+                references=references
             ),
             jump_out_flag=False,
         )
