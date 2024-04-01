@@ -2,4 +2,4 @@ name: unknown
 display_name: Unknown use case
 description: fallback intent for intent not belonging to any listed intent
 business: false
-hints: Error case, TB Guru can not recognize your intention
+hints: Error case, can not recognize your intention

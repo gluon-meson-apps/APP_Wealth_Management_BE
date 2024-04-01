@@ -62,10 +62,9 @@ async def get_intent_examples(user_input: str, parent_intent_name: str = None) -
 def process_one_intent_example(intent_example):
     text = intent_example.model_extra["text"]
     intent = intent_example.meta__reference.model_extra["meta__intent_result"]
-    parent_intent = intent_example.meta__reference.model_extra["meta__full_parent_intent"]
     example = text
     score = intent_example.meta__score
-    return dict(intent=intent, parent_intent=parent_intent, example=example, score=score)
+    return dict(intent=intent, parent_intent=None, example=example, score=score)
 
 
 def extract_examples_from_response_text(response: SearchResponse):
@@ -215,6 +214,7 @@ class LLMIntentClassifier(IntentClassifier):
             user_input = conversation.current_user_input
         parent_intent_name_of_current_layer: str = parent_intent.get_full_intent_name() if parent_intent else None
         intent_examples = await get_intent_examples(user_input, parent_intent_name_of_current_layer)
+        logger.info(f'intent_examples{intent_examples}')
         for intent_example in intent_examples:
             intent_result = json.loads(intent_example["intent"])
             intent_name = self.get_mapped_intent_of_current_layer(intent_example, parent_intent_name_of_current_layer)

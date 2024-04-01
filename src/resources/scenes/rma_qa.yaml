@@ -1,5 +1,0 @@
-name: rma_qa
-display_name: Trade RMA Related cases
-description: Trade RMA relationship and Trade services (bank line, LC, DC) acceptance checking and related pricing and limit details enquiries.
-business: true
-has_children: true

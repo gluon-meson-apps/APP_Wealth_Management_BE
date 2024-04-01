@@ -1,0 +1,43 @@
+name: Abi Data Retrieve
+display_name: Abi工厂数据检索
+description: 帮助用户在Anheuser Busch Inbev公司的数据消费平台上轻松方便地找到需要的数据。
+display_examples:
+  - 基于用户提供的描述告诉用户abi的tag basic info中的相关的数据。
+
+business: true
+
+examples:
+  - 漳州瓶装二线可用的数据有哪些？
+  - 请告诉我佛山听装1线酒机1号的功能位置。
+
+slots:
+  - name: 工厂名称
+    description: "Abi公司分工厂名称，一般以地理位置命名，如佛山，漳州"
+    slotType: text
+    optional: True
+  - name: 部门名称
+    description: "部门名称，如包装，动力，酿造等"
+    slotType: text
+    optional: True
+  - name: 工序名称
+    description: "工序的名称，如听装，瓶装等"
+    slotType: text
+    optional: True
+  - name: 产线名称
+    description: "产线名称，如CL1代表听装1线，BL6代表瓶装6线"
+    slotType: text
+    optional: True
+  - name: 主设备名称
+    description: "主设备的名称，如，酒机FCI"
+    slotType: text
+    optional: True
+  - name: 主设备序号名称
+    description: "主设备的序号，如，1"
+    slotType: text
+    optional: True
+  - name: 参数名称
+    description: "参数名称，如温度"
+    slotType: text
+    optional: True
+
+action: abi_data_retrieve
