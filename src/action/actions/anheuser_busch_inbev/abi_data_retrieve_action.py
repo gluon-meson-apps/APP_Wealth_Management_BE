@@ -23,11 +23,9 @@ create table Tag_Basic_Info
     MOD_TYPE            TEXT    not null, -- 模型类别，示例：设备_点位模型
     FAC_DESC            TEXT    not null, -- 工厂名称，示例：佛山，漳州，莆田
     DEPAR_DESC          TEXT, -- 部门名称，示例：包装
-    -- PROCESS_DESC 与 LINE_DESC 有联动效果，如听装二线为PROCESS_DESC（听装线），LINE_DESC（2）的组合，类似的有瓶装1线代表PROCESS_DESC（瓶装线），LINE_DESC（1）
     PROCESS_DESC        TEXT, -- 工序名称，示例：听装线
-    LINE_DESC           TEXT, -- 产线名称（数字或者英文与数字组合），示例：单数字，如1；数字与英文组合，如CL1代表听装1线，此时产线名称LINE_DESC包含了工序名称PROCESS_DESC
-    -- 同样EQUIP_DESC 与 EQUIP_NUM_DESC 有也有联动效果，如酒机FCI1线代表了主设备名称EQUIP_DESC为酒机FCI，主设备序号名称EQUIP_NUM_DESC为1线
-    EQUIP_DESC          TEXT, -- 主设备名称，示例：酒机FCI
+    LINE_DESC           TEXT, -- 产线名称，示例：1线
+    EQUIP_DESC          TEXT, -- 主设备名称，示例：酒机
     EQUIP_NUM_DESC      INTEGER, -- 主设备序号名称，示例：1
     FUNLOC_CODE         TEXT    not null, -- 功能位置，示例：CN55302001-0501
     FUNLOC_CODE_NAME    TEXT    not null, -- 功能位置（名称），示例：佛山-包装-听装线-CL1-酒机FCI-1
@@ -118,9 +116,9 @@ reply_prompt = """
 - 注意你回复的格式应当如下所示：
     - 如果@{数据库查询结果}为空，请回答：抱歉，没有找到相关数据，请检查查询条件或者提供更详细的信息.
     - 否则按照要求回答：
-    好的，查询结果为：
+    感谢您的等待，据查询，查询结果为：
     {以表格形式呈现的数据库查询结果}。
-    {对表格内容进行总结，包括数据描述，数量【你需要提醒用户由于数据数量限制，全量数据最多返回5条数据，否则返回100条】等}
+    {对表格内容进行总结，包括数据描述，数量等}
 
 ## 用户问题：
 {{question}}
@@ -150,8 +148,7 @@ sql_generate_prompt = """
 - 如果表中的字段是TEXT，在sql中的条件应该使用 LIKE '%xxx%' 而不是等于。
 - SQL的SELECT之后的字段值应该包括ID以及查询目标列
     - 如果有多列与用户查询的目标相关，应当一起返回，例如用户想查询功能位置，那么与功能位置相关的列包括功能位置编码与功能位置（名称），此时应该一起SELECT出来。
-    - 如果用户没有明确说明需要查询的目标，生成的SQL就应该将符合条件数据行的所有列SELECT出来，包括ID【但是ID和*不要同时SELECT】。
-- 要限制返回数据的数量【如果是SELECT的是全量数据【SELECT *】最多返回5条数据，否则最多返回100条】
+    - 如果用户没有明确说明需要查询的目标，如用户问有哪些数据，那么就返回ID，FAC_DESC，DEPAR_DESC，PROCESS_DESC，LINE_DESC，EQUIP_DESC，EQUIP_NUM_DESC以及PARA_NAME列。
 
 ## 问题
 {{question}}

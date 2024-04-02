@@ -23,15 +23,15 @@ slots:
     slotType: text
     optional: True
   - name: 工序名称
-    description: "工序的名称，如听装，瓶装等"
+    description: "工序的名称，如听装线，瓶装线等"
     slotType: text
     optional: True
   - name: 产线名称
-    description: "产线名称，如1代表1线，CL1代表听装1线，BL6代表瓶装6线"
+    description: "产线名称，如1线，CL1线，BL6线等"
     slotType: text
     optional: True
   - name: 主设备名称
-    description: "主设备的名称，如，酒机FCI"
+    description: "主设备的名称，如，酒机，酒机FCI等"
     slotType: text
     optional: True
   - name: 主设备序号名称

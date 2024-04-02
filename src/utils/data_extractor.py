@@ -19,3 +19,16 @@ def extract_data_set(file_path, columns):
     json_string = json.dumps(column_data_types, ensure_ascii=False, indent=2)
 
     return json_string
+
+
+def add_line_to_column(file_path, column_name):
+    df = pd.read_excel(file_path)
+
+    df[column_name] = df[column_name].astype(str) + "线"
+
+    df.to_excel(file_path, index=False)
+
+
+if __name__ == '__main__':
+    file_path = '../resources/repository/files/TAG_BASIC_INFO.xlsx'
+    add_line_to_column(file_path, 'LINE_DESC')
