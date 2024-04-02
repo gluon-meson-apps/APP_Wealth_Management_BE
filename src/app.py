@@ -254,12 +254,12 @@ def main():
         run(
             "app:app",
             host="0.0.0.0",
-            port=7788,
+            port=7888,
             reload=True,
             reload_dirs=os.path.dirname(os.path.abspath(__file__)),
         )
     else:
-        run("app:get_app", host="0.0.0.0", port=7788)
+        run("app:get_app", host="0.0.0.0", port=7888)
 
 
 if __name__ == "__main__":
