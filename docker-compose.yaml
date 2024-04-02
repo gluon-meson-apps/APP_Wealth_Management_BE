@@ -6,7 +6,7 @@ services:
       context: .
       ssh:
         - default=${GM_SDK_GIT_SSH_KEY:-$HOME/.ssh/id_rsa}
-    image: thought-agent:latest
+    image: anheuser-busch-inbev:latest
     restart: unless-stopped
     ports:
-      - 18002:7788
+      - "1012:7888"
