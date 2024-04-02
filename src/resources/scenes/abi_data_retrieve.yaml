@@ -8,7 +8,10 @@ business: true
 
 examples:
   - 漳州瓶装二线可用的数据有哪些？
-  - 请告诉我佛山听装1线酒机1号的功能位置。
+  - 请告诉我佛山听装1线酒机1的功能位置有哪些？
+  - 佛山灌酒机有哪些点位类型？
+  - 莆田有多少个低压开关柜？他们的主设备序号名称分别是多少？
+  - 佛山听装1线参数为压盖质量排出_数量的数据有哪些？
 
 slots:
   - name: 工厂名称
@@ -24,7 +27,7 @@ slots:
     slotType: text
     optional: True
   - name: 产线名称
-    description: "产线名称，如CL1代表听装1线，BL6代表瓶装6线"
+    description: "产线名称，如1代表1线，CL1代表听装1线，BL6代表瓶装6线"
     slotType: text
     optional: True
   - name: 主设备名称

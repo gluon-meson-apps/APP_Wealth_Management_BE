@@ -1,4 +1,3 @@
-import json
 import os
 import sqlite3
 from typing import Optional
@@ -9,8 +8,9 @@ from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioM
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
+from utils.data_extractor import extract_data_set
 
-NO_INFORMATION = '没有找到相关数据.'
+RETRY_TIMES, SORRY = 3, '抱歉'
 DB_PATH = f'{os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))}/resources/repository/anheuser_busch_inbev.db'
 FILE_PATH = f'{os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))}/resources/repository/files/TAG_BASIC_INFO.xlsx'
 
@@ -21,10 +21,12 @@ create table Tag_Basic_Info
     ID                  INTEGER
         primary key autoincrement, -- 数据库记录ID，主键，自增
     MOD_TYPE            TEXT    not null, -- 模型类别，示例：设备_点位模型
-    FAC_DESC            TEXT    not null, -- 工厂名称，示例：佛山
+    FAC_DESC            TEXT    not null, -- 工厂名称，示例：佛山，漳州，莆田
     DEPAR_DESC          TEXT, -- 部门名称，示例：包装
+    -- PROCESS_DESC 与 LINE_DESC 有联动效果，如听装二线为PROCESS_DESC（听装线），LINE_DESC（2）的组合，类似的有瓶装1线代表PROCESS_DESC（瓶装线），LINE_DESC（1）
     PROCESS_DESC        TEXT, -- 工序名称，示例：听装线
-    LINE_DESC           TEXT, -- 产线名称，示例：CL1
+    LINE_DESC           TEXT, -- 产线名称（数字或者英文与数字组合），示例：单数字，如1；数字与英文组合，如CL1代表听装1线，此时产线名称LINE_DESC包含了工序名称PROCESS_DESC
+    -- 同样EQUIP_DESC 与 EQUIP_NUM_DESC 有也有联动效果，如酒机FCI1线代表了主设备名称EQUIP_DESC为酒机FCI，主设备序号名称EQUIP_NUM_DESC为1线
     EQUIP_DESC          TEXT, -- 主设备名称，示例：酒机FCI
     EQUIP_NUM_DESC      INTEGER, -- 主设备序号名称，示例：1
     FUNLOC_CODE         TEXT    not null, -- 功能位置，示例：CN55302001-0501
@@ -69,7 +71,7 @@ summarize_prompt = """
 ## 角色：语言能力专家。
 
 ## 任务：
-- 根据聊天记录，总结优先级最高的问题，也就是用户最近提的问题。
+- 根据聊天记录和用户提问专用词汇数据集合，总结优先级最高的问题，也就是用户最近提的问题。
 
 ## 要求：
 - 请注意，对话历史后期的问题优先级高于开头的问题。
@@ -82,24 +84,48 @@ summarize_prompt = """
 {{chat_history}}
 """
 
+chat_prompt = """
+## 角色：AI助手
+
+## 背景：作为ABI公司【啤酒生产公司】的AI助手，你需要理解并回答用户的问题。
+
+## 任务：根据@{聊天历史记录}中的相关信息回答用户提出的的问题。
+
+## 要求：
+- 在@{聊天历史记录}中查找与@{用户问题}相关的信息，来回答@{用户问题}。
+- 你回复的格式务必如下：
+    - 如果历史记录中没有与@{用户问题}相关的信息，请回答：抱歉，没有查询到相关数据，请检查查询条件或者提供更详细的信息。
+    - 如果历史记录中有与@{用户问题}相关的信息，则按照用户要求回答@{用户问题}。
+- 以第二人称的形式回答用户的问题。
+
+## 用户问题：
+{{question}}
+
+## 聊天历史记录：
+{{chat_history}}
+"""
+
 reply_prompt = """
 ## 角色：AI助手
 
-## 背景：作为AI助手，你协助用户查询有关ABI公司的基本信息数据。用户提出问题，这些问题几乎需要使用以下SQL查询数据库。如果查询结果不为空，你应该根据查询结果回答问题。
+## 背景：作为ABI公司【啤酒生产公司】的AI助手，你根据查询结果回答@{用户问题}。
 
-### 任务：根据提供的查询结果回答下面的问题。
+## 任务：根据提供的查询结果回答@{用户问题}。
 
-### 要求：
-- 使用专业的语气。
-- 根据查询结果回答问题，如果用户要求返回的是数据，并且查询结果里也是多条包含多个键值对的实体，那么请以表格的形式返回。
+## 要求：
+- 以第二人称的形式@{用户问题}：
+- 如果用户要求返回的是数据，那么请以表格的形式返回@{数据库查询结果}中的所有数据。
+- 注意你回复的格式应当如下所示：
+    - 如果@{数据库查询结果}为空，请回答：抱歉，没有找到相关数据，请检查查询条件或者提供更详细的信息.
+    - 否则按照要求回答：
+    好的，查询结果为：
+    {以表格形式呈现的数据库查询结果}。
+    {对表格内容进行总结，包括数据描述，数量【你需要提醒用户由于数据数量限制，全量数据最多返回5条数据，否则返回100条】等}
 
-## 问题：
+## 用户问题：
 {{question}}
 
-## SQL
-{{sql}}
-
-### 查询结果：
+## 数据库查询结果：
 {{query_result}}
 """
 
@@ -120,20 +146,23 @@ sql_generate_prompt = """
 - 请仔细理解表中每个字段的含义（包括解释和示例），这将帮助你生成相应的SQL。
 - 对于用户问题中的术语，如果你有不理解的地方可以参考下面给你的用户提问专用词汇数据集合，这个集合包含了数据库中相关列的数据集合，你可以据此了解哪些词汇是属于哪一列的。
     - 如果有你不理解的词汇在专用词汇数据集合没有找到类别，那可能属于PARA_NAME。
+    - 你要精确理解用户查询条件的含义，不能瞎编乱造。
 - 如果表中的字段是TEXT，在sql中的条件应该使用 LIKE '%xxx%' 而不是等于。
-- sql的SELECT之后的字段值应该与问题相关，也就是用户问题中需要知道的查询目标
+- SQL的SELECT之后的字段值应该包括ID以及查询目标列
     - 如果有多列与用户查询的目标相关，应当一起返回，例如用户想查询功能位置，那么与功能位置相关的列包括功能位置编码与功能位置（名称），此时应该一起SELECT出来。
-    - 如果用户没有明确说明需要查询的目标，生成的SQL就应该将符合条件数据行的所有列SELECT出来。
+    - 如果用户没有明确说明需要查询的目标，生成的SQL就应该将符合条件数据行的所有列SELECT出来，包括ID【但是ID和*不要同时SELECT】。
+- 要限制返回数据的数量【如果是SELECT的是全量数据【SELECT *】最多返回5条数据，否则最多返回100条】
 
 ## 问题
 {{question}}
 
-## 生成的sql格式：
-{generated sql}
-
 ## 用户提问专用词汇数据集合
 {{data_set}}
+
+## 请注意--返回的sql格式：
+{可执行的sql}
 """
+
 
 def summarize_question(chat_model, prompt, history):
     chat_message_preparation = ChatMessagePreparation()
@@ -144,16 +173,22 @@ def summarize_question(chat_model, prompt, history):
     )
     chat_message_preparation.log(logger)
     summarized_question = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
-    logger.info(f"summarized_question: {summarized_question}")
+    logger.info(f"summarized_question:\n {summarized_question}")
     return summarized_question
 
 
-def reply_question(chat_model, prompt, question, query_result, sql):
+def reply_question(chat_model, prompt, question, history=None, query_result=None):
     chat_message_preparation = ChatMessagePreparation()
-    chat_message_preparation.add_message("user", prompt, query_result=query_result, sql=sql, question=question)
+    chat_message_preparation.add_message(
+        "user",
+        prompt,
+        question=question,
+        chat_history=history,
+        query_result=query_result
+    )
     chat_message_preparation.log(logger)
     result = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
-    logger.info(f"chat result: {result}")
+    logger.info(f"chat result:\n {result}")
     return result
 
 
@@ -168,76 +203,60 @@ def generate_sql(chat_model, prmpt, question, tables, data_set):
     )
     chat_message_preparation.log(logger)
     sql = chat_model.chat(**chat_message_preparation.to_chat_params(), max_length=2048).response
-    logger.info(f"sql: {sql}")
+    logger.info(f"sql:\n {sql}")
     return sql
-
-
-def extract_data_set(file_path):
-    df = pd.read_excel(file_path)
-
-    selected_columns = [1, 2, 3, 4, 5]
-
-    column_data_types = {}
-
-    for column_index in selected_columns:
-        abbreviation = df.columns[column_index].strip()
-
-        description = df.iloc[0][column_index]
-        data_types = set(df.iloc[1:, column_index].dropna().astype(str))
-
-        column_data_types[abbreviation] = {'description': description, 'types': list(data_types)}
-    json_string = json.dumps(column_data_types, ensure_ascii=False, indent=2)
-    return json_string
 
 
 def query_from_db(sql: str) -> tuple[str, Optional[Exception]]:
     con = sqlite3.connect(f'{DB_PATH}')
     cur = con.cursor()
 
-    result, ex = NO_INFORMATION, None
+    result, ex = None, None
     try:
         cur.execute(sql)
         rows = cur.fetchall()
-        logger.info(f'rows{rows}')
         if rows:
             columns = [col[0] for col in cur.description]
-            result = []
-
-            for row in rows:
-                result_dict = {columns[i]: row[i] for i in range(len(columns))}
-                result.append(result_dict)
+            result = pd.DataFrame(rows, columns=columns).to_string(index=False)
     except Exception as exception:
         ex = exception
         logger.info(f'sql execute error:\nsql:\n{sql}\nerror:{str(ex)}')
     finally:
         con.commit()
         con.close()
-        logger.info(f"Query result: {result}")
-        return str(result), ex
+        logger.info(f"Query result:\n {result}")
+        return result, ex
 
 
 class AbiDataRetrieveAction(Action):
     def __init__(self):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
+        self.data_set = extract_data_set(FILE_PATH, [1, 2, 3, 4, 5])
 
     def get_name(self) -> str:
         return "abi_data_retrieve"
 
     async def run(self, context) -> ActionResponse:
-        logger.info(f"exec action: {self.get_name()} ")
+        logger.info(f"exec action:\n {self.get_name()} ")
         chat_model = await self.scenario_model_registry.get_model(self.scenario_model, context.conversation.session_id)
 
         history = context.conversation.get_history().format_string()
         question = summarize_question(chat_model, summarize_prompt, history=history)
 
-        data_set = extract_data_set(FILE_PATH)
-        sql = generate_sql(chat_model, sql_generate_prompt, question, TABLES, data_set)
+        result = reply_question(chat_model, chat_prompt, question, history=history)
 
-        query_result, _ = query_from_db(sql)
+        retry_times, ex = RETRY_TIMES, None
+        while (result.startswith(SORRY) or ex is not None) and retry_times > 0:
+            retry_times -= 1
+            sql = generate_sql(chat_model, sql_generate_prompt, question, TABLES, self.data_set)
+            query_result, ex = query_from_db(sql)
 
-        result = reply_question(chat_model, reply_prompt, question, query_result, sql)
+            result = reply_question(chat_model, reply_prompt, question, query_result=query_result)
+
         answer = ChatResponseAnswer(
-            messageType=ResponseMessageType.FORMAT_TEXT, content=result, intent=context.conversation.current_intent.name
+            messageType=ResponseMessageType.FORMAT_TEXT,
+            content=result,
+            intent=context.conversation.current_intent.name
         )
         return GeneralResponse(code=200, message="success", answer=answer, jump_out_flag=False)
