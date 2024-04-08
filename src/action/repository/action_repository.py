@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Union
 
 from action.actions.general import ChitChatAction
-from action.actions.wealth_management.research_report_navigator_action import ResearchReportNavigatorAction
+from action.actions.wealth_management.research_report_inquiry_action import ResearchReportInquiryAction
 from action.base import Action
 
 
@@ -30,5 +30,5 @@ class MemoryBasedActionRepository(ActionRepository):
 
 
 action_repository = MemoryBasedActionRepository()
-action_repository.save(ResearchReportNavigatorAction())
+action_repository.save(ResearchReportInquiryAction())
 action_repository.save(ChitChatAction())

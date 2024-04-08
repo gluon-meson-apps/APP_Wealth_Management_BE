@@ -24,12 +24,13 @@ class SearchParam(BaseModel):
     size: Union[int, None] = None
     configs: Union[dict, None] = None
     tags: Union[dict[str, str], None] = {}
+    k: int = 4
 
 
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
-    meta__source_content: str = None
+    meta__source_content: dict = None
     meta__source_page: int = None
     meta__source_url: Union[str, None] = None
     meta__source_sub_name: Union[str, None] = None
@@ -53,7 +54,6 @@ class KnowledgeSearchItem(BaseModel, extra=Extra.allow):
     search__score: float
     type: str
     field__text: str
-    # field__page: str
     field__source: str
 
 

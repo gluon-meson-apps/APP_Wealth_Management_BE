@@ -1,4 +1,5 @@
 import configparser
+import json
 from typing import List
 import re
 
@@ -112,13 +113,11 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         header_to_value = item.model_dump()
         row = [str(header_to_value[header]) for header in headers]
         row.append(str(header_to_value["meta__score"]))
-        if item.meta__reference.meta__source_page:
-            row.append(str(item.meta__reference.meta__source_page))
         if item.meta__reference.meta__source_content:
-            row.append(str(item.meta__reference.meta__source_content))
+            row.append(json.dumps(item.meta__reference.meta__source_content))
 
         table_row_html = "".join(f"<tr><th>{header}</th><td>{remove_extra_newline(value)}</td></tr>"
-                                 for header, value in zip(headers + ["score", "page", "content"], row))
+                                 for header, value in zip(headers + ["score", "references"], row))
         table_cell_html += f"<table>{table_row_html}</table>"
 
     return table_cell_html
@@ -161,7 +160,7 @@ class BaseOutputAdapter(OutputAdapter):
         if output.answer.references and len(output.answer.references) > 0:
             output_html = process_references(output.answer.references)
             if output_html:
-                output.answer.extra_info["References"] = output_html
+                output.answer.extra_info["References Info"] = output_html
         if conversation.current_intent:
             slot_expression = conversation.current_intent.slot_expression
             self._fill_intent_value(conversation, output)

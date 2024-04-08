@@ -1,0 +1,37 @@
+name: Research Report Inquiry
+display_name: Research Report Inquiry
+description: Assists Relationship Managers (RMs) in serving clients in the high-end market by facilitating the reading of research reports. Users can ask questions to obtain summaries and key insights from reports. The application should accurately answer user queries, provide context references, and utilize existing technology and knowledge bases.
+display_examples:
+  - Users can obtain summaries, key findings, and strategic recommendations from reports by asking questions.
+business: true
+
+examples:
+  - What's the document is talking about?
+  - What's the major opinion of the reports and analysis?
+  - Tell me more about the FOMC forecasts.
+  - Impact of Central Bank Policies on Investment Portfolios
+    - According to the report, central banks are unlikely to cut interest rates in 2024. What does this mean for fixed-income investors and those seeking high dividend-paying stocks?
+    - How does the scenario of "No Fed Cuts" mentioned in the report affect current investment strategies?
+  - Inflation Trends and Asset Allocation Guidance
+    - The report predicts that inflation will remain sticky. What are the implications for investors holding real assets such as gold or real estate?
+    - If the inflation rate lingers between 2.5-3%, how should investors adjust their portfolios to protect asset values?
+  - Global Economic Growth Outlook and Diversification
+    - How does the regional variation in global economic growth mentioned in the report affect strategies for geographical diversification investments?
+    - Which regions or countries may offer better risk-adjusted returns for investors?
+  - Attractiveness of Emerging Market Assets
+    - How does the report's view on Indian assets, particularly the Indian Rupee and Indian bonds, influence investment in emerging market assets?
+    - In the current macroeconomic environment, how should investors balance their portfolios between emerging and developed market assets?
+  - Risk Management and Hedging Strategies
+    - How do the potential growth slowdowns and inflation risks mentioned in the report affect the choice of hedging strategies?
+    - How can investors utilize derivatives or other financial instruments to protect their portfolios from market volatility?
+  - Strategy Adjustments for Long-Term Investment Perspectives
+    - How do the long-term inflation and growth trends predicted in the report influence the formulation of long-term investment strategies?
+    - How should investors adjust their long-term investment plans to adapt to potential structural economic changes?
+
+slots:
+  - name: topic
+    description: "Topic of the research report that the user is interested in, used for searching reports."
+    slotType: text
+    optional: True
+
+action: research_report_inquiry
