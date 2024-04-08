@@ -29,7 +29,7 @@ class KnowledgeBase:
                     "Authorization": offline_token
                 }
             )
-            if query_response.status_code is not 200:
+            if query_response.status_code != 200:
                 raise Exception(query_response.content)
             else:
                 logger.debug(query_response.json())
