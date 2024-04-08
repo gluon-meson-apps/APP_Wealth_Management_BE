@@ -50,7 +50,7 @@ app = FastAPI()
 
 def get_app() -> FastAPI:
     app.include_router(api_router)
-    # init_logging()
+    init_logging()
     return app
 
 
