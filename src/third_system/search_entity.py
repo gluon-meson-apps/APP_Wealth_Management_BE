@@ -29,6 +29,8 @@ class SearchParam(BaseModel):
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
+    meta__source_content: str = None
+    meta__source_page: int = None
     meta__source_url: Union[str, None] = None
     meta__source_sub_name: Union[str, None] = None
     meta__source_sub_type: Union[str, None] = None
@@ -45,6 +47,22 @@ class SearchResponse(BaseModel):
     size: int = 0
     total: int = 0
     items: list[SearchItem] = []
+
+
+class KnowledgeSearchItem(BaseModel, extra=Extra.allow):
+    search__score: float
+    type: str
+    field__text: str
+    # field__page: str
+    field__source: str
+
+
+class KnowledgeSearchResponse(BaseModel):
+    items: list[KnowledgeSearchItem] = []
+    total: int = 0
+    page: int = 0
+    size: int = 0
+    pages: int = 0
 
     def is_empty(self):
         return self.total == 0

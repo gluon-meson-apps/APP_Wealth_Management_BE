@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Union
 
-from action.actions.anheuser_busch_inbev.abi_data_retrieve_action import AbiDataRetrieveAction
 from action.actions.general import ChitChatAction
+from action.actions.wealth_management.research_report_navigator_action import ResearchReportNavigatorAction
 from action.base import Action
 
 
@@ -30,5 +30,5 @@ class MemoryBasedActionRepository(ActionRepository):
 
 
 action_repository = MemoryBasedActionRepository()
-action_repository.save(AbiDataRetrieveAction())
+action_repository.save(ResearchReportNavigatorAction())
 action_repository.save(ChitChatAction())

@@ -112,8 +112,14 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         header_to_value = item.model_dump()
         row = [str(header_to_value[header]) for header in headers]
         row += [str(header_to_value["meta__score"])]
+        headers += ["score"]
+        if item.meta__reference.meta__source_page:
+            row += [str(item.meta__reference.meta__source_page)]
+            headers += ["page"]
+        if item.meta__reference.meta__source_content:
+            row += [str(item.meta__reference.meta__source_content)]
+            headers += ["content"]
         rows.append(row)
-    headers += ["score"]
 
     table_header_html = "<tr>" + "".join(f"<th>{remove_extra_newline(header)}</th>" for header in headers) + "</tr>"
     table_cell_html = "".join(
@@ -130,6 +136,10 @@ def process_references(references: List[SearchItem]):
     for item in references:
         if item.meta__reference:
             summary = item.meta__reference.meta__source_name
+            # if item.meta__reference.meta__source_page:
+            #     summary += f"({item.meta__reference.meta__source_page})"
+            # if item.meta__reference.meta__source_content:
+            #     summary += f"({item.meta__reference.meta__source_content})"
             if item.meta__reference.meta__source_sub_name:
                 summary += f"({item.meta__reference.meta__source_sub_name})"
             if item.meta__reference.meta__source_url:
