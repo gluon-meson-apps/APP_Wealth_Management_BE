@@ -85,12 +85,12 @@ class OutputAdapter:
         raise NotImplementedError()
 
     def prepare_answer(
-        self,
-        slot: {},
-        intent_description: str,
-        target_slot_value: str,
-        target_slot_name: str,
-        action_name: ActionName,
+            self,
+            slot: {},
+            intent_description: str,
+            target_slot_value: str,
+            target_slot_name: str,
+            action_name: ActionName,
     ):
         raise NotImplementedError()
 
@@ -103,30 +103,25 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
     if not summary_details:
         return ""
 
-    rows = []
     headers = [
         key for key in summary_details[0].model_dump().keys() if key not in ["meta__score", "meta__reference", "id"]
     ]
 
+    table_cell_html = ""
     for item in summary_details:
         header_to_value = item.model_dump()
         row = [str(header_to_value[header]) for header in headers]
-        row += [str(header_to_value["meta__score"])]
-        headers += ["score"]
+        row.append(str(header_to_value["meta__score"]))
         if item.meta__reference.meta__source_page:
-            row += [str(item.meta__reference.meta__source_page)]
-            headers += ["page"]
+            row.append(str(item.meta__reference.meta__source_page))
         if item.meta__reference.meta__source_content:
-            row += [str(item.meta__reference.meta__source_content)]
-            headers += ["content"]
-        rows.append(row)
+            row.append(str(item.meta__reference.meta__source_content))
 
-    table_header_html = "<tr>" + "".join(f"<th>{remove_extra_newline(header)}</th>" for header in headers) + "</tr>"
-    table_cell_html = "".join(
-        "<tr>" + "".join(f"<td>{remove_extra_newline(cell)}</td>" for cell in cells) + "</tr>" for cells in rows
-    )
-    table_html = f"<table>{table_header_html}{table_cell_html}</table>"
-    return table_html
+        table_row_html = "".join(f"<tr><th>{header}</th><td>{remove_extra_newline(value)}</td></tr>"
+                                 for header, value in zip(headers + ["score", "page", "content"], row))
+        table_cell_html += f"<table>{table_row_html}</table>"
+
+    return table_cell_html
 
 
 def process_references(references: List[SearchItem]):
@@ -136,10 +131,6 @@ def process_references(references: List[SearchItem]):
     for item in references:
         if item.meta__reference:
             summary = item.meta__reference.meta__source_name
-            # if item.meta__reference.meta__source_page:
-            #     summary += f"({item.meta__reference.meta__source_page})"
-            # if item.meta__reference.meta__source_content:
-            #     summary += f"({item.meta__reference.meta__source_content})"
             if item.meta__reference.meta__source_sub_name:
                 summary += f"({item.meta__reference.meta__source_sub_name})"
             if item.meta__reference.meta__source_url:
@@ -281,12 +272,12 @@ class BaseOutputAdapter(OutputAdapter):
         return slot
 
     def prepare_answer(
-        self,
-        slot: {},
-        intent_description: str,
-        target_slot_value: str,
-        target_slot_name: str,
-        action_name: ActionName,
+            self,
+            slot: {},
+            intent_description: str,
+            target_slot_value: str,
+            target_slot_name: str,
+            action_name: ActionName,
     ):
         return ActionResponseAnswer(
             messageType=ResponseMessageType.FORMAT_INTELLIGENT_EXEC,

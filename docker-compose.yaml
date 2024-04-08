@@ -10,3 +10,5 @@ services:
     restart: unless-stopped
     ports:
       - "1022:7688"
+    env_file:
+      - ./${ENV}.env
