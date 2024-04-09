@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from enum import unique, Enum
 from typing import Optional, Union, List
 
-from loguru import logger
 from pydantic import BaseModel
 
 from action.context import ActionContext, ActionConfigContext

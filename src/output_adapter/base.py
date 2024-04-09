@@ -145,7 +145,8 @@ def process_references(references: List[SearchItem]):
 
     for summary in summary_detail_dict.keys():
         table_html = generate_table_html(summary_detail_dict[summary])
-        html += table_html
+        details_html = f"<details><summary>{summary}</summary>{table_html}</details>"
+        html += details_html
 
     logger.info(html)
     return html
