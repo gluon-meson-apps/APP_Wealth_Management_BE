@@ -53,7 +53,7 @@ class ChatResponseAnswer(BaseModel):
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
-        return self.content + "\n\n<br>" + extra_info
+        return self.content + "\n\n<br>" + extra_info if extra_info else self.content
 
     def get_chatbot_details(self, template: str):
         details = "".join(
@@ -72,11 +72,11 @@ class ChatResponseAnswer(BaseModel):
         return ""
 
     def get_extra_info(self):
-        template = """<br><h2>{key}</h2><br>{value}<br>"""
+        template = """<br><h2>{key}</h2>{value}<br>"""
         extra_info_str = self.format_attachments_output(template)
         chatbot_detail = self.get_chatbot_details(template)
         chatbot_detail_summary = (
-            f"<br><br><h2>Detail Info Inside Chatbot</h2><br><details><summary>details</summary>{chatbot_detail}</details>"
+            f"<h2>Detail Info Inside Chatbot</h2><details><summary>details</summary>{chatbot_detail}</details>"
             if chatbot_detail
             else ""
         )

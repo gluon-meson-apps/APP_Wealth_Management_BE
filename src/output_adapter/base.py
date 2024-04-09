@@ -110,8 +110,6 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
 
     score_row = f"<tr><th>score</th><td style='text-align: center;'>{summary_details[0].meta__score}</td></tr>"
 
-    references_header_row = "<tr><th colspan='2' style='text-align: center;'>references</th></tr>"
-
     references_row = ""
     for item in summary_details:
         header_to_value = item.model_dump()
@@ -124,7 +122,7 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         else:
             references_row = "<tr><td colspan='2'  style='text-align: center;'>No references available</td></tr>"
 
-    table_html = f"<table>{score_row}{references_header_row}{references_row}</table>"
+    table_html = f"<table>{score_row}{references_row}</table>"
 
     return table_html
 
