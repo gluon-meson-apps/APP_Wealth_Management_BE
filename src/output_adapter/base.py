@@ -163,7 +163,7 @@ class BaseOutputAdapter(OutputAdapter):
         if output.answer.references and len(output.answer.references) > 0:
             output_html = process_references(output.answer.references)
             if output_html:
-                output.answer.extra_info["References Info"] = output_html
+                output.answer.extra_info["References"] = output_html
         if conversation.current_intent:
             slot_expression = conversation.current_intent.slot_expression
             self._fill_intent_value(conversation, output)
