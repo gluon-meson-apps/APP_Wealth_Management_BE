@@ -164,12 +164,6 @@ class BaseOutputAdapter(OutputAdapter):
             output_html = process_references(output.answer.references)
             if output_html:
                 output.answer.extra_info["References"] = output_html
-        if conversation.current_intent:
-            slot_expression = conversation.current_intent.slot_expression
-            self._fill_intent_value(conversation, output)
-            self._fill_filled_slots_value(conversation, output, slot_expression)
-            self._fill_unfilled_slots_value(conversation, output, slot_expression)
-            self._fill_slot_expression(output, slot_expression)
         return output
 
     def _fill_slot_expression(self, output, slot_expression):

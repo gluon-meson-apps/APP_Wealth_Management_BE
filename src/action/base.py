@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import unique, Enum
 from typing import Optional, Union, List
 
+from loguru import logger
 from pydantic import BaseModel
 
 from action.context import ActionContext, ActionConfigContext
@@ -72,15 +73,9 @@ class ChatResponseAnswer(BaseModel):
         return ""
 
     def get_extra_info(self):
-        template = """<br><h2>{key}</h2>{value}<br>"""
-        extra_info_str = self.format_attachments_output(template)
+        template = """<br><h4>{key}</h4>{value}<br>"""
         chatbot_detail = self.get_chatbot_details(template)
-        chatbot_detail_summary = (
-            f"<h2>Detail Info Inside Chatbot</h2><details><summary>details</summary>{chatbot_detail}</details>"
-            if chatbot_detail
-            else ""
-        )
-        extra_info = (extra_info_str + chatbot_detail_summary).replace("\n", "<br>")
+        extra_info = chatbot_detail.replace("\n", "<br>")
         return extra_info
 
     def get_email_extra_info(self):
