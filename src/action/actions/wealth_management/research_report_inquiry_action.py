@@ -146,7 +146,6 @@ class ResearchReportInquiryAction(Action):
             for index, item in enumerate(response):
                 reference_key = f"reference_{index}"
                 search_results[reference_key] = item.field__text
-            logger.error(f'search_results:{search_results}')
 
             references = [
                 SearchItem(meta__score=response[0].search__score,

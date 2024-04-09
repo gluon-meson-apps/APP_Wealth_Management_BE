@@ -108,20 +108,25 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         key for key in summary_details[0].model_dump().keys() if key not in ["meta__score", "meta__reference", "id"]
     ]
 
-    table_cell_html = ""
+    score_row = f"<tr><th>score</th><td style='text-align: center;'>{summary_details[0].meta__score}</td></tr>"
+
+    references_header_row = "<tr><th colspan='2' style='text-align: center;'>references</th></tr>"
+
+    references_row = ""
     for item in summary_details:
         header_to_value = item.model_dump()
         row = [str(header_to_value[header]) for header in headers]
         row.append(str(header_to_value["meta__score"]))
-        if item.meta__reference.meta__source_content:
-            row.append(json.dumps(item.meta__reference.meta__source_content))
+        references = item.meta__reference.meta__source_content
+        if references:
+            for key, value in references.items():
+                references_row += f"<tr><th>{key}</th><td>&nbsp;&nbsp;&nbsp;&nbsp;{value}</td></tr>"
+        else:
+            references_row = "<tr><td colspan='2'  style='text-align: center;'>No references available</td></tr>"
 
-        table_row_html = "".join(f"<tr><th>{header}</th><td>{remove_extra_newline(value)}</td></tr>"
-                                 for header, value in zip(headers + ["score", "references"], row))
-        table_cell_html += f"<table>{table_row_html}</table>"
+    table_html = f"</table>{score_row}{references_header_row}{references_row}</table>"
 
-    return table_cell_html
-
+    return table_html
 
 def process_references(references: List[SearchItem]):
     html = ""
