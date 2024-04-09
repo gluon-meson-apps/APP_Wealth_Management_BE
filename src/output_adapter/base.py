@@ -124,7 +124,7 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         else:
             references_row = "<tr><td colspan='2'  style='text-align: center;'>No references available</td></tr>"
 
-    table_html = f"</table>{score_row}{references_header_row}{references_row}</table>"
+    table_html = f"<table>{score_row}{references_header_row}{references_row}</table>"
 
     return table_html
 
