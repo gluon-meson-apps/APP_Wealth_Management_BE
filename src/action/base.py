@@ -6,7 +6,7 @@ from typing import Optional, Union, List
 from pydantic import BaseModel
 
 from action.context import ActionContext, ActionConfigContext
-from third_system.search_entity import SearchItem
+from third_system.search_entity import SearchItem, SearchItemReference
 
 
 @unique
@@ -49,14 +49,14 @@ class ChatResponseAnswer(BaseModel):
     messageType: str = (ResponseMessageType.FORMAT_TEXT,)
     content: str
     intent: Optional[str] = None
-    references: Optional[List[SearchItem]] = None
+    references: Optional[List[SearchItemReference]] = None
     extra_info: dict[str, Union[list[str], str]] = {}
 
     def get_content(self):
         return self.content
 
     def get_references(self):
-        return json.dumps([references.json() for references in self.references])
+        return json.dumps([reference.json() for reference in self.references])
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()

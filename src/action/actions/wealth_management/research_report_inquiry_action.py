@@ -9,7 +9,7 @@ from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from third_system.knowledge_base import KnowledgeBase
-from third_system.search_entity import SearchItemReference, SearchItem, SearchParamFilter
+from third_system.search_entity import SearchItemReference, SearchParamFilter
 
 SORRY, NUM_K = 'Sorry', 12
 
@@ -152,12 +152,13 @@ class ResearchReportInquiryAction(Action):
             logger.info(f"search response: {response}")
 
             references = [
-                SearchItem(meta__score=item.search__score,
-                           meta__reference=SearchItemReference(
-                               meta__source_type=item.type,
-                               meta__source_name=item.field__source,
-                               meta__source_text=item.field__text
-                           ))
+                SearchItemReference(
+                    data_set_id=item.data_set_id,
+                    meta__source_type=item.type,
+                    meta__source_name=item.field__source,
+                    meta__source_text=item.field__text,
+                    meta__source_score=item.data_set_id
+                )
                 for item in response
             ]
 
@@ -165,7 +166,7 @@ class ResearchReportInquiryAction(Action):
                 chat_model,
                 reply_prompt,
                 question,
-                query_result=json.dumps([references.json() for references in references])
+                query_result=json.dumps([reference.json() for reference in references])
             )
 
         answer = ChatResponseAnswer(

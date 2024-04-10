@@ -30,22 +30,27 @@ class SearchParam(BaseModel):
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
-    meta__source_text: str = None
-    meta__source_page: int = None
+    data_set_id: Union[int, None] = None
+    meta__source_text: Union[str, None] = None
+    meta__source_page: Union[int, None] = None
     meta__source_url: Union[str, None] = None
     meta__source_sub_name: Union[str, None] = None
     meta__source_sub_type: Union[str, None] = None
+    meta__source_score: Union[float, None] = None
+
+    def json(self):
+        return {
+            "data_set_id": self.data_set_id,
+            "meta__source_type": self.meta__source_type,
+            "meta__source_name": self.meta__source_name,
+            "meta__source_text": self.meta__source_text,
+            "meta__source_score": self.meta__source_score
+        }
 
 
 class SearchItem(BaseModel, extra=Extra.allow):
     meta__score: float
     meta__reference: Union[SearchItemReference, None] = None
-
-    def json(self):
-        return {
-            "meta__score": self.meta__score,
-            "meta__reference": self.meta__reference.json() if self.meta__reference else None
-        }
 
 
 class SearchResponse(BaseModel):
