@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from enum import unique, Enum
 from typing import Optional, Union, List
@@ -50,6 +51,12 @@ class ChatResponseAnswer(BaseModel):
     intent: Optional[str] = None
     references: Optional[List[SearchItem]] = None
     extra_info: dict[str, Union[list[str], str]] = {}
+
+    def get_content(self):
+        return self.content
+
+    def get_references(self):
+        return json.dumps([references.json() for references in self.references])
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()

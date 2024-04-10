@@ -113,7 +113,7 @@ def generate_table_html(summary_details: list[SearchItem]) -> str:
         header_to_value = item.model_dump()
         row = [str(header_to_value[header]) for header in headers]
         row.append(str(header_to_value["meta__score"]))
-        references = item.meta__reference.meta__source_content
+        references = item.meta__reference.meta__source_text
         if references:
             for key, value in references.items():
                 references_row += f"<tr><th>{key}</th><td>&nbsp;&nbsp;&nbsp;&nbsp;{value}</td></tr>"

@@ -30,7 +30,7 @@ class SearchParam(BaseModel):
 class SearchItemReference(BaseModel, extra=Extra.allow):
     meta__source_type: str
     meta__source_name: str
-    meta__source_content: dict = None
+    meta__source_text: str = None
     meta__source_page: int = None
     meta__source_url: Union[str, None] = None
     meta__source_sub_name: Union[str, None] = None
@@ -40,6 +40,12 @@ class SearchItemReference(BaseModel, extra=Extra.allow):
 class SearchItem(BaseModel, extra=Extra.allow):
     meta__score: float
     meta__reference: Union[SearchItemReference, None] = None
+
+    def json(self):
+        return {
+            "meta__score": self.meta__score,
+            "meta__reference": self.meta__reference.json() if self.meta__reference else None
+        }
 
 
 class SearchResponse(BaseModel):
@@ -51,6 +57,8 @@ class SearchResponse(BaseModel):
 
 
 class KnowledgeSearchItem(BaseModel, extra=Extra.allow):
+    data_set_id: int
+    source: str
     search__score: float
     type: str
     field__text: str

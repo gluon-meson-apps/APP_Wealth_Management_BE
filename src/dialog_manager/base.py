@@ -82,10 +82,7 @@ class BaseDialogManager:
 
         plan = await self.reasoner.think(conversation)
 
-        action_response = await self.action_runner.run(plan.action, ActionContext(conversation))
-        for output_adapter in self.output_adapters:
-            action_response = await output_adapter.process_output(action_response, conversation)
-        response = action_response
+        response = await self.action_runner.run(plan.action, ActionContext(conversation))
         conversation.append_assistant_history(response.answer)
         if summarize_history_feature_toggle is True:
             await self.history_summarizer.summarize_history(conversation)

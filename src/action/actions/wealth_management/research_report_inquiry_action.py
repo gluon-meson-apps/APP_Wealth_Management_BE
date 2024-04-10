@@ -1,10 +1,15 @@
+import json
+import os
+
+from gluon_meson_component_sdk.knowledge_base.commands.search_command import BatchSearchCommand
+from gluon_meson_component_sdk.knowledge_base.search_document.search_document import SearchDocument
 from gluon_meson_sdk.models.abstract_models.chat_message_preparation import ChatMessagePreparation
 from gluon_meson_sdk.models.scenario_model_registry.base import DefaultScenarioModelRegistryCenter
 from loguru import logger
 
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from third_system.knowledge_base import KnowledgeBase
-from third_system.search_entity import SearchParam, SearchItemReference, SearchItem, SearchParamFilter
+from third_system.search_entity import SearchItemReference, SearchItem, SearchParamFilter
 
 SORRY, NUM_K = 'Sorry', 12
 
@@ -104,6 +109,10 @@ class ResearchReportInquiryAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
         self.knowledge_base = KnowledgeBase()
+        self.search_document = SearchDocument(size=100)
+        self.data_set_id = os.getenv("DATASET_ID_DICT_WEALTH_MANAGEMENT")
+        self.data_set_id_list = [os.getenv("DATASET_ID_DICT_WEALTH_MANAGEMENT")]
+        self.k = NUM_K
 
     @staticmethod
     def form_filter_with_entities(entities: dict) -> list[SearchParamFilter]:
@@ -120,12 +129,13 @@ class ResearchReportInquiryAction(Action):
     def get_name(self) -> str:
         return "research_report_inquiry"
 
-    async def search_from_knowledge_base(self, user_input, num_k):
-        search_param = SearchParam(
+    async def search_from_knowledge_base(self, user_input, num_k, data_set_id_list=None):
+        batch_search_param = BatchSearchCommand(
+            data_set_id_list=data_set_id_list,
             query=user_input,
             k=num_k
         )
-        search_response = self.knowledge_base.insurance_search(param=search_param, topic="wealth_management")
+        search_response = self.search_document.search_document_by_data_set_ids(batch_search_param)
         return search_response.items
 
     async def run(self, context) -> ActionResponse:
@@ -138,24 +148,25 @@ class ResearchReportInquiryAction(Action):
         result, references = reply_question(chat_model, chat_prompt, question, history=history), None
 
         if result.startswith(SORRY):
-            response = await self.search_from_knowledge_base(context.conversation.current_user_input, NUM_K)
+            response = await self.search_from_knowledge_base(question, self.k, data_set_id_list=self.data_set_id_list)
             logger.info(f"search response: {response}")
 
-            search_results = {}
-
-            for index, item in enumerate(response):
-                reference_key = f"reference_{index}"
-                search_results[reference_key] = item.field__text
-
             references = [
-                SearchItem(meta__score=response[0].search__score,
+                SearchItem(meta__score=item.search__score,
                            meta__reference=SearchItemReference(
-                               meta__source_type=response[0].type,
-                               meta__source_name=response[0].field__source,
-                               meta__source_content=search_results
+                               meta__source_type=item.type,
+                               meta__source_name=item.field__source,
+                               meta__source_text=item.field__text
                            ))
-            ] if response else None
-            result = reply_question(chat_model, reply_prompt, question, query_result=search_results)
+                for item in response
+            ]
+
+            result = reply_question(
+                chat_model,
+                reply_prompt,
+                question,
+                query_result=json.dumps([references.json() for references in references])
+            )
 
         answer = ChatResponseAnswer(
             messageType=ResponseMessageType.FORMAT_TEXT,

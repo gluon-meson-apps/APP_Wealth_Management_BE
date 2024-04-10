@@ -103,10 +103,14 @@ def chat(
     return {"response": result, "session_id": conversation.session_id}
 
 
-async def generate_answer_with_len_limited(answer, **kwargs):
-    # chunk with 500
-    for i in range(0, len(answer), 1000):
-        yield {"data": json.dumps({"answer": answer[i : i + 1000], **kwargs})}
+async def generate_answer_with_len_limited(response, **kwargs):
+    for i in range(0, len(response['answer']), 1000):
+        yield json.dumps({"answer": response['answer'][i: i + 1000], **kwargs})
+
+    for i in range(0, len(response['references']), 1000):
+        yield json.dumps({"references": response['references'][i: i + 1000], **kwargs})
+
+    yield json.dumps({"session_id": response['session_id']})
 
 
 async def parse_file_name(file_url):
@@ -170,52 +174,18 @@ async def score(
 
     async def generator():
         if not result:
-            answer = {"answer": err_msg if err_msg else "unknown error occurred"}
+            response = {"answer": err_msg if err_msg else "unknown error occurred"}
         elif isinstance(result, JumpOutResponse):
-            answer = {"answer": "Sorry, I can't help you with that."}
+            response = {"answer": "Sorry, I can't help you with that."}
         else:
-            answer = {
-                "answer": result.answer.get_content_with_extra_info(from_email=score_command.from_email),
-                "session_id": session_id,
-                **(
-                    dict(attachments=[a.model_dump_json() for a in result.attachments])
-                    if isinstance(result, AttachmentResponse)
-                    else {}
-                ),
+            response = {
+                "answer": result.answer.get_content(),
+                "references": result.answer.get_references(),
+                "session_id": session_id
             }
-        if score_command.from_email:
-            origin_answer = result.answer if isinstance(result, ActionResponse) else None
-            ai_message = await atom_service.create_ai_message(
-                session_id,
-                user_id,
-                message=origin_answer.content if isinstance(origin_answer, ChatResponseAnswer) else None,
-                prompt_message=answer,
-            )
-            feedback_link = (
-                atom_service.generate_feedback_link(ai_message["id"])
-                if ai_message and "id" in ai_message and ai_message["id"]
-                else None
-            )
-            if feedback_link:
-                answer["answer"] += f"<br><a href='{feedback_link}'>Click here to share your feedback with us!</a>"
 
-        async for answer in generate_answer_with_len_limited(**answer):
-            yield answer
-        full_history = []
-        if conversation is not None:
-            full_history = conversation.history.format_messages()
-        await asyncio.sleep(0.1)
-        await asyncio.create_task(
-            PGModelLogService().async_log(
-                session_id,
-                "overall",
-                "no_model",
-                full_history[:-1] if len(full_history) > 0 else [],
-                full_history[-1]["content"] if len(full_history) > 0 and "content" in full_history[-1] else "",
-                {**score_command.model_dump(), "extra_info": result.answer.extra_info if result else {}},
-                err_msg,
-            )
-        )
+        async for response in generate_answer_with_len_limited(response):
+            yield response
 
     return EventSourceResponse(generator())
 
