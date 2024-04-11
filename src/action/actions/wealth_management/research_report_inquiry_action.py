@@ -157,7 +157,7 @@ class ResearchReportInquiryAction(Action):
                     meta__source_type=item.type,
                     meta__source_name=item.field__source,
                     meta__source_text=item.field__text,
-                    meta__score=item.search__score,
+                    meta__source_score=item.search__score,
                 )
                 for item in response
             ]
@@ -166,7 +166,7 @@ class ResearchReportInquiryAction(Action):
                 chat_model,
                 reply_prompt,
                 question,
-                query_result=json.dumps([reference.json() for reference in references])
+                query_result=json.dumps([reference.json() if reference else None for reference in references])
             )
 
         answer = ChatResponseAnswer(

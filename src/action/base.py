@@ -56,7 +56,7 @@ class ChatResponseAnswer(BaseModel):
         return self.content
 
     def get_references(self):
-        return json.dumps([reference.json() for reference in self.references])
+        return json.dumps([reference.json() if reference else None for reference in self.references])
 
     def get_content_with_extra_info(self, from_email: bool = False):
         extra_info = self.get_email_extra_info() if from_email else self.get_extra_info()
