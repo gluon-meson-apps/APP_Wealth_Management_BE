@@ -157,7 +157,7 @@ class ResearchReportInquiryAction(Action):
                     meta__source_type=item.type,
                     meta__source_name=item.field__source,
                     meta__source_text=item.field__text,
-                    meta__source_score=item.data_set_id
+                    meta__score=item.search__score,
                 )
                 for item in response
             ]
