@@ -95,7 +95,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
 
 @app.post("/chat/")
 def chat(
-    user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
+        user_input: str = Form(), session_id: Optional[str] = Form(None), files: Optional[list[UploadFile]] = Form(None)
 ):
     result, conversation = dialog_manager.handle_message(user_input, session_id, files)
     # if config.get('debugMode', 'debug') == "True":
@@ -104,13 +104,11 @@ def chat(
 
 
 async def generate_answer_with_len_limited(response, **kwargs):
-    for i in range(0, len(response['answer']), 1000):
-        yield json.dumps({"answer": response['answer'][i: i + 1000], **kwargs})
+    yield json.dumps({"answer": response['answer']}, **kwargs)
+    for reference in response['references']:
+        yield json.dumps({"reference": reference.json()}, **kwargs)
 
-    for i in range(0, len(response['references']), 1000):
-        yield json.dumps({"references": response['references'][i: i + 1000], **kwargs})
-
-    yield json.dumps({"session_id": response['session_id']})
+    yield json.dumps({"session_id": response['session_id']}, **kwargs)
 
 
 async def parse_file_name(file_url):
@@ -119,9 +117,9 @@ async def parse_file_name(file_url):
 
 @app.post("/score/")
 async def score(
-    score_command: ScoreCommand,
-    unified_search: UnifiedSearch = Depends(),
-    atom_service: AtomService = Depends(),
+        score_command: ScoreCommand,
+        unified_search: UnifiedSearch = Depends(),
+        atom_service: AtomService = Depends(),
 ):
     """
     This api is a chat entrypoint, for adapt prompt flow protocol, we use the name score
@@ -161,8 +159,8 @@ async def score(
                 ":"
             )[1].replace("This model's maximum context length is", "We allow")
             err_msg = (
-                err_msg.replace("Your messages has exceeded the model's maximum context length. ", "")
-                + " Please start a new conversation, thanks."
+                    err_msg.replace("Your messages has exceeded the model's maximum context length. ", "")
+                    + " Please start a new conversation, thanks."
             )
         elif isinstance(err, ChatModelRequestException):
             if err.model_source == "HSBC":
