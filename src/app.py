@@ -104,11 +104,7 @@ def chat(
 
 
 async def generate_answer_with_len_limited(response, **kwargs):
-    yield json.dumps({"answer": response['answer']}, **kwargs)
-    for reference in response['references']:
-        yield json.dumps({"reference": reference.json()}, **kwargs)
-
-    yield json.dumps({"session_id": response['session_id']}, **kwargs)
+    yield json.dumps(response, **kwargs)
 
 
 async def parse_file_name(file_url):
