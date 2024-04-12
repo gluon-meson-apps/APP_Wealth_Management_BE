@@ -11,7 +11,8 @@ from action.base import Action, ActionResponse, ResponseMessageType, ChatRespons
 from third_system.knowledge_base import KnowledgeBase
 from third_system.search_entity import SearchItemReference, SearchParamFilter
 
-SORRY, NUM_K = 'Sorry', 12
+SORRY = 'Sorry'
+NUM_REFERENCES_FOR_EACH_FILE, MAX_REFERENCES, SIZE = 12, 12, 100
 
 summarize_prompt = """
 ## Role: Language Capability Expert
@@ -56,7 +57,7 @@ reply_prompt = """
 
 ## Background: We need an AI assistant to help the Bank institution's Private Wealth Manager who serves the high-end market to read research reports.
 
-## Task: Respond to user questions based on the query results.
+## Task: Respond to user questions based on the query results  of multiple research documents or reports.
 
 ## Requirements:
 - Respond to user questions in the second person form.
@@ -66,7 +67,6 @@ reply_prompt = """
     - Otherwise, summarize the query results to answer the user's question.
     - If query results are scattered, provide a detailed and accurate answer by extracting relevant information as much as possible.
     - If query results are complex with different dimensions, categorize the answer from multiple perspectives and list them.
-    - If query results is empty, please respond: "Sorry, no relevant data found. Please provide more details."
     
 ## User Question:
 {{question}}
@@ -109,10 +109,9 @@ class ResearchReportInquiryAction(Action):
         self.scenario_model_registry = DefaultScenarioModelRegistryCenter()
         self.scenario_model = self.get_name() + "_action"
         self.knowledge_base = KnowledgeBase()
-        self.search_document = SearchDocument(size=100)
-        self.data_set_id = os.getenv("DATASET_ID_DICT_WEALTH_MANAGEMENT")
-        self.data_set_id_list = [os.getenv("DATASET_ID_DICT_WEALTH_MANAGEMENT")]
-        self.k = NUM_K
+        self.search_document = SearchDocument(size=SIZE)
+        self.data_set_id_list = os.getenv("DATASET_ID_DICT_WEALTH_MANAGEMENT").split(',')
+        self.k, self.max_references = NUM_REFERENCES_FOR_EACH_FILE, MAX_REFERENCES
 
     @staticmethod
     def form_filter_with_entities(entities: dict) -> list[SearchParamFilter]:
@@ -159,7 +158,7 @@ class ResearchReportInquiryAction(Action):
                     meta__source_text=item.field__text,
                     meta__source_score=item.search__score,
                 )
-                for item in response
+                for item in sorted(response, key=lambda x: x.search__score)[:self.max_references]
             ]
 
             result = reply_question(
