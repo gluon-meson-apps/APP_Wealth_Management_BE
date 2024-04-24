@@ -4,7 +4,7 @@ venv_abi/
 .idea
 *.log
 /poetry.toml
-.env
+*.env
 .vscode
 .DS_Store
 tmp

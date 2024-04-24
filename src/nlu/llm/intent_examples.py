@@ -10,35 +10,36 @@ from resources.util import get_resources
 from third_system.unified_search import UnifiedSearch
 
 intent_yaml_file_folder = get_resources("scenes")
-unified_search_base_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
+# unified_search_base_url = os.environ.get("UNIFIED_SEARCH_URL", "http://localhost:8000")
+unified_search_base_url = "http://3.25.115.152:18001"
 
 
 def retrieve_intent_examples_from_intent_yaml(folder_path, full_parent_intent=None):
-    files = [f for f in os.listdir(folder_path) if f.endswith(".yaml")]
-
     intent_examples = []
-    for file_name in files:
-        file_path = os.path.join(folder_path, file_name)
 
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-        if data and data.get("name"):
-            intent_name = data.get("name")
-            if data.get("has_children"):
-                full_parent = f"{full_parent_intent}.{intent_name}" if full_parent_intent else intent_name
-                examples = retrieve_intent_examples_from_intent_yaml(f"{folder_path}/{intent_name}", full_parent)
-                intent_examples.extend(examples)
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
 
-            all_examples = data.get("examples", []) + data.get("display_examples", [])
+        if os.path.isdir(item_path):
+            # 如果是文件夹，则递归调用函数处理文件夹中的内容
+            examples = retrieve_intent_examples_from_intent_yaml(item_path, item)
+            intent_examples.extend(examples)
+        elif item.endswith(".yaml"):
+            # 如果是 YAML 文件，则读取其中的内容并处理
+            with open(item_path, "r", encoding="utf-8") as file:
+                data = yaml.safe_load(file)
+            if data and data.get("name"):
+                intent_name = data.get("name")
+                full_intent_name = f"{full_parent_intent}.{intent_name}" if full_parent_intent else intent_name
 
-            for example in all_examples:
-                intent_examples.append(
-                    {
+                # 提取意图示例并添加到列表中
+                all_examples = data.get("examples", []) + data.get("display_examples", [])
+                for example in all_examples:
+                    intent_examples.append({
                         "intent": data["name"],
                         "example": example,
-                        "full_parent_intent": full_parent_intent,
-                    }
-                )
+                        "full_parent_intent": full_intent_name,
+                    })
 
     return intent_examples
 
@@ -61,7 +62,7 @@ async def vectorize_examples(intent_examples):
 
 async def main():
     intent_examples = retrieve_intent_examples_from_intent_yaml(intent_yaml_file_folder)
-
+    print(intent_examples)
     if len(intent_examples) == 0:
         print("No examples")
         return
