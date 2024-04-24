@@ -1,0 +1,22 @@
+name: Insurance Products comparison
+description: Retrieve information about insurance products and compare them based on user queries. This action assists users in understanding the features, coverage, and differences between various insurance products offered by the company.
+
+business: true
+
+examples:
+  - "What insurance products are available for minors aged 18 and below?"
+  - "Can you compare Thoughtworks Type B Major Illness Insurance and Thoughtworks Type C Malignant Tumor Disease Insurance?"
+  - "Which insurance products offer automatic premium renewal?"
+  - "Are there any insurance products that offer installment payment options?"
+  - "Are there any insurance products that allow payment of premiums within a grace period?"
+  - "What are the main differences in premium payment methods between Thoughtworks Type B Major Illness Insurance and Thoughtworks Type C Malignant Tumor Disease Insurance?"
+  - "What are the grace periods for Thoughtworks Type B Major Illness Insurance and Thoughtworks Type D Whole Life Insurance?"
+  - "Under what specific circumstances do the termination conditions for Thoughtworks Type B Major Illness Insurance and Thoughtworks Type C Malignant Tumor Disease Insurance differ?"
+  - "Which insurance products allow for a full refund of premiums if the contract is canceled within the cooling-off period?"
+  - "What are the specific policies for Thoughtworks Type B Major Illness Insurance and Thoughtworks Type C Malignant Tumor Disease Insurance regarding contract cancellation during the cooling-off period?"
+  - "Which insurance products offer coverage for Death Insurance Benefit?"
+  - "What are the similarities and differences in the coverage of specific diseases or conditions between Thoughtworks Type B Major Illness Insurance and Thoughtworks Type C Malignant Tumor Disease Insurance?"
+
+slots: []
+
+action: insurance_product_comparison

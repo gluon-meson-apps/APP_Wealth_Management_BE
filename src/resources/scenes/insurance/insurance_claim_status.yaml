@@ -1,0 +1,52 @@
+name: insurance_claim_status
+description: Retrieve the status and updates of an insurance claim for a customer. This action allows users, who are staff members of an insurance company, to inquire about the current status of an insurance claim, providing updates and information related to the claim, policy, and customer details. Users can specify the claim number, policy number, customer's full name, and the last four digits of the customer's social security number to retrieve accurate information about the insurance claim. Additionally, users may ask about the start and end dates of the policy associated with the claim. This action assists users, who are staff members, in efficiently managing insurance claims and providing timely updates to customers. Please note that the user is a staff member of an insurance company, not a customer. The information asked should be about the customer, not the staff member.
+
+
+business: true
+examples:
+  - "I need to check the status of an insurance claim for a customer."
+  - "I need to check the status of an insurance claim for a customer who's on the line right now."
+  - "Can you help me with the latest updates on a claim for our customer?"
+  - "Please assist me in providing the current status of claim CLM-453219[claim_number]."
+  - "I'd like to inquire about the progress of a claim filed by one of our customers."
+  - "Could you give me an update on the insurance claim status for Mrs. Smith[customer_full_name]?"
+  - "I need to know if claim CLM-453219[claim_number] has been processed yet."
+  - "CLM-453219[claim_number]."
+  - "The claim number is CLM-781283[claim_number]."
+  - "Name is Amanda Miller[customer_full_name]."
+  - "Amanda Miller[customer_full_name]."
+  - "Policy number is POL-851890[policy_number]."
+  - "POL-851890[policy_number]."
+  - "The last four digits associated are 3013[customer_social_security_last_four]."
+  - "4521[customer_social_security_last_four]."
+  - "When does the policy end?"
+  - "When does the policy start?"
+  - "POL-851890, Amanda Miller and 3013."
+  - "I want to know the reason of the claim."
+  - "tell me the reason about the claim."
+  - "Why did the claim was rejected."
+  - "I want to know the reason why did the claim was rejected."
+
+slots:
+  - name: claim_number
+    description: the claim number
+    slotType: text
+    optional: False
+  - name: policy_number
+    description: the policy number associated with the claim
+    slotType: text
+    optional: False
+  - name: full_name
+    description: The full name associated with the customer not mine(staff)
+    slotType: text
+    optional: False
+  - name: social_security_last_four
+    description: The last four digits of the social security number associated with the customer not mine(staff)
+    slotType: text
+    optional: False
+  - name: date_of_birth
+    description: the date of birth associated with the claim
+    slotType: text
+    optional: True
+
+action: insurance_claim_status

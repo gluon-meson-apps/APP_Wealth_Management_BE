@@ -1,0 +1,33 @@
+name: Insurance Q&A
+examples:
+  - "What type of life insurance should I buy?"
+  - "What are the common terms and coverage in life insurance policies?"
+  - "How do I apply for a claim?"
+  - "Can I still make a claim after two claims for minor illnesses?"
+  - "What disease is covered by Type B critical illness insurance?"
+description: Asking questions about insurance information, such as claims, product descriptions, product terms, etc.
+business: true
+slots:
+  - name: question_category
+    description: "Categories of questions include: General, Product Description, Policy Terms, Data Services, Corporate Governance"
+    slotType: categorical
+    optional: True
+    default: General
+  - name: question_theme
+    description: "Themes of insurance inquiries include: Product Consultation, Insurance Claims, Other"
+    slotType: categorical
+    optional: True
+    default: Other
+  - name: product_category
+    description: "Types of insurance products include: Life Insurance, Critical Illness Insurance"
+    slotType: categorical
+    optional: True
+  - name: product
+    description: "The products include: WLQ, MIL, MSA, CAB"
+    slotType: categorical
+    optional: True
+  - name: question
+    description: The user's question after analysis, thinking, and refinement
+    slotType: text
+    optional: False
+action: insurance_qa

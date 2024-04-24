@@ -1,0 +1,26 @@
+name: Document Retrieval
+examples:
+  - "I need a life insurance policy that can process claims quickly."
+  - "I need the documentation for life insurance."
+  - "Do you have the policy document about insurance for retirement people?"
+description: Search and retrieve certain documents
+business: true
+slots:
+  - name: document name
+    description: document name for searching and retrieval
+    slotType: text
+    optional: True
+  - name: document type
+    description: The category of a document, such as product description, product terms, and company announcements
+    slotType: categorical
+    optional: True
+    default: general
+  - name: product
+    description: The product name of a specific product
+    slotType: categorical
+    optional: True
+  - name: document keywords
+    description: the keywords extracted from the user input
+    slotType: text
+    optional: False
+action: document_retrieval
