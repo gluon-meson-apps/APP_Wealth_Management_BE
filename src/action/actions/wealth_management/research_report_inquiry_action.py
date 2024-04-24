@@ -1,5 +1,6 @@
 import json
 import os
+from dotenv import load_dotenv
 
 from gluon_meson_component_sdk.knowledge_base.commands.search_command import BatchSearchCommand
 from gluon_meson_component_sdk.knowledge_base.search_document.search_document import SearchDocument
@@ -10,6 +11,7 @@ from loguru import logger
 from action.base import Action, ActionResponse, ResponseMessageType, ChatResponseAnswer, GeneralResponse
 from third_system.knowledge_base import KnowledgeBase
 from third_system.search_entity import SearchItemReference, SearchParamFilter
+load_dotenv()
 
 SORRY = 'Sorry'
 NUM_REFERENCES_FOR_EACH_FILE, MAX_REFERENCES, SIZE = 12, 12, 100
