@@ -1,6 +1,5 @@
 *.pyc
 venv/
-venv_abi/
 .idea
 *.log
 /poetry.toml
